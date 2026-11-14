@@ -3,7 +3,7 @@
 (function(){
 'use strict';
 const KEY='nhi-stage-drag-layout-v1';
-const positions={hanja:{x:0,y:0},korean:{x:0,y:0},vietnamese:{x:0,y:0}};
+const positions={hanja:{x:0,y:0},korean:{x:0,y:0},vietnamese:{x:0,y:0},note:{x:0,y:0}};
 try{
  const saved=JSON.parse(localStorage.getItem(KEY)||'{}');
  for(const k of Object.keys(positions)){
@@ -83,6 +83,7 @@ function update(){
  document.querySelectorAll('#planBox .pcard .nhi-hanja-lookup').forEach(el=>install(el,'hanja'));
  document.querySelectorAll('#planBox .pcard .nhi-ko-line>.answer.ko').forEach(el=>install(el,'korean'));
  document.querySelectorAll('#planBox .pcard .pfront>.vi-under').forEach(el=>install(el,'vietnamese'));
+ document.querySelectorAll('#planBox .pcard .nhi-card-note').forEach(el=>install(el,'note'));
 }
 function init(){
  const container=document.getElementById('planBox');
