@@ -67,7 +67,7 @@ function setup(){
   const x=(e.clientX-r.left)/Math.max(r.width,1),y=(e.clientY-r.top)/Math.max(r.height,1);
   if(x>=.67&&x<=.92&&y>=.05&&y<=.29){e.preventDefault();e.stopImmediatePropagation();start();}
  },true);
- new MutationObserver(()=>{if(cover.hidden)reset();}).observe(cover,{attributes:true,attributeFilter:['hidden']});
+ new MutationObserver(()=>{if(cover.hidden){stopSound();reset();}}).observe(cover,{attributes:true,attributeFilter:['hidden']});
 }
 function toggleCoverLearning(show){
  for(const selector of ['.cover-in>h1','.cover-in>.lead','#coverGo']){
@@ -129,9 +129,14 @@ function petals(count){
   p.style.setProperty('--rose-blur',depth===0?'1.1px':depth===1?'.25px':'0px');
   p.style.setProperty('--rose-duration',rnd(7.5,depth===0?16:depth===1?13:10)+'s');
   p.style.setProperty('--rose-delay',rnd(0,4)+'s');
-  p.style.setProperty('--rose-wind',rnd(-105,105)+'px');
+  const wind=rnd(-105,105),turn=rnd(-780,780);
+  p.style.setProperty('--rose-wind',wind+'px');
+  p.style.setProperty('--rose-wind-first',Math.round(wind*.36)+'px');
+  p.style.setProperty('--rose-wind-second',Math.round(wind*.84)+'px');
+  p.style.setProperty('--rose-turn-first',Math.round(turn*.3)+'deg');
+  p.style.setProperty('--rose-turn-second',Math.round(turn*.66)+'deg');
   p.style.setProperty('--rose-sway',rnd(11,43)+'px');
-  p.style.setProperty('--rose-turn',rnd(-780,780)+'deg');
+  p.style.setProperty('--rose-turn',turn+'deg');
   p.style.setProperty('--rose-flutter',rnd(2.1,4.4)+'s');
   frag.append(p);
   delay(()=>p.remove(),22000);
