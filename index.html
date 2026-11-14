@@ -3699,7 +3699,15 @@ button,input,select,textarea{font-family:var(--ui)}
     function renderDone(v) {
       var s = sess, p = el('div', 'quiz sdone');
       setFocus(false);
-      var m = el('div'); m.innerHTML = girl('grin'); p.appendChild(m.firstChild);
+      // A cheerful cat takes the victory spotlight; no girl mascot at completion.
+      var m = el('div','nhi-victory-cat-scene');
+      var cat=el('img','nhi-victory-cat');
+      cat.src='nhi-celebration-cat-v1.svg?v=20261115-final1';
+      cat.alt='Mèo chibi vẫy chân và giơ biểu tượng like chúc mừng hoàn thành bài học';
+      cat.loading='eager';m.appendChild(cat);
+      var likeSpark=el('span','nhi-victory-like-float','👍');
+      likeSpark.setAttribute('aria-hidden','true');m.appendChild(likeSpark);
+      p.appendChild(m);
       p.appendChild(el('h2', null, '🎉 Chúc mừng, bạn đã hoàn thành!'));
       p.appendChild(el('p', 'nhi-victory-message', 'Tuyệt vời! Mỗi thẻ đã học là một bước tiến mới. ✨'));
       p.appendChild(el('p', 'listinfo', s.title));
