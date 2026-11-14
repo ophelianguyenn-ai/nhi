@@ -1,0 +1,207 @@
+@import url('https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&display=swap');
+/* Lương–Nhi v4: vector sharp at any resolution, articulated chibi walk and kiss. */
+#cover #coverHero>.nhi-luong-v2{
+ width:64%!important;right:-16%!important;top:-13%!important;
+ aspect-ratio:320 / 530!important;
+ filter:drop-shadow(0 9px 10px rgba(73,52,59,.17))!important;
+}
+#cover #coverHero>.nhi-luong-v2>.nhi-boy-standing[hidden]{display:none!important}
+#cover #coverHero>.nhi-luong-v2>.nhi-boy-standing{
+ position:absolute!important;inset:0!important;width:100%!important;height:100%!important;object-fit:contain!important;
+}
+#cover #coverHero>.nhi-luong-v2>svg.nhi-boy-drawn{
+ position:absolute;display:block;inset:0;width:100%;height:100%;overflow:visible!important;
+ shape-rendering:geometricPrecision;
+}
+#cover #coverHero .nhi-boy-drawn .nhi-boy-head,
+#cover #coverHero .nhi-boy-drawn .nhi-boy-leg,
+#cover #coverHero .nhi-boy-drawn .nhi-boy-arm,
+#cover #coverHero .nhi-boy-drawn .nhi-boy-eyes{
+ transform-box:view-box;will-change:transform;
+}
+#cover.nhi-romance-v2-running:not(.nhi-v2-arrived) .nhi-boy-leg-front{
+ animation:nhi-leg-front-step .75s cubic-bezier(.45,0,.55,1) infinite!important;
+}
+#cover.nhi-romance-v2-running:not(.nhi-v2-arrived) .nhi-boy-leg-back{
+ animation:nhi-leg-back-step .75s cubic-bezier(.45,0,.55,1) infinite!important;
+}
+#cover.nhi-romance-v2-running:not(.nhi-v2-arrived) .nhi-boy-arm-front{
+ animation:nhi-arm-front-step .75s ease-in-out infinite!important;
+}
+#cover.nhi-romance-v2-running:not(.nhi-v2-arrived) .nhi-boy-arm-back{
+ animation:nhi-arm-back-step .75s ease-in-out infinite!important;
+}
+#cover.nhi-romance-v2-running:not(.nhi-v2-kissing) .nhi-boy-head{
+ animation:nhi-boy-head-nod 2s ease-in-out infinite!important;
+}
+#cover.nhi-romance-v2-running .nhi-boy-eyes{
+ transform-origin:151px 202px!important;
+ animation:nhi-boy-blink 5.6s ease-in-out infinite!important;
+}
+#cover.nhi-v2-kissing .nhi-boy-head{
+ animation:nhi-boy-gentle-kiss 1.8s ease-in-out both!important;
+}
+#cover.nhi-v2-kissing .nhi-boy-smile{opacity:0!important}
+#cover.nhi-v2-kissing .nhi-boy-kiss-mouth{opacity:1!important}
+#cover.nhi-v2-kissing .nhi-boy-arm-front{animation:nhi-boy-reaching 2s ease-in-out both!important}
+#cover.nhi-v2-kissing .nhi-boy-arm-back{animation:nhi-boy-reaching-back 2s ease-in-out both!important}
+#cover.nhi-v2-kissing #coverHero>.nhi-original{
+ animation:nhi-girl-kisses-back 2.1s ease-in-out both!important;
+ transform-origin:66% 69%!important;
+}
+@keyframes nhi-leg-front-step{
+ 0%,100%{transform:rotate(-11deg) translateY(-1px)}
+ 50%{transform:rotate(14deg) translateY(2px)}
+}
+@keyframes nhi-leg-back-step{
+ 0%,100%{transform:rotate(12deg) translateY(2px)}
+ 50%{transform:rotate(-12deg) translateY(-1px)}
+}
+@keyframes nhi-arm-front-step{
+ 0%,100%{transform:rotate(9deg)}
+ 50%{transform:rotate(-9deg)}
+}
+@keyframes nhi-arm-back-step{
+ 0%,100%{transform:rotate(-8deg)}
+ 50%{transform:rotate(8deg)}
+}
+@keyframes nhi-boy-head-nod{
+ 0%,100%{transform:rotate(0) translateY(0)}
+ 50%{transform:rotate(1.6deg) translateY(-2px)}
+}
+@keyframes nhi-boy-blink{
+ 0%,88%,95%,100%{transform:scaleY(1)}
+ 91%,93%{transform:scaleY(.25)}
+}
+@keyframes nhi-boy-gentle-kiss{
+ 0%{transform:rotate(0) translate(0,0)}
+ 36%,77%{transform:rotate(-13deg) translate(-14px,4px)}
+ 100%{transform:rotate(-4deg) translate(-5px,1px)}
+}
+@keyframes nhi-boy-reaching{
+ 0%{transform:rotate(0)}
+ 36%,77%{transform:rotate(-24deg)}
+ 100%{transform:rotate(-10deg)}
+}
+@keyframes nhi-boy-reaching-back{
+ 0%{transform:rotate(0)}
+ 36%,77%{transform:rotate(17deg)}
+ 100%{transform:rotate(4deg)}
+}
+@keyframes nhi-girl-kisses-back{
+ 0%,100%{transform:rotate(0) translate(0,0) scale(1)}
+ 35%{transform:rotate(2deg) translate(7px,-2px) scale(1.015)}
+ 61%{transform:rotate(4deg) translate(12px,-5px) scale(1.02)}
+ 79%{transform:rotate(3deg) translate(8px,-3px) scale(1.017)}
+}
+#cover #coverHero>.nhi-girl-reaction{
+ position:absolute;pointer-events:none;z-index:7;
+ top:28%;left:47%;width:27%;height:20%;
+ opacity:0;transform:translateY(7px) scale(.6);
+ filter:drop-shadow(0 3px 4px #ce8a9652);
+}
+#cover #coverHero>.nhi-girl-reaction svg{width:100%;height:100%}
+#cover.nhi-v2-kissing #coverHero>.nhi-girl-reaction{
+ animation:nhi-girl-heart-expression 2s ease-out both;
+}
+@keyframes nhi-girl-heart-expression{
+ 0%,100%{opacity:0;transform:translateY(8px) scale(.6)}
+ 30%,70%{opacity:.95;transform:translateY(-5px) scale(1)}
+}
+/* Boy position and scale are timed so the vector walks in naturally then leans in. */
+@keyframes nhi-v2-boy-walk-kiss{
+ 0%{opacity:0;transform:translate(75vw,22px) scale(.36) rotate(0)}
+ 10%{opacity:1;transform:translate(51vw,-2px) scale(.52) rotate(-1deg)}
+ 20%{transform:translate(32vw,3px) scale(.68) rotate(1deg)}
+ 30%{transform:translate(15vw,-4px) scale(.84) rotate(-.5deg)}
+ 39%{transform:translate(4vw,2px) scale(.97) rotate(.5deg)}
+ 44%{transform:translate(-20px,0) scale(1) rotate(0)}
+ 48%,63%{transform:translate(-79px,-14px) scale(1.04) rotate(-10deg)}
+ 70%{transform:translate(-37px,-2px) scale(1) rotate(-2deg)}
+ 79%{transform:translate(-64px,-10px) scale(1.03) rotate(-8deg)}
+ 85%{transform:translate(-30px,0) scale(1) rotate(0)}
+ 100%{opacity:1;transform:translate(-30px,0) scale(1) rotate(0)}
+}
+#cover.nhi-romance-v2-running.nhi-v2-idle #coverHero>.nhi-luong-v2{
+ animation:nhi-v4-boy-idle 3.7s ease-in-out infinite!important;
+}
+@keyframes nhi-v4-boy-idle{
+ 0%,100%{opacity:1;transform:translate(-30px,0) scale(1) rotate(0)}
+ 50%{opacity:1;transform:translate(-33px,-3px) scale(1.008) rotate(1.1deg)}
+}
+/* Hair flower replaces the bridge as romantic petals/music trigger. */
+#cover #nhiBridgeMusic{display:none!important}
+#cover #coverHero>#nhiHairRose{
+ position:absolute!important;
+ top:12%;left:24%;width:25%;height:22%;
+ z-index:16!important;border:0!important;border-radius:55%!important;
+ background:transparent!important;cursor:pointer!important;
+ box-shadow:none!important;
+}
+#cover #coverHero>#nhiHairRose::after{
+ content:"✿";display:block;position:absolute;
+ top:58%;left:55%;transform:translate(-50%,-50%);
+ color:#f3a4be;font-size:clamp(13px,2vw,21px);
+ text-shadow:0 1px 0 white,0 2px 4px #cb7e94;
+ opacity:.72;pointer-events:none;
+}
+#cover #coverHero>#nhiHairRose:hover::after,
+#cover #coverHero>#nhiHairRose[aria-pressed="true"]::after{
+ opacity:1;filter:drop-shadow(0 0 5px #ffd3e5);
+}
+/* Three layers of hand-painted translucent rose petals.
+   Each petal falls with wind drift while its inner leaf flutters independently. */
+#cover .nhi-illustrated-flowers{z-index:2!important;perspective:800px;isolation:isolate}
+#cover .nhi-real-petal{
+ position:absolute;top:-65px;left:var(--rose-left);
+ width:var(--rose-width);height:calc(var(--rose-width) * 1.29);
+ display:block;pointer-events:none;opacity:0;
+ filter:blur(var(--rose-blur,0px)) drop-shadow(1px 2px 2px #ad63713d);
+ will-change:transform,opacity;
+ animation:nhi-natural-rose-fall var(--rose-duration) var(--rose-delay) cubic-bezier(.41,.04,.56,1) forwards;
+}
+#cover .nhi-real-petal>svg{
+ width:100%;height:100%;display:block;transform-origin:50% 25%;
+ animation:nhi-natural-rose-flutter var(--rose-flutter) ease-in-out infinite alternate;
+}
+@keyframes nhi-natural-rose-fall{
+ 0%{opacity:0;transform:translate3d(0,-7vh,0) rotate(-20deg) scale(var(--rose-depth))}
+ 9%{opacity:var(--rose-opacity)}
+ 32%{transform:translate3d(calc(var(--rose-wind)*.36),31vh,0) rotate(calc(var(--rose-turn)*.3)) scale(var(--rose-depth))}
+ 65%{opacity:var(--rose-opacity);transform:translate3d(calc(var(--rose-wind)*.84),69vh,0) rotate(calc(var(--rose-turn)*.66)) scale(var(--rose-depth))}
+ 91%{opacity:calc(var(--rose-opacity)*.78)}
+ 100%{opacity:0;transform:translate3d(var(--rose-wind),110vh,0) rotate(var(--rose-turn)) scale(var(--rose-depth))}
+}
+@keyframes nhi-natural-rose-flutter{
+ 0%{transform:translateX(calc(-1 * var(--rose-sway))) rotateY(65deg) rotateZ(-15deg)}
+ 50%{transform:translateX(0) rotateY(-38deg) rotateZ(8deg)}
+ 100%{transform:translateX(var(--rose-sway)) rotateY(64deg) rotateZ(25deg)}
+}
+/* More rounded, playful storybook lettering rather than modern corporate sans. */
+#cover .nhi-romance-title-v2{
+ font-family:'Baloo 2','Fredoka','Nunito',system-ui,sans-serif!important;
+ font-size:clamp(34px,6.4vw,61px)!important;
+ font-weight:800!important;letter-spacing:.018em!important;
+ color:#b6597e!important;
+ text-shadow:0 3px 0 #fff5ed,0 5px 10px #944c6857!important;
+}
+#cover .nhi-romance-title-v2 span{
+ filter:drop-shadow(0 2px 2px #d5819c57);
+}
+/* Reduced motion keeps a clean static couple and still lets music be toggled. */
+@media(prefers-reduced-motion:reduce){
+ #cover .nhi-real-petal{display:none!important}
+ #cover.nhi-romance-v2-running .nhi-boy-leg,
+ #cover.nhi-romance-v2-running .nhi-boy-arm,
+ #cover.nhi-romance-v2-running .nhi-boy-head,
+ #cover.nhi-romance-v2-running .nhi-boy-eyes{
+  animation:none!important;
+ }
+}
+@media(max-width:660px){
+ #cover #coverHero>.nhi-luong-v2{
+  width:66%!important;right:-17%!important;top:-11%!important;
+ }
+ #cover #coverHero>#nhiHairRose{top:13%;left:24%;width:26%;height:21%}
+ #cover .nhi-romance-title-v2{font-size:clamp(31px,9vw,50px)!important}
+}
