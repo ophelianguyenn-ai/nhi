@@ -3060,9 +3060,10 @@ button,input,select,textarea{font-family:var(--ui)}
     /* ---- views ---- */
     function render() {
       // Header controls belong in the sticky white brand bar, not a second toolbar.
+      // Capture the exact viewport BEFORE changing the sticky header height.
+      var previousScroll = window.scrollY || document.documentElement.scrollTop || 0;
       document.querySelector('#topbar .nhi-study-topbar')?.remove();
       document.body.classList.toggle('nhi-in-study',!!sess);
-      var previousScroll = window.scrollY || document.documentElement.scrollTop || 0;
       var v = $('planBox'); if (!v) return;
       // Resynchronize route and selected view before removing the previous card.
       if (state.mode !== 'plan') return;
