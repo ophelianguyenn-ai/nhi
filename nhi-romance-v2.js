@@ -6,7 +6,7 @@ const cover=document.getElementById('cover'),hero=document.getElementById('cover
 if(!cover||!hero)return;
 const asset='?v=20261114-romance-v2';
 const make=(tag,cls)=>{const node=document.createElement(tag);if(cls)node.className=cls;return node;};
-let ready=false,scheduled=[],audio=null,audioTick=null,sceneId=0;
+let ready=false,scheduled=[],audio=null,audioTick=null,roseTicker=null,sceneId=0;
 const delay=(fn,ms)=>{const id=setTimeout(fn,ms);scheduled.push(id);return id;};
 const reduce=()=>window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches;
 const rnd=(a,b)=>a+Math.random()*(b-a);
@@ -14,11 +14,22 @@ const scene=()=>cover.classList.contains('nhi-romance-v2-running');
 function setup(){
  if(ready)return;ready=true;
  const boy=make('div','nhi-luong-v2');boy.id='nhiLuongV2';
- const standing=make('img','nhi-boy-standing');standing.src='nhi-luong-demo-approved-v3.svg?v=20261114-approved';
- standing.alt='Lương chibi tóc đen áo polo nâu theo mẫu';standing.draggable=false;
- const kissing=make('img','nhi-boy-kissing');kissing.src='nhi-luong-demo-approved-v3.svg?v=20261114-approved';
- kissing.alt='';kissing.setAttribute('aria-hidden','true');kissing.draggable=false;
- boy.append(standing,kissing);hero.append(boy);
+ const assetUrl='nhi-luong-articulated-v4.svg?v=20261115-anim1';
+ const fallback=make('img','nhi-boy-standing');fallback.src=assetUrl;
+ fallback.alt='Lương chibi nét vector tóc đen, áo polo nâu';fallback.draggable=false;
+ boy.append(fallback);hero.append(boy);
+ // Embed the local, hand-drawn SVG into the DOM so each arm, leg, eyes and
+ // head can actually animate; unlike an opaque raster/GIF image.
+ fetch(assetUrl).then(response=>{if(!response.ok)throw Error('art missing');return response.text();})
+  .then(xml=>{
+    const svg=new DOMParser().parseFromString(xml,'image/svg+xml').documentElement;
+    if(svg.localName!=='svg')throw Error('invalid vector art');
+    svg.classList.add('nhi-boy-drawn');svg.setAttribute('aria-hidden','true');
+    boy.append(document.importNode(svg,true));fallback.hidden=true;
+  }).catch(()=>{fallback.hidden=false;});
+ const reaction=make('span','nhi-girl-reaction');reaction.setAttribute('aria-hidden','true');
+ reaction.innerHTML='<svg viewBox="0 0 70 38"><path d="M16 27C-3 16 2 3 15 10 27-3 40 14 16 27" fill="#ffadc2" stroke="#d77f9f" stroke-width="2"/><path d="M48 32C33 23 36 12 47 18 58 7 69 20 48 32" fill="#ffd5aa" stroke="#e6ad76" stroke-width="2"/></svg>';
+ hero.append(reaction);
  const flowers=make('div','nhi-illustrated-flowers');flowers.setAttribute('aria-hidden','true');cover.append(flowers);
  const hearts=make('div','nhi-illustrated-hearts');hearts.setAttribute('aria-hidden','true');cover.append(hearts);
  const title=make('div','nhi-romance-title-v2');title.id='nhiLoveTitleV2';
@@ -34,12 +45,16 @@ function setup(){
  const bouquet=make('button','nhi-v2-hotspot');bouquet.id='nhiBouquetLove';bouquet.type='button';
  bouquet.setAttribute('aria-label','Chạm hoa để Lương và Nhi trò chuyện');bouquet.title='Bó hoa · ck iu / vợ iu';
  bouquet.addEventListener('click',e=>{e.preventDefault();e.stopPropagation();talk();});hero.append(bouquet);
- const bridge=make('button','nhi-v2-hotspot');bridge.id='nhiBridgeMusic';bridge.type='button';
- bridge.setAttribute('aria-label','Chạm cầu để bật hoặc tắt nhạc và cánh hoa hồng');
- bridge.setAttribute('aria-pressed','false');bridge.title='Cây cầu · nhạc và hoa hồng';
- bridge.addEventListener('click',e=>{e.preventDefault();e.stopPropagation();const playing=toggleSound();
-  bridge.setAttribute('aria-pressed',String(playing));if(playing)petals(12);
- });cover.append(bridge);
+ // The rose-petal/music effect now belongs to the pink clips/flower in Nhi's hair.
+ const hair=make('button','nhi-v2-hotspot');hair.id='nhiHairRose';hair.type='button';
+ hair.setAttribute('aria-label','Chạm cành hoa trên tóc Nhi: bật hoặc tắt nhạc và hoa hồng rơi');
+ hair.setAttribute('aria-pressed','false');
+ hair.title='Cành hoa trên tóc Nhi · nhạc và hoa hồng';
+ hair.addEventListener('click',e=>{
+  e.preventDefault();e.stopPropagation();
+  const playing=toggleSound();hair.setAttribute('aria-pressed',String(playing));
+  if(playing){petals(26);roseTicker=setInterval(()=>{if(!cover.hidden)petals(9);},8000);}
+ });hero.append(hair);
  const go=make('button','nhi-v2-enter');go.id='nhiRomanceEnter';go.type='button';
  go.title='Vào học';go.setAttribute('aria-label','Vào học');go.innerHTML='<span aria-hidden="true">→</span>';
  go.addEventListener('click',e=>{e.stopPropagation();document.getElementById('coverGo')?.click();});
@@ -67,7 +82,7 @@ function reset(){
  const title=document.getElementById('nhiLoveTitleV2');
  if(title){title.classList.remove('nhi-title-revealed');title.style.removeProperty('opacity');}
  sceneId++;scheduled.forEach(clearTimeout);scheduled=[];
- cover.classList.remove('nhi-romance-v2-running','nhi-v2-kissing','nhi-v2-done','nhi-v2-talking','nhi-v2-preview','nhi-v2-idle');
+ cover.classList.remove('nhi-romance-v2-running','nhi-v2-kissing','nhi-v2-done','nhi-v2-talking','nhi-v2-preview','nhi-v2-idle','nhi-v2-arrived');
  document.querySelector('.nhi-illustrated-hearts')?.replaceChildren();
  document.querySelector('.nhi-illustrated-flowers')?.replaceChildren();
 }
@@ -88,22 +103,40 @@ function heartBurst(count){
  for(let i=0;i<count;i++)pulseHeart(i);
 }
 function petalSVG(index){
- // Original storybook illustration rather than emoji or stock rose.
- if(index%4===0)return '<svg viewBox="0 0 48 54" aria-hidden="true"><path d="M24 29q-4 10-1 23" stroke="#6d9e75" stroke-width="2.5" fill="none"/><path d="M24 40q-9-12-18-5 10 10 17 10M24 44q8-13 17-9-7 11-17 12" fill="#95bc87" stroke="#6a9b73" stroke-width="1.3"/><path d="M24 11C9-1 1 14 9 25 0 32 13 40 22 32 31 42 44 29 38 22 47 13 35 3 24 11Z" fill="#f6afc0" stroke="#dc829f" stroke-width="2"/><path d="M24 14q-17-5-12 10 4 14 15 8 17-6 8-17-8-8-11-1Z" fill="#f8c8cf" stroke="#e69eae" stroke-width="1.5"/><path d="M17 22q6-13 15 0 2 9-8 10-9 0-7-10Z" fill="#f2a2b6" stroke="#db7e9c" stroke-width="1.4"/><path d="M19 24q5-6 10 0-2 5-8 4" fill="none" stroke="#fff0eb" stroke-width="2" stroke-linecap="round"/></svg>';
- return '<svg viewBox="0 0 34 44" aria-hidden="true"><path d="M17 3C5 5 0 16 5 30c5 11 14 14 23 3C31 23 30 8 17 3Z" fill="'+(['#f6c2c7','#f3abbf','#f9c9b8'][index%3])+'" stroke="#d995a3" stroke-width="1.5"/><path d="M11 29q12-10 9-21" fill="none" stroke="#e49caa" stroke-width="1.7"/></svg>';
+ const color=['#d86b89','#ed9eaf','#f5b3b9','#f7c6c2','#d9869d'][index%5];
+ const shade=['#a64a69','#c66b89','#d78599','#d9909a','#9c4a6d'][index%5];
+ const id='nhiPetalGradient'+index;
+ return '<svg viewBox="0 0 48 62" aria-hidden="true">'+
+  '<defs><linearGradient id="'+id+'" x1="0" y1="0" x2="1" y2=".9">'+
+  '<stop stop-color="#fff2ea"/><stop offset=".37" stop-color="'+color+'"/><stop offset="1" stop-color="'+shade+'"/></linearGradient></defs>'+
+  '<path d="M24 4C7 6 0 25 8 46Q15 60 31 53C46 45 49 26 38 12Q31 3 24 4Z" fill="url(#'+id+')" stroke="'+shade+'" stroke-width=".7"/>'+
+  '<path d="M17 10Q31 19 33 44Q23 52 15 45" fill="none" stroke="#fff5ee" stroke-opacity=".42" stroke-width="1.4"/>'+
+  '<path d="M9 32Q17 18 27 12M24 49Q31 29 38 23" fill="none" stroke="'+shade+'" stroke-opacity=".24" stroke-width="1.5"/>'+
+  '<path d="M13 14Q21 6 29 10" fill="none" stroke="#fff" stroke-opacity=".65" stroke-width="2" stroke-linecap="round"/></svg>';
 }
 function petals(count){
  const holder=cover.querySelector('.nhi-illustrated-flowers');
  if(!holder||reduce())return;
+ const frag=document.createDocumentFragment();
  for(let i=0;i<count;i++){
-  const p=make('span','nhi-drawn-petal');p.innerHTML=petalSVG(i);
-  p.style.setProperty('--petal-left',(i%2?rnd(77,100):rnd(0,23))+'%');
-  p.style.setProperty('--petal-size',rnd(14,27)+'px');
-  p.style.setProperty('--petal-wind',rnd(-40,40)+'px');
-  p.style.setProperty('--petal-delay',rnd(0,4)+'s');
-  p.style.setProperty('--petal-time',rnd(9,15)+'s');
-  holder.append(p);delay(()=>p.remove(),20000);
+  const p=make('span','nhi-real-petal');
+  const depth=i%3; // three parallax depths just like real falling petals
+  p.innerHTML=petalSVG(i);
+  p.style.setProperty('--rose-left',(i%2?rnd(78,99):rnd(0,22))+'%');
+  p.style.setProperty('--rose-width',rnd(14,depth===0?22:depth===1?30:37)+'px');
+  p.style.setProperty('--rose-depth',depth===0?.67:depth===1?1:1.3);
+  p.style.setProperty('--rose-opacity',depth===0?.46:depth===1?.76:.91);
+  p.style.setProperty('--rose-blur',depth===0?'1.1px':depth===1?'.25px':'0px');
+  p.style.setProperty('--rose-duration',rnd(7.5,depth===0?16:depth===1?13:10)+'s');
+  p.style.setProperty('--rose-delay',rnd(0,4)+'s');
+  p.style.setProperty('--rose-wind',rnd(-105,105)+'px');
+  p.style.setProperty('--rose-sway',rnd(11,43)+'px');
+  p.style.setProperty('--rose-turn',rnd(-780,780)+'deg');
+  p.style.setProperty('--rose-flutter',rnd(2.1,4.4)+'s');
+  frag.append(p);
+  delay(()=>p.remove(),22000);
  }
+ holder.append(frag);
 }
 function talk(){
  if(!scene())cover.classList.add('nhi-v2-preview');
@@ -117,7 +150,8 @@ function start(){
  toggleCoverLearning(false);
  if(reduce()){cover.classList.add('nhi-v2-done');return;}
  const run=sceneId;
- delay(()=>{if(run===sceneId){cover.classList.add('nhi-v2-kissing');heartBurst(7);petals(8);}},7200);
+ delay(()=>{if(run===sceneId)cover.classList.add('nhi-v2-arrived');},6500);
+ delay(()=>{if(run===sceneId){cover.classList.add('nhi-v2-kissing');heartBurst(5);petals(8);}},7200);
  delay(()=>{if(run===sceneId)cover.classList.remove('nhi-v2-kissing');},9900);
  delay(()=>{if(run===sceneId){
   cover.classList.add('nhi-v2-done');
@@ -133,6 +167,7 @@ function tone(ctx,hz,start,len,volume){
  o.connect(g);g.connect(ctx.destination);o.start(start);o.stop(start+len+.03);
 }
 function stopSound(){
+ if(roseTicker){clearInterval(roseTicker);roseTicker=null;}
  if(audioTick)clearInterval(audioTick);audioTick=null;
  if(audio){const a=audio;audio=null;a.close().catch(()=>{});}
 }
