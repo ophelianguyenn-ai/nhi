@@ -3057,6 +3057,10 @@ button,input,select,textarea{font-family:var(--ui)}
 
     /* ---- views ---- */
     function render() {
+      // Header controls belong in the sticky white brand bar, not a second toolbar.
+      document.querySelector('#topbar .nhi-study-topbar')?.remove();
+      document.body.classList.toggle('nhi-in-study',!!sess);
+      var previousScroll = window.scrollY || document.documentElement.scrollTop || 0;
       var v = $('planBox'); if (!v) return;
       // Resynchronize route and selected view before removing the previous card.
       if (state.mode !== 'plan') return;
@@ -3100,11 +3104,18 @@ button,input,select,textarea{font-family:var(--ui)}
           backup.appendChild(nav);
           var rates = el('div','btnrow');rates.style.justifyContent='center';
           rates.appendChild(btn('ghost','Khó',function(){rate('hard');}));
-          rates.appendChild(btn('ghost','Bình thường',function(){rate('mid');}));
           backup.appendChild(rates);
           v.appendChild(backup);
         } else if (oldCard.childNodes.length) v.appendChild(oldCard);
         else v.appendChild(el('p','notice','Đã xảy ra lỗi hiển thị. Hãy tải lại trang để tiếp tục học; tiến độ không bị xoá.'));
+      }
+      // Do not jump to the top when the learner flips or moves to the next card.
+      if (inSess && !fresh && previousScroll > 12) {
+        requestAnimationFrame(function () {
+          if (!sess) return;
+          window.scrollTo(0, Math.min(previousScroll,
+            Math.max(0, document.documentElement.scrollHeight - window.innerHeight)));
+        });
       }
     }
     function legend() {
@@ -3474,7 +3485,10 @@ button,input,select,textarea{font-family:var(--ui)}
       var bar = el('div', 'sbar'), sp = el('span'); sp.style.width = Math.max(4, Math.min(100, s.pos / s.queue.length * 100)) + '%'; bar.appendChild(sp); head.appendChild(bar);
       head.appendChild(el('span', 'counter', (s.pos + 1) + ' / ' + s.queue.length));
       var fb = ibtn('iconbtn sm', focus ? 'unfocus' : 'focus', function () { setFocus(!focus); render(); }, focus ? 'Thoát chế độ tập trung (Esc)' : 'Chế độ tập trung (F)'); fb.setAttribute('aria-pressed', String(focus)); head.appendChild(fb);
-      v.appendChild(head);
+      head.classList.add('nhi-study-topbar');
+      var topbar = $('topbar');
+      if (topbar) topbar.insertBefore(head, topbar.querySelector('.topbtns'));
+      else v.appendChild(head);
       v.appendChild(el('p', 'stitle', s.title));
       var wrap = el('div', 'pcardwrap'), c = el('div', 'card pcard'); c.dataset.item=it.id; c.style.setProperty('--tc', topicColor(it.topic));
       var m = el('div', 'card-top'), cm = el('div', 'cmeta');
@@ -3483,11 +3497,23 @@ button,input,select,textarea{font-family:var(--ui)}
       m.appendChild(el('span', 'kind', (it.type === 'w' ? 'Từ vựng' : 'Câu') + (it.type === 'w' && it.n > 1 ? ' · gặp ' + it.n + ' lần' : '') + (it.edited ? ' · đã sửa' : '')));
       var ci = el('div', 'cicons');
       ci.appendChild(ibtn('iconbtn sm ai', 'spark', function () { askAi(); }, 'Hỏi AI về thẻ này (A)'));
+      var photoTapTimer = null;
       ci.appendChild(ibtn('iconbtn sm', 'photo', function () {
-        s.imagePicker = !s.imagePicker; s.editing = false;
-        if (s.imagePicker) { s.flipped = true; s.hanja = true; }
-        legendOpen = false; render();
-      }, 'Tìm ảnh trên mạng và chạm để thêm vào thẻ'));
+        // A real double click/tap opens Korean Google Images immediately.
+        // A single click still opens the existing image picker.
+        if (photoTapTimer) {
+          clearTimeout(photoTapTimer); photoTapTimer = null;
+          window.open('https://www.google.com/search?tbm=isch&q='+
+            encodeURIComponent(it.ko), '_blank', 'noopener,noreferrer');
+          return;
+        }
+        photoTapTimer = setTimeout(function () {
+          photoTapTimer=null;
+          s.imagePicker = !s.imagePicker; s.editing = false;
+          if (s.imagePicker) { s.flipped = true; s.hanja = true; }
+          legendOpen = false; render();
+        }, 280);
+      }, 'Một lần: thêm ảnh · Hai lần: tìm hình theo từ tiếng Hàn'));
       ci.appendChild(ibtn('iconbtn sm', 'edit', function () { s.editing = !s.editing; legendOpen = false; render(); }, 'Sửa thẻ, chữ Hán và hình ảnh'));
       var bk = ibtn('iconbtn sm', 'book', function () { legendOpen = !legendOpen; render(); }, 'Chú giải phím tắt và thao tác'); bk.setAttribute('aria-expanded', String(legendOpen)); ci.appendChild(bk);
       ci.appendChild(ibtn('iconbtn sm', 'vol', function () { toggleSpeech(s.flipped ? it.ko : it.vi, s.flipped ? 'ko-KR' : 'vi-VN'); }, 'Phát âm / Dừng mặt thẻ hiện tại'));
@@ -3512,13 +3538,17 @@ button,input,select,textarea{font-family:var(--ui)}
          var dictionaries=el('div','nhi-card-dictionaries');if(window.NHI_STUDY)window.NHI_STUDY.dictionaryButtons(dictionaries,function(){return s.selectedKo||it.ko;});koRow.appendChild(dictionaries);f.appendChild(koRow);
 
         if (hj && s.hanja) {
-          var characters=String(hj[0]||'').replace(/[^\p{Script=Han}]/gu,'');
-          var hex=[...characters].map(function(ch){return ch.codePointAt(0).toString(16).toUpperCase();}).join(' ');
-          var hx=el('a','hanja nhi-hanja-lookup',hj[0]);
-          hx.href='https://hvdic.thivien.net/?HEXCodes='+encodeURIComponent(hex)+'&PronMode=0&Simplified=ON&Traditional=ON';
+          var hanTerm=String(hj[0]||'').trim();
+          var hanSearch=hanTerm.replace(/[^\p{Script=Han}\s]/gu,'').trim();
+          var hx=el('a','hanja nhi-hanja-lookup');
+          var hanCount=[...hanSearch.replace(/\s+/g,'')].length;
+          hx.href='https://hvdic.thivien.net/'+(hanCount===1?'whv/':'hv/')+
+            encodeURIComponent(hanSearch.replace(/\s+/g,'+')).replace(/%2B/gi,'+');
           hx.target='_blank';hx.rel='noopener noreferrer';hx.lang='zh-Hant';
-          hx.title='Bấm để tra '+hj[0]+' tại Từ điển Hán Nôm Thi Viện';
-          hx.appendChild(el('small',null,'('+hj[1]+')'));
+          hx.title='Bấm để tra trực tiếp '+hanTerm+' tại Từ điển Hán Nôm Thi Viện';
+          hx.appendChild(el('span','nhi-hanja-characters',hanTerm));
+          hx.appendChild(el('span','nhi-hanja-dash',' – '));
+          hx.appendChild(el('small','nhi-hanja-reading',hj[1]));
           f.appendChild(hx);
         }
         f.appendChild(hlText(el('p', 'vi-under'), it, 'vi', true));
@@ -3556,7 +3586,7 @@ button,input,select,textarea{font-family:var(--ui)}
       var pv = ibtn('parrow nhi-prev-v3', 'left', function () { go(-1); }, 'Thẻ trước (←)');
       pv.disabled = s.pos === 0;pv.setAttribute('aria-label','Thẻ trước');r.appendChild(pv);
       var hard = btn('hard' + (picked === 'hard' ? ' picked' : ''), 'Khó', function () { rate('hard'); });
-      hard.appendChild(el('kbd',null,'1'));r.appendChild(hard);
+      r.appendChild(hard);
       var nx = ibtn('parrow nhi-next-v3', 'right', function () { go(1); }, 'Thẻ sau (→)');
       nx.setAttribute('aria-label','Thẻ sau');r.appendChild(nx);
       if (undoHistory.length) r.appendChild(btn('pundo','↶ Hoàn tác',undoDelete,'Khôi phục thẻ vừa xóa (Ctrl+Z)'));
