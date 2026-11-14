@@ -167,9 +167,9 @@
 @keyframes nhi-natural-rose-fall{
  0%{opacity:0;transform:translate3d(0,-7vh,0) rotate(-20deg) scale(var(--rose-depth))}
  9%{opacity:var(--rose-opacity)}
- 32%{transform:translate3d(calc(var(--rose-wind)*.36),31vh,0) rotate(calc(var(--rose-turn)*.3)) scale(var(--rose-depth))}
- 65%{opacity:var(--rose-opacity);transform:translate3d(calc(var(--rose-wind)*.84),69vh,0) rotate(calc(var(--rose-turn)*.66)) scale(var(--rose-depth))}
- 91%{opacity:calc(var(--rose-opacity)*.78)}
+ 32%{transform:translate3d(var(--rose-wind-first,30px),31vh,0) rotate(var(--rose-turn-first,180deg)) scale(var(--rose-depth))}
+ 65%{opacity:var(--rose-opacity);transform:translate3d(var(--rose-wind-second,80px),69vh,0) rotate(var(--rose-turn-second,360deg)) scale(var(--rose-depth))}
+ 91%{opacity:var(--rose-opacity,.8)}
  100%{opacity:0;transform:translate3d(var(--rose-wind),110vh,0) rotate(var(--rose-turn)) scale(var(--rose-depth))}
 }
 @keyframes nhi-natural-rose-flutter{
