@@ -16,6 +16,7 @@ function setupEnglish(box){
  const read=(key,def)=>{try{const n=Number(localStorage.getItem(key));return Number.isFinite(n)&&n!==0?n:def;}catch(_e){return def;}};
  let w=read(STORE,0),h=read(HEIGHT_KEY,0),y=read(OFFSET_KEY,0);
  const apply=()=>{
+  box.classList.toggle('nhi-en-user-width',w>0);
   box.style.setProperty('--nhi-en-width',w>0?Math.round(w)+'px':'fit-content');
   box.style.setProperty('--nhi-en-height',h>0?Math.round(h)+'px':'auto');
   box.style.setProperty('--nhi-en-offset-y',Math.round(y)+'px');
