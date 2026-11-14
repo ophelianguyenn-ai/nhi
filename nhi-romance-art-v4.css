@@ -205,3 +205,18 @@
  #cover #coverHero>#nhiHairRose{top:13%;left:24%;width:26%;height:21%}
  #cover .nhi-romance-title-v2{font-size:clamp(31px,9vw,50px)!important}
 }
+
+/* Recognizable tiny painted flower on Nhi's hair rather than an invisible touch area. */
+#cover #coverHero>#nhiHairRose::after{content:none!important;display:none!important}
+#cover #coverHero>#nhiHairRose>.nhi-hair-bloom{
+ position:absolute;top:38%;left:40%;
+ width:clamp(19px,3.2vw,32px);height:clamp(19px,3.2vw,32px);
+ transform:translate(-50%,-50%) rotate(-9deg);
+ pointer-events:none;filter:drop-shadow(0 2px 2px #963e6033);
+ transition:transform .25s ease,filter .25s ease;
+}
+#cover #coverHero>#nhiHairRose:hover>.nhi-hair-bloom,
+#cover #coverHero>#nhiHairRose[aria-pressed="true"]>.nhi-hair-bloom{
+ transform:translate(-50%,-50%) rotate(13deg) scale(1.14);
+ filter:drop-shadow(0 0 6px #ffbbd7);
+}
