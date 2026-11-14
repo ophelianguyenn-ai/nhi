@@ -19,6 +19,8 @@ function install(el,key){
  if(el.dataset.nhiMovableReady)return;
  el.dataset.nhiMovableReady='true';
  el.dataset.nhiMovable=key;
+ el.draggable=false;
+ el.addEventListener('dragstart',e=>e.preventDefault());
  el.tabIndex=0;
  el.title=el.title ? el.title+' · Kéo để di chuyển' : 'Giữ và kéo trực tiếp để di chuyển; Alt + mũi tên để tinh chỉnh';
  let active=null,suppress=false;
