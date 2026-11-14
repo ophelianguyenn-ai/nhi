@@ -3486,6 +3486,7 @@ button,input,select,textarea{font-family:var(--ui)}
       var head = el('div', 'shead' + (fresh ? ' fx-in' : ''));
       head.appendChild(ibtn('iconbtn sm', 'pause', pause, 'Tạm dừng, về trang bài học'));
       var bar = el('div', 'sbar'), sp = el('span'); sp.style.width = Math.max(4, Math.min(100, s.pos / s.queue.length * 100)) + '%'; bar.appendChild(sp); head.appendChild(bar);
+      head.style.setProperty('--nhi-progress-color', topicColor(it.topic));
       head.appendChild(el('span', 'counter', (s.pos + 1) + ' / ' + s.queue.length));
       var fb = ibtn('iconbtn sm', focus ? 'unfocus' : 'focus', function () { setFocus(!focus); render(); }, focus ? 'Thoát chế độ tập trung (Esc)' : 'Chế độ tập trung (F)'); fb.setAttribute('aria-pressed', String(focus)); head.appendChild(fb);
       head.classList.add('nhi-study-topbar');
@@ -3549,7 +3550,12 @@ button,input,select,textarea{font-family:var(--ui)}
             encodeURIComponent(hanSearch.replace(/\s+/g,'+')).replace(/%2B/gi,'+');
           hx.target='_blank';hx.rel='noopener noreferrer';hx.lang='zh-Hant';
           hx.title='Bấm để tra trực tiếp '+hanTerm+' tại Từ điển Hán Nôm Thi Viện';
-          hx.appendChild(el('span','nhi-hanja-characters',hanTerm));
+          var spacedHanja=el('span','nhi-hanja-characters');
+          Array.from(hanTerm).forEach(function(ch){
+            if(/\p{Script=Han}/u.test(ch))spacedHanja.appendChild(el('span','nhi-hanja-character',ch));
+            else if(ch.trim())spacedHanja.appendChild(el('span','nhi-hanja-punctuation',ch));
+          });
+          hx.appendChild(spacedHanja);
           hx.appendChild(el('span','nhi-hanja-dash',' – '));
           hx.appendChild(el('small','nhi-hanja-reading',hj[1]));
           f.appendChild(hx);
@@ -3579,12 +3585,16 @@ button,input,select,textarea{font-family:var(--ui)}
       f.addEventListener('click', function (e) {
         if(e.target.closest('figure,.nhi-english-v5,button,input,a,.nhi-card-dictionaries,[contenteditable]'))return;
         if(s.editing || e.target.closest('.ph.tap'))return;
-        // Empty left/right quarters navigate. Center and text flip the card.
-        if(e.target.closest('.answer,.vi-under,.nhi-card-note,.hanja,.prompt')){flip();return;}
-        var rect=f.getBoundingClientRect(), part=(e.clientX-rect.left)/Math.max(rect.width,1);
-        if(part<=.25)go(-1);else if(part>=.75)go(1);else flip();
+        // Every free area flips the card; previous/next are dedicated pink buttons.
+        flip();
       });
       c.appendChild(f);
+      // The unused background around the entire card should also flip it.
+      c.addEventListener('click', function(e) {
+        if(e.target.closest('.pfront,.prate,.cicons,.pdel,.pundo,.legendpop,.nhi-card-dictionaries,.nhi-english-v5,figure,button,input,textarea,select,a,[contenteditable]'))return;
+        if(s.editing || s.imagePicker || flipping)return;
+        flip();
+      });
       var r = el('div', 'prate nhi-rating-v3'), picked = s.picked[s.pos];
       var pv = ibtn('parrow nhi-prev-v3', 'left', function () { go(-1); }, 'Thẻ trước (←)');
       pv.disabled = s.pos === 0;pv.setAttribute('aria-label','Thẻ trước');r.appendChild(pv);
@@ -4286,7 +4296,7 @@ button,input,select,textarea{font-family:var(--ui)}
     }
     function paintLog() {
       var box = $('aiLog'); box.textContent = '';
-      if (!log.length) { var hi = mk('div', 'aimsg ai'); hi.textContent = 'Chào bạn! Hỏi mình bất cứ điều gì về tiếng Hàn: nghĩa của từ, ngữ pháp, cách nói lịch sự với sếp… Khi bạn đang học một thẻ, mình tự biết bạn đang hỏi về thẻ đó.'; box.appendChild(hi); }
+      // No auto-inserted welcome paragraph. The editable quick questions remain below.
       log.forEach(function (m) {
         var d = mk('div', 'aimsg ' + (m.r === 'me' ? 'me' : m.n ? 'ai note' : m.e ? 'err' : 'ai'));
         if (m.r === 'me') d.textContent = m.t; else d.innerHTML = fmt(m.t);
