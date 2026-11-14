@@ -269,7 +269,23 @@ function display(box,entry,id,vi,ko){
 
  box.querySelector('.nhi-en-status').textContent='';
  comparisonRows(box,id,vi,ko);
- var review=box.querySelector('.nhi-en-review');if(review){review.hidden=!en;review.onclick=()=>checkMeaning(box,id,vi,ko);}
+ var review=box.querySelector('.nhi-en-review');
+ if(review){
+  review.hidden=!en;
+  review.setAttribute('aria-expanded',String(box.classList.contains('nhi-compare-expanded')));
+  review.onclick=()=>{
+   const expand=!box.classList.contains('nhi-compare-expanded');
+   box.classList.toggle('nhi-compare-expanded',expand);
+   review.textContent=expand?'Thu gọn':'Đối chiếu';
+   review.setAttribute('aria-expanded',String(expand));
+   if(expand){
+    // Previously compared versions render immediately; no duplicate network calls.
+    const cached=reviewCache[entryKey(vi,ko)]||suppliedComparison(vi,ko);
+    if(!cached)checkMeaning(box,id,vi,ko);
+    else comparisonRows(box,id,vi,ko);
+   }
+  };
+ }
  var editBtn=box.querySelector('.nhi-en-edit');if(editBtn)editBtn.onclick=()=>editEnglish(box,id,vi,ko);
 }
 function editEnglish(box,id,vi,ko) {
