@@ -50,6 +50,14 @@ function setup(){
  hair.setAttribute('aria-label','Chạm cành hoa trên tóc Nhi: bật hoặc tắt nhạc và hoa hồng rơi');
  hair.setAttribute('aria-pressed','false');
  hair.title='Cành hoa trên tóc Nhi · nhạc và hoa hồng';
+ hair.innerHTML='<svg viewBox="0 0 50 50" class="nhi-hair-bloom" aria-hidden="true">'+
+  '<g stroke="#cb7a96" stroke-width="1.5" fill="#f8b3ca">'+
+  '<ellipse cx="25" cy="14" rx="7" ry="11"/><ellipse cx="25" cy="36" rx="7" ry="11"/>'+
+  '<ellipse cx="14" cy="25" rx="11" ry="7"/><ellipse cx="36" cy="25" rx="11" ry="7"/>'+
+  '<ellipse cx="17" cy="17" rx="7" ry="10" transform="rotate(-45 17 17)"/>'+
+  '<ellipse cx="33" cy="33" rx="7" ry="10" transform="rotate(-45 33 33)"/>'+
+  '</g><circle cx="25" cy="25" r="8" fill="#ffdf8c" stroke="#d7a55e" stroke-width="2"/>'+
+  '<circle cx="22" cy="23" r="2" fill="#fff9d7" opacity=".9"/></svg>';
  hair.addEventListener('click',e=>{
   e.preventDefault();e.stopPropagation();
   const playing=toggleSound();hair.setAttribute('aria-pressed',String(playing));
