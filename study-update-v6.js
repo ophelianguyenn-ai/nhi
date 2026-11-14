@@ -25,12 +25,18 @@ function layout(){
 }
 function dictionary(word,kind){
  word=String(word||'').trim();if(!word)return;
+ // Tap the same pink/blue bubble again to close its own dictionary.
+ if(dock && !dock.hidden && document.body.classList.contains('dictionary-open')
+    && dock.dataset.kind===kind && dock.dataset.word===word){
+   dock.hidden=true;document.body.classList.remove('dictionary-open');layout();return;
+ }
  const url=kind==='en'?'https://vdict.com/'+encodeURIComponent(word)+',1,0,0.html':
  'https://korean.dict.naver.com/'+(kind==='ko-en'?'koendict':'kovidict')+'/#/search?query='+encodeURIComponent(word);
  if(!dock){
   dock=make('aside','nhi-dictionary-dock');dock.id='nhiDictionary';dock.setAttribute('aria-label','Cửa sổ từ điển');
   const grip=make('div','nhi-dict-resize');grip.tabIndex=0;grip.setAttribute('role','separator');grip.setAttribute('aria-label','Đổi độ rộng từ điển');grip.setAttribute('aria-orientation','vertical');
-  const head=make('div','nhi-dialog-head'),title=make('strong');head.append(title,button('×',()=>{document.body.classList.remove('dictionary-open');dock.hidden=true;layout();}));head.lastChild.setAttribute('aria-label','Đóng từ điển');
+  const head=make('div','nhi-dialog-head'),title=make('strong');
+  head.append(title); // Closing is exclusively through a second bubble tap; no × button.
   const link=make('a','nhi-dictionary-external');link.target='_blank';link.rel='noopener noreferrer';
   link.title='Mở từ điển trong tab mới';link.setAttribute('aria-label',link.title);
   link.innerHTML='<svg viewBox="0 0 64 64" aria-hidden="true"><defs><linearGradient id="nhiExternalBubble" x1="0" x2="1" y1="0" y2="1"><stop stop-color="#6ed4ec"/><stop offset="1" stop-color="#39a9d8"/></linearGradient></defs><path d="M32 4C16 4 5 16 5 31c0 12 8 22 19 26l-1 5 12-5c13-1 24-12 24-26C59 16 47 4 32 4Z" fill="url(#nhiExternalBubble)"/><path d="M22 39 42 20M27 20h15v15" stroke="#17334c" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>';
@@ -44,6 +50,7 @@ function dictionary(word,kind){
   grip.onpointerup=grip.onpointercancel=()=>{if(!drag)return;drag=null;persist();};
   grip.onkeydown=e=>{if(!['ArrowLeft','ArrowRight'].includes(e.key))return;e.preventDefault();dictWidth=Math.max(220,Math.min(innerWidth-260,dictWidth+(e.key==='ArrowLeft'?24:-24)));persist();layout();};
  }
+ dock.dataset.kind=kind;dock.dataset.word=word;
  dock.querySelector('strong').textContent=(kind==='en'?'VDict':kind==='ko-en'?'Naver Hàn–Anh':'Naver Hàn–Việt')+' · '+word;
  dock.querySelector('iframe').src=url;dock.querySelector('a').href=url;dock.hidden=false;document.body.classList.add('dictionary-open');layout();
 }
@@ -54,6 +61,10 @@ function dictionaryButtons(root,value){
   const b=button('',()=>{
    if(b.disabled)return;
    const selected=String(value()||'').trim();if(!selected)return;
+   if(dock && !dock.hidden && document.body.classList.contains('dictionary-open')
+      && dock.dataset.kind===kind && dock.dataset.word===selected){
+     dictionary(selected,kind);return;
+   }
    const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
    if(reduce){dictionary(selected,kind);return;}
    b.disabled=true;b.classList.add('nhi-burst');
