@@ -127,7 +127,7 @@ html body #planBox .pcard .pfront>.nhi-card-details{
   min-width:0!important;
   min-height:0!important;
   height:auto!important;
-  margin:14px auto 5px!important;
+  margin:var(--nhi-safe-margin,14px) auto 5px!important;
   padding:0 3px 4px!important;
   gap:8px!important;
   box-sizing:border-box!important;
