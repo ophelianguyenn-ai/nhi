@@ -2,6 +2,9 @@
    No changes to learning text, translation data, saved progress, or the seasons. */
 
 /* The portrait shrinks by approximately four percent; preserve the gentle sway. */
+@media(min-width:661px){
+  #cover.nhi-upper-v8 #coverHero{margin-bottom:20px!important}
+}
 #cover.nhi-upper-v8 #coverHero{
   width:min(317px,69vw)!important;
   height:clamp(216px,35.5vh,341px)!important;
@@ -43,7 +46,8 @@
 :root[data-theme="dark"] #cover.nhi-upper-v8 h1 em{color:#8ed2ff!important}
 :root[data-theme="dark"] #cover.nhi-upper-v8 .lead{color:#bad8e9!important}
 :root[data-theme="dark"] #cover.nhi-upper-v8 .primary.white{
-  color:#2777a3!important;
+  color:#a7dfff!important;
+  background:#173346!important;
   box-shadow:0 5px 0 #326b91!important;
 }
 :root[data-theme="dark"] #cover.nhi-upper-v8 .cstats b{color:#96d2f5!important}
