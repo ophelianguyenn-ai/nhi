@@ -3701,7 +3701,8 @@ button,input,select,textarea{font-family:var(--ui)}
       // A cheerful cat takes the victory spotlight; no girl mascot at completion.
       var m = el('div','nhi-victory-cat-scene');
       var cat=el('img','nhi-victory-cat');
-      cat.src='nhi-kitten-lifelike-v2.svg?v=20261115-kitten-v2';
+      cat.src='nhi-kitten-photo-v3.svg?v=20261115-kitten-photo-v3';
+      cat.onerror=function(){cat.onerror=null;cat.src='nhi-kitten-lifelike-v2.svg?v=20261115-kitten-v2';};
       cat.alt='Mèo đáng yêu vẫy chân chúc mừng hoàn thành bài học';
       cat.loading='eager';m.appendChild(cat);
       // A yellow thumbs-up emoji was distracting; the kitten paws do the celebrating.
