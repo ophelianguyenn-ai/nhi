@@ -24,7 +24,7 @@ const server = http.createServer((req, res) => {
       'Connection': 'keep-alive'
     });
     streams.add(res);
-    res.write('event: put\\ndata: ' + JSON.stringify({ path: '/', data: db }) + '\\n\\n');
+    res.write('event: put\ndata: ' + JSON.stringify({ path: '/', data: db }) + '\n\n');
     req.on('close', () => streams.delete(res));
     return;
   }
@@ -34,7 +34,7 @@ const server = http.createServer((req, res) => {
     req.on('end', () => {
       const patch = JSON.parse(raw);
       Object.keys(patch).forEach(key => { db[key] = patch[key]; });
-      const event = 'event: patch\\ndata: ' + JSON.stringify({ path: '/', data: patch }) + '\\n\\n';
+      const event = 'event: patch\ndata: ' + JSON.stringify({ path: '/', data: patch }) + '\n\n';
       streams.forEach(client => { try { client.write(event); } catch {} });
       res.writeHead(200, { 'Content-Type': 'application/json' });
       res.end('{}');
