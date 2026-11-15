@@ -72,8 +72,9 @@ async function enableSync(page) {
 async function checkCounter(page, n) {
   try {
     await page.waitForFunction(expected => {
-      const el = document.querySelector('#planBox .counter');
-      return el && el.textContent.trim().startsWith(expected + ' /') &&
+      const data = JSON.parse(localStorage.getItem('viko-plan-sess-v1') || '{}');
+      const card = document.querySelector('#planBox .pcard');
+      return card && Array.isArray(data.queue) && data.pos === expected - 1 &&
         document.querySelector('#view-plan').hidden === false;
     }, { timeout: 13000 }, n);
   } catch (error) {
