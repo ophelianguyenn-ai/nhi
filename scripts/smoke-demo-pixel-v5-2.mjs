@@ -100,7 +100,7 @@ try{
    b=document.getElementById('luongCharacter').getBoundingClientRect(),
    clip=document.getElementById('nhiHairClipPlane').getBoundingClientRect();
   return {girlWidth:g.width,clipWidth:clip.width,clipHeight:clip.height,viewport:innerWidth,rootScroll:document.documentElement.scrollWidth,
-  stageHeight:document.getElementById('nhiCoupleStage').getBoundingClientRect().height,boyWidth:b.width};
+  stageHeight:document.getElementById('nhiCoupleStage').getBoundingClientRect().height,boyWidth:document.getElementById('luongCharacter').offsetWidth};
  });
  console.log('DEMO V5.2 MOBILE',JSON.stringify(screen));
  assert(screen.girlWidth>90&&screen.boyWidth>55&&screen.clipWidth>=44&&screen.clipHeight>=44,'Mobile character visibility or hairclip target failed');
