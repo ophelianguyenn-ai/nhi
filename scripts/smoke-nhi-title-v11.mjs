@@ -39,6 +39,7 @@ try{
 
     // Exercise all 3 fixed palettes without relying on random chance.
     for(const mode of ['light','dark']){
+      const paletteColors=[];
       for(const shade of shades){
         await page.evaluate(({mode,shade})=>{
           document.documentElement.dataset.theme=mode;
@@ -47,9 +48,11 @@ try{
         const state=await read();
         assert(state.animation==='none'&&state.filter==='none','No animation in '+mode+'/'+shade);
         assert(state.color!==state.accent,'Both title parts should have coordinated shade contrasts');
+        paletteColors.push(state.color);
         if(mode==='light')await page.screenshot({path:'/tmp/nhi-v11-preview/cover-'+shade+'-'+size.width+'.png'});
         console.log('V11 COLOR',mode,shade,size.width,state.color,state.accent);
       }
+      assert(new Set(paletteColors).size===3,'Each of the three hues needs its own '+mode+' theme color');
     }
     await page.close();
     console.log('V11 FIXED PER LOAD',size.width,first.selected);
