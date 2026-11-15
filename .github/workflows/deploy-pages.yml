@@ -44,7 +44,7 @@ jobs:
             nhi-cover-gif-player-v4.js nhi-cover-gif-player-v4.css luong-nhi-goc.gif
             nhi-romantic-cover-v5-1.js nhi-romantic-cover-v5-1.css nhi-luong-hands-at-sides-v5.svg
             nhi-demo-pixel-cover-v5-2.js nhi-demo-pixel-cover-v5-2.css
-            nhi-solo-cover-v7.css nhi-card-polish-v8.css nhi-card-polish-v9.css nhi-card-polish-v10.css nhi-card-controls-v8.js
+            nhi-solo-cover-v7.css nhi-card-polish-v8.css nhi-card-polish-v9.css nhi-card-polish-v10.css nhi-cover-palette-v12.css nhi-card-controls-v8.js
             nhi-luong-articulated-v4.svg nhi-romance-art-v4.css nhi-polish-20261115.css nhi-stage-move-v1.js nhi-refine-20261115.css nhi-celebration-cat-v1.svg nhi-final-tight-v1.css nhi-kitten-lifelike-v2.svg nhi-kitten-meow-v1.js nhi-card-no-overlap-v1.js nhi-kitten-photo-v3.svg
             index.html nhi-neck-options.html sw.js manifest.webmanifest
             lessons.json technical-images.json audio-manifest.json
@@ -102,6 +102,7 @@ jobs:
           test -s _site/nhi-card-polish-v8.css
           test -s _site/nhi-card-polish-v9.css
           test -s _site/nhi-card-polish-v10.css
+          test -s _site/nhi-cover-palette-v12.css
           test -s _site/assets/romantic-demo/nhi-demo-original-pixels.png
           echo 'f4f280c95b5373299fd83e9e87e5dca606641242d9dd64f54c5926b44551b442  _site/assets/romantic-demo/nhi-demo-original-pixels.png' | sha256sum -c -
           echo '730021cfe9c23d81b8d01c3a76a0e5791577bf5dae14f24faa7c8a0043243132  _site/assets/romantic-demo/luong-demo-original-pixels.png' | sha256sum -c -
@@ -120,6 +121,7 @@ jobs:
           grep -q 'nhi-card-polish-v8.css' _site/index.html
           grep -q 'nhi-card-polish-v9.css' _site/index.html
           grep -q 'nhi-card-polish-v10.css' _site/index.html
+          grep -q 'nhi-cover-palette-v12.css' _site/index.html
           grep -q 'nhiCoverTitle' _site/index.html
           grep -q 'data-nhi-cover-title' _site/nhi-card-polish-v10.css
           grep -q 'nhi-card-controls-v8.js' _site/index.html

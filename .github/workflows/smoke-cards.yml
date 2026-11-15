@@ -33,6 +33,8 @@ on:
       - 'nhi-card-polish-v10.css'
       - 'scripts/smoke-nhi-card-v10.mjs'
       - 'scripts/smoke-nhi-title-v11.mjs'
+      - 'nhi-cover-palette-v12.css'
+      - 'scripts/smoke-nhi-palette-v12.mjs'
       - 'scripts/smoke-nhi-card-v9.mjs'
       - 'nhi-card-controls-v8.js'
       - 'nhi-stage-move-v1.js'
@@ -102,6 +104,8 @@ jobs:
         run: node scripts/smoke-nhi-card-v10.mjs
       - name: Verify fixed blue, green or pink title per page load
         run: node scripts/smoke-nhi-title-v11.mjs
+      - name: Verify Korean encouragement, learning button and frame border follow fixed title palette
+        run: node scripts/smoke-nhi-palette-v12.mjs
       - name: Save half-body cover and study card previews
         if: ${{ always() }}
         uses: actions/upload-artifact@v4
