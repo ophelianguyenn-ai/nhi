@@ -99,8 +99,10 @@ jobs:
         if: ${{ always() }}
         uses: actions/upload-artifact@v4
         with:
-          name: nhi-upper-card-v8-preview
-          path: /tmp/nhi-v8-preview/*.png
+          name: nhi-cover-card-v9-preview
+          path: |
+            /tmp/nhi-v8-preview/*.png
+            /tmp/nhi-v9-preview/*.png
           if-no-files-found: ignore
           retention-days: 7
       - name: Confirm Vietnamese to Korean flip is visible
