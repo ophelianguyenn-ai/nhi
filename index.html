@@ -1604,7 +1604,7 @@ button,input,select,textarea{font-family:var(--ui)}
   }
   function go(d) {
     var n = state.idx + d; if (n < 0 || n >= queue.length) return;
-    state.idx = n; state.flipped = false; renderCard();
+    state.idx = n; state.flipped = false; renderCard(); ACTIVE_CARD.cards();
     var cc = $('card'); if (cc && cc.animate && !reduceMotion()) { var sign = d > 0 ? 1 : -1; cc.animate([{ opacity: .1, transform: 'perspective(1100px) translateX(' + (sign * 54) + 'px) rotateY(' + (sign * -7) + 'deg) scale(.948)' }, { offset: .72, opacity: 1, transform: 'perspective(1100px) translateX(' + (sign * -4) + 'px) rotateY(' + (sign * .8) + 'deg) scale(1.007)' }, { opacity: 1, transform: 'perspective(1100px) translateX(0) rotateY(0deg) scale(1)' }], { duration: 620, easing: 'cubic-bezier(.16,.78,.23,1)' }); }
     var current=currentCard(),lang=state.dir==='vk'?'vi':'ko';if(current)speak(current[lang],lang==='vi'?'vi-VN':'ko-KR');
   }
@@ -1851,6 +1851,101 @@ button,input,select,textarea{font-family:var(--ui)}
     };
   })();
 
+
+  /* ---------- Follow the same active card on laptop and phone ---------- */
+  var ACTIVE_CARD = (function () {
+    var KEY = 'nlc-active-card-v1', DEVICE_KEY = 'nlc-active-device-v1';
+    var device = lsGet(DEVICE_KEY);
+    if (!device || !/^[a-z0-9]{20,64}$/.test(device)) {
+      device = newCode();
+      lsSet(DEVICE_KEY, device);
+    }
+    var last = null, silentDepth = 0, receivedOnce = false;
+    try { last = JSON.parse(lsGet(KEY) || 'null'); } catch (e) { last = null; }
+    if (!last || !Number.isFinite(last.t)) last = null;
+    function silence(fn) {
+      silentDepth++;
+      try { return fn(); } finally { silentDepth--; }
+    }
+    function publish(data) {
+      if (silentDepth || !SYNC.cfg()) return;
+      var record = Object.assign({}, data, {
+        t: Math.max(Date.now(), (last && last.t || 0) + 1),
+        from: device
+      });
+      last = record;
+      lsSet(KEY, JSON.stringify(last));
+      SYNC.queue('nav', record);
+    }
+    function publishPlan(s) {
+      if (!s || !s.L || state.mode !== 'plan') return;
+      publish({
+        mode: 'plan', lesson: s.L.id, kind: s.kind,
+        queue: s.queue.slice(0, 1200), pos: s.pos,
+        card: s.queue[s.pos] || ''
+      });
+    }
+    function publishCards() {
+      if (state.mode !== 'cards' || !queue.length) return;
+      var c = currentCard();
+      if (!c) return;
+      publish({
+        mode: 'cards', card: c.id, deck: state.deck,
+        status: state.status, order: state.order, seed: state.seed
+      });
+    }
+    function followCards(nav) {
+      if (!BY_ID[nav.card]) return;
+      silence(function () {
+        PLAN.home();
+        state.mode = 'cards';
+        state.deck = nav.deck === 'all' || DECK_NAME[nav.deck] ? nav.deck : 'all';
+        state.status = typeof nav.status === 'string' ? nav.status : 'all';
+        state.order = ['default', 'shuffle'].indexOf(nav.order) >= 0 ? nav.order : 'default';
+        if (Number.isFinite(nav.seed)) state.seed = nav.seed;
+        buildQueue(nav.card);
+        if (queue.indexOf(nav.card) < 0) {
+          state.deck = 'all'; state.status = 'all'; state.order = 'default';
+          buildQueue(nav.card);
+        }
+        if (queue.indexOf(nav.card) < 0) return;
+        state.idx = queue.indexOf(nav.card);
+        state.flipped = false;
+        saveUi();
+        renderMode();
+        SHELL.cover(false);
+        window.scrollTo(0, 0);
+      });
+    }
+    function receive(raw, full) {
+      if (!raw || typeof raw !== 'object') {
+        if (full && last && last.from === device) SYNC.queue('nav', last);
+        return;
+      }
+      if (!Number.isFinite(raw.t) || raw.t <= 0 || typeof raw.from !== 'string' ||
+          (raw.mode !== 'plan' && raw.mode !== 'cards')) return;
+      if (raw.mode === 'plan' &&
+          (typeof raw.lesson !== 'string' || !/^[\\w-]+$/.test(raw.lesson) ||
+          !Array.isArray(raw.queue) || raw.queue.length > 1200)) return;
+      if (raw.mode === 'cards' && typeof raw.card !== 'string') return;
+      var newer = !last || raw.t > last.t ||
+        (raw.t === last.t && raw.from > String(last.from || ''));
+      var initialReplay = !receivedOnce && last && raw.t === last.t && raw.from === last.from;
+      receivedOnce = true;
+      if (newer || initialReplay) {
+        last = raw;
+        lsSet(KEY, JSON.stringify(last));
+        if (raw.from !== device) {
+          if (raw.mode === 'plan') PLAN.follow(raw);
+          else followCards(raw);
+        }
+      } else if (full && last && last.from === device && last.t > raw.t) {
+        SYNC.queue('nav', last);
+      }
+    }
+    return { plan: publishPlan, cards: publishCards, receive: receive, silence: silence };
+  })();
+
   // Merge whatever the other device sent: newest timestamp wins, item by item
   function cleanEntry(id, v) {
     if (!BY_ID[id] || !v || typeof v !== 'object') return null;
@@ -1900,6 +1995,8 @@ button,input,select,textarea{font-family:var(--ui)}
     if (changedP) cacheLocal();
     if (changedCustom) { if (state.deck !== 'all' && !DECK_NAME[state.deck]) state.deck = 'all'; var c = currentCard(); buildQueue(c ? c.id : null); renderDecks(); renderStats(); softRender(); }
     else if (changedP) refreshAfterSync();
+    // Navigation is separate from completion marks and is never an API credential.
+    ACTIVE_CARD.receive(doc.nav, full);
   }
 
   /* ================= Shared helpers for the study modes ================= */
@@ -2899,7 +2996,7 @@ button,input,select,textarea{font-family:var(--ui)}
       fetch(c.url + '/sync/' + c.code + '/X.json').then(function (r) { return r.ok ? r.json() : null; }).then(function (X) { if (X) applyExtras(X); settle(); }).catch(settle);
     }
     var dataCb = null;
-    function onData() { if (dataCb) { try { dataCb(); } catch (e) { } } }
+    function onData() { if (dataCb) { try { dataCb(); } catch (e) { } } tryFollowCursor(); }
     function load() {
       if (loaded || loadErr === 'loading') return;
       loadErr = 'loading';
@@ -3378,6 +3475,46 @@ button,input,select,textarea{font-family:var(--ui)}
     function saveSess() {
       if (!sess) { lsSet(SKEY, ''); return; }
       lsSet(SKEY, JSON.stringify({ kind: sess.kind, title: sess.title, lesson: sess.L ? sess.L.id : null, queue: sess.queue, pos: sess.pos, picked: sess.picked, again: sess.again, stats: sess.stats, recorded: !!sess.recorded, celebrated: !!sess.celebrated }));
+      ACTIVE_CARD.plan(sess);
+    }
+    var pendingCursor = null;
+    function follow(nav) {
+      pendingCursor = nav;
+      tryFollowCursor();
+    }
+    function tryFollowCursor() {
+      var nav = pendingCursor;
+      if (!nav || !loaded) return;
+      var L = BY_LESSON[nav.lesson];
+      // Daily lessons may arrive after the initial Firebase event.
+      if (!L) return;
+      var allowed = {};
+      L.ids.forEach(function (id) { allowed[id] = true; });
+      var ids = nav.queue.filter(function (id) { return typeof id === 'string' && allowed[id] && alive(id); });
+      if (!ids.length) ids = ordered(L.ids);
+      if (!ids.length) return;
+      var pos = Number.isFinite(nav.pos) ? Math.max(0, Math.min(nav.queue.length, Math.floor(nav.pos))) : 0;
+      pos = nav.queue.slice(0, pos).filter(function (id) { return allowed[id] && alive(id); }).length;
+      pos = Math.min(ids.length, pos);
+      if (nav.card && ids[pos] !== nav.card) {
+        var cardPos = ids.indexOf(nav.card);
+        if (cardPos >= 0) pos = cardPos;
+      }
+      pendingCursor = null;
+      if (state.mode === 'plan' && sess && sess.L && sess.L.id === L.id &&
+          sess.pos === pos && sess.queue.length === ids.length && sess.queue[pos] === ids[pos]) return;
+      ACTIVE_CARD.silence(function () {
+        if (sess) leave();
+        page = L.id;
+        history.replaceState(null, '', location.pathname + location.search + '#/bai/' + L.id);
+        document.body.classList.add('plan-page');
+        state.mode = 'plan';
+        saveUi();
+        renderMode();
+        var kind = ['lesson', 'free', 'hard', 'english'].indexOf(nav.kind) >= 0 ? nav.kind : 'lesson';
+        start(kind, ids, titleMain(L), L, { pos: pos, recorded: pos >= ids.length });
+        SHELL.cover(false);
+      });
     }
     function restoreSession() {
       try {
@@ -3399,8 +3536,8 @@ button,input,select,textarea{font-family:var(--ui)}
       if (!ids.length) { toast('Không còn thẻ nào cần học.'); return; }
       var pos = 0;
       if (restored && Number.isFinite(+restored.pos)) {
-        var previous = Math.max(0, Math.min(beforeFilter.length - 1, Math.floor(+restored.pos)));
-        pos = Math.min(ids.length - 1, beforeFilter.slice(0, previous).filter(alive).length);
+        var previous = Math.max(0, Math.min(beforeFilter.length, Math.floor(+restored.pos)));
+        pos = Math.min(ids.length, beforeFilter.slice(0, previous).filter(alive).length);
       }
       sess = { kind: kind, title: title, L: L || null, queue: ids.slice(), pos: pos,
         flipped: false, again: restored && restored.again || {}, picked: restored && restored.picked || {},
@@ -3801,7 +3938,7 @@ button,input,select,textarea{font-family:var(--ui)}
       if (changed) { save(); onData(); if (state.mode === 'plan' && !sess) render(); }
     }
     return {
-      render: render, merge: merge, extras: applyExtras, active: function () { return !!sess; }, load: load, leave: function () { if (!page) leave(); }, route: route,
+      render: render, merge: merge, extras: applyExtras, follow: follow, active: function () { return !!sess; }, load: load, leave: function () { if (!page) leave(); }, route: route,
       home: home, openDailyCreator: openDailyCreator, summary: summary, onData: function (fn) { dataCb = fn; },
       ctx: function () { var it = curItem(); if (it) return { ko: it.ko, vi: it.vi, topic: it.topic, type: it.type }; return page && BY_LESSON[page] ? { lesson: BY_LESSON[page].title } : null; }
     };
@@ -3841,16 +3978,16 @@ button,input,select,textarea{font-family:var(--ui)}
     Array.prototype.forEach.call(document.querySelectorAll('.looseChk'), function (o) { o.checked = !!state.loose; });
   }
   function renderAll() { renderDecks(); renderStats(); renderMode(); }
-  function rebuild() { var c = currentCard(); buildQueue(c ? c.id : null); saveUi(); renderAll(); }
+  function rebuild() { var c = currentCard(); buildQueue(c ? c.id : null); saveUi(); renderAll(); ACTIVE_CARD.cards(); }
 
   /* ---------- Events ---------- */
   $('decks').addEventListener('click', function (e) {
     var b = e.target.closest('.chip'); if (!b) return;
-    state.deck = b.dataset.deck; buildQueue(); saveUi(); renderAll();
+    state.deck = b.dataset.deck; buildQueue(); saveUi(); renderAll(); ACTIVE_CARD.cards();
   });
-  $('status').addEventListener('change', function () { state.status = this.value; buildQueue(); saveUi(); renderAll(); });
-  $('order').addEventListener('change', function () { state.order = this.value; buildQueue(); saveUi(); renderAll(); });
-  $('reshuffle').addEventListener('click', function () { state.seed = Math.floor(Math.random() * 1e9); buildQueue(); saveUi(); renderAll(); });
+  $('status').addEventListener('change', function () { state.status = this.value; buildQueue(); saveUi(); renderAll(); ACTIVE_CARD.cards(); });
+  $('order').addEventListener('change', function () { state.order = this.value; buildQueue(); saveUi(); renderAll(); ACTIVE_CARD.cards(); });
+  $('reshuffle').addEventListener('click', function () { state.seed = Math.floor(Math.random() * 1e9); buildQueue(); saveUi(); renderAll(); ACTIVE_CARD.cards(); });
   $('autoRead').addEventListener('change', function () {
     state.autoVi = this.checked; saveUi();
     if (!this.checked && canSpeak) { try { window.speechSynthesis.cancel(); } catch (e) { } }
@@ -4009,7 +4146,7 @@ button,input,select,textarea{font-family:var(--ui)}
     var clr = e.target.closest('[data-clear-all]');
     if (clr) { state.status = 'all'; state.deck = 'all'; buildQueue(); saveUi(); renderAll(); return; }
     var go = e.target.closest('[data-go]');
-    if (go) { state.mode = go.dataset.go; saveUi(); renderMode(); window.scrollTo({ top: 0, behavior: 'smooth' }); }
+    if (go) { state.mode = go.dataset.go; saveUi(); renderMode(); ACTIVE_CARD.cards(); window.scrollTo({ top: 0, behavior: 'smooth' }); }
   });
   // Học
   $('lStage').addEventListener('click', function (e) {
@@ -4128,7 +4265,7 @@ button,input,select,textarea{font-family:var(--ui)}
     if (ds.edit) { sets.editing = ds.edit; sets.confirmDel = ''; renderSets(); }
     else if (ds.rename) { sets.renaming = ds.rename; renderSets(); }
     else if (ds.act === 'cancel') { sets.editing = ''; sets.renaming = ''; renderSets(); }
-    else if (ds.learn) { state.deck = ds.learn; state.status = 'all'; state.mode = 'cards'; buildQueue(); saveUi(); renderAll(); window.scrollTo({ top: 0, behavior: 'smooth' }); }
+    else if (ds.learn) { state.deck = ds.learn; state.status = 'all'; state.mode = 'cards'; buildQueue(); saveUi(); renderAll(); ACTIVE_CARD.cards(); window.scrollTo({ top: 0, behavior: 'smooth' }); }
     else if (ds.delcard) {
       if (sets.confirmDel !== ds.delcard) { sets.confirmDel = ds.delcard; renderSets(); return; }
       putCustom('c', ds.delcard, Object.assign({}, custom.c[ds.delcard], { del: true })); sets.confirmDel = ''; customChanged();
@@ -4218,7 +4355,7 @@ button,input,select,textarea{font-family:var(--ui)}
         menu(false);
         if (b.dataset.mode === 'plan') PLAN.home();
         else if (location.hash) history.replaceState(null, '', location.pathname + location.search);
-        state.mode = b.dataset.mode; state.flipped = false; saveUi(); document.body.classList.remove('plan-page'); renderMode(); window.scrollTo(0, 0);
+        state.mode = b.dataset.mode; state.flipped = false; saveUi(); document.body.classList.remove('plan-page'); renderMode(); ACTIVE_CARD.cards(); window.scrollTo(0, 0);
       });
       $('menuDaily').addEventListener('click', function () { menu(false); PLAN.openDailyCreator(); });
       $('menuCover').addEventListener('click', function () { menu(false); cover(true); });
