@@ -62,7 +62,7 @@ try{
   return {font:getComputedStyle(text).fontSize,height:document.querySelector('#planBox .pcard').getBoundingClientRect().height};
  });
  console.log('V8 FRONT SIZED',JSON.stringify(front));
- assert(front.font==='34px'&&front.height>=550,'Separate front font or card height failed');
+ assert(front.font==='34px'&&front.height>=550&&front.height<=700,'Front font or user-selected card height failed');
  await page.keyboard.press('Enter');
  await page.waitForSelector('#planBox .pfront>.vi-under',{timeout:8000});
  await page.waitForFunction(()=>document.querySelector('#planBox .nhi-english-v5')?.dataset.frameResizable==='true',{timeout:8000});
@@ -76,7 +76,7 @@ try{
  });
  console.log('V8 BACK',JSON.stringify(back));
  assert(back.font==='28px'&&back.movable==='vietnamese','Separate back Vietnamese font or moving key missing');
- assert(back.editCount===0&&back.english&&back.height>=550,'English inline edit removal or card height failed');
+ assert(back.editCount===0&&back.english&&back.height>=550&&back.height<=720,'English edit removal or card height failed');
  assert(back.speech<=23,'English speaker icon did not shrink');
 
  // Back Vietnamese only moves on a double tap and hold, never a single touch.
