@@ -3442,7 +3442,7 @@ button,input,select,textarea{font-family:var(--ui)}
       var l1 = el('label', 'flabel'); l1.appendChild(el('span', null, 'Tiếng Hàn')); var ko = el('textarea', 'field'); ko.rows = 2; ko.lang = 'ko'; ko.value = it.ko; ko.name = 'ko'; l1.appendChild(ko); f.appendChild(l1);
       var l2 = el('label', 'flabel'); l2.appendChild(el('span', null, 'Nghĩa tiếng Việt')); var vi = el('textarea', 'field'); vi.rows = 2; vi.value = it.vi; vi.name = 'vi'; l2.appendChild(vi); f.appendChild(l2);
       var enLabel=el('label','flabel');enLabel.appendChild(el('span',null,'Tiếng Anh'));var en=el('textarea','field');en.name='en';en.lang='en';en.rows=2;var enEntry=window.NHI_ENGLISH?window.NHI_ENGLISH.entry(it.id,it.vi,it.ko):{};en.value=enEntry.en||'';enLabel.appendChild(en);f.appendChild(enLabel);
-       var ipaLabel=el('label','flabel');ipaLabel.appendChild(el('span',null,'Phiên âm IPA tiếng Anh (có thể chỉnh sửa)'));var ipaInput=el('input','field');ipaInput.name='ipa';ipaInput.type='text';ipaInput.lang='en';ipaInput.autocomplete='off';ipaInput.value=(enEntry.ipa||'').replace(/^\\/,'');ipaLabel.appendChild(ipaInput);f.appendChild(ipaLabel);
+       var ipaLabel=el('label','flabel');ipaLabel.appendChild(el('span',null,'Phiên âm IPA tiếng Anh (có thể chỉnh sửa)'));var ipaInput=el('input','field');ipaInput.name='ipa';ipaInput.type='text';ipaInput.lang='en';ipaInput.autocomplete='off';ipaInput.value=String(enEntry.ipa||'').replace(/^\//,'').replace(/\/$/,'');ipaLabel.appendChild(ipaInput);f.appendChild(ipaLabel);
       var nl=el('label','flabel');nl.appendChild(el('span',null,'Ghi chú dưới nghĩa'));var notes=el('textarea','field');notes.name='note';notes.rows=3;notes.value=(val('note',it.id)||{}).text||it.note||'';nl.appendChild(notes);f.appendChild(nl);
       var nc=el('input');nc.type='hidden';nc.name='noteColor';nc.value=(val('note',it.id)||{}).color||'#dbeefe';f.appendChild(nc);
       vi.parentElement.after(nl);
@@ -3465,7 +3465,7 @@ button,input,select,textarea{font-family:var(--ui)}
         if(pairs.value===originalPairText&&(k!==it.ko||w!==it.vi))pairList=[[w,k]];
         if(pairList.some(function(p){return p.length!==2||!p[0]||!p[1]||!w.toLocaleLowerCase('vi').includes(p[0].toLocaleLowerCase('vi'))||!k.includes(p[1]);})){toast('Mỗi cặp cần đúng dạng Việt | Hàn và có trong nội dung thẻ.');return;}
         put('ed',it.id,{vi:w,ko:k,pairs:pairList.length?pairList:[[w,k]]});
-        if(window.NHI_ENGLISH && (en.value.trim() || enEntry.en))window.NHI_ENGLISH.saveEntry(it.id,it.vi,it.ko,Object.assign({},enEntry,{en:en.value.trim()||enEntry.en,ipa:ipaInput.value.trim().replace(/^\\/,'').replace(/\\$/,''),source:'manual',format:formatting?formatting():{}}));
+        if(window.NHI_ENGLISH && (en.value.trim() || enEntry.en))window.NHI_ENGLISH.saveEntry(it.id,it.vi,it.ko,Object.assign({},enEntry,{en:en.value.trim()||enEntry.en,ipa:ipaInput.value.trim().replace(/^\//,'').replace(/\/$/,''),source:'manual',format:formatting?formatting():{}}));
         put('note',it.id,{text:notes.value.trim(),color:nc.value});if(formatting)put('fmt',it.id,formatting()); applyEd(it.id);
         sess.editing = false; render(); toast('Đã lưu bản sửa.');
       });
