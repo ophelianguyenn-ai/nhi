@@ -13,7 +13,7 @@
     const overlay=document.createElement('div');
     overlay.id='nhiPlaneLayer';
     overlay.setAttribute('aria-hidden','true');
-    const svg=make('svg',{id:'nhiPlaneSky',viewBox:'0 0 1000 600',preserveAspectRatio:'none'});
+    const svg=make('svg',{id:'nhiPlaneSky',viewBox:'0 0 1000 600',preserveAspectRatio:'xMidYMid meet'});
     const pathD='M -110 385 C 35 267 120 507 253 393 C 321 333 257 245 211 312 C 173 369 325 485 449 376 C 487 341 488 286 451 246 C 411 200 411 150 469 144 C 514 139 536 170 541 209 C 556 164 585 134 626 152 C 687 182 650 253 607 288 C 557 332 528 357 541 370 C 634 391 738 199 840 126 C 920 71 1030 68 1130 26';
     const path=make('path',{d:pathD,fill:'none',stroke:'none'});
     const defs=make('defs');
@@ -49,10 +49,11 @@
       const follow=point(d-130);
       const sub=point(d-134);
       const followAngle=Math.atan2(follow.y-sub.y,follow.x-sub.x)*180/Math.PI;
+      const bannerScale=Math.min(2.25,Math.max(1,790/Math.max(320,window.innerWidth)));
       plane.setAttribute('transform','translate('+p.x+' '+p.y+') rotate('+angle+') scale(.65)');
       // Keep lettering readable, even when the plane makes a tight loop.
-      banner.setAttribute('transform','translate('+follow.x+' '+(follow.y+14)+') rotate('+Math.max(-13,Math.min(13,followAngle*.25))+')');
-      rope.setAttribute('d','M '+(p.x-30)+' '+p.y+' Q '+((p.x+follow.x)/2)+' '+((p.y+follow.y)/2+13)+' '+(follow.x+79)+' '+(follow.y+14));
+      banner.setAttribute('transform','translate('+follow.x+' '+(follow.y+14)+') rotate('+Math.max(-13,Math.min(13,followAngle*.25))+') scale('+bannerScale.toFixed(2)+')');
+      rope.setAttribute('d','M '+(p.x-30)+' '+p.y+' Q '+((p.x+follow.x)/2)+' '+((p.y+follow.y)/2+13)+' '+(follow.x+79*bannerScale)+' '+(follow.y+14));
       reveal.setAttribute('stroke-dasharray',Math.max(0,d)+' '+(total+30));
       Array.from(hearts.children).forEach((heart,i)=>{const threshold=.19+i*.108;heart.setAttribute('opacity',String(Math.max(0,Math.min(.9,(progress-threshold)*9))));});
       overlay.style.opacity=progress<.09?String(progress/.09):progress>.91?String((1-progress)/.09):'1';
@@ -70,7 +71,7 @@
       if(reduced){
         overlay.classList.add('nhi-plane-reduced');
         overlay.style.opacity='1';
-        banner.setAttribute('transform','translate(500 120)');
+        banner.setAttribute('transform','translate(500 120) scale('+Math.min(2.25,Math.max(1,790/Math.max(320,window.innerWidth))).toFixed(2)+')');
         plane.setAttribute('transform','translate(760 118) scale(.65)');
         rope.setAttribute('d','M 733 118 L 580 126');
         hearts.setAttribute('opacity','0');
