@@ -48,6 +48,16 @@ try{
  console.log('V8 FRONT INITIAL',JSON.stringify(original));
  assert(original.front&&original.first===original.first.toLocaleUpperCase('vi-VN'),'Vietnamese front first letter not uppercase');
  assert(original.center==='center'&&original.move==='vietnameseFront','Front text not centered or draggable');
+ // Centered front meaning also supports direct horizontal movement.
+ const moveFront=await page.evaluate(()=>{
+  const el=document.querySelector('#planBox .pfront>.prompt'),rect=el.getBoundingClientRect();
+  const x=rect.left+rect.width/2,y=rect.top+rect.height/2;
+  const event=(type,xx,yy)=>el.dispatchEvent(new PointerEvent(type,{bubbles:true,cancelable:true,pointerId:51,pointerType:'mouse',button:0,clientX:xx,clientY:yy}));
+  event('pointerdown',x,y);event('pointermove',x+32,y);event('pointerup',x+32,y);
+  return {move:el.style.getPropertyValue('--nhi-move-x'),align:getComputedStyle(el).textAlign};
+ });
+ console.log('V8 FRONT MOVEMENT',JSON.stringify(moveFront));
+ assert(moveFront.move!=='0px'&&moveFront.align==='center','Front meaning must move horizontally while preserving centered alignment');
  await page.click('#setBtn');
  for(const [k,v] of [['front','34'],['back','28'],['height','550']]){
   await page.waitForSelector('#nhiV8-'+k);
@@ -78,6 +88,28 @@ try{
  assert(back.font==='28px'&&back.movable==='vietnamese','Separate back Vietnamese font or moving key missing');
  assert(back.editCount===0&&back.english&&back.height>=550&&back.height<=720,'English edit removal or card height failed');
  assert(back.speech<=23,'English speaker icon did not shrink');
+
+ const englishMove=await page.evaluate(()=>{
+  const box=document.querySelector('#planBox .nhi-english-v5'),handle=box.querySelector('.nhi-en-head');
+  const b=handle.getBoundingClientRect(),x=b.left+b.width*.35,y=b.top+b.height*.40;
+  const send=(type,id,xx,yy)=>handle.dispatchEvent(new PointerEvent(type,{bubbles:true,cancelable:true,pointerId:id,pointerType:'touch',button:0,clientX:xx,clientY:yy}));
+  const base=box.style.getPropertyValue('--nhi-en-offset-y');
+  send('pointerdown',71,x,y);send('pointermove',71,x,y+35);send('pointerup',71,x,y+35);
+  const one=box.style.getPropertyValue('--nhi-en-offset-y');
+  send('pointerdown',72,x,y);send('pointermove',72,x,y+32);send('pointerup',72,x,y+32);
+  return {base,one,two:box.style.getPropertyValue('--nhi-en-offset-y')};
+ });
+ console.log('V8 ENGLISH DOUBLE-TAP',JSON.stringify(englishMove));
+ assert(englishMove.base===englishMove.one&&englishMove.two!==englishMove.one,
+  'English meaning frame must move only on double click/tap');
+ const toolbar=await page.evaluate(()=>({
+  iconWidths:[...document.querySelectorAll('#planBox .cicons>.iconbtn')].map(el=>Math.round(el.getBoundingClientRect().width)),
+  englishIcons:[...document.querySelectorAll('.nhi-en-head-actions button')].map(el=>Math.round(el.getBoundingClientRect().width))
+ }));
+ console.log('V8 EVEN ICONS',JSON.stringify(toolbar));
+ assert(toolbar.iconWidths.length>=4&&toolbar.iconWidths.every(x=>x===38),'Card toolbar icons must have equal widths');
+ assert(toolbar.englishIcons.length>=2&&toolbar.englishIcons.every(x=>x===34),'English icons must have equal widths');
+
 
  // Back Vietnamese only moves on a double tap and hold, never a single touch.
  const drag=await page.evaluate(()=>{
