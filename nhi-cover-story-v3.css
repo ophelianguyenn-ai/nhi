@@ -27,7 +27,7 @@
   filter:drop-shadow(0 8px 6px rgba(52,34,40,.16));
 }
 #cover .nhi-v3-boy{
-  position:absolute;right:-1%;top:1%;width:45%;height:97%;z-index:2;
+  position:absolute;right:12%;top:1%;width:45%;height:97%;z-index:2;
   opacity:0;pointer-events:none;
   transform-origin:48% 82%;
   will-change:transform,opacity;
@@ -125,7 +125,7 @@
   #cover.nhi-cover-v3-enabled #coverGo{min-height:47px;font-size:16px}
   #cover .nhi-v3-love-button{padding:8px 16px;font-size:13px}
   #cover .nhi-v3-girl{left:1%;width:68%}
-  #cover .nhi-v3-boy{right:-4%;width:47%}
+  #cover .nhi-v3-boy{right:8%;width:47%}
 }
 @media(max-width:360px),(max-height:615px){
   #cover.nhi-cover-v3-enabled #coverHero{height:clamp(188px,35vh,235px)!important}
