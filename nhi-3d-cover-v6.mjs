@@ -414,8 +414,8 @@ if(cover&&hero){
       setPhase('turn');
       const p=delta(beat.stop,beat.turn,t);
       luong.root.position.x=1.04;
-      luong.root.rotation.y=-1.06;
-      luong.head.rotation.y=lerp(-.33,-.60,p);
+      luong.root.rotation.y=-.84;
+      luong.head.rotation.y=lerp(-.26,-.37,p);
       luong.head.rotation.z=.13*p;
       luong.head.position.x=-.15*p;
       nhi.head.rotation.z=-.06*p;
@@ -423,13 +423,15 @@ if(cover&&hero){
     }else if(t<beat.kiss){
       setPhase('kiss');
       const p=delta(beat.turn,beat.kiss,t);
-      luong.root.position.x=lerp(1.04,.88,p);
-      luong.root.rotation.y=-1.10;
-      luong.head.rotation.y=-.65;
-      luong.head.rotation.z=.13+.20*p;
-      luong.head.position.x=-.15-.22*p;
+      luong.root.position.x=lerp(1.04,.70,p);
+      luong.root.rotation.y=-.84;
+      luong.head.rotation.y=-.37;
+      luong.head.rotation.z=.13+.15*p;
+      luong.head.position.x=-.15-.35*p;
       nhi.head.rotation.z=-.06-.055*p;
       nhi.head.rotation.y=.14+.08*p;
+      // Shift Nhi's peace-sign hand outward a little so her cheek remains visible.
+      nhi.rightArm.rotation.z=-.20*p;
       luong.smile.visible=false;luong.kissMouth.visible=true;
       if(!burstDone && p>.55){
         burstDone=true;burst('heart',heartBtn);
@@ -437,13 +439,14 @@ if(cover&&hero){
     }else if(t<beat.recover){
       setPhase('recover');
       const p=delta(beat.kiss,beat.recover,t);
-      luong.root.position.x=lerp(.88,1.06,p);
-      luong.root.rotation.y=-1.08;
-      luong.head.rotation.y=lerp(-.65,-.35,p);
-      luong.head.rotation.z=lerp(.33,.05,p);
-      luong.head.position.x=lerp(-.37,0,p);
+      luong.root.position.x=lerp(.70,1.06,p);
+      luong.root.rotation.y=lerp(-.84,-.86,p);
+      luong.head.rotation.y=lerp(-.37,-.34,p);
+      luong.head.rotation.z=lerp(.28,.05,p);
+      luong.head.position.x=lerp(-.50,0,p);
       nhi.head.rotation.z=lerp(-.115,-.045,p);
       nhi.head.rotation.y=lerp(.22,.20,p);
+      nhi.rightArm.rotation.z=-.20*(1-p);
       luong.smile.visible=true;luong.kissMouth.visible=false;
     }else{
       setPhase('couple');
