@@ -20,7 +20,8 @@ try{
  const before=await page.evaluate(()=>{
   const title=document.querySelector('#cover h1');
   const name=title.querySelector('em');
-  return {animation:getComputedStyle(title).animationName,
+  return {shade:document.documentElement.dataset.nhiCoverTitle,
+   animation:getComputedStyle(title).animationName,
    duration:getComputedStyle(title).animationDuration,
    filter:getComputedStyle(title).filter,
    color:getComputedStyle(title).color,
@@ -31,8 +32,9 @@ try{
  await new Promise(r=>setTimeout(r,2400));
  const after=await page.evaluate(()=>getComputedStyle(document.querySelector('#cover h1')).filter);
  console.log('V10 TITLE',JSON.stringify({...before,laterFilter:after}));
- fail(before.animation==='nhi-v10-title-breeze'&&before.duration==='9s','Title needs a subtle blue-green animation');
- fail(before.filter!=='none'&&before.filter!==after,'Hue should animate through blue and green');
+ fail(['blue','green','pink'].includes(before.shade),'Choose blue, green or pink on load');
+ fail(before.animation==='none'&&before.filter==='none'&&after==='none',
+  'Color must stay fixed with no continuous filter or animation');
  fail(before.text.includes('Nhi')&&before.text.includes('Learning Corner')&&before.portrait==='nhi-v8-gentle-sway','Keep existing title and swaying Nhi');
  await page.screenshot({path:'/tmp/nhi-v10-preview/cover-blue-green-desktop.png'});
  await page.close();
