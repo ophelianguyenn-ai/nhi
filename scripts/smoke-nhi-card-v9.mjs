@@ -31,7 +31,14 @@ async function cover(page,theme,view,photo){
    animation:getComputedStyle(image).animationName,
    highlight:sample(em),
    theme:document.documentElement.dataset.theme,
-   horizontalOverflow:document.documentElement.scrollWidth-innerWidth
+   horizontalOverflow:document.documentElement.scrollWidth-innerWidth,
+   button:(()=>{
+    const b=document.querySelector('#coverGo'),r=b.getBoundingClientRect(),css=getComputedStyle(b);
+    return {text:b.textContent,display:css.display,visibility:css.visibility,
+      opacity:css.opacity,background:css.backgroundColor,
+      x:r.x,y:r.y,w:r.width,h:r.height,coverHeight:innerHeight,
+      inViewport:r.bottom>0&&r.top<innerHeight};
+   })()
   };
  });
  console.log('V9 COVER '+theme+'/'+view,JSON.stringify(v));
