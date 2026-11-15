@@ -96,6 +96,8 @@ jobs:
           done
           cat /tmp/nhi-site-server.log
           exit 1
+      - name: Verify phone and laptop follow the same card over Firebase
+        run: node scripts/smoke-cross-device.mjs
       - name: Verify original half-body Nhi and all seven card improvements
         run: node scripts/smoke-nhi-card-v8.mjs
       - name: Verify V9 blue cover, centered meanings, compact pairs and comparison UI
@@ -120,8 +122,6 @@ jobs:
           retention-days: 7
       - name: Confirm Vietnamese to Korean flip is visible
         run: node scripts/smoke-cards.mjs
-      - name: Verify phone and laptop follow the same card over Firebase
-        run: node scripts/smoke-cross-device.mjs
       - name: Check mobile layout, rating animations and fireworks
         if: ${{ !cancelled() }}
         run: node scripts/smoke-ux-v3.mjs
