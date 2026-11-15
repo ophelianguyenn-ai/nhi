@@ -41,6 +41,19 @@
   transition:none!important;
   filter:none!important;
 }
+/* Override the earlier V9 night headline rule (higher specificity) too. */
+:root[data-theme="dark"] #cover.nhi-upper-v8 h1{
+  color:var(--nhi-cover-title-main,#c1eaff)!important;
+  animation:none!important;
+  transition:none!important;
+  filter:none!important;
+}
+:root[data-theme="dark"] #cover.nhi-upper-v8 h1 em{
+  color:var(--nhi-cover-title-accent,#91d9ff)!important;
+  animation:none!important;
+  transition:none!important;
+  filter:none!important;
+}
 
 /* The English card itself stays centered relative to Vietnamese/Korean.
    Only its INSIDE text becomes left-aligned, not the outer frame. */
