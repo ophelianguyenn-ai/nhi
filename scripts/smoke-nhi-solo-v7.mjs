@@ -46,7 +46,16 @@ try{
  const desktop=await browser.newPage();listen(desktop,'desktop');
  await desktop.setViewport({width:1366,height:768,deviceScaleFactor:1});
  await desktop.goto(url,{waitUntil:'domcontentloaded'});
- await desktop.waitForSelector('#coverHero .nhi-solo-art');
+ console.log('SOLO DIAGNOSTIC',JSON.stringify(await desktop.evaluate(()=>({
+  href:location.href,
+  title:document.title,
+  cover:!!document.getElementById('cover'),
+  hero:document.getElementById('coverHero')?.outerHTML?.slice(0,600),
+  imageCount:document.querySelectorAll('.nhi-solo-art').length,
+  source:document.documentElement.outerHTML.includes('nhi-solo-art'),
+  scripts:[...document.scripts].map(e=>e.getAttribute('src')).filter(Boolean).slice(-10)
+ }))));
+ await desktop.waitForSelector('#coverHero .nhi-solo-art',{timeout:8000});
  const d=await inspect(desktop);
  console.log('NHI SOLO DESKTOP',JSON.stringify(d));
  assert(d.solo&&!d.coverHidden&&d.sources.length===1,'Only Nhi should be displayed in the cover');
