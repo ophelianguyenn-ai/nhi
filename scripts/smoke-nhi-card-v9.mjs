@@ -32,6 +32,7 @@ async function cover(page,theme,view,photo){
    width:hero.getBoundingClientRect().width,height:hero.getBoundingClientRect().height,
    animation:getComputedStyle(image).animationName,
    highlight:sample(em),
+   titleShade:document.documentElement.dataset.nhiCoverTitle,
    theme:document.documentElement.dataset.theme,
    horizontalOverflow:document.documentElement.scrollWidth-innerWidth,
    button:(()=>{
@@ -48,8 +49,8 @@ async function cover(page,theme,view,photo){
  fail(v.animation==='nhi-v8-gentle-sway','Sway should not stop');
  fail(v.width<=(view==='phone'?300:323)&&v.width>=180,'Nhi size must be only slightly smaller');
  const rgb=(v.highlight.match(/\d+\.?\d*/g)||[]).map(Number);
- fail(rgb.length>=3&&rgb[2]>rgb[1]&&rgb[1]>rgb[0],
-  'Cover headline accent must be blue, not green, in '+theme+' theme');
+ fail(['blue','green','pink'].includes(v.titleShade)&&rgb.length>=3,
+  'Cover headline must use a valid fixed blue, green or pink shade in '+theme+' theme');
  fail(v.horizontalOverflow<=3,'Cover overflows '+view);
  fail(v.button.inViewport&&Number(v.button.opacity)>.95,'Study CTA must be visible after cover animation');
  await page.screenshot({path:'/tmp/nhi-v9-preview/'+photo});

@@ -1,25 +1,58 @@
 /* V10 — fresher title, left-aligned English contents, bright pastel-blue "Khó".
    Layered after V9; portrait sizing, seasonal garden and card layout unchanged. */
 
-/* Both words of the cover title drift gently from sea blue to spring green.
-   Colors stay readable in daylight and night themes. */
+/* Choose a single fresh cover color once at document load, not an animation.
+   The two words use coordinated shades of the same selected hue.
+   Keep accessible contrast in light and dark themes. */
+:root[data-nhi-cover-title="blue"]{
+  --nhi-cover-title-main:#227dac;
+  --nhi-cover-title-accent:#088eb8;
+}
+:root[data-nhi-cover-title="green"]{
+  --nhi-cover-title-main:#278359;
+  --nhi-cover-title-accent:#169b71;
+}
+:root[data-nhi-cover-title="pink"]{
+  --nhi-cover-title-main:#ad527f;
+  --nhi-cover-title-accent:#d36a9b;
+}
+:root[data-theme="dark"][data-nhi-cover-title="blue"]{
+  --nhi-cover-title-main:#c1eaff;
+  --nhi-cover-title-accent:#91d9ff;
+}
+:root[data-theme="dark"][data-nhi-cover-title="green"]{
+  --nhi-cover-title-main:#baefce;
+  --nhi-cover-title-accent:#92e0b9;
+}
+:root[data-theme="dark"][data-nhi-cover-title="pink"]{
+  --nhi-cover-title-main:#ffdaeb;
+  --nhi-cover-title-accent:#ffb3d8;
+}
 #cover.nhi-upper-v8 h1{
-  color:#247caa!important;
-  animation:nhi-v10-title-breeze 9s ease-in-out infinite!important;
-  will-change:filter;
+  color:var(--nhi-cover-title-main,#227dac)!important;
+  animation:none!important;
+  transition:none!important;
+  filter:none!important;
+  will-change:auto!important;
 }
 #cover.nhi-upper-v8 h1 em{
-  color:#138bb5!important;
+  color:var(--nhi-cover-title-accent,#088eb8)!important;
+  animation:none!important;
+  transition:none!important;
+  filter:none!important;
 }
-@keyframes nhi-v10-title-breeze{
-  0%,100%{filter:hue-rotate(0deg) brightness(1.06) saturate(1.16)}
-  50%{filter:hue-rotate(-67deg) brightness(1.11) saturate(1.08)}
-}
+/* Override the earlier V9 night headline rule (higher specificity) too. */
 :root[data-theme="dark"] #cover.nhi-upper-v8 h1{
-  color:#b5e7ff!important;
+  color:var(--nhi-cover-title-main,#c1eaff)!important;
+  animation:none!important;
+  transition:none!important;
+  filter:none!important;
 }
 :root[data-theme="dark"] #cover.nhi-upper-v8 h1 em{
-  color:#86d5fd!important;
+  color:var(--nhi-cover-title-accent,#91d9ff)!important;
+  animation:none!important;
+  transition:none!important;
+  filter:none!important;
 }
 
 /* The English card itself stays centered relative to Vietnamese/Korean.
