@@ -111,7 +111,7 @@ try{
  assert(toolbar.englishIcons.length>=2&&toolbar.englishIcons.every(x=>x===34),'English icons must have equal widths');
 
 
- // Back Vietnamese only moves on a double tap and hold, never a single touch.
+ // Back Vietnamese moves immediately on the first press-and-drag.
  const drag=await page.evaluate(()=>{
   const el=document.querySelector('#planBox .pfront>.vi-under'),r=el.getBoundingClientRect();
   const x=r.x+r.width/2,y=r.y+r.height/2;
@@ -122,8 +122,8 @@ try{
   fire('pointerdown',13,x,y);fire('pointermove',13,x+40,y);fire('pointerup',13,x+40,y);
   return {prior,afterOne,afterTwo:el.style.getPropertyValue('--nhi-move-x')};
  });
- console.log('V8 DOUBLE-TAP VI',JSON.stringify(drag));
- assert(drag.afterOne===drag.prior&&drag.afterTwo!=='0px'&&drag.afterTwo!==drag.afterOne,'Back Vietnamese should move only after second tap');
+ console.log('V8 FIRST-PRESS DRAG VI',JSON.stringify(drag));
+ assert(drag.afterOne!==drag.prior&&drag.afterOne!=='0px','Back Vietnamese should move on the first press-and-drag');
 
  // Editing IPA and English translation happens in the full card editor.
  await page.$eval('#planBox .cicons button[title*="Sửa thẻ"]',b=>b.click());
