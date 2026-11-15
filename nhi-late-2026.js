@@ -21,7 +21,7 @@ function setupEnglish(box){
   box.style.setProperty('--nhi-en-height',h>0?Math.round(h)+'px':'auto');
   box.style.setProperty('--nhi-en-offset-y',Math.round(y)+'px');
  };
- apply();let drag=null;
+ apply();let drag=null,lastTap=0,lastTapX=0,lastTapY=0;
  box.tabIndex=0;
  box.setAttribute('title','Kéo trực tiếp: mép phải để đổi chiều ngang; mép dưới để đổi chiều cao; nền tiêu đề để di chuyển lên xuống');
  const maxWidth=()=>Math.max(260,(box.closest('.pfront')?.clientWidth||box.parentElement.clientWidth)-24);
@@ -39,7 +39,14 @@ function setupEnglish(box){
   if(e.target.closest('button,a,input,textarea,select,label,[contenteditable],.nhi-en-word,.nhi-en-choice'))return;
   const mode=modeAt(e);
   if(!mode)return;
-  drag={id:e.pointerId,mode,x:e.clientX,y:e.clientY,width:box.getBoundingClientRect().width,
+   if(mode==='move'){
+    const now=performance.now();
+    const armed=now-lastTap<400&&Math.hypot(e.clientX-lastTapX,e.clientY-lastTapY)<36;
+    lastTap=now;lastTapX=e.clientX;lastTapY=e.clientY;
+    if(!armed)return;
+    lastTap=0;box.classList.add('nhi-doubletap-ready');
+   }
+   drag={id:e.pointerId,mode,x:e.clientX,y:e.clientY,width:box.getBoundingClientRect().width,
         height:box.getBoundingClientRect().height,offset:y,moved:false};
   box.classList.add('nhi-en-resizing');
   box.dataset.dragMode=mode;
@@ -60,7 +67,7 @@ function setupEnglish(box){
  });
  function finish(e){
   if(!drag||e.pointerId!==drag.id)return;
-  const active=drag;drag=null;box.classList.remove('nhi-en-resizing');delete box.dataset.dragMode;
+  const active=drag;drag=null;box.classList.remove('nhi-en-resizing','nhi-doubletap-ready');delete box.dataset.dragMode;
   if(active.moved){
    try{if(w>0)localStorage.setItem(STORE,String(Math.round(w)));
        if(h>0)localStorage.setItem(HEIGHT_KEY,String(Math.round(h)));
