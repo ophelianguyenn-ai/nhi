@@ -4194,7 +4194,7 @@ button,input,select,textarea{font-family:var(--ui)}
     }
     function init() {
       applyTheme(); paintIcons(document);
-      $('coverHero').innerHTML = '<img class="nhi-original" src="nhi-mascot.webp" alt="Nhi ôm hoa">';
+      // Preserve the single Nhi cover image already declared in the HTML.
       var face = girl('face').replace('viewBox="0 0 160 160"', 'viewBox="30 30 100 100"'); $('brandFace').innerHTML = '<img src="nhi-mascot.webp" alt="Nhi" width="64" height="64">'; $('aiFace').innerHTML = face;
       if (!$('cover').hidden) document.body.classList.add('modal-open');
       $('menuBtn').addEventListener('click', function () { menu($('menuList').hidden); });
