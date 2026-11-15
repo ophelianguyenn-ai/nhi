@@ -102,7 +102,7 @@ try{
    const box=window.NHI_ENGLISH.mount(holder,id,vi,ko);
    const label=box.querySelector('.nhi-en-ipa');
    return {english:en,hidden:label.hidden,reading:label.textContent,
-    alignment:getComputedStyle(label).textAlign};
+    alignment:getComputedStyle(label).textAlign,display:getComputedStyle(label).display};
   };
   const three=read('ipa-three-v10','Please check this carefully','pliːz tʃɛk ðɪs ˈkɛrfəli');
   const five=read('ipa-five-v10',"Please check the safety valves",'pliːz tʃɛk ðə ˈseɪfti vælvz');
@@ -122,7 +122,7 @@ try{
   const missing=read('ipa-composed-v10','Glimmer quartz petals','');
   const last=front.lastElementChild.querySelector('.nhi-en-ipa');
   for(let i=0;i<40&&last.hidden;i++)await new Promise(r=>setTimeout(r,25));
-  missing.hidden=last.hidden;missing.reading=last.textContent;
+  missing.hidden=last.hidden;missing.reading=last.textContent;missing.display=getComputedStyle(last).display;
   window.fetch=nativeFetch;
   host.remove();
   return {three,five,six,hyphen,missing};
@@ -130,6 +130,8 @@ try{
  console.log('V10 IPA POLICY',JSON.stringify(policy));
  fail(!policy.three.hidden&&!policy.five.hidden&&!policy.hyphen.hidden,'English phrases up to 5 words must show IPA');
  fail(policy.six.hidden&&policy.six.reading==='','Phrases of more than 5 words must hide IPA even when stored');
+ fail(policy.three.display==='block'&&policy.five.display==='block'&&policy.six.display==='none',
+  'Short IPA should occupy a separate line; long-phrase IPA must be invisible');
  fail(!policy.missing.hidden&&policy.missing.reading.split(' ').length>=3,'Missing short-phrase IPA must be composed from genuine word readings');
 
  const phoneContext=await browser.createBrowserContext();
