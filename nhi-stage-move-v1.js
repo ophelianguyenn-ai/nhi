@@ -14,6 +14,8 @@ try{
  }
 }catch(_e){}
 const clamp=(n,min,max)=>Math.min(max,Math.max(min,n));
+// Persist double-tap memory across card rerenders caused by text highlighting.
+const tapMemory={};
 function save(){try{localStorage.setItem(KEY,JSON.stringify(positions));}catch(_e){}}
 function install(el,key){
  if(el.dataset.nhiMovableReady)return;
@@ -26,7 +28,7 @@ function install(el,key){
  let active=null,suppress=false;
  // Double-tap/click the Vietnamese back meaning before dragging. Never arm on one tap.
  const twoTaps=key==='vietnamese';
- let lastTapAt=0,lastTapX=0,lastTapY=0;
+
  const apply=()=>{
    const v=positions[key];
    el.style.setProperty('--nhi-move-x',v.x+'px');
@@ -37,10 +39,11 @@ function install(el,key){
   if((e.pointerType==='mouse'&&e.button!==0) || e.target.closest('button,input,textarea,select,[contenteditable]'))return;
   if(twoTaps){
     const now=performance.now();
-    const doubleTap=now-lastTapAt<390&&Math.hypot(e.clientX-lastTapX,e.clientY-lastTapY)<32;
-    lastTapAt=now;lastTapX=e.clientX;lastTapY=e.clientY;
+    const last=tapMemory[key];
+    const doubleTap=!!last&&now-last.at<390&&Math.hypot(e.clientX-last.x,e.clientY-last.y)<32;
+    tapMemory[key]={at:now,x:e.clientX,y:e.clientY};
     if(!doubleTap)return;
-    lastTapAt=0;
+    delete tapMemory[key];
     el.classList.add('nhi-doubletap-ready');
     setTimeout(()=>el.classList.remove('nhi-doubletap-ready'),1400);
   }
