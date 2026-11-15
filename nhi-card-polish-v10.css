@@ -145,3 +145,26 @@ html body #planBox .pcard .pfront .nhi-english-v5>.nhi-en-head>.nhi-en-head-acti
   align-self:start!important;
   justify-self:end!important;
 }
+
+
+/* Readable bilingual stack: English expression first, IPA on its own line.
+   Explicit [hidden] wins, including for phrases exceeding five words. */
+html body #planBox .pcard .nhi-english-v5 .nhi-en-main>.nhi-en-translation,
+html body #planBox .pcard .nhi-english-v5 .nhi-en-main>.nhi-en-ipa:not([hidden]){
+  display:block!important;
+  box-sizing:border-box!important;
+  width:100%!important;
+  max-width:100%!important;
+  margin:0!important;
+  padding:0!important;
+  text-align:left!important;
+  white-space:normal!important;
+  overflow-wrap:anywhere!important;
+}
+html body #planBox .pcard .nhi-english-v5 .nhi-en-main>.nhi-en-ipa:not([hidden]){
+  margin-top:3px!important;
+  line-height:1.4!important;
+}
+html body #planBox .pcard .nhi-english-v5 .nhi-en-main>.nhi-en-ipa[hidden]{
+  display:none!important;
+}
