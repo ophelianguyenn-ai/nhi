@@ -1,11 +1,11 @@
 // Offline support: network-first for GitHub Pages and static assets.
 // Fall back to cache only when offline. Different cache key forces eviction of earlier stale CSS/JS.
-const CACHE = 'nhi-corner-v51-nov15-lifelike-meow';
+const CACHE = 'nhi-corner-v52-photo-kitten';
 const CORE = [
   'study-update-v6.js','study-update-v6.css','nhi-november-v15.js','nhi-november-v15.css',
   'nhi-late-2026.js','nhi-late-2026.css','nhi-romance-v1.js','nhi-romance-v1.css','nhi-luong-v1.svg','nhi-couple-gif-v1.js','nhi-couple-gif-v1.css',
   'nhi-romance-v2.js','nhi-romance-v2.css','nhi-controls-v3.css','nhi-bubble-effects-v3.css','nhi-luong-reference-v2.svg','nhi-luong-kiss-v2.svg','nhi-luong-demo-approved-v3.svg',
-  'nhi-luong-articulated-v4.svg','nhi-romance-art-v4.css','nhi-polish-20261115.css','nhi-stage-move-v1.js','nhi-refine-20261115.css','nhi-celebration-cat-v1.svg','nhi-final-tight-v1.css','nhi-kitten-lifelike-v2.svg','nhi-kitten-meow-v1.js','nhi-card-no-overlap-v1.js',
+  'nhi-luong-articulated-v4.svg','nhi-romance-art-v4.css','nhi-polish-20261115.css','nhi-stage-move-v1.js','nhi-refine-20261115.css','nhi-celebration-cat-v1.svg','nhi-final-tight-v1.css','nhi-kitten-lifelike-v2.svg','nhi-kitten-meow-v1.js','nhi-card-no-overlap-v1.js','nhi-kitten-photo-v3.svg',
   './','index.html','manifest.webmanifest','qrcode.js','lessons.json',
   'icon-192.png','icon-512.png','refresh-v9.css','study-enhancements-v13.css',
   'hanja-v9.js','hanja-extra-v12.js','nhi-avatar.png','nhi-mascot.webp',
