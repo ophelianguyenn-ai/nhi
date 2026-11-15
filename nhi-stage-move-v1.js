@@ -3,7 +3,7 @@
 (function(){
 'use strict';
 const KEY='nhi-stage-drag-layout-v1';
-const positions={hanja:{x:0,y:0},korean:{x:0,y:0},vietnamese:{x:0,y:0},note:{x:0,y:0}};
+const positions={hanja:{x:0,y:0},korean:{x:0,y:0},vietnamese:{x:0,y:0},vietnameseFront:{x:0,y:0},note:{x:0,y:0}};
 try{
  const saved=JSON.parse(localStorage.getItem(KEY)||'{}');
  for(const k of Object.keys(positions)){
@@ -24,6 +24,9 @@ function install(el,key){
  el.tabIndex=0;
  el.title=el.title ? el.title+' · Kéo để di chuyển' : 'Giữ và kéo trực tiếp để di chuyển; Alt + mũi tên để tinh chỉnh';
  let active=null,suppress=false;
+ // Double-tap/click the Vietnamese back meaning before dragging. Never arm on one tap.
+ const twoTaps=key==='vietnamese';
+ let lastTapAt=0,lastTapX=0,lastTapY=0;
  const apply=()=>{
    const v=positions[key];
    el.style.setProperty('--nhi-move-x',v.x+'px');
@@ -31,7 +34,16 @@ function install(el,key){
  };
  apply();
  el.addEventListener('pointerdown',e=>{
-  if(e.button!==0 || e.target.closest('button,input,textarea,select,[contenteditable]'))return;
+  if((e.pointerType==='mouse'&&e.button!==0) || e.target.closest('button,input,textarea,select,[contenteditable]'))return;
+  if(twoTaps){
+    const now=performance.now();
+    const doubleTap=now-lastTapAt<390&&Math.hypot(e.clientX-lastTapX,e.clientY-lastTapY)<32;
+    lastTapAt=now;lastTapX=e.clientX;lastTapY=e.clientY;
+    if(!doubleTap)return;
+    lastTapAt=0;
+    el.classList.add('nhi-doubletap-ready');
+    setTimeout(()=>el.classList.remove('nhi-doubletap-ready'),1400);
+  }
   const card=el.closest('.pcard');
   if(!card || !card.isConnected)return;
   const rect=el.getBoundingClientRect();
@@ -49,7 +61,7 @@ function install(el,key){
   const box=container?.getBoundingClientRect();
   const xMax=box?Math.min(120,Math.max(0,(box.width-active.rect.width)/2-8)):110;
   positions[key].x=clamp(Math.round(active.x+dx),-xMax,xMax);
-  positions[key].y=clamp(Math.round(active.y+dy),-80,100);
+  positions[key].y=key==='vietnameseFront'?0:clamp(Math.round(active.y+dy),-80,100);
   el.classList.add('nhi-is-moving');
   apply();e.preventDefault();e.stopPropagation();
  },{passive:false});
@@ -58,6 +70,7 @@ function install(el,key){
   suppress=active.moved;
   active=null;el.classList.remove('nhi-is-moving');
   try{el.releasePointerCapture(e.pointerId);}catch(_e){}
+  el.classList.remove('nhi-doubletap-ready');
   if(suppress){
    save();
    setTimeout(()=>{suppress=false;},100);
@@ -75,7 +88,7 @@ function install(el,key){
   const delta=e.shiftKey?20:6;
   const p=positions[key];
   p.x=clamp(p.x+(e.key==='ArrowLeft'?-delta:e.key==='ArrowRight'?delta:0),-110,110);
-  p.y=clamp(p.y+(e.key==='ArrowUp'?-delta:e.key==='ArrowDown'?delta:0),-80,100);
+  p.y=key==='vietnameseFront'?0:clamp(p.y+(e.key==='ArrowUp'?-delta:e.key==='ArrowDown'?delta:0),-80,100);
   apply();save();
  });
 }
@@ -83,6 +96,7 @@ function update(){
  document.querySelectorAll('#planBox .pcard .nhi-hanja-lookup').forEach(el=>install(el,'hanja'));
  document.querySelectorAll('#planBox .pcard .nhi-ko-line>.answer.ko').forEach(el=>install(el,'korean'));
  document.querySelectorAll('#planBox .pcard .pfront>.vi-under').forEach(el=>install(el,'vietnamese'));
+ document.querySelectorAll('#planBox .pcard .pfront>.prompt').forEach(el=>install(el,'vietnameseFront'));
  document.querySelectorAll('#planBox .pcard .nhi-card-note').forEach(el=>install(el,'note'));
 }
 function init(){
