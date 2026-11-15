@@ -158,6 +158,9 @@ try{
   return {alignment:getComputedStyle(box.querySelector('.nhi-en-translation')).textAlign,
    ipaAlignment:getComputedStyle(box.querySelector('.nhi-en-ipa')).textAlign,
    separated:main.right<=actions.left+1,
+   mainRight:main.right,actionsLeft:actions.left,
+   display:getComputedStyle(box.querySelector('.nhi-en-head')).display,
+   grid:getComputedStyle(box.querySelector('.nhi-en-head')).gridTemplateColumns,
    centers:Math.abs((b.x+b.width/2)-(vi.x+vi.width/2)),
    scrollWidth:document.documentElement.scrollWidth,viewport:innerWidth};
  });
