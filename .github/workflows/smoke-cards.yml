@@ -16,6 +16,10 @@ on:
       - 'luong-nhi-goc.gif'
       - 'nhi-cover-gif-player-v4.js'
       - 'nhi-cover-gif-player-v4.css'
+      - 'nhi-romantic-cover-v5-1.js'
+      - 'nhi-romantic-cover-v5-1.css'
+      - 'nhi-luong-hands-at-sides-v5.svg'
+      - 'scripts/smoke-romantic-v5-1.mjs'
       - 'study-update-v6.js'
       - 'study-update-v6.css'
       - 'recorded-voices-v11.js'
@@ -71,8 +75,8 @@ jobs:
           done
           cat /tmp/nhi-site-server.log
           exit 1
-      - name: Verify original 9-frame Lương/Nhi GIF, airplane and mobile
-        run: node scripts/smoke-cover-v4.mjs
+      - name: Verify romantic two-dimensional 6-second Lương/Nhi animation, airplane and mobile
+        run: node scripts/smoke-romantic-v5-1.mjs
       - name: Confirm Vietnamese to Korean flip is visible
         run: node scripts/smoke-cards.mjs
       - name: Check mobile layout, rating animations and fireworks

@@ -41,6 +41,7 @@ jobs:
             nhi-luong-reference-v2.svg nhi-luong-kiss-v2.svg nhi-luong-demo-approved-v3.svg
             nhi-cover-girl-rig-v3.svg nhi-cover-airplane-v3.js nhi-cover-story-v3.js nhi-cover-story-v3.css
             nhi-cover-gif-player-v4.js nhi-cover-gif-player-v4.css luong-nhi-goc.gif
+            nhi-romantic-cover-v5-1.js nhi-romantic-cover-v5-1.css nhi-luong-hands-at-sides-v5.svg
             nhi-luong-articulated-v4.svg nhi-romance-art-v4.css nhi-polish-20261115.css nhi-stage-move-v1.js nhi-refine-20261115.css nhi-celebration-cat-v1.svg nhi-final-tight-v1.css nhi-kitten-lifelike-v2.svg nhi-kitten-meow-v1.js nhi-card-no-overlap-v1.js nhi-kitten-photo-v3.svg
             index.html nhi-neck-options.html sw.js manifest.webmanifest
             lessons.json technical-images.json audio-manifest.json
@@ -86,6 +87,7 @@ jobs:
           node --check _site/nhi-cover-airplane-v3.js
           node --check _site/nhi-cover-story-v3.js
           node --check _site/nhi-cover-gif-player-v4.js
+          node --check _site/nhi-romantic-cover-v5-1.js
           test -s _site/nhi-cover-girl-rig-v3.svg
           test -s _site/nhi-luong-articulated-v4.svg
           test -s _site/luong-nhi-goc.gif
@@ -93,7 +95,10 @@ jobs:
           for i in 00 01 02 03 04 05 06 07 08; do
             test -s "_site/assets/cover-gif/frame-${i}.webp"
           done
-          grep -q 'nhi-cover-gif-player-v4.js' _site/index.html
+          test -s _site/nhi-romantic-cover-v5-1.css
+          test -s _site/nhi-luong-hands-at-sides-v5.svg
+          grep -q 'nhi-romantic-cover-v5-1.js' _site/index.html
+          grep -q 'nhi-romantic-cover-v5-1.css' _site/index.html
           grep -q 'nhi-cover-airplane-v3.js' _site/index.html
           echo "Interactive Lương/Nhi cover assets verified."
 
