@@ -294,7 +294,7 @@ if(cover&&hero){
   const overlay=make('div','nhi-three-bursts');
   overlay.setAttribute('aria-hidden','true');stage.append(overlay);
   let renderer,scene,camera,nhi,luong,airplane,button,live,resizeObs,visibilityObs,raf=0;
-  let ready=false,state='LOADING',phase='idle',begin=0,frameAt=0,elapsedMs=0,playCount=0,burstDone=false;
+  let ready=false,state='LOADING',phase='idle',begin=0,frameAt=0,elapsedMs=0,playCount=0,burstDone=false,kissSeen=false,lastKissPose=null;
   let error=null,lastWidth=0,lastHeight=0;
   const lerp=THREE.MathUtils.lerp;
   const smooth=p=>{p=THREE.MathUtils.clamp(p,0,1);return p*p*(3-2*p);};
@@ -347,7 +347,7 @@ if(cover&&hero){
     }
   }
   function reset(){
-    elapsedMs=0;burstDone=false;overlay.replaceChildren();
+    elapsedMs=0;burstDone=false;kissSeen=false;lastKissPose=null;overlay.replaceChildren();
     if(!luong)return;
     luong.root.visible=false;
     luong.root.position.set(3.75,0,-2.7);
@@ -436,6 +436,7 @@ if(cover&&hero){
       nhi.rightArm.rotation.z=-.25*p;
       nhi.rightArm.position.y=2.62-1.05*p;
       luong.smile.visible=false;luong.kissMouth.visible=true;
+      kissSeen=true;lastKissPose={headYaw:luong.head.rotation.y,bodyYaw:luong.root.rotation.y};
       if(!burstDone && p>.55){
         burstDone=true;burst('heart',heartBtn);
       }
@@ -578,7 +579,7 @@ if(cover&&hero){
       luongVisible:!!luong?.root?.visible,
       luongBodyYaw:luong?.root?.rotation?.y??null,
       luongHeadYaw:luong?.head?.rotation?.y??null,
-      luongArmPose:'both-at-sides',
+      luongArmPose:'both-at-sides',kissSeen,lastKissPose,
       airplaneRunning:!!airplane?.running,
       error
     }),
