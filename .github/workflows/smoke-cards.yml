@@ -120,6 +120,8 @@ jobs:
           retention-days: 7
       - name: Confirm Vietnamese to Korean flip is visible
         run: node scripts/smoke-cards.mjs
+      - name: Verify phone and laptop follow the same card over Firebase
+        run: node scripts/smoke-cross-device.mjs
       - name: Check mobile layout, rating animations and fireworks
         if: ${{ !cancelled() }}
         run: node scripts/smoke-ux-v3.mjs
