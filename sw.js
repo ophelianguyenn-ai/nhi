@@ -1,6 +1,6 @@
 // Offline support: network-first for GitHub Pages and static assets.
 // Fall back to cache only when offline. Different cache key forces eviction of earlier stale CSS/JS.
-const CACHE = 'nhi-corner-v56-romantic-2d-v51';
+const CACHE = 'nhi-corner-v57-exact-demo-pixels-v52';
 const CORE = [
   'study-update-v6.js','study-update-v6.css','nhi-november-v15.js','nhi-november-v15.css',
   'nhi-late-2026.js','nhi-late-2026.css','nhi-romance-v1.js','nhi-romance-v1.css','nhi-luong-v1.svg','nhi-couple-gif-v1.js','nhi-couple-gif-v1.css',
@@ -8,6 +8,13 @@ const CORE = [
   'nhi-cover-girl-rig-v3.svg','nhi-cover-airplane-v3.js','nhi-cover-story-v3.js','nhi-cover-story-v3.css',
   'nhi-cover-gif-player-v4.js','nhi-cover-gif-player-v4.css','luong-nhi-goc.gif',
   'nhi-romantic-cover-v5-1.js','nhi-romantic-cover-v5-1.css','nhi-luong-hands-at-sides-v5.svg',
+  'nhi-demo-pixel-cover-v5-2.js','nhi-demo-pixel-cover-v5-2.css',
+  'assets/romantic-demo/nhi-demo-original-pixels.png',
+  'assets/romantic-demo/luong-demo-original-pixels.png',
+  'assets/romantic-demo/luong-demo-head-v52.png',
+  'assets/romantic-demo/luong-demo-torso-v52.png',
+  'assets/romantic-demo/luong-demo-leg-left-v52.png',
+  'assets/romantic-demo/luong-demo-leg-right-v52.png',
   'assets/cover-gif/manifest.json',
   'assets/cover-gif/frame-00.webp','assets/cover-gif/frame-01.webp','assets/cover-gif/frame-02.webp','assets/cover-gif/frame-03.webp','assets/cover-gif/frame-04.webp','assets/cover-gif/frame-05.webp','assets/cover-gif/frame-06.webp','assets/cover-gif/frame-07.webp','assets/cover-gif/frame-08.webp',
   'nhi-luong-articulated-v4.svg','nhi-romance-art-v4.css','nhi-polish-20261115.css','nhi-stage-move-v1.js','nhi-refine-20261115.css','nhi-celebration-cat-v1.svg','nhi-final-tight-v1.css','nhi-kitten-lifelike-v2.svg','nhi-kitten-meow-v1.js','nhi-card-no-overlap-v1.js','nhi-kitten-photo-v3.svg',

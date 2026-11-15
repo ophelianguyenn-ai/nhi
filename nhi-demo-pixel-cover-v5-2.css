@@ -1,0 +1,118 @@
+/* V5.2: use the EXACT colored pixels of the user's approved generated demo.
+   No replacement SVG character drawings or low-resolution GIF frames.
+   Only transparent alpha silhouettes were cut from the source image.
+   Full source-pixel layers at rest; Lương head and two legs animate independently. */
+#cover.nhi-cover-demo-v52-enabled #coverHero{
+  position:relative!important;overflow:visible!important;isolation:isolate;
+}
+#cover.nhi-cover-demo-v52-enabled #nhiCoupleStage{
+  position:relative;width:100%;height:100%;overflow:visible;
+}
+#cover.nhi-cover-demo-v52-enabled .nhi-demo-girl,
+#cover.nhi-cover-demo-v52-enabled .nhi-demo-boy{
+  top:0;right:auto;bottom:auto;min-width:0;
+  box-sizing:border-box;
+  transform-origin:50% 85%;
+  filter:drop-shadow(0 6px 5px #563a3c29);
+}
+#cover.nhi-cover-demo-v52-enabled .nhi-demo-girl>img.nhi-demo-layer,
+#cover.nhi-cover-demo-v52-enabled .nhi-demo-boy>img.nhi-demo-part{
+  position:absolute;inset:0;display:block;width:100%;height:100%;
+  object-fit:fill;pointer-events:none;user-select:none;
+  image-rendering:auto;backface-visibility:hidden;
+}
+#cover.nhi-cover-demo-v52-enabled .nhi-demo-boy>img.nhi-boy-head{
+  z-index:4;transform-origin:47% 31%;will-change:transform;
+}
+#cover.nhi-cover-demo-v52-enabled .nhi-demo-boy>img.nhi-boy-torso{
+  z-index:3;
+}
+#cover.nhi-cover-demo-v52-enabled .nhi-demo-boy>img.nhi-boy-leg-left{
+  z-index:1;transform-origin:32% 62%;will-change:transform;
+}
+#cover.nhi-cover-demo-v52-enabled .nhi-demo-boy>img.nhi-boy-leg-right{
+  z-index:2;transform-origin:70% 62%;will-change:transform;
+}
+/* Keep the original screenshot pixels in the resting pose. Sway as a unit
+   so no unpainted skin is exposed; head and legs can move in the story. */
+#cover.nhi-cover-demo-v52-enabled .nhi-demo-girl{
+  animation:nhi-demo-girl-sway 3.5s ease-in-out infinite alternate;
+}
+@keyframes nhi-demo-girl-sway{
+  0%{transform:rotate(-.85deg) translateY(0)}
+  100%{transform:rotate(1.05deg) translateY(-2px)}
+}
+/* Soft independent 2D gait in the *original* artwork legs. */
+#cover.nhi-cover-demo-v52-enabled .nhi-v51-stage[data-phase=walk] img.nhi-boy-leg-left{
+  animation:nhi-demo-leg-left .62s ease-in-out infinite;
+}
+#cover.nhi-cover-demo-v52-enabled .nhi-v51-stage[data-phase=walk] img.nhi-boy-leg-right{
+  animation:nhi-demo-leg-right .62s ease-in-out infinite;
+}
+@keyframes nhi-demo-leg-left{0%,100%{transform:rotate(-5.2deg)}50%{transform:rotate(5.2deg)}}
+@keyframes nhi-demo-leg-right{0%,100%{transform:rotate(5.2deg)}50%{transform:rotate(-5.2deg)}}
+/* Lương turns his own head to Nhi and leans gently for the cheek kiss.
+   Parent moves left to contact Nhi. */
+#cover.nhi-cover-demo-v52-enabled .nhi-v51-stage[data-phase=approach] img.nhi-boy-head{
+  transform:rotate(-5deg) translate(-3px,-1px);
+}
+#cover.nhi-cover-demo-v52-enabled .nhi-v51-stage[data-phase=kiss] img.nhi-boy-head{
+  transform:rotate(-12deg) translate(-8px,-2px);
+}
+#cover.nhi-cover-demo-v52-enabled .nhi-v51-stage[data-phase=kiss] .nhi-demo-girl{
+  animation:nhi-demo-girl-kiss .85s ease-in-out both;
+}
+@keyframes nhi-demo-girl-kiss{to{transform:rotate(2.4deg)}}
+/* Choice A: couple stands close and gently tilts heads toward one another. */
+#cover.nhi-cover-demo-v52-enabled .nhi-v51-stage[data-phase=couple] img.nhi-boy-head{
+  animation:nhi-demo-head-together 4.1s ease-in-out infinite alternate;
+}
+@keyframes nhi-demo-head-together{
+  0%{transform:rotate(-2deg)}
+  100%{transform:rotate(-4.1deg) translate(-1px,0)}
+}
+#cover.nhi-cover-demo-v52-enabled .nhi-v51-stage[data-phase=couple] .nhi-demo-girl{
+  animation:nhi-demo-girl-couple 3.5s ease-in-out infinite alternate;
+}
+@keyframes nhi-demo-girl-couple{
+  0%{transform:rotate(.35deg)}
+  100%{transform:rotate(1.8deg) translateY(-1px)}
+}
+/* Exact pink hairclips are in screenshot, hotspot must follow Nhi sprite. */
+#cover.nhi-cover-demo-v52-enabled .nhi-demo-hairclip{
+  position:absolute;z-index:8;
+  left:31%;top:10%;width:23%;height:14%;
+  min-width:44px;min-height:44px;
+  padding:0;border:0!important;border-radius:45%;
+  background:transparent!important;cursor:pointer;pointer-events:auto;
+  touch-action:manipulation;
+}
+#cover.nhi-cover-demo-v52-enabled .nhi-demo-hairclip:hover{
+  box-shadow:0 0 15px 3px #ffc1d399!important;
+}
+#cover.nhi-cover-demo-v52-enabled .nhi-demo-hairclip:focus-visible{
+  outline:3px dashed #e06a9e;outline-offset:2px;
+}
+#cover.nhi-cover-demo-v52-enabled .nhi-v51-bouquet-hotspot{
+  left:44%;top:34%;width:33%;height:23%;
+}
+#cover.nhi-cover-demo-v52-enabled .nhi-v51-bouquet-hotspot:focus-visible{
+  outline:3px dashed #de7d92;
+}
+/* Keep the source pixels unaffected by blend-mode background decorations. */
+#cover.nhi-cover-demo-v52-enabled .nhi-v51-romance-light{mix-blend-mode:soft-light}
+/* No horizontal overflow at mobile sizes. */
+@media(max-width:660px){
+  #cover.nhi-cover-demo-v52-enabled #coverHero{
+    height:clamp(210px,39vh,330px)!important;
+  }
+  #cover.nhi-cover-demo-v52-enabled .nhi-demo-hairclip{
+    min-width:44px;min-height:44px;
+  }
+}
+@media(prefers-reduced-motion:reduce){
+  #cover.nhi-cover-demo-v52-enabled .nhi-demo-girl,
+  #cover.nhi-cover-demo-v52-enabled .nhi-demo-boy img{
+    animation:none!important;transition:none!important;
+  }
+}
