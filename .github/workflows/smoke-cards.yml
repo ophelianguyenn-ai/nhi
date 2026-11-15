@@ -11,6 +11,11 @@ on:
       - 'nhi-cover-girl-rig-v3.svg'
       - 'nhi-luong-articulated-v4.svg'
       - 'scripts/smoke-cover-v3.mjs'
+      - 'scripts/smoke-cover-v4.mjs'
+      - 'scripts/build_cover_gif_frames.py'
+      - 'luong-nhi-goc.gif'
+      - 'nhi-cover-gif-player-v4.js'
+      - 'nhi-cover-gif-player-v4.css'
       - 'study-update-v6.js'
       - 'study-update-v6.css'
       - 'recorded-voices-v11.js'
@@ -51,6 +56,11 @@ jobs:
           node-version: '22'
       - name: Install headless Chrome automation
         run: npm install --no-save --no-package-lock puppeteer-core@24
+      - name: Extract nine original GIF frames for browser tests
+        run: |
+          python3 -m pip install --user 'Pillow>=10,<13'
+          python3 scripts/build_cover_gif_frames.py
+
       - name: Start local static site
         run: |
           if [ ! -f english.json ]; then printf '{"version":1,"cards":{}}\n' > english.json; fi
@@ -61,8 +71,8 @@ jobs:
           done
           cat /tmp/nhi-site-server.log
           exit 1
-      - name: Verify interactive Lương/Nhi cover, airplane and mobile
-        run: node scripts/smoke-cover-v3.mjs
+      - name: Verify original 9-frame Lương/Nhi GIF, airplane and mobile
+        run: node scripts/smoke-cover-v4.mjs
       - name: Confirm Vietnamese to Korean flip is visible
         run: node scripts/smoke-cards.mjs
       - name: Check mobile layout, rating animations and fireworks
