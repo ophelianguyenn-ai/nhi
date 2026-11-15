@@ -65,24 +65,3 @@
   outline:3px solid var(--nhi-cover-ui-ink,#1a719e)!important;
   outline-offset:3px;
 }
-
-/* A delicate border around the cover's content follows the same palette,
-   without obscuring the garden or adding a solid panel. */
-#cover.nhi-upper-v8 .cover-in::after{
-  content:"";
-  position:absolute;
-  inset:-8px -14px;
-  pointer-events:none;
-  border:1px solid var(--nhi-cover-ui-border,#86c3e3);
-  border-radius:28px;
-  opacity:.54;
-  background:transparent;
-  z-index:-1;
-}
-@media(max-width:660px){
-  #cover.nhi-upper-v8 .cover-in::after{
-    inset:-5px -5px;
-    border-radius:22px;
-    opacity:.48;
-  }
-}
