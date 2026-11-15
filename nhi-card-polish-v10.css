@@ -41,6 +41,12 @@
   transition:none!important;
   filter:none!important;
 }
+/* The cover title is already weight 900. Add a very subtle stroke
+   so both lines look slightly fuller without changing layout or palette. */
+#cover.nhi-upper-v8 h1,
+#cover.nhi-upper-v8 h1 em{
+  -webkit-text-stroke:.35px currentColor;
+}
 /* Override the earlier V9 night headline rule (higher specificity) too. */
 :root[data-theme="dark"] #cover.nhi-upper-v8 h1{
   color:var(--nhi-cover-title-main,#c1eaff)!important;
