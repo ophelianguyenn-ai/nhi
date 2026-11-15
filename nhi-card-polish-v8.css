@@ -299,3 +299,12 @@ html body #planBox .pcard .pfront>.vi-under[data-nhi-movable]{
      complete offset, so disable it to avoid moving twice. */
   translate:none!important;
 }
+
+/* Final visual review: separate the swaying girl from the title on wide screens. */
+#cover.nhi-upper-v8 #coverHero{margin:0 auto 12px!important}
+@media(max-width:660px){#cover.nhi-upper-v8 #coverHero{margin-bottom:6px!important}}
+html body #planBox .pcard .nhi-forgot-bubble{
+  background:#edf3f9!important;color:#253c52!important;
+  border-color:#aabfcf!important;font-weight:600!important;
+}
+html body #planBox .pcard .nhi-forgot-bubble::after{background:#edf3f9;border-color:#aabfcf}
