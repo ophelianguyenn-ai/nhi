@@ -25,6 +25,8 @@ on:
       - 'nhi-demo-pixel-cover-v5-2.css'
       - 'nhi-3d-cover-v6.mjs'
       - 'nhi-3d-cover-v6.css'
+      - 'nhi-solo-cover-v7.css'
+      - 'scripts/smoke-nhi-solo-v7.mjs'
       - 'scripts/smoke-three-v6.mjs'
       - 'assets/romantic-demo/**'
       - 'study-update-v6.js'
@@ -66,16 +68,11 @@ jobs:
         with:
           node-version: '22'
       - name: Install headless Chrome automation
-        run: npm install --no-save --no-package-lock puppeteer-core@24 three@0.160.1
+        run: npm install --no-save --no-package-lock puppeteer-core@24
       - name: Extract nine original GIF frames for browser tests
         run: |
           python3 -m pip install --user 'Pillow>=10,<13'
           python3 scripts/build_cover_gif_frames.py
-
-      - name: Prepare pinned WebGL Three.js module
-        run: |
-          mkdir -p vendor
-          cp node_modules/three/build/three.module.js vendor/three.module.js
 
       - name: Start local static site
         run: |
@@ -87,14 +84,14 @@ jobs:
           done
           cat /tmp/nhi-site-server.log
           exit 1
-      - name: Verify real Three.js 3D characters, face orientation, 6-second kiss and mobile
-        run: node scripts/smoke-three-v6.mjs
+      - name: Verify restored solo Nhi 2D cover on desktop and phone
+        run: node scripts/smoke-nhi-solo-v7.mjs
       - name: Save desktop and phone 3D preview screenshots
         if: ${{ always() }}
         uses: actions/upload-artifact@v4
         with:
-          name: romantic-cover-3d-preview
-          path: /tmp/nhi-3d-preview/*.png
+          name: solo-nhi-cover-preview
+          path: /tmp/nhi-solo-preview/*.png
           if-no-files-found: ignore
           retention-days: 7
       - name: Confirm Vietnamese to Korean flip is visible
