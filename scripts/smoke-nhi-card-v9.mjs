@@ -143,7 +143,8 @@ try{
   'Hán–Việt label must move up by four pixels');
 
  // Check the actual phone editing layout without touching the stored lesson.
- const phone=await browser.newPage();
+ const phoneContext=await browser.createBrowserContext();
+ const phone=await phoneContext.newPage();
  phone.on('pageerror',error=>problems.push('mobile study: '+String(error)));
  await phone.setViewport({width:390,height:844,isMobile:true,hasTouch:true,deviceScaleFactor:1});
  await phone.evaluateOnNewDocument(()=>{
@@ -180,6 +181,7 @@ try{
   'Pair editor is clipped on phone');
  await phone.screenshot({path:'/tmp/nhi-v9-preview/card-editor-phone.png'});
  await phone.close();
+ await phoneContext.close();
  await page.close();
 
  if(problems.length)throw Error('Browser JS errors: '+problems.join(' | '));
