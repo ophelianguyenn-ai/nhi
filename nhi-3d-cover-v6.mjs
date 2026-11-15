@@ -341,7 +341,9 @@ if(cover&&hero){
     luong.root.position.set(3.75,0,-2.7);
     luong.root.rotation.y=-.65;luong.root.scale.setScalar(.48);
     luong.neutral();
+    luong.body.rotation.z=0;
     luong.head.rotation.set(0,0,0);
+    luong.head.position.x=0;
     nhi.head.rotation.set(0,0,0);
     setPhase('idle');transition('NHI_IDLE');
   }
@@ -350,6 +352,7 @@ if(cover&&hero){
     if(!ready||cover.hidden||!['NHI_IDLE','COUPLE_IDLE'].includes(state))return false;
     reset();playCount++;
     if(reduced()){
+      transition('PLAYING');
       elapsedMs=TOTAL;applyStory(TOTAL);transition('COUPLE_IDLE');
       report('Lương đứng cạnh Nhi; đã bỏ qua chuyển động theo thiết lập thiết bị.');
       return true;
@@ -520,6 +523,18 @@ if(cover&&hero){
       bouquetBtn.addEventListener('click',(e)=>{e.preventDefault();e.stopPropagation();burst('petal',bouquetBtn);});
       heartBtn.addEventListener('click',(e)=>{e.preventDefault();e.stopPropagation();burst('heart',heartBtn);});
       airplane=window.NhiCoverAirplaneV3?.create(cover)||null;
+      const ambient=make('div','nhi-three-ambient');
+      ambient.setAttribute('aria-hidden','true');
+      for(let i=0;i<10;i++){
+        const dot=make('span');
+        dot.textContent=i%2?'✿':'❀';
+        dot.style.setProperty('--x',(3+i*9.7)%95+'%');
+        dot.style.setProperty('--size',11+i%3*3+'px');
+        dot.style.setProperty('--speed',(11+i%4*2)+'s');
+        dot.style.setProperty('--offset',(-i*1.6)+'s');
+        ambient.append(dot);
+      }
+      cover.append(ambient);
       cover.classList.add('nhi-cover-3d-v6-enabled');
       resize();ready=true;reset();
       resizeObs=new ResizeObserver(resize);resizeObs.observe(stage);
@@ -530,7 +545,7 @@ if(cover&&hero){
     }catch(e){
       error=String(e);
       console.error('Nhi true 3D cover failed; retaining original cover mascot',e);
-      renderer?.dispose();stage.remove();button?.remove();
+      renderer?.dispose();stage.remove();button?.remove();cover.querySelector('.nhi-three-ambient')?.remove();
       // The original cover mascot remains available as the failure fallback.
     }
   }
