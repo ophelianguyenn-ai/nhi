@@ -10,6 +10,7 @@ from collections import deque
 from pathlib import Path
 import argparse
 import json
+import hashlib
 
 from PIL import Image
 
@@ -62,6 +63,10 @@ def remove_exterior_backdrop(frame: Image.Image) -> Image.Image:
 def build(output: Path) -> None:
     if not SOURCE.is_file():
         raise SystemExit(f"Original animation is missing: {SOURCE}")
+    expected_sha = "f25a96ec8fe753c29d60fa5abb5a33b1d924641bb98f962496803faa2cf270c9"
+    actual_sha = hashlib.sha256(SOURCE.read_bytes()).hexdigest()
+    if actual_sha != expected_sha:
+        raise SystemExit(f"Original GIF does not match user's upload: {actual_sha}")
     gif = Image.open(SOURCE)
     if gif.size != EXPECTED_SIZE or gif.n_frames != EXPECTED_COUNT:
         raise SystemExit(f"GIF must contain exactly {EXPECTED_COUNT} frames of {EXPECTED_SIZE}; got {gif.n_frames} at {gif.size}")
