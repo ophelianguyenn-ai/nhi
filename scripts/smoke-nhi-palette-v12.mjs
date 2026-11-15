@@ -1,5 +1,5 @@
-/* Check that V12 cover's Korean encouragement, CTA, and borders adopt
-   exactly the per-load title shade, in both themes and phone layouts. */
+/* Check that the Korean encouragement and CTA follow the per-load title
+   palette, while the previously removed cover frame stays invisible. */
 import puppeteer from 'puppeteer-core';
 const browser=await puppeteer.launch({
  headless:true,
@@ -66,9 +66,9 @@ try{
     assert(v.koText.includes('오늘도 화이팅')&&v.buttonText.includes('Vào học thôi'),'Original cover text missing');
     assert(v.ko===v.button,'Korean encouragement and button label must match');
     assert(v.ko!==v.title,'Slightly different shades across typography are intentional');
-    assert(v.buttonBorder===v.frameBorder,'Button and cover frame must share selected border color');
-    assert(v.buttonBorderWidth==='2px'&&v.frameBorderWidth==='1px','Both borders must be visible');
-    assert(v.framePresence!=='none'&&v.ctaVisible,'Cover frame or CTA invisible');
+    assert(v.buttonBorderWidth==='2px','The entry button must keep its visible palette border');
+    assert(v.frameBorderWidth==='0px','The removed thin cover frame must stay invisible');
+    assert(v.ctaVisible,'The entry button must remain visible');
     assert(v.documentOverflow<=3,'Phone cover must not overflow horizontally');
     assert(v.titleAnimation==='none','Header cannot animate');
     assert(!!variable,'No palette variable selected');
