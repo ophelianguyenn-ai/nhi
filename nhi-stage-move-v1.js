@@ -14,8 +14,16 @@ try{
  }
 }catch(_e){}
 const clamp=(n,min,max)=>Math.min(max,Math.max(min,n));
-// Persist double-tap memory across card rerenders caused by text highlighting.
-const tapMemory={};
+/* Recenter the Vietnamese back meaning once when upgrading from the earlier
+ * double-tap layout. Preserve its saved vertical offset and all other positions. */
+const VI_CENTER_KEY='nhi-back-vietnamese-centered-v2';
+try{
+ if(localStorage.getItem(VI_CENTER_KEY)!=='1'){
+  positions.vietnamese.x=0;
+  localStorage.setItem(KEY,JSON.stringify(positions));
+  localStorage.setItem(VI_CENTER_KEY,'1');
+ }
+}catch(_e){positions.vietnamese.x=0;}
 function save(){try{localStorage.setItem(KEY,JSON.stringify(positions));}catch(_e){}}
 function install(el,key){
  if(el.dataset.nhiMovableReady)return;
@@ -24,10 +32,9 @@ function install(el,key){
  el.draggable=false;
  el.addEventListener('dragstart',e=>e.preventDefault());
  el.tabIndex=0;
- el.title=el.title ? el.title+' · Kéo để di chuyển' : 'Giữ và kéo trực tiếp để di chuyển; Alt + mũi tên để tinh chỉnh';
+ el.title=el.title ? el.title+' · Nhấn giữ và kéo một lần để di chuyển' : 'Nhấn giữ và kéo một lần để di chuyển; Alt + mũi tên để tinh chỉnh';
  let active=null,suppress=false;
- // Double-tap/click the Vietnamese back meaning before dragging. Never arm on one tap.
- const twoTaps=key==='vietnamese';
+ // All movable terms, including Vietnamese on the back, drag on the first press.
 
  const apply=()=>{
    const v=positions[key];
@@ -37,16 +44,6 @@ function install(el,key){
  apply();
  el.addEventListener('pointerdown',e=>{
   if((e.pointerType==='mouse'&&e.button!==0) || e.target.closest('button,input,textarea,select,[contenteditable]'))return;
-  if(twoTaps){
-    const now=performance.now();
-    const last=tapMemory[key];
-    const doubleTap=!!last&&now-last.at<390&&Math.hypot(e.clientX-last.x,e.clientY-last.y)<32;
-    tapMemory[key]={at:now,x:e.clientX,y:e.clientY};
-    if(!doubleTap)return;
-    delete tapMemory[key];
-    el.classList.add('nhi-doubletap-ready');
-    setTimeout(()=>el.classList.remove('nhi-doubletap-ready'),1400);
-  }
   const card=el.closest('.pcard');
   if(!card || !card.isConnected)return;
   const rect=el.getBoundingClientRect();
@@ -73,7 +70,6 @@ function install(el,key){
   suppress=active.moved;
   active=null;el.classList.remove('nhi-is-moving');
   try{el.releasePointerCapture(e.pointerId);}catch(_e){}
-  el.classList.remove('nhi-doubletap-ready');
   if(suppress){
    save();
    setTimeout(()=>{suppress=false;},100);
