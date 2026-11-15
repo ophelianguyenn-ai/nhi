@@ -36,6 +36,7 @@ jobs:
             nhi-late-2026.js nhi-late-2026.css nhi-romance-v1.js nhi-romance-v1.css nhi-luong-v1.svg nhi-couple-gif-v1.js nhi-couple-gif-v1.css
             nhi-romance-v2.js nhi-romance-v2.css nhi-controls-v3.css nhi-bubble-effects-v3.css
             nhi-luong-reference-v2.svg nhi-luong-kiss-v2.svg nhi-luong-demo-approved-v3.svg
+            nhi-cover-girl-rig-v3.svg nhi-cover-airplane-v3.js nhi-cover-story-v3.js nhi-cover-story-v3.css
             nhi-luong-articulated-v4.svg nhi-romance-art-v4.css nhi-polish-20261115.css nhi-stage-move-v1.js nhi-refine-20261115.css nhi-celebration-cat-v1.svg nhi-final-tight-v1.css nhi-kitten-lifelike-v2.svg nhi-kitten-meow-v1.js nhi-card-no-overlap-v1.js nhi-kitten-photo-v3.svg
             index.html nhi-neck-options.html sw.js manifest.webmanifest
             lessons.json technical-images.json audio-manifest.json
@@ -72,6 +73,18 @@ jobs:
           test -s _site/index.html
           test -s _site/lessons.json
           echo "Static website assembled; data and illustrations preserved."
+
+      - name: Verify interactive cover JavaScript and required assets
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --check _site/nhi-cover-airplane-v3.js
+          node --check _site/nhi-cover-story-v3.js
+          test -s _site/nhi-cover-girl-rig-v3.svg
+          test -s _site/nhi-luong-articulated-v4.svg
+          grep -q 'nhi-cover-story-v3.js' _site/index.html
+          grep -q 'nhi-cover-airplane-v3.js' _site/index.html
+          echo "Interactive Lương/Nhi cover assets verified."
 
       - name: Configure GitHub Pages
         uses: actions/configure-pages@v5
