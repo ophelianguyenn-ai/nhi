@@ -14,7 +14,7 @@ html body #planBox .pcard .pfront .nhi-english-v5:not(.nhi-compare-expanded){
   flex:0 1 auto!important;
   align-self:center!important;
   justify-self:center!important;
-  margin:12px auto 3px!important;
+  margin:calc(12px + var(--nhi-en-offset-y,0px)) auto 3px!important;
   padding:7px 10px!important;
   gap:3px!important;
   overflow:visible!important;
@@ -70,8 +70,8 @@ html body #planBox .pcard .pfront .nhi-english-v5.nhi-compare-expanded{
   max-width:100%!important;
   min-width:0!important;
   height:auto!important;
-  min-height:0!important;
-  margin:12px auto 3px!important;
+  min-height:var(--nhi-en-height,0px)!important;
+  margin:calc(12px + var(--nhi-en-offset-y,0px)) auto 3px!important;
   padding:12px 13px!important;
   align-self:center!important;
   justify-self:center!important;
