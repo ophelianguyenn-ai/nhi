@@ -132,7 +132,8 @@ try{
  fail(policy.six.hidden&&policy.six.reading==='','Phrases of more than 5 words must hide IPA even when stored');
  fail(!policy.missing.hidden&&policy.missing.reading.split(' ').length>=3,'Missing short-phrase IPA must be composed from genuine word readings');
 
- const phone=await browser.newPage();
+ const phoneContext=await browser.createBrowserContext();
+ const phone=await phoneContext.newPage();
  phone.on('pageerror',e=>errors.push('phone: '+e));
  await phone.setViewport({width:390,height:844,isMobile:true,hasTouch:true,deviceScaleFactor:1});
  await phone.evaluateOnNewDocument(()=>{
@@ -165,6 +166,7 @@ try{
  fail(mobile.centers<=10&&mobile.scrollWidth<=mobile.viewport+3,'English frame should stay centered without mobile overflow');
  await phone.screenshot({path:'/tmp/nhi-v10-preview/card-english-left-phone.png'});
  await phone.close();
+ await phoneContext.close();
  await study.close();
 
  if(errors.length)throw Error('Browser JavaScript errors: '+errors.join(' | '));
