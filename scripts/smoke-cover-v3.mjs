@@ -54,10 +54,10 @@ try{
  const measures=await mobile.evaluate(()=>{
   const go=document.getElementById('coverGo'),clip=document.getElementById('nhiHairClipPlane');
   const r=go.getBoundingClientRect(),h=document.getElementById('coverHero').getBoundingClientRect();
-  return {heroWidth:h.width,goWidth:r.width,goTop:r.top,goBottom:r.bottom,clipBox:clip.getBoundingClientRect().width,screen:innerWidth,scroll:document.getElementById('cover').scrollWidth};
+  return {heroWidth:h.width,goWidth:r.width,goTop:r.top,goBottom:r.bottom,clipBox:clip.getBoundingClientRect().width,screen:innerWidth,rootScroll:document.documentElement.scrollWidth,coverClip:getComputedStyle(document.getElementById('cover')).overflowX};
  });
  console.log('COVER MOBILE',JSON.stringify(measures));
- expect(measures.heroWidth>200&&measures.goWidth>80&&measures.clipBox>25&&measures.scroll<=measures.screen+3,'Mobile cover clip/overflow issue');
+ expect(measures.heroWidth>200&&measures.goWidth>80&&measures.clipBox>25&&measures.goBottom<=667&&measures.coverClip==='hidden'&&measures.rootScroll<=measures.screen+3,'Mobile cover clip/overflow issue');
  await mobile.emulateMediaFeatures([{name:'prefers-reduced-motion',value:'reduce'}]);
  await mobile.evaluate(()=>document.getElementById('nhiLoveButton').click());
  expect((await mobile.evaluate(()=>window.NHI_COVER_V3.getState())).romance==='TOGETHER','Reduced-motion ending missing');
