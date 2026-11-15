@@ -230,31 +230,60 @@ async function speakEnglish(t){
  if(window.NHI_AUDIO){await window.NHI_AUDIO.ready;if(window.NHI_AUDIO.play(t,'en',1))return;}
 }
 
-/* Look up the real IPA for isolated English vocabulary, without inventing pronunciations.
-   Cache successful results and leave multiword phrases unchanged. */
+/* English IPA rule: 1–5 words (inclusive) are eligible; 6+ are hidden.
+   Prefer curated IPA stored for a whole phrase. For missing short phrases,
+   compose genuine phonetics obtained from dictionary entries, not guesses. */
 const ipaLookupCache=new Map();
-async function showSingleWordIPA(box,english){
- const word=clean(english);
- if(!/^[A-Za-z]+(?:[-'][A-Za-z]+)?$/.test(word))return;
- const label=box.querySelector('.nhi-en-ipa');
- if(!label)return;
+const englishTokens=value=>clean(value).match(/[A-Za-z]+(?:[-'’][A-Za-z]+)*/g)||[];
+const eligibleForIPA=value=>{
+ const count=englishTokens(value).length;
+ return count>0&&count<=5;
+};
+const trimmedIPA=value=>clean(value).replace(/^\/+|\/+$/g,'').trim();
+let preloadedIPAWords=null;
+function corpusWordIPAs(){
+ if(preloadedIPAWords)return preloadedIPAWords;
+ const map=new Map();
+ for(const row of Object.values(data||{})){
+  const words=englishTokens(row?.en);
+  if(words.length!==1||!clean(row?.ipa))continue;
+  const key=words[0].toLowerCase();
+  if(!map.has(key))map.set(key,trimmedIPA(row.ipa));
+ }
+ preloadedIPAWords=map;
+ return map;
+}
+async function verifiedWordIPA(word){
  const key=word.toLowerCase();
+ const known=corpusWordIPAs().get(key);
+ if(known)return known;
+ if(ipaLookupCache.has(key))return ipaLookupCache.get(key);
+ const promise=(async()=>{
+  const response=await fetch('https://api.dictionaryapi.dev/api/v2/entries/en/'+encodeURIComponent(key));
+  if(!response.ok)return '';
+  const entries=await response.json();
+  const row=Array.isArray(entries)?entries[0]:null;
+  return trimmedIPA(clean(row?.phonetic)||clean(row?.phonetics?.find(p=>clean(p.text))?.text));
+ })().catch(()=>'');
+ ipaLookupCache.set(key,promise);
+ const result=await promise;
+ if(result)ipaLookupCache.set(key,Promise.resolve(result));
+ else ipaLookupCache.delete(key);
+ return result;
+}
+async function showShortPhraseIPA(box,english,revision){
+ const words=englishTokens(english);
+ if(!words.length||words.length>5)return;
  try{
-  let reading=ipaLookupCache.get(key);
-  if(!reading){
-   const response=await fetch('https://api.dictionaryapi.dev/api/v2/entries/en/'+encodeURIComponent(key));
-   if(!response.ok)return;
-   const entries=await response.json();
-   const entry=Array.isArray(entries)?entries[0]:null;
-   reading=clean(entry?.phonetic)||clean(entry?.phonetics?.find(p=>clean(p.text))?.text);
-   if(!reading)return;
-   ipaLookupCache.set(key,reading);
-  }
-  if(clean(box.querySelector('.nhi-en-translation')?.textContent)!==word)return;
-  if(label.dataset.manual==='true')return;
-  label.textContent='/'+reading.replace(/^\/|\/$/g,'')+'/';
+  const sounds=await Promise.all(words.map(verifiedWordIPA));
+  if(sounds.some(sound=>!sound))return;
+  const label=box.querySelector('.nhi-en-ipa');
+  if(!label||box._ipaRevision!==revision||label.dataset.manual==='true')return;
+  if(!eligibleForIPA(english)||clean(box._englishText)!==clean(english))return;
+  label.textContent='/'+sounds.join(' ')+'/';
+  label.title=words.length>1?'Phiên âm ghép từ IPA từng từ, có thể chỉnh sửa ở Cài đặt thẻ':'Phiên âm IPA tiếng Anh';
   label.hidden=false;
- }catch(_e){/* Offline: do not guess phonetic transcription. */}
+ }catch(_e){/* Offline: keep transcription blank instead of guessing. */}
 }
 function display(box,entry,id,vi,ko){
  // Cards are constructed off-DOM, then appended; populate immediately.
@@ -263,7 +292,16 @@ function display(box,entry,id,vi,ko){
  entry=choices[entryKey(vi,ko)]||entry;
  const en=clean(entry&&entry.en),ipa=clean(entry&&entry.ipa);
  const translation=box.querySelector('.nhi-en-translation');translation.textContent=en||'Đang chuẩn bị bản dịch tiếng Anh…';if(en&&window.NHI_STUDY){window.NHI_STUDY.wordElements(translation,en);window.NHI_STUDY.formatText(translation,entry?.format||box._format||{},'en');}
- const span=box.querySelector('.nhi-en-ipa');span.dataset.manual=ipa?'true':'false';span.textContent=ipa?'/'+ipa.replace(/^\/|\/$/g,'')+'/':'';span.hidden=!ipa;if(!ipa&&en)showSingleWordIPA(box,en);
+  // IPA eligibility is checked from word count every time a card rerenders.
+  const span=box.querySelector('.nhi-en-ipa');
+  const eligible=eligibleForIPA(en);
+  box._englishText=en;
+  box._ipaRevision=(box._ipaRevision||0)+1;
+  span.dataset.manual=ipa?'true':'false';
+  span.title='';
+  span.textContent=eligible&&ipa?'/'+trimmedIPA(ipa)+'/':'';
+  span.hidden=!eligible||!ipa;
+  if(eligible&&!ipa)showShortPhraseIPA(box,en,box._ipaRevision);
  const play=box.querySelector('.nhi-en-speak');
  play.hidden=!en;play.onclick=()=>window.NHI_SPEECH?window.NHI_SPEECH.toggle(en,'en-US'):speakEnglish(en);
 

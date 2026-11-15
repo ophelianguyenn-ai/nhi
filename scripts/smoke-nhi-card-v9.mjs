@@ -111,8 +111,8 @@ try{
  const sameCenter=(rect)=>Math.abs(center(rect)-center(v.frame))<=8;
  fail(sameCenter(v.ko)&&sameCenter(v.vi)&&(!v.han||sameCenter(v.han)),
   'Korean, Vietnamese and Hán–Việt must align with English frame center');
- fail(v.cssKo==='center'&&v.cssVi==='center'&&v.cssEnglish==='center',
-  'All three translations need centered text');
+ fail(v.cssKo==='center'&&v.cssVi==='center'&&v.cssEnglish==='left',
+  'Vietnamese/Korean stay centered; V10 English text is left-aligned inside its centered box');
  const hard=(v.hard.match(/\d+\.?\d*/g)||[]).map(Number);
  fail(hard.length>=3&&hard[2]>hard[1]&&hard[1]>hard[0],
   'Khó background must be soft blue, not mint green');
