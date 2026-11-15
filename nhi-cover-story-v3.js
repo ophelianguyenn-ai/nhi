@@ -29,6 +29,8 @@
   }
  }
  function getSize(){return Math.max(220,stage?.getBoundingClientRect().width||hero.getBoundingClientRect().width||350);}
+ // Contact anchors: Nhi's right cheek (~67% of her SVG) and Lương's mouth (~47% of his SVG).
+ function kissOffset(){return (girl.offsetLeft+girl.offsetWidth*.67)-(boy.offsetLeft+boy.offsetWidth*.47);}
  function applyBoy(offset,scale,rot=0,opacity=1){
   if(!boy)return;
   boy.style.opacity=String(opacity);
@@ -54,13 +56,13 @@
   if(t<TIMES.arrive){applyBoy(0,1);return;}
   if(t<TIMES.kissStart){
    const p=ease((t-TIMES.arrive)/(TIMES.kissStart-TIMES.arrive));
-   applyBoy(-W*.225*p,1,-9*p);
+   applyBoy(kissOffset()*p,1,-9*p);
    return;
   }
-  if(t<TIMES.kissEnd){applyBoy(-W*.225,1,-9);return;}
+  if(t<TIMES.kissEnd){applyBoy(kissOffset(),1,-9);return;}
   if(t<TIMES.recover){
    const p=ease((t-TIMES.kissEnd)/(TIMES.recover-TIMES.kissEnd));
-   applyBoy(-W*.225*(1-p),1,-9*(1-p));
+   applyBoy(kissOffset()*(1-p),1,-9*(1-p));
    return;
   }
   applyBoy(0,1);
