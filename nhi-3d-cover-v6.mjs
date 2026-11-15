@@ -180,7 +180,9 @@ if(cover&&hero){
     }
     const flowerAnchor=marker(bouquet,0,.2,.23);
     const cheek=marker(head,.58,-.16,.58);
-    return {root,torso,head,neck,leftArm,rightArm,bouquet,clipAnchor,flowerAnchor,cheek,strandGroups,
+    // Heart hotspot sits ABOVE their heads, never over Nhi's face.
+    const heartAnchor=marker(head,.81,1.16,.48);
+    return {root,torso,head,neck,leftArm,rightArm,bouquet,clipAnchor,flowerAnchor,cheek,heartAnchor,strandGroups,
       idle(t,quiet=false){
         const a=quiet?0:Math.sin(t*1.78);
         torso.rotation.z=.013*a;
@@ -485,7 +487,7 @@ if(cover&&hero){
       projectAnchor(nhi.clipAnchor,clipBtn);
       projectAnchor(nhi.flowerAnchor,bouquetBtn);
       if(state==='COUPLE_IDLE'||state==='PLAYING'){
-        projectAnchor(nhi.cheek,heartBtn);
+        projectAnchor(nhi.heartAnchor,heartBtn);
       }
       resize();
       renderer.render(scene,camera);
