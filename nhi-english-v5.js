@@ -271,19 +271,20 @@ function display(box,entry,id,vi,ko){
  comparisonRows(box,id,vi,ko);
  var review=box.querySelector('.nhi-en-review');
  if(review){
-  review.hidden=!en;
-  review.setAttribute('aria-expanded',String(box.classList.contains('nhi-compare-expanded')));
+  // Comparison expands once; the old “Thu gọn” button is removed.
+  const expanded=box.classList.contains('nhi-compare-expanded');
+  review.hidden=!en||expanded;
+  review.textContent='Đối chiếu';
+  review.setAttribute('aria-expanded',String(expanded));
   review.onclick=()=>{
-   const expand=!box.classList.contains('nhi-compare-expanded');
-   box.classList.toggle('nhi-compare-expanded',expand);
-   review.textContent=expand?'Thu gọn':'Đối chiếu';
-   review.setAttribute('aria-expanded',String(expand));
-   if(expand){
-    // Previously compared versions render immediately; no duplicate network calls.
-    const cached=reviewCache[entryKey(vi,ko)]||suppliedComparison(vi,ko);
-    if(!cached)checkMeaning(box,id,vi,ko);
-    else comparisonRows(box,id,vi,ko);
-   }
+   if(box.classList.contains('nhi-compare-expanded'))return;
+   box.classList.add('nhi-compare-expanded');
+   review.hidden=true;
+   review.setAttribute('aria-expanded','true');
+   // Cached results still render instantly; only a new pair requests translation.
+   const cached=reviewCache[entryKey(vi,ko)]||suppliedComparison(vi,ko);
+   if(!cached)checkMeaning(box,id,vi,ko);
+   else comparisonRows(box,id,vi,ko);
   };
  }
  // Editing the translation and IPA now happens only in the card settings.

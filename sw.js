@@ -1,6 +1,6 @@
 // Offline support: network-first for GitHub Pages and static assets.
 // Fall back to cache only when offline. Different cache key forces eviction of earlier stale CSS/JS.
-const CACHE = 'nhi-corner-v60-upper-body-card-controls-v8';
+const CACHE = 'nhi-corner-v61-blue-cover-pastel-cards-v9';
 const CORE = [
   'study-update-v6.js','study-update-v6.css','nhi-november-v15.js','nhi-november-v15.css',
   'nhi-late-2026.js','nhi-late-2026.css','nhi-romance-v1.js','nhi-romance-v1.css','nhi-luong-v1.svg','nhi-couple-gif-v1.js','nhi-couple-gif-v1.css',
@@ -9,7 +9,7 @@ const CORE = [
   'nhi-cover-gif-player-v4.js','nhi-cover-gif-player-v4.css','luong-nhi-goc.gif',
   'nhi-romantic-cover-v5-1.js','nhi-romantic-cover-v5-1.css','nhi-luong-hands-at-sides-v5.svg',
   'nhi-demo-pixel-cover-v5-2.js','nhi-demo-pixel-cover-v5-2.css',
-  'nhi-solo-cover-v7.css','nhi-card-polish-v8.css','nhi-card-controls-v8.js',
+  'nhi-solo-cover-v7.css','nhi-card-polish-v8.css','nhi-card-polish-v9.css','nhi-card-controls-v8.js',
   'assets/romantic-demo/nhi-demo-original-pixels.png',
   'assets/romantic-demo/luong-demo-original-pixels.png',
   'assets/romantic-demo/luong-demo-head-v52.png',
