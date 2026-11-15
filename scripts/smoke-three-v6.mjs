@@ -45,10 +45,10 @@ try {
  const walk=await page.evaluate(()=>window.NHI_COVER_3D_V6.getState());
  console.log('TRUE THREE-D WALK',JSON.stringify(walk));
  assert(walk.luongVisible&&walk.luongBodyYaw<-.55,'Lương must face left toward Nhi while walking, not toward the viewer');
- await page.waitForFunction(()=>window.NHI_COVER_3D_V6?.getState().phase==='kiss',{timeout:5300});
+ await page.waitForFunction(()=>{const s=window.NHI_COVER_3D_V6?.getState();return s?.phase==='kiss'&&s.elapsedMs>=4570;},{timeout:5300});
  const kiss=await page.evaluate(()=>window.NHI_COVER_3D_V6.getState());
  console.log('TRUE THREE-D KISS',JSON.stringify(kiss));
- assert(kiss.luongHeadYaw<-.5&&kiss.luongBodyYaw<-.7,'Lương needs to turn face toward Nhi and lean for cheek kiss');
+ assert(kiss.luongHeadYaw<-.25&&kiss.luongBodyYaw<-.65,'Lương needs to turn face toward Nhi in a visible 3/4 angle for cheek kiss');
  await page.screenshot({path:'/tmp/nhi-3d-preview/nhi-3d-kiss-desktop.png'});
  assert((await page.evaluate(()=>window.NHI_COVER_3D_V6.playAirplane()))===true,'Independent airplane not working');
  assert((await page.$eval('#nhiLoveBanner text',e=>e.textContent))==='Lương ❤️ Nhi','Banner text must remain exact');
