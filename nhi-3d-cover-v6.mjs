@@ -122,12 +122,20 @@ if(cover&&hero){
       for(let j=0;j<5;j++){
         const x=s*(.66+j*.065);
         const h=group(backHair);
+        const offset=j*.075;
         const points=[
-          [x,.36,-.07],[x+s*.09,-.21,.02],
-          [x+s*(.10+(j%2)*.035),-.83,-.02],
-          [x+s*.18,-1.46,.01],[x+s*.12,-2.05,-.01]
+          [x,.40,-.08],
+          [x+s*(.16+offset),-.20,.02],
+          [x-s*(.03+offset*.30),-.60,.06],
+          [x+s*(.20+offset*.25),-1.04,.04],
+          [x-s*(.02+offset*.15),-1.48,.06],
+          [x+s*(.13+offset*.30),-1.87,.05],
+          [x+s*(.17+offset*.30),-2.13,.03]
         ];
-        stroke(h,points,j%2?C.hairMid:C.hair,.11-(j*.006));
+        const hairMaterial=j%3===0?C.hairHi:j%2?C.hairMid:C.hair;
+        const radius=.135-(j*.012);
+        stroke(h,points,hairMaterial,radius);
+        oval(h,hairMaterial,points[points.length-1][0],points[points.length-1][1],points[points.length-1][2],radius,radius*1.4,radius);
         strandGroups.push({g:h,s,j});
       }
     }
@@ -246,9 +254,11 @@ if(cover&&hero){
     oval(head,C.black,0,.52,-.02,.74,.39,.63,0,0,-.07);
     oval(head,C.black,-.41,.49,.40,.34,.27,.25,0,0,.38);
     oval(head,C.black,.43,.50,.35,.33,.28,.28,0,0,-.25);
-    for(let i=0;i<7;i++){
-      const x=-.50+i*.17;
-      oval(head,i%2?C.black:C.ink,x,.79+(i%3)*.035,.09,.16,.15,.18,0,0,(i-3)*-.13);
+    // Hair is sleek, soft and swept to one side, without spherical bumps.
+    for(let i=0;i<6;i++){
+      const x=-.49+i*.19;
+      const frontY=.60+(i%3)*.045;
+      stroke(head,[[x,.78,.18],[x+.12,.72,.38],[x+.19,.56,.52]],i%2?C.black:C.ink,.065);
     }
     const mouth=marker(head,-.10,-.28,.64);
     return {root,body,neck,head,legs,arms,mouth,smile,kissMouth,
