@@ -110,3 +110,38 @@ html body #planBox .pcard>.prate>.hard.picked{
 @media(prefers-reduced-motion:reduce){
   #cover.nhi-upper-v8 h1{animation:none!important;filter:none!important;will-change:auto}
 }
+
+
+/* Legacy compact English CSS used a higher-specificity inline-flex header.
+   Override that rule as well, so tiny mobile widths cannot put the text
+   underneath the headphones / thinking buttons. */
+html body #planBox .pcard .pfront .nhi-english-v5:not(.nhi-compare-expanded)>.nhi-en-head,
+html body #planBox .pcard .pfront .nhi-english-v5.nhi-compare-expanded>.nhi-en-head{
+  display:grid!important;
+  width:100%!important;
+  min-width:0!important;
+  max-width:100%!important;
+  grid-template-columns:minmax(0,1fr) auto!important;
+  gap:8px!important;
+  align-items:start!important;
+  justify-items:stretch!important;
+  justify-content:normal!important;
+  flex-wrap:nowrap!important;
+}
+html body #planBox .pcard .pfront .nhi-english-v5>.nhi-en-head>.nhi-en-main{
+  box-sizing:border-box!important;
+  grid-area:1/1!important;
+  display:block!important;
+  min-width:0!important;
+  width:100%!important;
+  max-width:100%!important;
+  padding:0 4px 0 0!important;
+  text-align:left!important;
+}
+html body #planBox .pcard .pfront .nhi-english-v5>.nhi-en-head>.nhi-en-head-actions{
+  grid-area:1/2!important;
+  min-width:0!important;
+  margin:0!important;
+  align-self:start!important;
+  justify-self:end!important;
+}
