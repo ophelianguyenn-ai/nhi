@@ -274,6 +274,9 @@
       airplane=window.NhiCoverAirplaneV3?.create(cover)||null;
       initHotspots();
       cover.classList.add('nhi-cover-v51-enabled','nhi-cover-demo-v52-enabled');
+      // V5.1 cover CSS changes the hero height. Recalculate pixel-perfect
+      // layout AFTER applying that class so the actual displayed size is used.
+      layout();
       ready=true;
       reset();
       observer=new MutationObserver(()=>{
@@ -282,6 +285,14 @@
       });
       observer.observe(cover,{attributes:true,attributeFilter:['hidden']});
       window.addEventListener('pagehide',resetAll);
+      if(typeof ResizeObserver!=='undefined'){
+        const ro=new ResizeObserver(()=>{
+          layout();
+          if(state==='NHI_IDLE')pose(stage.clientWidth*.72,.26,0,0);
+          if(state==='COUPLE_IDLE')pose(0,1,0,1);
+        });
+        ro.observe(stage);
+      }
       window.addEventListener('resize',()=>{
         layout();
         if(state==='NHI_IDLE')pose(stage.clientWidth*.72,.26,0,0);
