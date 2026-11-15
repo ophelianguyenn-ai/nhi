@@ -430,7 +430,8 @@ if(cover&&hero){
       luong.head.rotation.z=.13+.15*p;
       luong.head.position.x=-.15-.53*p;
       nhi.head.rotation.z=-.06-.055*p;
-      nhi.head.rotation.y=.14+.08*p;
+      // Nhi turns her cheek naturally toward Lương, not toward the camera.
+      nhi.head.rotation.y=.14+.44*p;
       // Shift Nhi's peace-sign hand outward a little so her cheek remains visible.
       nhi.rightArm.rotation.z=-.25*p;
       nhi.rightArm.position.y=2.62-1.05*p;
@@ -447,7 +448,7 @@ if(cover&&hero){
       luong.head.rotation.z=lerp(.28,.05,p);
       luong.head.position.x=lerp(-.68,0,p);
       nhi.head.rotation.z=lerp(-.115,-.045,p);
-      nhi.head.rotation.y=lerp(.22,.20,p);
+      nhi.head.rotation.y=lerp(.58,.20,p);
       nhi.rightArm.rotation.z=-.25*(1-p);
       nhi.rightArm.position.y=2.62-1.05*(1-p);
       luong.smile.visible=true;luong.kissMouth.visible=false;
