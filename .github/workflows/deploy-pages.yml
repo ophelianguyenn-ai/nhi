@@ -7,6 +7,7 @@ on:
 
 permissions:
   contents: read
+  actions: read
   pages: write
   id-token: write
 
@@ -130,6 +131,25 @@ jobs:
         uses: actions/upload-pages-artifact@v4
         with:
           path: _site
+
+      - name: Wait for GitHub to register the Pages artifact
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          for attempt in $(seq 1 12); do
+            count="$(gh api "repos/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}/artifacts?name=github-pages" --jq '.artifacts | length' 2>/dev/null || echo 0)"
+            if [ "$count" -gt 0 ] 2>/dev/null; then
+              echo "GitHub Pages artifact is registered."
+              sleep 7
+              exit 0
+            fi
+            echo "Artifact metadata not indexed yet (attempt ${attempt}/12)"
+            sleep 5
+          done
+          echo "GitHub did not index the uploaded Pages artifact."
+          exit 1
 
       - name: Publish website
         id: deployment
