@@ -101,6 +101,23 @@ function compactEditor(editor){
    const lines=String(node.value??node.textContent??'').split(/\n/);
    let widest=0;
    for(const line of lines)widest=Math.max(widest,ctx?ctx.measureText(line).width:line.length*10);
+   if(node.matches('textarea[name="pairs"]')){
+    // Size by the actual pair rows, not the explanatory heading or rich editors.
+    const limit=Math.min(520,Math.max(174,editor.clientWidth-44));
+    const width=Math.min(limit,Math.max(174,Math.ceil(widest+30)));
+    const lineWidth=Math.max(36,width-26);
+    let visualRows=0;
+    for(const line of lines){
+     const measured=ctx?ctx.measureText(line).width:line.length*8;
+     visualRows+=Math.max(1,Math.ceil(measured/lineWidth));
+    }
+    const rowHeight=parseFloat(style.lineHeight)||20;
+    const height=Math.min(220,Math.max(52,Math.ceil(visualRows*rowHeight+20)));
+    node.style.setProperty('--nhi-pairs-width',Math.round(width)+'px');
+    node.style.setProperty('--nhi-pairs-height',Math.round(height)+'px');
+    node.rows=Math.max(2,Math.min(8,visualRows));
+    continue;
+   }
    const max=Math.min(690,Math.max(260,editor.clientWidth-36));
    const width=Math.max(245,Math.min(max,Math.ceil(widest+65)));
    node.style.setProperty('--nhi-field-width',width+'px');
