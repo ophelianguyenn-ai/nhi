@@ -20,6 +20,8 @@ async function cover(page,theme,view,photo){
  await page.evaluateOnNewDocument(t=>{localStorage.setItem('nlc-prefs-v1',JSON.stringify({theme:t,fx:false}));},theme);
  await page.goto(base+'?cover=1&v=nhi-v9-preview',{waitUntil:'domcontentloaded'});
  await page.waitForSelector('#coverHero .nhi-upper-girl-v8',{timeout:10000});
+ // Let the existing entrance animation finish before visual assertions/screenshots.
+ await new Promise(resolve=>setTimeout(resolve,1050));
  const v=await page.evaluate(()=>{
   const image=document.querySelector('#coverHero .nhi-upper-girl-v8');
   const hero=document.querySelector('#coverHero');
@@ -49,6 +51,7 @@ async function cover(page,theme,view,photo){
  fail(rgb.length>=3&&rgb[2]>rgb[1]&&rgb[1]>rgb[0],
   'Cover headline accent must be blue, not green, in '+theme+' theme');
  fail(v.horizontalOverflow<=3,'Cover overflows '+view);
+ fail(v.button.inViewport&&Number(v.button.opacity)>.95,'Study CTA must be visible after cover animation');
  await page.screenshot({path:'/tmp/nhi-v9-preview/'+photo});
 }
 function center(rect){return rect.x+rect.width/2;}
