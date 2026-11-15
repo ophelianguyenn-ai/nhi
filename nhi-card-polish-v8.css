@@ -279,3 +279,23 @@ html body #planBox .pcard .nhi-forgot-bubble[hidden]{display:none!important}
 @media(prefers-reduced-motion:reduce){
   #cover.nhi-upper-v8 #coverHero>.nhi-upper-girl-v8{animation:none!important;transform:none!important}
 }
+/* Stronger than the legacy viewport-fit :has() rule. The user-selected
+   minimum length must win even when auto-fit mode is active. */
+html body.nhi-viewport-fit #planBox .pcard:not(:has(.nhi-editor-window-v5,.nhi-picture-picker)){
+  height:auto!important;
+  min-height:var(--nhi-v8-card-height,430px)!important;
+  max-height:none!important;
+  overflow:visible!important;
+}
+html body.nhi-viewport-fit #planBox .pcard>.pfront{
+  min-height:clamp(190px,calc(var(--nhi-v8-card-height,430px) - 150px),650px)!important;
+  flex:1 0 auto!important;
+  overflow:visible!important;
+  align-content:space-evenly!important;
+}
+html body #planBox .pcard .pfront>.prompt[data-nhi-movable],
+html body #planBox .pcard .pfront>.vi-under[data-nhi-movable]{
+  /* Old CSS applied the translate property; our transform owns the
+     complete offset, so disable it to avoid moving twice. */
+  translate:none!important;
+}
