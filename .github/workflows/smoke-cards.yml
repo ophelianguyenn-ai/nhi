@@ -32,6 +32,7 @@ on:
       - 'nhi-card-polish-v9.css'
       - 'nhi-card-polish-v10.css'
       - 'scripts/smoke-nhi-card-v10.mjs'
+      - 'scripts/smoke-nhi-title-v11.mjs'
       - 'scripts/smoke-nhi-card-v9.mjs'
       - 'nhi-card-controls-v8.js'
       - 'nhi-stage-move-v1.js'
@@ -97,17 +98,20 @@ jobs:
         run: node scripts/smoke-nhi-card-v8.mjs
       - name: Verify V9 blue cover, centered meanings, compact pairs and comparison UI
         run: node scripts/smoke-nhi-card-v9.mjs
-      - name: Verify animated blue-green heading, left aligned English and IPA five-word rule
+      - name: Verify left English layout and five-word IPA without title animation
         run: node scripts/smoke-nhi-card-v10.mjs
+      - name: Verify fixed blue, green or pink title per page load
+        run: node scripts/smoke-nhi-title-v11.mjs
       - name: Save half-body cover and study card previews
         if: ${{ always() }}
         uses: actions/upload-artifact@v4
         with:
-          name: nhi-cover-card-v10-preview
+          name: nhi-cover-title-v11-preview
           path: |
             /tmp/nhi-v8-preview/*.png
             /tmp/nhi-v9-preview/*.png
             /tmp/nhi-v10-preview/*.png
+            /tmp/nhi-v11-preview/*.png
           if-no-files-found: ignore
           retention-days: 7
       - name: Confirm Vietnamese to Korean flip is visible
