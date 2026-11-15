@@ -111,7 +111,7 @@ try {
   await checkCounter(phone.page, 1);
 
   for (let i = 0; i < 3; i++) {
-    await laptop.page.$eval('#planBox .pnav .parrow:last-child', button => button.click());
+    await laptop.page.$eval('#planBox .parrow[aria-label="Thẻ sau"]', button => button.click());
   }
   await checkCounter(laptop.page, 4);
   await checkCounter(phone.page, 4);
@@ -123,7 +123,7 @@ try {
   await enableSync(phone.page);
   await checkCounter(phone.page, 4);
 
-  await phone.page.$eval('#planBox .pnav .parrow:last-child', button => button.click());
+  await phone.page.$eval('#planBox .parrow[aria-label="Thẻ sau"]', button => button.click());
   await checkCounter(laptop.page, 5);
 
   await laptop.page.evaluate(() => {
