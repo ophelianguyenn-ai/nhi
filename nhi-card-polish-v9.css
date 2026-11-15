@@ -107,9 +107,15 @@ html body #planBox .pcard>.pfront>.nhi-ko-line{
 html body #planBox .pcard>.pfront>.nhi-ko-line>.answer.ko{
   text-align:center!important;margin-inline:auto!important;
 }
+/* Vietnamese and the English panel are centered in the same text column.
+   Use only the shared CSS translate from nhi-polish for user drag offsets:
+   applying both transform and translate made the meaning move twice as far. */
 html body #planBox .pcard>.pfront>.vi-under{
   text-align:center!important;
-  transform:translate3d(var(--nhi-move-x,0px),var(--nhi-move-y,0px),0)!important;
+  justify-self:center!important;
+  align-self:center!important;
+  margin-inline:auto!important;
+  transform:none!important;
 }
 html body #planBox .pcard>.pfront>.nhi-card-details{
   align-items:center!important;justify-content:center!important;
