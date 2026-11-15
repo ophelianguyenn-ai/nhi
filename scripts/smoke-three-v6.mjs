@@ -49,6 +49,7 @@ try {
  const kiss=await page.evaluate(()=>window.NHI_COVER_3D_V6.getState());
  console.log('TRUE THREE-D KISS',JSON.stringify(kiss));
  assert(kiss.luongHeadYaw<-.5&&kiss.luongBodyYaw<-.7,'Lương needs to turn face toward Nhi and lean for cheek kiss');
+ await page.screenshot({path:'/tmp/nhi-3d-preview/nhi-3d-kiss-desktop.png'});
  assert((await page.evaluate(()=>window.NHI_COVER_3D_V6.playAirplane()))===true,'Independent airplane not working');
  assert((await page.$eval('#nhiLoveBanner text',e=>e.textContent))==='Lương ❤️ Nhi','Banner text must remain exact');
  await page.waitForFunction(()=>window.NHI_COVER_3D_V6?.getState().state==='COUPLE_IDLE',{timeout:3500});
