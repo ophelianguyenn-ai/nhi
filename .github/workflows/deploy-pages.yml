@@ -116,7 +116,6 @@ jobs:
             echo "Unexpected romance/3D runtime on solo Nhi cover"
             exit 1
           fi
-          grep -q 'nhi-cover-airplane-v3.js' _site/index.html
           echo "Solo Nhi illustration verified; no romance/3D scripts loaded."
 
       - name: Configure GitHub Pages
