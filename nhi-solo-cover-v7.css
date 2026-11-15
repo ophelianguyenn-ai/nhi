@@ -1,0 +1,72 @@
+/* Solo Nhi cover V7 — restore the original approved 2D girl.
+   No boy, no couple animation, no romantic click effects.
+   Keep the original seasonal garden, day/night and learning interface. */
+#cover.nhi-solo-v7 .cover-in{
+  width:min(670px,100%)!important;
+  gap:clamp(7px,1.45vh,15px)!important;
+  padding-top:8px!important;
+  padding-bottom:clamp(18px,4vh,38px)!important;
+}
+#cover.nhi-solo-v7 #coverHero{
+  width:min(580px,96vw)!important;
+  max-width:100%!important;
+  min-width:0!important;
+  height:clamp(275px,47vh,420px)!important;
+  position:relative!important;
+  display:flex!important;
+  justify-content:center!important;
+  align-items:flex-end!important;
+  margin:0 auto!important;
+  transform:none!important;
+  animation:none!important;
+  filter:none!important;
+  overflow:visible!important;
+  isolation:isolate;
+}
+#cover.nhi-solo-v7 #coverHero .nhi-solo-art{
+  display:block;
+  height:100%;
+  width:auto;
+  max-width:min(86vw,400px);
+  aspect-ratio:445/774;
+  object-fit:contain;
+  image-rendering:auto;
+  transform:none!important;
+  animation:none!important;
+  filter:drop-shadow(0 8px 9px rgba(87,58,70,.14));
+  user-select:none;
+  -webkit-user-drag:none;
+  pointer-events:none;
+}
+#cover.nhi-solo-v7 #coverHero > :not(.nhi-solo-art){display:none!important}
+#cover.nhi-solo-v7 #coverGo{
+  position:relative;
+  z-index:4;
+}
+@media(max-width:660px){
+  #cover.nhi-solo-v7{
+    padding:8px 10px calc(12px + env(safe-area-inset-bottom,0px));
+  }
+  #cover.nhi-solo-v7 .cover-in{
+    gap:7px!important;
+    padding-top:5px!important;
+    padding-bottom:12px!important;
+  }
+  #cover.nhi-solo-v7 #coverHero{
+    width:min(480px,96vw)!important;
+    height:clamp(218px,41vh,345px)!important;
+  }
+  #cover.nhi-solo-v7 h1{font-size:clamp(35px,10vw,53px)!important}
+  #cover.nhi-solo-v7 .lead{font-size:14px!important}
+  #cover.nhi-solo-v7 #coverGo{min-height:47px;font-size:16px}
+}
+@media(max-height:615px){
+  #cover.nhi-solo-v7 #coverHero{height:clamp(190px,34vh,260px)!important}
+  #cover.nhi-solo-v7 .cover-in{gap:5px!important;padding-bottom:8px!important}
+}
+@media(prefers-reduced-motion:reduce){
+  #cover.nhi-solo-v7 #coverHero,
+  #cover.nhi-solo-v7 #coverHero .nhi-solo-art{
+    animation:none!important;transition:none!important;
+  }
+}
