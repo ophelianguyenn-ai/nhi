@@ -3544,18 +3544,15 @@ button,input,select,textarea{font-family:var(--ui)}
 
         if (hj && s.hanja) {
           var hanTerm=String(hj[0]||'').trim();
-          var hanSearch=hanTerm.replace(/[^\p{Script=Han}\s]/gu,'').trim();
+          var hanSearch=Array.from(hanTerm).filter(function(ch){return /\p{Script=Han}/u.test(ch);});
           var hx=el('a','hanja nhi-hanja-lookup');
-          var hanCount=[...hanSearch.replace(/\s+/g,'')].length;
-          hx.href='https://hvdic.thivien.net/'+(hanCount===1?'whv/':'hv/')+
-            encodeURIComponent(hanSearch.replace(/\s+/g,'+')).replace(/%2B/gi,'+');
+          // Thi Viện expects a separated list of Hán characters in /whv/;
+          // only the URL is spaced; the original word stays joined on the card.
+          hx.href='https://hvdic.thivien.net/whv/'+hanSearch.map(encodeURIComponent).join('%20');
           hx.target='_blank';hx.rel='noopener noreferrer';hx.lang='zh-Hant';
           hx.title='Bấm để tra trực tiếp '+hanTerm+' tại Từ điển Hán Nôm Thi Viện';
-          var spacedHanja=el('span','nhi-hanja-characters');
-          Array.from(hanTerm).forEach(function(ch){
-            if(/\p{Script=Han}/u.test(ch))spacedHanja.appendChild(el('span','nhi-hanja-character',ch));
-            else if(ch.trim())spacedHanja.appendChild(el('span','nhi-hanja-punctuation',ch));
-          });
+          var spacedHanja=el('span','nhi-hanja-characters',hanTerm.replace(/\s+/g,''));
+          // Never insert separators between characters in the flashcard itself.
           hx.appendChild(spacedHanja);
           hx.appendChild(el('span','nhi-hanja-dash',' – '));
           hx.appendChild(el('small','nhi-hanja-reading',hj[1]));
@@ -3592,7 +3589,7 @@ button,input,select,textarea{font-family:var(--ui)}
       c.appendChild(f);
       // The unused background around the entire card should also flip it.
       c.addEventListener('click', function(e) {
-        if(e.target.closest('.pfront,.prate,.cicons,.pdel,.pundo,.legendpop,.nhi-card-dictionaries,.nhi-english-v5,figure,button,input,textarea,select,a,[contenteditable]'))return;
+        if(e.target.closest('.pfront,.pdel,.pundo,.legendpop,.nhi-card-dictionaries,.nhi-english-v5,figure,button,input,textarea,select,a,[contenteditable]'))return;
         if(s.editing || s.imagePicker || flipping)return;
         flip();
       });
@@ -3704,11 +3701,11 @@ button,input,select,textarea{font-family:var(--ui)}
       var m = el('div','nhi-victory-cat-scene');
       var cat=el('img','nhi-victory-cat');
       cat.src='nhi-celebration-cat-v1.svg?v=20261115-final1';
-      cat.alt='Mèo chibi vẫy chân và giơ biểu tượng like chúc mừng hoàn thành bài học';
+      cat.alt='Mèo đáng yêu vẫy chân chúc mừng hoàn thành bài học';
       cat.loading='eager';m.appendChild(cat);
-      var likeSpark=el('span','nhi-victory-like-float','👍');
-      likeSpark.setAttribute('aria-hidden','true');m.appendChild(likeSpark);
+      // A yellow thumbs-up emoji was distracting; the kitten paws do the celebrating.
       p.appendChild(m);
+      if (window.NHI_VICTORY_CAT) window.NHI_VICTORY_CAT.attach(cat);
       p.appendChild(el('h2', null, '🎉 Chúc mừng, bạn đã hoàn thành!'));
       p.appendChild(el('p', 'nhi-victory-message', 'Tuyệt vời! Mỗi thẻ đã học là một bước tiến mới. ✨'));
       p.appendChild(el('p', 'listinfo', s.title));
@@ -3725,6 +3722,7 @@ button,input,select,textarea{font-family:var(--ui)}
       p.appendChild(row); v.appendChild(p);
       if (!s.celebrated) {
         s.celebrated = true; saveSess();
+        if(window.NHI_VICTORY_CAT)window.NHI_VICTORY_CAT.meow();
         if (prefs.fx && !reduceMotion()) {
           if (window.NHI_FIREWORKS && window.NHI_FIREWORKS.launch) window.NHI_FIREWORKS.launch();
           else confetti();
