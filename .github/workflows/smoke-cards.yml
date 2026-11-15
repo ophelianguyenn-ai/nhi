@@ -5,6 +5,12 @@ on:
     branches: [main]
     paths:
       - 'index.html'
+      - 'nhi-cover-story-v3.js'
+      - 'nhi-cover-airplane-v3.js'
+      - 'nhi-cover-story-v3.css'
+      - 'nhi-cover-girl-rig-v3.svg'
+      - 'nhi-luong-articulated-v4.svg'
+      - 'scripts/smoke-cover-v3.mjs'
       - 'study-update-v6.js'
       - 'study-update-v6.css'
       - 'recorded-voices-v11.js'
@@ -55,6 +61,8 @@ jobs:
           done
           cat /tmp/nhi-site-server.log
           exit 1
+      - name: Verify interactive Lương/Nhi cover, airplane and mobile
+        run: node scripts/smoke-cover-v3.mjs
       - name: Confirm Vietnamese to Korean flip is visible
         run: node scripts/smoke-cards.mjs
       - name: Check mobile layout, rating animations and fireworks
