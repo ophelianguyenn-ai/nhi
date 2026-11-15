@@ -70,11 +70,27 @@ async function enableSync(page) {
   await page.waitForFunction(() => document.querySelector('#sync')?.dataset.s === 'cloud', { timeout: 12000 });
 }
 async function checkCounter(page, n) {
-  await page.waitForFunction(expected => {
-    const el = document.querySelector('#planBox .counter');
-    return el && el.textContent.trim().startsWith(expected + ' /') &&
-      document.querySelector('#view-plan').hidden === false;
-  }, { timeout: 18000 }, n);
+  try {
+    await page.waitForFunction(expected => {
+      const el = document.querySelector('#planBox .counter');
+      return el && el.textContent.trim().startsWith(expected + ' /') &&
+        document.querySelector('#view-plan').hidden === false;
+    }, { timeout: 13000 }, n);
+  } catch (error) {
+    const diag = await page.evaluate(() => ({
+      hash: location.hash, sync: document.querySelector('#sync')?.textContent,
+      mode: JSON.parse(localStorage.getItem('viko-ko-meeting-ui-v1') || '{}').mode,
+      viewHidden: document.querySelector('#view-plan')?.hidden,
+      counter: document.querySelector('#planBox .counter')?.textContent,
+      card: document.querySelector('#planBox .pcard')?.textContent?.slice(0, 100),
+      plan: document.querySelector('#planBox')?.textContent?.slice(0, 300),
+      active: localStorage.getItem('nlc-active-card-v1')?.slice(0, 350),
+      session: localStorage.getItem('viko-plan-sess-v1')?.slice(0, 350),
+      documentReady: document.readyState
+    }));
+    console.log('CURSOR TIMEOUT:', n, JSON.stringify(diag), 'CLOUD:', JSON.stringify(db), 'ERRORS:', JSON.stringify(errors));
+    throw error;
+  }
 }
 let laptop, phone;
 try {
