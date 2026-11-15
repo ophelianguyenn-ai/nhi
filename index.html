@@ -1861,20 +1861,28 @@ button,input,select,textarea{font-family:var(--ui)}
       lsSet(DEVICE_KEY, device);
     }
     var last = null, silentDepth = 0, receivedOnce = false;
-    try { last = JSON.parse(lsGet(KEY) || 'null'); } catch (e) { last = null; }
-    if (!last || !Number.isFinite(last.t)) last = null;
+    function scope() { var c = SYNC.cfg(); return c ? c.url + '/sync/' + c.code : ''; }
+    var lastScope = scope();
+    try {
+      var saved = JSON.parse(lsGet(KEY) || 'null');
+      if (saved && saved.scope === lastScope && saved.nav && Number.isFinite(saved.nav.t)) last = saved.nav;
+    } catch (e) { last = null; }
+    function checkScope() {
+      if (scope() !== lastScope) { lastScope = scope(); last = null; receivedOnce = false; }
+    }
+    function remember(nav) { last = nav; lsSet(KEY, JSON.stringify({ scope: lastScope, nav: nav })); }
     function silence(fn) {
       silentDepth++;
       try { return fn(); } finally { silentDepth--; }
     }
     function publish(data) {
       if (silentDepth || !SYNC.cfg()) return;
+      checkScope();
       var record = Object.assign({}, data, {
         t: Math.max(Date.now(), (last && last.t || 0) + 1),
         from: device
       });
-      last = record;
-      lsSet(KEY, JSON.stringify(last));
+      remember(record);
       SYNC.queue('nav', record);
     }
     function publishPlan(s) {
@@ -1901,7 +1909,7 @@ button,input,select,textarea{font-family:var(--ui)}
         state.mode = 'cards';
         state.deck = nav.deck === 'all' || DECK_NAME[nav.deck] ? nav.deck : 'all';
         state.status = typeof nav.status === 'string' ? nav.status : 'all';
-        state.order = ['default', 'shuffle'].indexOf(nav.order) >= 0 ? nav.order : 'default';
+        state.order = ['default', 'hard', 'shuffle'].indexOf(nav.order) >= 0 ? nav.order : 'default';
         if (Number.isFinite(nav.seed)) state.seed = nav.seed;
         buildQueue(nav.card);
         if (queue.indexOf(nav.card) < 0) {
@@ -1918,6 +1926,7 @@ button,input,select,textarea{font-family:var(--ui)}
       });
     }
     function receive(raw, full) {
+      checkScope();
       if (!raw || typeof raw !== 'object') {
         if (full && last && last.from === device) SYNC.queue('nav', last);
         return;
@@ -1925,7 +1934,7 @@ button,input,select,textarea{font-family:var(--ui)}
       if (!Number.isFinite(raw.t) || raw.t <= 0 || typeof raw.from !== 'string' ||
           (raw.mode !== 'plan' && raw.mode !== 'cards')) return;
       if (raw.mode === 'plan' &&
-          (typeof raw.lesson !== 'string' || !/^[\\w-]+$/.test(raw.lesson) ||
+          (typeof raw.lesson !== 'string' || !/^[\w-]+$/.test(raw.lesson) ||
           !Array.isArray(raw.queue) || raw.queue.length > 1200)) return;
       if (raw.mode === 'cards' && typeof raw.card !== 'string') return;
       var newer = !last || raw.t > last.t ||
@@ -1933,8 +1942,7 @@ button,input,select,textarea{font-family:var(--ui)}
       var initialReplay = !receivedOnce && last && raw.t === last.t && raw.from === last.from;
       receivedOnce = true;
       if (newer || initialReplay) {
-        last = raw;
-        lsSet(KEY, JSON.stringify(last));
+        remember(raw);
         if (raw.from !== device) {
           if (raw.mode === 'plan') PLAN.follow(raw);
           else followCards(raw);
