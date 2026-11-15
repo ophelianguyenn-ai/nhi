@@ -1,0 +1,310 @@
+/* V8 — original upper-body, gently swaying Nhi + precise flashcard controls.
+   Appended AFTER all legacy styles to make the selected settings predictable. */
+
+/* Restore the older Nhi half-body mascot (brown wavy hair, pink sweater,
+   yellow flowers) with a soft idle sway; no male character or 3D. */
+#cover.nhi-upper-v8 .cover-in{
+  width:min(660px,100%)!important;
+  gap:clamp(8px,1.6vh,16px)!important;
+  padding-top:6px!important;
+  padding-bottom:clamp(15px,3.5vh,32px)!important;
+}
+#cover.nhi-upper-v8 #coverHero{
+  position:relative!important;
+  display:grid!important;
+  place-items:center!important;
+  width:min(330px,72vw)!important;
+  height:clamp(225px,37vh,355px)!important;
+  min-width:0!important;max-width:100%!important;
+  margin:0 auto!important;
+  overflow:visible!important;
+  transform:none!important;
+  animation:none!important;
+  filter:none!important;
+  isolation:isolate;
+}
+#cover.nhi-upper-v8 #coverHero>.nhi-upper-girl-v8{
+  display:block!important;
+  max-width:100%!important;
+  width:100%!important;height:100%!important;
+  object-fit:contain!important;
+  object-position:center bottom!important;
+  user-select:none;pointer-events:none;
+  image-rendering:auto;
+  filter:drop-shadow(0 7px 8px rgba(69,43,55,.17));
+  transform-origin:50% 87%;
+  animation:nhi-v8-gentle-sway 3.7s ease-in-out infinite alternate!important;
+}
+@keyframes nhi-v8-gentle-sway{
+  0%{transform:translate3d(-2px,1px,0) rotate(-1.4deg)}
+  100%{transform:translate3d(2px,-3px,0) rotate(1.4deg)}
+}
+#cover.nhi-upper-v8 #coverHero>:not(.nhi-upper-girl-v8){display:none!important}
+@media(max-width:660px){
+  #cover.nhi-upper-v8{padding:8px 10px calc(12px + env(safe-area-inset-bottom,0px))}
+  #cover.nhi-upper-v8 .cover-in{padding:5px 0 12px!important;gap:7px!important}
+  #cover.nhi-upper-v8 #coverHero{
+    width:min(300px,78vw)!important;
+    height:clamp(200px,34vh,300px)!important;
+  }
+  #cover.nhi-upper-v8 h1{font-size:clamp(35px,10vw,53px)!important}
+  #cover.nhi-upper-v8 .lead{font-size:14px!important}
+  #cover.nhi-upper-v8 #coverGo{min-height:47px}
+}
+@media(max-height:615px){
+  #cover.nhi-upper-v8 #coverHero{height:clamp(155px,28vh,240px)!important}
+}
+
+/* Setting labels remain compact and accessible on phone and desktop. */
+#nhiCardFontSettings .nhi-v8-heading{
+  font-size:13px;font-weight:800;letter-spacing:.015em;
+  border-top:1px solid var(--line);padding-top:10px;margin-top:8px;
+}
+.nhi-v8-setting-row>.field{width:112px;max-width:38%;min-height:42px}
+.nhi-v8-setting-row label{flex:1 1 175px;min-width:0}
+.nhi-v8-setting-tip{font-size:12px;line-height:1.4;margin:-5px 0 5px;color:var(--muted)}
+
+/* Expand the card's available LENGTH/height. Never clip text, English, note or
+   illustration; content taller than the chosen minimum expands the card. */
+html body #planBox .pcard{
+  min-height:var(--nhi-v8-card-height,430px)!important;
+  height:auto!important;
+  max-height:none!important;
+  display:flex!important;
+  flex-direction:column!important;
+  overflow:visible!important;
+  box-sizing:border-box!important;
+}
+html body.nhi-viewport-fit #planBox .pcard{
+  min-height:var(--nhi-v8-card-height,430px)!important;
+  max-height:none!important;
+  height:auto!important;
+}
+html body #planBox .pcard>.card-top,
+html body #planBox .pcard>.cmeta,
+html body #planBox .pcard>.prate{flex:0 0 auto!important}
+html body #planBox .pcard>.pfront{
+  box-sizing:border-box!important;
+  flex:1 0 auto!important;
+  height:auto!important;
+  min-height:clamp(190px,calc(var(--nhi-v8-card-height,430px) - 150px),650px)!important;
+  max-height:none!important;
+  overflow:visible!important;
+  align-content:space-evenly!important;
+  grid-auto-rows:min-content!important;
+  gap:clamp(7px,2.1vh,16px)!important;
+  padding-block:clamp(12px,2.3vh,20px)!important;
+}
+html body #planBox .pcard>.pfront:not(.nhi-with-image){
+  display:flex!important;
+  flex-direction:column!important;
+  justify-content:space-evenly!important;
+  align-items:center!important;
+}
+html body #planBox .pcard>.pfront.nhi-with-image{
+  display:grid!important;
+  align-content:space-evenly!important;
+}
+html body #planBox .pcard>.pfront>.nhi-card-details,
+html body #planBox .pcard .nhi-card-details{
+  min-height:0!important;
+  height:auto!important;
+  grid-auto-rows:min-content!important;
+  align-content:space-evenly!important;
+}
+html body #planBox .pcard .nhi-english-v5{
+  max-height:none!important;
+}
+html body #planBox .pcard .nhi-english-v5.nhi-compare-expanded .nhi-en-choices{
+  max-height:none!important;overflow:visible!important;
+}
+
+/* Independent Vietnamese sizes and centering.
+   The front stays centered unless its user-configured horizontal offset
+   intentionally moves it. First-letter capitalization is handled by JS
+   without overwriting lesson content. */
+html body #planBox .pcard .pfront>.prompt{
+  font-size:var(--nhi-v8-front-size,26px)!important;
+  line-height:1.32!important;
+  width:min(100%,44ch)!important;
+  max-width:100%!important;
+  min-width:0!important;
+  margin-inline:auto!important;
+  text-align:center!important;
+  align-self:center!important;
+  justify-self:center!important;
+  text-wrap:balance;
+  transform:translate3d(var(--nhi-move-x,0px),0,0)!important;
+}
+html body #planBox .pcard .pfront>.vi-under{
+  font-size:var(--nhi-v8-back-size,22px)!important;
+  line-height:1.40!important;
+  min-height:1.5em!important;
+  min-width:0!important;
+  width:fit-content!important;
+  max-width:100%!important;
+  text-align:center!important;
+  justify-self:center!important;
+  align-self:center!important;
+  margin:0 auto!important;
+  text-wrap:balance!important;
+  transform:translate3d(var(--nhi-move-x,0px),var(--nhi-move-y,0px),0)!important;
+}
+/* Preserve a visible move affordance only during double-tap drag. */
+#planBox .pcard [data-nhi-movable="vietnameseFront"]{touch-action:pan-y}
+#planBox .pcard [data-nhi-movable="vietnamese"]{touch-action:pan-y}
+#planBox .pcard .nhi-doubletap-ready{
+  outline:2px dashed color-mix(in srgb,var(--accent-t) 48%,transparent);
+  outline-offset:4px;border-radius:7px;cursor:grabbing!important;
+}
+#planBox .pcard .pfront>.prompt [class*=ph],
+#planBox .pcard .pfront>.vi-under [class*=ph]{font-size:inherit}
+
+/* Pastel-mint "Khó" button, still readable and active-state visible. */
+html body #planBox .pcard>.prate.nhi-rating-v3>.hard,
+html body #planBox .pcard>.prate>.hard{
+  background:#dff5e9!important;
+  color:#316d50!important;
+  border-color:#9dcfb6!important;
+  box-shadow:0 3px 0 #abd8c0!important;
+}
+html body #planBox .pcard>.prate.nhi-rating-v3>.hard.picked{
+  background:#c5ead8!important;
+  color:#245e44!important;
+  border-color:#79b59a!important;
+}
+
+/* Equal visual square dimensions for icons sharing a toolbar row. */
+html body .topbtns>.iconbtn,
+html body #planBox .pcard .cicons>.iconbtn,
+html body #planBox .pcard .cicons>.hjbtn{
+  box-sizing:border-box!important;
+  flex:0 0 38px!important;
+  width:38px!important;
+  min-width:38px!important;
+  max-width:38px!important;
+  height:38px!important;
+  min-height:38px!important;
+  max-height:38px!important;
+  padding:5px!important;
+  display:inline-grid!important;
+  place-items:center!important;
+}
+html body #planBox .pcard .cicons{
+  display:flex!important;
+  flex-wrap:wrap!important;
+  gap:6px!important;
+  justify-content:flex-end!important;
+  align-items:center!important;
+}
+html body #planBox .pcard .cicons svg{width:20px!important;height:20px!important}
+html body #planBox .pcard .cicons>.hjbtn{
+  font-size:17px!important;
+}
+html body #planBox .pcard .nhi-card-dictionaries .nhi-dict-bubble{
+  width:36px!important;
+  min-width:36px!important;
+  height:36px!important;
+  min-height:36px!important;
+  flex:0 0 36px!important;
+}
+html body #planBox .pcard .nhi-en-head-actions{
+  display:inline-flex!important;align-items:center!important;gap:6px!important;
+  flex-wrap:nowrap!important;
+}
+html body #planBox .pcard .nhi-en-head-actions .nhi-en-speak,
+html body #planBox .pcard .nhi-en-head-actions .nhi-thinking-button{
+  box-sizing:border-box!important;
+  display:grid!important;place-items:center!important;
+  width:34px!important;min-width:34px!important;max-width:34px!important;
+  height:34px!important;min-height:34px!important;max-height:34px!important;
+  padding:4px!important;
+  border-radius:10px!important;
+}
+/* Smaller, gentler but still visible headphone and "hard to remember" icons. */
+html body #planBox .pcard .nhi-en-head-actions .nhi-en-speak svg{
+  width:20px!important;height:20px!important;opacity:.75!important;
+}
+html body #planBox .pcard .nhi-en-head-actions .nhi-thinking-button .nhi-emoji-think{
+  font-size:21px!important;line-height:1!important;opacity:.78!important;
+  filter:saturate(.80);
+}
+html body #planBox .pcard .nhi-en-head-actions .nhi-thinking-button[aria-pressed=true] .nhi-emoji-think{opacity:.90!important}
+/* English edit is now in card settings only, including IPA. */
+html body #planBox .pcard .nhi-en-edit,
+html body #planBox .pcard .nhi-en-edit-form{display:none!important}
+
+/* ChatGPT-style thought bubble, with serif Times New Roman inscription. */
+html body #planBox .pcard .nhi-en-forgot{position:relative}
+html body #planBox .pcard .nhi-forgot-bubble{
+  box-sizing:border-box!important;
+  position:absolute!important;z-index:30!important;
+  right:-8px!important;bottom:calc(100% + 13px)!important;
+  width:max-content!important;max-width:min(265px,72vw)!important;
+  padding:10px 14px!important;
+  border:1px solid #c5cfd5!important;
+  background:#f6f8fb!important;color:#344355!important;
+  border-radius:17px 17px 4px 17px!important;
+  box-shadow:0 6px 18px #4a526220!important;
+  font-family:"Times New Roman",Times,serif!important;
+  font-size:16px!important;line-height:1.4!important;
+  font-weight:400!important;font-style:italic!important;
+  text-align:center!important;white-space:normal!important;
+}
+html body #planBox .pcard .nhi-forgot-bubble::after{
+  content:"";position:absolute;right:12px;bottom:-8px;
+  width:13px;height:13px;background:#f6f8fb;
+  border-right:1px solid #c5cfd5;border-bottom:1px solid #c5cfd5;
+  transform:rotate(45deg);
+}
+html body #planBox .pcard .nhi-forgot-bubble[hidden]{display:none!important}
+:root[data-theme="dark"] body #planBox .pcard .nhi-forgot-bubble{
+  background:#344152!important;color:#f5f6fa!important;border-color:#8295aa!important;
+}
+:root[data-theme="dark"] body #planBox .pcard .nhi-forgot-bubble::after{background:#344152;border-color:#8295aa}
+
+@media(max-width:600px){
+  html body #planBox .pcard>.pfront{
+    min-height:clamp(190px,calc(var(--nhi-v8-card-height,430px) - 145px),680px)!important;
+    gap:10px!important;
+    padding-inline:10px!important;
+  }
+  html body #planBox .pcard .card-top{
+    flex-wrap:wrap!important;gap:7px!important;
+  }
+  html body #planBox .pcard .cicons{justify-content:center!important;flex:1 1 100%!important}
+  html body #planBox .pcard>.prate{width:100%!important;max-width:100%!important}
+  .nhi-v8-setting-row>.field{max-width:44%;min-width:92px}
+}
+@media(prefers-reduced-motion:reduce){
+  #cover.nhi-upper-v8 #coverHero>.nhi-upper-girl-v8{animation:none!important;transform:none!important}
+}
+/* Stronger than the legacy viewport-fit :has() rule. The user-selected
+   minimum length must win even when auto-fit mode is active. */
+html body.nhi-viewport-fit #planBox .pcard:not(:has(.nhi-editor-window-v5,.nhi-picture-picker)){
+  height:auto!important;
+  min-height:var(--nhi-v8-card-height,430px)!important;
+  max-height:none!important;
+  overflow:visible!important;
+}
+html body.nhi-viewport-fit #planBox .pcard>.pfront{
+  min-height:clamp(190px,calc(var(--nhi-v8-card-height,430px) - 150px),650px)!important;
+  flex:1 0 auto!important;
+  overflow:visible!important;
+  align-content:space-evenly!important;
+}
+html body #planBox .pcard .pfront>.prompt[data-nhi-movable],
+html body #planBox .pcard .pfront>.vi-under[data-nhi-movable]{
+  /* Old CSS applied the translate property; our transform owns the
+     complete offset, so disable it to avoid moving twice. */
+  translate:none!important;
+}
+
+/* Final visual review: separate the swaying girl from the title on wide screens. */
+#cover.nhi-upper-v8 #coverHero{margin:0 auto 12px!important}
+@media(max-width:660px){#cover.nhi-upper-v8 #coverHero{margin-bottom:6px!important}}
+html body #planBox .pcard .nhi-forgot-bubble{
+  background:#edf3f9!important;color:#253c52!important;
+  border-color:#aabfcf!important;font-weight:600!important;
+}
+html body #planBox .pcard .nhi-forgot-bubble::after{background:#edf3f9;border-color:#aabfcf}
