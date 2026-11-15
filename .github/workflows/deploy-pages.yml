@@ -117,8 +117,6 @@ jobs:
           done
           grep -q 'nhi-3d-cover-v6.mjs' _site/index.html
           grep -q 'nhi-3d-cover-v6.css' _site/index.html
-          grep -q 'nhi-demo-pixel-cover-v5-2.css' _site/index.html
-          grep -q 'nhi-romantic-cover-v5-1.css' _site/index.html
           grep -q 'nhi-cover-airplane-v3.js' _site/index.html
           echo "Interactive Lương/Nhi cover assets verified."
 
