@@ -23,6 +23,9 @@ on:
       - 'scripts/smoke-demo-pixel-v5-2.mjs'
       - 'nhi-demo-pixel-cover-v5-2.js'
       - 'nhi-demo-pixel-cover-v5-2.css'
+      - 'nhi-3d-cover-v6.mjs'
+      - 'nhi-3d-cover-v6.css'
+      - 'scripts/smoke-three-v6.mjs'
       - 'assets/romantic-demo/**'
       - 'study-update-v6.js'
       - 'study-update-v6.css'
@@ -63,11 +66,16 @@ jobs:
         with:
           node-version: '22'
       - name: Install headless Chrome automation
-        run: npm install --no-save --no-package-lock puppeteer-core@24
+        run: npm install --no-save --no-package-lock puppeteer-core@24 three@0.160.1
       - name: Extract nine original GIF frames for browser tests
         run: |
           python3 -m pip install --user 'Pillow>=10,<13'
           python3 scripts/build_cover_gif_frames.py
+
+      - name: Prepare pinned WebGL Three.js module
+        run: |
+          mkdir -p vendor
+          cp node_modules/three/build/three.module.js vendor/three.module.js
 
       - name: Start local static site
         run: |
@@ -79,8 +87,8 @@ jobs:
           done
           cat /tmp/nhi-site-server.log
           exit 1
-      - name: Verify exact-demo-pixel characters, 6-second animation, airplane and mobile
-        run: node scripts/smoke-demo-pixel-v5-2.mjs
+      - name: Verify real Three.js 3D characters, face orientation, 6-second kiss and mobile
+        run: node scripts/smoke-three-v6.mjs
       - name: Confirm Vietnamese to Korean flip is visible
         run: node scripts/smoke-cards.mjs
       - name: Check mobile layout, rating animations and fireworks
