@@ -54,6 +54,8 @@
   color:var(--nhi-cover-ui-ink,#1a719e)!important;
   background:var(--nhi-cover-ui-soft,#eef8ff)!important;
   box-shadow:0 5px 0 var(--nhi-cover-ui-edge,#add9ef)!important;
+  /* Palette changes must be immediate, never briefly display the old hue. */
+  transition-property:transform,filter!important;
   filter:none!important;
 }
 #cover.nhi-upper-v8 #coverGo.primary.white:hover{
