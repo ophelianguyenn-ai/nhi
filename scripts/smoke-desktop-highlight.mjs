@@ -1,13 +1,13 @@
 /* Regression for real single-click paired highlights on desktop and touchscreen. */
 import puppeteer from 'puppeteer-core';
 
-// A semantic, explicitly matched bilingual pair. Unmatched phrases in the
+// Two verified Vietnamese/Korean subpairs. Unmatched phrases in the
 // general corpus are intentionally marked independently, without fabricating translations.
 const ITEM='desktop-paired-highlight';
 const LESSON='daily-2026-11-16-paired-highlight';
 const fixture={id:LESSON,date:'2026-11-16',plan:'2026-11-16',title:'Kiểm tra tô màu song ngữ',
   items:[[ITEM,'w','Kiểm tra chức năng','Thủ tục thanh toán','결제 절차',1,
-    [['Thủ tục thanh toán','결제 절차']],'']],updatedAt:Date.now()};
+    [['Thủ tục','절차'],['thanh toán','결제']],'']],updatedAt:Date.now()};
 const ROOT='http://127.0.0.1:8765/';
 const browser=await puppeteer.launch({headless:true,executablePath:process.env.CHROME_BIN||'/usr/bin/google-chrome',
   args:['--no-sandbox','--disable-setuid-sandbox','--disable-dev-shm-usage']});
