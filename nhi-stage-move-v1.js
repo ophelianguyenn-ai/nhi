@@ -50,13 +50,18 @@ function install(el,key){
   // Words can be selected/clicked normally unless the user actually drags.
   active={pointer:e.pointerId,startX:e.clientX,startY:e.clientY,
     x:positions[key].x,y:positions[key].y,rect,moved:false};
-  try{el.setPointerCapture(e.pointerId);}catch(_e){}
+  // Do not capture on press: capturing the parent retargets a desktop click
+  // away from the .ph.tap phrase and makes the paired highlight unreachable.
  },{passive:true});
  el.addEventListener('pointermove',e=>{
   if(!active || active.pointer!==e.pointerId)return;
   const dx=e.clientX-active.startX,dy=e.clientY-active.startY;
-  if(!active.moved && Math.hypot(dx,dy)<6)return;
-  active.moved=true;
+  if(!active.moved){
+   if(Math.hypot(dx,dy)<6)return;
+   active.moved=true;
+   // Capture only a real drag so movement outside the element still works.
+   try{el.setPointerCapture(e.pointerId);}catch(_e){}
+  }
   const container=el.closest('.pfront');
   const box=container?.getBoundingClientRect();
   const xMax=box?Math.min(120,Math.max(0,(box.width-active.rect.width)/2-8)):110;
