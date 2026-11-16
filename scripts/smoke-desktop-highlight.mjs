@@ -1,9 +1,13 @@
 /* Regression for real single-click paired highlights on desktop and touchscreen. */
-import fs from 'node:fs';
 import puppeteer from 'puppeteer-core';
 
-const lesson=JSON.parse(fs.readFileSync('lessons.json','utf8')).lessons.find(l=>l.items?.length>=2);
-if(!lesson)throw Error('A built-in lesson is required');
+// A semantic, explicitly matched bilingual pair. Unmatched phrases in the
+// general corpus are intentionally marked independently, without fabricating translations.
+const ITEM='desktop-paired-highlight';
+const LESSON='daily-2026-11-16-paired-highlight';
+const fixture={id:LESSON,date:'2026-11-16',plan:'2026-11-16',title:'Kiểm tra tô màu song ngữ',
+  items:[[ITEM,'w','Kiểm tra chức năng','Thủ tục thanh toán','결제 절차',1,
+    [['Thủ tục thanh toán','결제 절차']],'']],updatedAt:Date.now()};
 const ROOT='http://127.0.0.1:8765/';
 const browser=await puppeteer.launch({headless:true,executablePath:process.env.CHROME_BIN||'/usr/bin/google-chrome',
   args:['--no-sandbox','--disable-setuid-sandbox','--disable-dev-shm-usage']});
@@ -14,22 +18,18 @@ async function check(name,viewport){
   const page=await context.newPage();
   await page.setViewport(viewport);
   page.on('pageerror',err=>console.error(name+' PAGE ERROR: '+err));
-  await page.goto(ROOT+'#/bai/'+lesson.id,{waitUntil:'domcontentloaded'});
-  await page.waitForSelector('#planBox .ppage',{timeout:18000});
-  await page.evaluate(()=>{
-   const start=[...document.querySelectorAll('#planBox button')]
-     .find(b=>/Học ngay|Học trước|Tiếp tục|Học lại|Ôn/.test(b.textContent||''));
-   if(!start)throw Error('Lesson start button missing');
-   start.click();
-  });
-  await page.waitForSelector('#planBox .pcard .pfront',{timeout:16000});
-  let phrase=null;
-  for(let i=0;i<40;i++){
-   phrase=await page.$('#planBox .pfront .prompt .ph.tap');
-   if(phrase)break;
-   await page.$eval('#planBox .pnav .parrow:last-child',button=>button.click());
-  }
-  if(!phrase)throw Error(name+': No paired phrase on built-in cards');
+  // Restore a complete single-card lesson (same path as normal daily lessons).
+  await page.evaluateOnNewDocument((id,item,lesson)=>{
+   localStorage.setItem('viko-daily-lessons-v1',JSON.stringify({[id]:lesson}));
+   localStorage.setItem('viko-plan-sess-v1',JSON.stringify({
+    kind:'lesson',title:lesson.title,lesson:id,queue:[item],pos:0,
+    picked:{},stats:{hard:0,mid:0}
+   }));
+   localStorage.setItem('viko-ko-meeting-ui-v1',JSON.stringify({mode:'cards',dir:'vk'}));
+   sessionStorage.setItem('nlc-cover-seen','1');
+  },LESSON,ITEM,fixture);
+  await page.goto(ROOT+'#/bai/'+LESSON,{waitUntil:'domcontentloaded'});
+  await page.waitForSelector('#planBox .pcard .pfront .prompt .ph.tap',{timeout:16000});
   const before=await page.evaluate(()=>{
    const el=document.querySelector('#planBox .pfront .prompt .ph.tap');
    const rect=el.getBoundingClientRect();
