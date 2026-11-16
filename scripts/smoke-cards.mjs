@@ -203,7 +203,7 @@ try {
       return {className:phrase?.className,flipped:!!document.querySelector('#planBox .pfront .answer.ko')};
     });
     console.log('DESKTOP CLICK HIGHLIGHT FRONT',JSON.stringify(markedFront));
-    if(!/\\bhl[1-4]\\b/.test(markedFront.className||'')||markedFront.flipped)
+    if(!['hl1','hl2','hl3','hl4'].some(cls=>(markedFront.className||'').split(' ').includes(cls))||markedFront.flipped)
       throw Error('One mouse click did not highlight the front phrase without flipping');
     await customPage.click('#planBox .pflip');
     await new Promise(r=>setTimeout(r,650));
@@ -213,7 +213,7 @@ try {
       return {korean:korean?.className,vietnamese:vietnamese?.className};
     });
     console.log('DESKTOP CLICK HIGHLIGHT BACK',JSON.stringify(markedBack));
-    if(!/\\bhl[1-4]\\b/.test(markedBack.korean||'')||!/\\bhl[1-4]\\b/.test(markedBack.vietnamese||''))
+    if(!['hl1','hl2','hl3','hl4'].some(cls=>(markedBack.korean||'').split(' ').includes(cls))||!['hl1','hl2','hl3','hl4'].some(cls=>(markedBack.vietnamese||'').split(' ').includes(cls)))
       throw Error('Highlighted Vietnamese phrase did not match its Korean meaning');
     await visibleCard(customPage,'restored custom Vietnamese-Korean');
     await customPage.reload({waitUntil:'domcontentloaded'});
