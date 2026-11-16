@@ -1,10 +1,11 @@
-name: Generate selected daily lesson Neural audio
+name: Generate selected daily lesson FPT Ban Mai and InJoon MP3
 on:
   pull_request:
     branches: [main]
     paths:
       - scripts/daily-audio-texts.json
       - scripts/generate_daily_audio.py
+      - scripts/generate_selected_voices.py
       - .github/workflows/generate-daily-neural.yml
   workflow_dispatch:
 permissions:
@@ -17,7 +18,7 @@ jobs:
   generate:
     if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 40
     steps:
       - uses: actions/checkout@v4
         with:
@@ -26,9 +27,13 @@ jobs:
         with:
           python-version: '3.12'
       - run: python -m pip install 'edge-tts>=7,<8' 'mutagen>=1.47,<2'
-      - name: Generate missing SunHi and HoaiMy clips
+      - name: Validate FPT/Edge routing offline
+        run: python -m unittest scripts/test_selected_voices.py -v
+      - name: Generate InJoon and Ban Mai if protected FPT key exists
+        env:
+          FPT_API_KEY: ${{ secrets.FPT_API_KEY }}
         run: python scripts/generate_daily_audio.py
-      - name: Commit audio to the tested feature branch
+      - name: Commit only successfully validated audio
         env:
           TARGET_BRANCH: ${{ github.head_ref || github.ref_name }}
         run: |
@@ -36,11 +41,11 @@ jobs:
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git add audio/ audio-manifest.json
           if ! git diff --cached --quiet; then
-            git commit -m 'Add Neural speech for the selected daily lesson'
+            git commit -m 'Add selected daily lesson Ban Mai/InJoon speech'
             git pull --rebase origin "$TARGET_BRANCH"
             git push origin "HEAD:$TARGET_BRANCH"
           fi
-      - name: Verify the branch with the new audio
+      - name: Verify new audio on the branch
         env:
           GH_TOKEN: ${{ github.token }}
           TARGET_BRANCH: ${{ github.head_ref || github.ref_name }}
