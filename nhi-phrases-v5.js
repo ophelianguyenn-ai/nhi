@@ -86,9 +86,19 @@ function align(it,all){
  return output.length?output:[[vi,ko]];
 }
 function expand(it,all){
- const base=Array.isArray(it.pairs)&&it.pairs.length>1?it.pairs.map(p=>p.slice()):[];
+ const supplied=Array.isArray(it.pairs)?it.pairs:[];
+ const base=supplied.length>1?supplied.map(p=>p.slice()):[];
  const auto=align(it,all);
- if(!base.length)return auto;
+ if(!base.length){
+  // Keep a supplied whole-card translation linked when the auto segmenter
+  // has no verified bilingual subpairs. Otherwise its VI-only and KO-only
+  // fragments make a tap on the front unable to colour the matching back.
+  const whole=supplied.length===1?supplied[0]:null;
+  if(Array.isArray(whole)&&lower(whole[0]).trim()===lower(it.vi).trim()
+     &&String(whole[1]||'').trim()===String(it.ko||'').trim()
+     &&!auto.some(p=>p[0]&&p[1]))return [whole.slice()];
+  return auto;
+ }
  for(const pair of auto){
   const vi=pair[0]||'',ko=pair[1]||'';
   if(base.some(p=>(vi&&p[0]&&(lower(p[0]).includes(lower(vi))||lower(vi).includes(lower(p[0]))))||(ko&&p[1]&&(p[1].includes(ko)||ko.includes(p[1])))))continue;
