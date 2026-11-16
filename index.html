@@ -596,7 +596,7 @@ section:not([hidden]) > .quiz, section:not([hidden]) > #cardWrap, .list > .row:n
 }
 </style>
 
-<script src="hanja-v9.js?v=12"></script><script src="hanja-extra-v12.js"></script><script src="card-images-v11.js"></script><script src="nhi-google-images-v1.js?v=20261114-study-v7"></script><script src="nhi-hard-minimal-v1.js?v=20261114-study-v7"></script><script src="nhi-phrases-v5.js?v=20261116-paired-whole-card-v1"></script><script src="nhi-english-data-v6.js?v=20261113-reviewed-173"></script><script src="nhi-english-v5.js?v=20261115-v10-ipa-five"></script><script src="recorded-voices-v11.js?v=20261114-study-v7"></script>
+<script src="hanja-v9.js?v=12"></script><script src="hanja-extra-v12.js"></script><script src="card-images-v11.js"></script><script src="nhi-google-images-v1.js?v=20261114-study-v7"></script><script src="nhi-hard-minimal-v1.js?v=20261114-study-v7"></script><script src="nhi-phrases-v5.js?v=20261116-paired-whole-card-v1"></script><script src="nhi-english-data-v6.js?v=20261113-reviewed-173"></script><script src="nhi-english-v5.js?v=20261115-v10-ipa-five"></script><script src="recorded-voices-v11.js?v=20261116-fpt-banmai-injoon-v1"></script>
 <script src="qrcode.js" defer></script>
 <link rel="stylesheet" href="refresh-v9.css?v=13"><link rel="stylesheet" href="study-enhancements-v13.css?v=14"><link rel="stylesheet" href="nhi-updates-v1.css?v=1"><link rel="stylesheet" href="nhi-ai-resize-v2.css?v=1"><link rel="stylesheet" href="nhi-study-motion-v3.css?v=3"><link rel="stylesheet" href="nhi-interface-v4.css?v=4"><link rel="stylesheet" href="nhi-interface-v5.css?v=20261113-rollback-stable-v1"><link rel="stylesheet" href="nhi-seasons-v1.css?v=20261113-cartoon-soft-1">
 <link rel="stylesheet" href="nhi-living-garden-v1.css?v=20261113-cartoon-butterflies-v1">
@@ -4011,13 +4011,21 @@ button,input,select,textarea{font-family:var(--ui)}
 
   // Voice picker
   var SAMPLE = { en: 'A furniture company is coming in today to re-examine the scene.', ko: '난간과 탱크 지붕 철판의 용접을 진행하여 상부 구조의 연결부를 보강했습니다.', vi: 'Đã hàn lan can và thép tấm mái bồn để gia cố các chỗ nối của kết cấu phía trên.' };
+  function recordedVoiceLabel(lang) {
+    var oldName = {ko:'SunHi',vi:'HoaiMy',en:'Jenny'}[lang];
+    var byLanguage = window.NHI_AUDIO && window.NHI_AUDIO.voiceCounts && window.NHI_AUDIO.voiceCounts();
+    var counts = byLanguage && byLanguage[lang];
+    if (lang==='vi' && counts && counts.banmai) return 'Neural · Ban Mai (FPT)' + (counts.HoaiMy ? ' · còn câu Hoài My' : '');
+    if (lang==='ko' && counts && counts['ko-KR-InJoonNeural']) return 'Neural · InJoon' + (counts.SunHi ? ' · còn câu SunHi' : '');
+    return 'Neural · ' + oldName;
+  }
   function fillVoiceSelects() {
     var missing = [];
     [['ko', 'voiceKo', 'tiếng Hàn'], ['vi', 'voiceVi', 'tiếng Việt'], ['en', 'voiceEn', 'tiếng Anh']].forEach(function (x) {
       var sel = $(x[1]), list = voicesFor(x[0]);
       sel.textContent = '';
       var auto = document.createElement('option'); auto.value = '';
-      auto.textContent = 'Neural · ' + ({ko:'SunHi',vi:'HoaiMy',en:'Jenny'})[x[0]] + ' (không cần cài)';
+      auto.textContent = recordedVoiceLabel(x[0]) + ' (không cần cài)';
       sel.appendChild(auto);
       list.forEach(function (v) { var o = document.createElement('option'); o.value = v.voiceURI; o.textContent = v.name + (v.localService ? '' : ' · trực tuyến'); sel.appendChild(o); });
       var has = VOICE_PREF[x[0]] && list.some(function (v) { return v.voiceURI === VOICE_PREF[x[0]]; });
@@ -4031,6 +4039,7 @@ button,input,select,textarea{font-family:var(--ui)}
     m.textContent = missing.length ? ('Máy này chưa có giọng ' + missing.join(' và ') + '. Hãy cài thêm giọng trong phần cài đặt giọng nói của máy rồi tải lại trang.') : '';
   }
   fillVoiceSelects();
+  document.addEventListener('nhi-audio-ready',fillVoiceSelects);
   if (canSpeak) {
     try { window.speechSynthesis.addEventListener('voiceschanged', fillVoiceSelects); } catch (e) { window.speechSynthesis.onvoiceschanged = fillVoiceSelects; }
   }
