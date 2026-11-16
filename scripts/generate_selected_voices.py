@@ -58,8 +58,7 @@ def _post_fpt(phrase, api_key):
     payload = phrase.encode('utf-8')
     req = request.Request(FPT_ENDPOINT, data=payload, method='POST', headers={
         'api_key': api_key, 'voice': VOICE['vi'], 'speed': '0',
-        'format': 'mp3', 'Content-Type': 'text/plain; charset=utf-8',
-        'Cache-Control': 'no-cache'})
+        'format': 'mp3', 'Cache-Control': 'no-cache'})
     with request.urlopen(req, timeout=35) as response:
         result = json.loads(response.read().decode('utf-8'))
     if str(result.get('error', '0')) not in ('0', '') or result.get('success') is False or result.get('success') == 'false':
