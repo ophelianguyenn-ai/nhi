@@ -24,7 +24,7 @@ const scenarios=[
  ['Trao đổi bản vẽ','수정된 도면을 확인 부탁드립니다.','Nhờ anh/chị kiểm tra bản vẽ đã sửa.']
 ];
 let panel='',noteTab='grammar',term='',scope='lesson',sourceLesson='',scenario=0;
-let voice=null,recorder=null,audioChunks=[],recordUrl='',transcript='',answerRevealed=false;
+let voice=null,recorder=null,audioChunks=[],recordUrl='',transcript='',answerRevealed=false,selectedItemId='',exercisePos=0,exerciseAnswer='',exerciseFeedback='';
 const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
 const data=()=>P()?.snapshot?.()||{lessons:[],items:[],active:false,syncEnabled:false};
 function read(k,def){try{const v=JSON.parse(localStorage.getItem(k));return v==null?def:v}catch(e){return def}}
@@ -57,6 +57,7 @@ function visibleItems(){const d=data(),l=d.lessons.find(x=>x.id===sourceLesson)|
 function renderPanel(){
  const out=$('#nhiV2Workspace');if(!out)return;
  if(panel==='search')out.innerHTML=renderSearch();
+ else if(panel==='write'||panel==='quiz')out.innerHTML=renderExercise();
  else if(panel==='notebook'||panel==='errors')out.innerHTML=renderNotebook();
  else if(panel==='progress')out.innerHTML=renderProgress();
  else if(panel==='practice')out.innerHTML=renderPractice();
@@ -64,6 +65,24 @@ function renderPanel(){
  else if(panel==='threads')out.innerHTML=renderThreads();
  else if(panel==='settings')out.innerHTML=renderSettings();
  else out.textContent='';
+}
+function renderExercise(){
+ const pool=visibleItems(),it=pool[Math.min(exercisePos,pool.length-1)];
+ if(!it)return pageTitle('Luyện tập','Bài này chưa có thẻ.');
+ const options=[it].concat(pool.filter(x=>x.id!==it.id).slice((exercisePos*7)%Math.max(1,pool.length),((exercisePos*7)%Math.max(1,pool.length))+3));
+ const lesson=data().lessons.find(x=>x.id===sourceLesson)||firstLesson();
+ return pageTitle(panel==='write'?'✍️ Luyện viết tiếng Hàn':'🧩 Trắc nghiệm tiếng Hàn',
+ 'Nguồn: '+(scope==='all'?'Toàn bộ học phần':lesson&&lesson.title||'Bài hiện tại')+' · '+pool.length+' thẻ')
+ +'<section class="nhi-v2-surface"><div class="nhi-v2-between"><b>Câu '+(exercisePos+1)+'/'+pool.length+'</b><span class="nhi-v2-tag">Không ảnh hưởng lịch ôn 5 lượt</span></div>'
+ +'<p class="nhi-v2-question">'+esc(it.vi)+'</p>'
+ +(panel==='write'?'<label for="nhiV2WriteInput">Viết câu tiếng Hàn</label><textarea id="nhiV2WriteInput" rows="3" placeholder="Nhập tiếng Hàn…">'+esc(exerciseAnswer)+'</textarea>'+button('exercise-check','Kiểm tra','primary')
+ :'<div class="nhi-v2-options">'+options.sort((a,b)=>a.id.localeCompare(b.id)).map(x=>button('quiz-answer:'+x.id,x.ko,'ghost')).join('')+'</div>')
+ +(exerciseFeedback?'<div class="nhi-v2-answer">'+esc(exerciseFeedback)+'</div>':'')
+ +'<div class="nhi-v2-practice-buttons">'+button('exercise-next','Câu tiếp','primary')+button('exercise-listen','🔊 Nghe mẫu','ghost')+'</div></section>';
+}
+function recordExercise(it,correct){
+ const m=read(KEY,{ratings:[],minutes:{}});m.quizzes=Array.isArray(m.quizzes)?m.quizzes:[];
+ m.quizzes.push({id:it.id,correct:!!correct,at:Date.now(),mode:panel});m.quizzes=m.quizzes.slice(-2000);write(KEY,m);
 }
 function renderSearch(){
  const d=data();const matches=d.items.filter(it=>{
@@ -83,7 +102,8 @@ function renderSearch(){
 }
 function renderNotebook(){
  const d=data(),history=read(KEY,{ratings:[]}).ratings||[];
- const hard=d.items.filter(it=>it.hard||it.rate==='hard'||history.filter(h=>h.id===it.id&&h.grade==='hard').length>=2);
+ const incorrect=read(KEY,{}).quizzes||[];
+ const hard=d.items.filter(it=>it.hard||it.rate==='hard'||history.filter(h=>h.id===it.id&&h.grade==='hard').length>=2||incorrect.some(q=>q.id===it.id&&!q.correct));
  const saved=read(EXAMPLE,[]);
  let html=pageTitle(panel==='errors'?'🧠 Lỗi sai của tôi':'📝 Sổ tay của Nhi','Gắn trực tiếp với từ và câu Hàn–Việt đã học.');
  html+='<div class="nhi-v2-pills">'+[['grammar','Ngữ pháp'],['errors','Lỗi sai ('+hard.length+')'],['examples','Ví dụ đã lưu']].map(x=>button('note-tab:'+x[0],x[1],noteTab===x[0]?'primary':'ghost')).join('')+'</div>';
@@ -122,14 +142,15 @@ function renderProgress(){
  const d=data(),m=read(KEY,{ratings:[],minutes:{}}),ratings=m.ratings||[],minutes=m.minutes||{};
  const last7=[],today=new Date();for(let i=6;i>=0;i--){let x=new Date(today);x.setDate(today.getDate()-i);let k=x.getFullYear()+'-'+String(x.getMonth()+1).padStart(2,'0')+'-'+String(x.getDate()).padStart(2,'0');last7.push({day:k,min:Math.round((minutes[k]||0)/60)});}
  const nmin=last7.reduce((a,x)=>a+x.min,0),first=ratings.filter(x=>x.first),remember=first.filter(x=>x.grade==='known').length;
- const answered=ratings.filter(x=>x.grade==='mid'||x.grade==='known').length;
- const accuracy=ratings.length?Math.round(answered/ratings.length*100):null;
+ const quizzes=m.quizzes||[];
+ const answered=quizzes.filter(x=>x.correct).length;
+ const accuracy=quizzes.length?Math.round(answered/quizzes.length*100):null;
  const hard=d.items.filter(it=>it.hard||it.rate==='hard').length;
  const grammat=patterns.filter(g=>d.items.some(it=>it.type==='s'&&g.rx.test(it.ko)&&(it.known||it.rate==='known'))).length;
  return pageTitle('📈 Tiến độ học tập','Số liệu được ghi nhận thật từ khi bật phiên bản này; không có điểm XP hay bảng xếp hạng.')
  +'<div class="nhi-v2-metrics">'+[
   [nmin+' phút','Trong 7 ngày'],[first.length?remember+'/'+first.length:'—','Nhớ ngay lần đầu'],
-  [hard,'Thẻ còn khó'],[accuracy==null?'—':accuracy+'%','Đánh giá Vừa / Dễ']
+  [hard,'Thẻ còn khó'],[accuracy==null?'—':accuracy+'%','Đúng khi kiểm tra']
  ].map(x=>'<div class="nhi-v2-metric"><strong>'+esc(x[0])+'</strong><span>'+esc(x[1])+'</span></div>').join('')+'</div>'
  +'<section class="nhi-v2-surface"><h3>Thời gian thực học theo ngày</h3><div class="nhi-v2-bars">'+last7.map(x=>'<div><span style="height:'+Math.max(3,Math.min(100,x.min*4))+'%"></span><small>'+esc(x.day.slice(8))+'</small><small>'+x.min+'p</small></div>').join('')+'</div></section>'
  +'<section class="nhi-v2-surface"><b>Ngữ pháp đã gặp và thuộc: '+grammat+'/'+patterns.length+' cấu trúc</b><p>Lượt học nhỏ hoàn thành: '+read('nhi-v2-batches-v1',[]).length+'</p>'
@@ -282,6 +303,18 @@ function recordLearning(){
   log.ratings.push({id:x.id,grade:x.grade,lesson:x.lesson||'',practice:!!x.practice,at:Date.now(),first:first});
   log.ratings=log.ratings.slice(-2000);write(KEY,log);
  });
+ window.addEventListener('nhi:quiz',e=>{
+  const d=e.detail;if(!d||!d.id)return;
+  const log=read(KEY,{ratings:[],minutes:{}});log.quizzes=log.quizzes||[];
+  log.quizzes.push({id:d.id,correct:!!d.correct,at:Date.now(),mode:'trắc nghiệm'});
+  log.quizzes=log.quizzes.slice(-2000);write(KEY,log);
+ });
+ window.addEventListener('nhi:test',e=>{
+  const d=e.detail;if(!d)return;
+  const log=read(KEY,{ratings:[],minutes:{}});log.tests=log.tests||[];
+  log.tests.push({right:d.right,total:d.total,wrongIds:d.wrongIds||[],at:Date.now()});
+  log.tests=log.tests.slice(-300);write(KEY,log);
+ });
  let last=Date.now();
  setInterval(()=>{
   const now=Date.now(),elapsed=Math.min(now-last,15000);last=now;
@@ -332,6 +365,27 @@ function ask(text){
 }
 function handle(act){
  const d=data();
+ if(act==='exercise-check'){
+  const it=visibleItems()[Math.min(exercisePos,visibleItems().length-1)];if(!it)return;
+  const value=$('#nhiV2WriteInput')?.value||'',norm=x=>String(x||'').replace(/\s+/g,'').replace(/[.?!。、]/g,'').toLowerCase();
+  const correct=!!value.trim()&&norm(value)===norm(it.ko);
+  recordExercise(it,correct);exerciseFeedback=(correct?'✓ Đúng! ':'Chưa chính xác. ')+'Mẫu: '+it.ko+' ('+it.vi+')';
+  exerciseAnswer=value;renderPanel();return;
+ }
+ if(act.startsWith('quiz-answer:')){
+  const it=visibleItems()[Math.min(exercisePos,visibleItems().length-1)];if(!it)return;
+  const correct=it.id===act.slice(12);recordExercise(it,correct);
+  exerciseFeedback=(correct?'✓ Đúng! ':'Chưa đúng. ')+'Đáp án: '+it.ko+' ('+it.vi+')';
+  renderPanel();return;
+ }
+ if(act==='exercise-next'){
+  const pool=visibleItems();exercisePos=(exercisePos+1)%Math.max(1,pool.length);
+  exerciseFeedback='';exerciseAnswer='';renderPanel();return;
+ }
+ if(act==='exercise-listen'){
+  const it=visibleItems()[Math.min(exercisePos,visibleItems().length-1)];if(it)window.NHI_SPEECH?.speak(it.ko,'ko-KR');return;
+ }
+
  if(act.startsWith('note-tab:')){noteTab=act.slice(9);setPanel('notebook');return;}
  if(act.startsWith('scope:')){scope=act.slice(6);renderPanel();return;}
  if(act.startsWith('open-item:')){
@@ -350,6 +404,7 @@ function handle(act){
  if(act.startsWith('mode:')){
   const type=act.slice(5),l=d.lessons.find(x=>x.id===sourceLesson)||firstLesson();
   if(type==='listen'||type==='speak'||type==='dialog'){setPanel(type==='listen'?'listen':'speak');if(type==='dialog'){scenario=1;renderPanel();}return;}
+  if(type==='write'||type==='quiz'||type==='test'){exercisePos=0;exerciseAnswer='';exerciseFeedback='';setPanel(type==='test'?'quiz':type);return;}
   if(type==='flash'){setPanel('');if(scope==='lesson'&&l)P()?.startLessonById?.(l.id);else P()?.startPractice?.(d.items.map(x=>x.id),'Ôn tổng hợp tất cả học phần');return;}
   const tab={write:'write',quiz:'quiz',test:'test',match:'match'}[type];
   if(tab){status('Chế độ '+type+' dùng bộ lọc học phần gốc. Hãy kiểm tra tên nguồn ở đầu trang.');route(tab);}return;
@@ -422,6 +477,7 @@ function init(){
    term=e.target.value;const start=e.target.selectionStart;renderPanel();
    const next=$('#nhiV2SearchInput');if(next){next.focus({preventScroll:true});next.setSelectionRange(start,start);}
   }else if(e.target.id==='nhiV2Answer')transcript=e.target.value;
+  else if(e.target.id==='nhiV2WriteInput')exerciseAnswer=e.target.value;
  });
  wrap.addEventListener('change',e=>{
   if(e.target.id==='nhiV2LessonSelect'){sourceLesson=e.target.value;renderPanel();}
