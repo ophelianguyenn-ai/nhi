@@ -1,6 +1,6 @@
 // Offline support: network-first for GitHub Pages and static assets.
 // Fall back to cache only when offline. Different cache key forces eviction of earlier stale CSS/JS.
-const CACHE = 'nhi-corner-v72-speech-replay-original-gif-20261117';
+const CACHE = 'nhi-corner-v73-cute-ux2-scoped-checkpoints';
 const CORE = [
   'study-update-v6.js','study-update-v6.css','nhi-november-v15.js','nhi-november-v15.css',
   'nhi-late-2026.js','nhi-late-2026.css','nhi-romance-v1.js','nhi-romance-v1.css','nhi-luong-v1.svg','nhi-couple-gif-v1.js','nhi-couple-gif-v1.css',
@@ -24,7 +24,7 @@ const CORE = [
   'hanja-v9.js','hanja-extra-v12.js','nhi-avatar.png','nhi-mascot.webp',
   'nhi-puzzled.webp','garden-v10.js','card-images-v11.js','technical-images.json',
   'nhi-google-images-v1.js','nhi-hard-minimal-v1.js','nhi-updates-v1.css','nhi-ai-resize-v2.js','nhi-ai-resize-v2.css',
-  'nhi-study-motion-v3.css','nhi-fireworks-v3.js','nhi-interface-v5.css','nhi-interface-v5.js','nhi-seasons-v1.css','nhi-seasons-v1.js','nhi-living-garden-v1.css','nhi-living-garden-v1.js','nhi-phrases-v5.js','nhi-chat-voice-v1.js','nhi-chat-image-notes-v1.css','nhi-chat-note-card-v2.css','nhi-cat-phu-ba-20261117-v2.svg','nhi-original-gif-review-v1.css','nhi-cat-original-8frames-20261117.gif','nhi-verified-pairs-20261117.js','nhi-longpress-dictionary-v1.js','nhi-money-cat-20261117.svg','nhi-seven-fixes-20261117.css','nhi-english-data-v6.js','nhi-english-v5.js','nhi-interface-v4.css','nhi-interface-v4.js',
+  'nhi-study-motion-v3.css','nhi-fireworks-v3.js','nhi-interface-v5.css','nhi-interface-v5.js','nhi-seasons-v1.css','nhi-seasons-v1.js','nhi-living-garden-v1.css','nhi-living-garden-v1.js','nhi-phrases-v5.js','nhi-chat-voice-v1.js','nhi-chat-image-notes-v1.css','nhi-corner-v2.js','nhi-corner-v2.css','nhi-chat-note-card-v2.css','nhi-cat-phu-ba-20261117-v2.svg','nhi-original-gif-review-v1.css','nhi-cat-original-8frames-20261117.gif','nhi-verified-pairs-20261117.js','nhi-longpress-dictionary-v1.js','nhi-money-cat-20261117.svg','nhi-seven-fixes-20261117.css','nhi-english-data-v6.js','nhi-english-v5.js','nhi-interface-v4.css','nhi-interface-v4.js',
   'recorded-voices-v11.js','audio-manifest.json','backup-portable-v1.js',
   'garden-day.webp','garden-night.webp',
   'garden-summer-day.webp','garden-summer-night.webp',

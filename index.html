@@ -658,6 +658,7 @@ button,input,select,textarea{font-family:var(--ui)}
 <link rel="stylesheet" href="nhi-card-polish-v10.css?v=20261115-title-weight-v12">
 <link rel="stylesheet" href="nhi-cover-palette-v12.css?v=20261115-no-girl-frame-v13">
 <link rel="stylesheet" href="nhi-chat-image-notes-v1.css?v=20261117"><link rel="stylesheet" href="nhi-chat-note-card-v2.css?v=20261117"><link rel="stylesheet" href="nhi-original-gif-review-v1.css?v=20261117-r3">
+<link rel="stylesheet" href="nhi-corner-v2.css?v=20261117-ux2">
 <script>
 /* Pick exactly one of three cover colors when the document loads.
    Navigate/flip cards without changing it; no animation or interval. */
@@ -1683,6 +1684,7 @@ button,input,select,textarea{font-family:var(--ui)}
     if (quiz.answered) return;
     var c = BY_ID[quiz.id], ok = id === c.id, fb = $('qFb');
     quiz.answered = true; quiz.picked = id; quiz.total++;
+    window.dispatchEvent(new CustomEvent('nhi:quiz',{detail:{id:c.id,correct:ok,at:Date.now()}}));
     if (ok) { quiz.right++; fb.className = 'feedback ok'; fb.textContent = 'Đúng rồi.'; }
     else {
       fb.className = 'feedback bad';
@@ -2386,6 +2388,7 @@ button,input,select,textarea{font-family:var(--ui)}
       res[qi] = ok; total++; if (ok) right++; else wrongIds.push(q.id);
     });
     P.score = { res: res, mt: mt, right: right, total: total, wrongIds: wrongIds };
+    window.dispatchEvent(new CustomEvent('nhi:test',{detail:{right:right,total:total,wrongIds:wrongIds.slice(),at:Date.now()}}));
     test.graded = true;
     wrongIds.forEach(markWrong);
     paintTest();
@@ -2849,7 +2852,7 @@ button,input,select,textarea{font-family:var(--ui)}
     function save() { var o = { resume: resume, resumeFull: resumeFull }; SECS.forEach(function (k) { o[k] = ps[k]; }); lsSet(KEY, JSON.stringify(o)); }
     function val(sec, k) { var e = ps[sec][k]; return e ? e.v : null; }
     function put(sec, k, v) { var e = { v: v, t: Date.now() }; ps[sec][k] = e; save(); SYNC.queue('L/' + sec + '/' + k, e); }
-    var view = 'days', sess = null, page = null;
+    var view = 'home', sess = null, page = null;
     var lastKey = '', anim = '', flipping = false, legendOpen = false, query = '', topicSel = '';
     var ratingPending = false, ratingToken = 0, pendingRatingFinish = null;
 
@@ -3019,7 +3022,7 @@ button,input,select,textarea{font-family:var(--ui)}
       fetch(c.url + '/sync/' + c.code + '/X.json').then(function (r) { return r.ok ? r.json() : null; }).then(function (X) { if (X) applyExtras(X); settle(); }).catch(settle);
     }
     var dataCb = null;
-    function onData() { if (dataCb) { try { dataCb(); } catch (e) { } } tryFollowCursor(); }
+    function onData() { if (dataCb) { try { dataCb(); } catch (e) { } } tryFollowCursor();window.dispatchEvent(new Event('nhi:lessons-ready')); }
     function load() {
       if (loaded || loadErr === 'loading') return;
       loadErr = 'loading';
@@ -3314,7 +3317,12 @@ button,input,select,textarea{font-family:var(--ui)}
       var a = el('a', 'ptitle', titleMain(L)); a.href = '#/bai/' + L.id; a.title = L.title; body.appendChild(a);
       body.appendChild(topicTags(L));
       body.appendChild(el('span', 'listinfo', c[0] + ' từ vựng · ' + c[1] + ' câu'));
-      p.appendChild(body); p.appendChild(chips(L));
+      p.appendChild(body);
+      var details=el('details','nhi-v2-review-details');
+      details.appendChild(el('summary',null,'Xem lịch ôn 5 lượt'));details.appendChild(chips(L));p.appendChild(details);
+      var finished=val('done',L.id)||[],partial=resumeFull[L.id];
+      if(finished.length)p.appendChild(el('p','nhi-v2-review-info','Ôn gần nhất: '+vn(finished[finished.length-1],true)));
+      if(partial&&partial.pos>0)p.appendChild(el('p','nhi-v2-review-info','✏️ Đang học dở · '+partial.pos+'/'+partial.queue.length+' thẻ'));
       var row = el('div', 'prow'); row.appendChild(statusLine(L));
       var rs = (resume[L.id] || []).filter(alive);
       row.appendChild(btn('primary', rs.length ? 'Tiếp tục (' + rs.length + ' thẻ)' : 'Mở bài', function () { openLesson(L.id); }));
@@ -3384,7 +3392,42 @@ button,input,select,textarea{font-family:var(--ui)}
       }
       box.appendChild(p);
     }
+    function renderDashboard(v){
+      var info=summary(),all=info.due.concat(info.late),seen={};
+      all=all.filter(function(L){if(seen[L.id])return false;seen[L.id]=1;return true;});
+      var banner=todayCard();banner.classList.add('nhi-v2-hero');v.appendChild(banner);
+      var intro=el('div','nhi-v2-intro');
+      intro.appendChild(el('p',null,'🌸 Một chút tiếng Hàn mỗi ngày, Nhi nhé!'));
+      var actions=el('div','nhi-v2-home-actions');
+      if(all.length)actions.appendChild(btn('primary nhi-v2-start','▶ Bắt đầu học 10 phút',function(){startLesson(all[0]);}));
+      else actions.appendChild(el('p','listinfo','Hôm nay không có bài đến hạn. Bạn có thể ôn lại những thẻ khó.'));
+      actions.appendChild(btn('ghost','🗓 Xem lịch học',function(){view='days';render();}));
+      intro.appendChild(actions);
+      var goal=el('div','nhi-v2-goal');goal.innerHTML='<b>🎯 Mục tiêu 10 phút</b><div class="nhi-v2-goal-track"><span></span></div><small>Thời gian được ghi nhận khi thực sự học</small>';
+      intro.appendChild(goal);v.appendChild(intro);
+      var group=el('section','nhi-v2-priorities');group.appendChild(el('h3',null,'🌟 3 bài ưu tiên'));
+      if(!all.length)group.appendChild(el('p','listinfo','Các bài đã hoàn thành đang chờ lịch ôn tiếp theo.'));
+      all.slice(0,3).forEach(function(L,i){
+        var row=el('article','nhi-v2-priority'),copy=el('div');
+        copy.appendChild(el('span','nhi-v2-order',String(i+1).padStart(2,'0')));
+        var a=el('a','nhi-v2-priority-title',titleMain(L));a.href='#/bai/'+L.id;copy.appendChild(a);
+        var n=liveCount(L.ids),r=resumeFull[L.id],est=Math.min(10,Math.max(2,Math.ceil(L.ids.length*.45)));
+        copy.appendChild(el('p','listinfo',n[0]+' từ · '+n[1]+' câu · khoảng '+est+' phút'));
+        copy.appendChild(statusLine(L));
+        if(r&&r.pos>0)copy.appendChild(el('small','nhi-v2-resume','✏️ Đang học dở: '+r.pos+'/'+r.queue.length));
+        row.appendChild(copy);row.appendChild(btn('primary',r&&r.pos>0?'Tiếp tục':'Học',function(){startLesson(L);}));
+        group.appendChild(row);
+      });
+      group.appendChild(btn('ghost','Xem tất cả bài đến hạn ('+all.length+')',function(){view='days';render();}));v.appendChild(group);
+      if(info.hard.length){var h=el('section','nhi-v2-hard-peek');h.appendChild(el('b',null,'🧠 '+info.hard.length+' thẻ khó'));
+        h.appendChild(btn('ghost','Luyện thêm',function(){start('hard',info.hard,'Thẻ khó · Luyện thêm');}));v.appendChild(h);}
+      var browse=el('details','nhi-v2-browse');browse.appendChild(el('summary',null,'📚 Duyệt học phần và chủ đề'));
+      var links=el('div','nhi-v2-browse-links');
+      [['days','Lịch học'],['topics','Chủ đề'],['months','Tháng']].forEach(function(x){links.appendChild(btn('ghost',x[1],function(){view=x[0];render();}));});
+      browse.appendChild(links);v.appendChild(browse);
+    }
     function renderHome(v, fresh) {
+      if(view==='home'){renderDashboard(v);return;}
       if (fresh) v.classList.add('stagger');
       v.appendChild(todayCard());
       var tools = el('div', 'ptools'), sb = el('div', 'psearch');
@@ -3535,7 +3578,7 @@ button,input,select,textarea{font-family:var(--ui)}
       hero.appendChild(ht); hero.appendChild(lessonRing(L, 'lg'));
       wrap.appendChild(hero);
       var hd = el('div', 'quiz');
-      hd.appendChild(chips(L));
+      var t=el('details','nhi-v2-review-details');t.appendChild(el('summary',null,'Xem đủ 5 mốc ôn'));t.appendChild(chips(L));hd.appendChild(t);
       var row = el('div', 'prow'), cur = current(L); row.appendChild(statusLine(L));
       hd.appendChild(row);
       var rs = (resume[L.id] || []).filter(alive);
@@ -3557,6 +3600,20 @@ button,input,select,textarea{font-family:var(--ui)}
       if (hd2.length) row2.appendChild(lbtn('ghost', 'flip', 'Ôn lại thẻ khó (' + hd2.length + ')', function () { start('hard', hd2, L.title + ' · thẻ khó', L); }));
       var enids=L.ids.filter(function(id){return alive(id)&&val('enHard',id);});if(enids.length)row2.appendChild(btn('ghost','Ôn chưa nhớ tiếng Anh ('+enids.length+')',function(){start('english',enids,L.title+' · chưa nhớ tiếng Anh',L);}));
       hd.appendChild(row2);
+      var modes=el('div','nhi-v2-lesson-modes');
+      modes.appendChild(el('p','nhi-v2-source-label','Nguồn: '+titleMain(L)+' · '+L.ids.filter(alive).length+' thẻ'));
+      var actions=el('div','nhi-v2-lesson-mode-buttons');
+      var early=!!cur&&(cur.st==='next'||cur.st==='future')&&!alreadyStudied&&!rs.length;
+      var flash=btn('primary','📇 Học flashcard',function(){startLesson(L);});
+      if(early){flash.disabled=true;flash.title='Bài mới chỉ mở đúng ngày học, không tự học trước';}
+      actions.appendChild(flash);
+      [['write','✍️ Luyện viết'],['quiz','🧩 Trắc nghiệm'],['listen','🎧 Nghe']].forEach(function(x){
+        actions.appendChild(btn('ghost',x[1],function(){
+          if(window.NHI_V2_OPEN_LESSON_MODE)window.NHI_V2_OPEN_LESSON_MODE(L.id,x[0]);
+          else toast('Tính năng đang tải. Vui lòng thử lại.');
+        }));
+      });
+      modes.appendChild(actions);hd.appendChild(modes);
       wrap.appendChild(hd);
       var body = el('div', 'quiz'); body.appendChild(contentBlock(L.ids)); wrap.appendChild(body);
       v.appendChild(wrap);
@@ -3565,7 +3622,7 @@ button,input,select,textarea{font-family:var(--ui)}
     /* ---- study session (kept across reloads) ---- */
     function saveSess() {
       if (!sess) { lsSet(SKEY, ''); return; }
-      lsSet(SKEY, JSON.stringify({ kind: sess.kind, title: sess.title, lesson: sess.L ? sess.L.id : null, queue: sess.queue, pos: sess.pos, picked: sess.picked, again: sess.again, stats: sess.stats, recorded: !!sess.recorded, celebrated: !!sess.celebrated }));
+      lsSet(SKEY, JSON.stringify({ kind: sess.kind, title: sess.title, lesson: sess.L ? sess.L.id : null, queue: sess.queue, pos: sess.pos, picked: sess.picked, again: sess.again, stats: sess.stats, recorded: !!sess.recorded, celebrated: !!sess.celebrated, batchStop:sess.batchStop, lastCheckpoint:sess.lastCheckpoint }));
       ACTIVE_CARD.plan(sess);
     }
     var pendingCursor = null;
@@ -3612,7 +3669,7 @@ button,input,select,textarea{font-family:var(--ui)}
         var o = JSON.parse(lsGet(SKEY) || 'null'); if (!o || !o.queue) return;
         // a session on one of the daily lessons can only come back once those lessons have arrived
         if (!extrasTried && ((o.lesson && !BY_LESSON[o.lesson]) || o.queue.some(function (id) { return !ITEMS[id]; }))) return;
-        sess = { kind: o.kind, title: o.title, L: o.lesson ? BY_LESSON[o.lesson] || null : null, queue: o.queue.filter(function (id) { return ITEMS[id]; }), pos: o.pos || 0, flipped: false, again: o.again || {}, picked: o.picked || {}, spoken: -1, stats: o.stats || { known: 0, hard: 0, mid: 0 }, recorded: !!o.recorded, celebrated: !!o.celebrated };
+        sess = { kind: o.kind, title: o.title, L: o.lesson ? BY_LESSON[o.lesson] || null : null, queue: o.queue.filter(function (id) { return ITEMS[id]; }), pos: o.pos || 0, flipped: false, again: o.again || {}, picked: o.picked || {}, spoken: -1, stats: o.stats || { known: 0, hard: 0, mid: 0 }, recorded: !!o.recorded, celebrated: !!o.celebrated, batchStop:Number(o.batchStop)||Math.min(o.queue.length,Math.ceil(((o.pos||0)+1)/10)*10),lastCheckpoint:Number(o.lastCheckpoint)||0 };
         // Do not hijack another learning mode while old lesson data is loading.
         // On a slow connection, the user may already have selected "Thẻ ghi nhớ".
         // Recover the deep-link only while the active mode is actually "Lịch học".
@@ -3633,7 +3690,7 @@ button,input,select,textarea{font-family:var(--ui)}
       sess = { kind: kind, title: title, L: L || null, queue: ids.slice(), pos: pos,
         flipped: false, again: restored && restored.again || {}, picked: restored && restored.picked || {},
         spoken: -1, stats: restored && restored.stats || { known: 0, hard: 0, mid: 0 },
-        recorded: !!(restored && restored.recorded) };
+        recorded: !!(restored && restored.recorded), batchStop:Math.min(ids.length,Math.max(pos+1,Number(restored&&restored.batchStop)||Math.ceil((pos+1)/10)*10)),lastCheckpoint:Number(restored&&restored.lastCheckpoint)||0 };
       expireUndo(); stopSpeech();
       anim = 'next'; saveSess(); render(); window.scrollTo({ top: 0, behavior: 'smooth' });
     }
@@ -3651,7 +3708,7 @@ button,input,select,textarea{font-family:var(--ui)}
         resumeFull[sess.L.id] = {
           kind: sess.kind, queue: sess.queue.slice(), pos: sess.pos, title: sess.title,
           picked: Object.assign({}, sess.picked), again: Object.assign({}, sess.again),
-          stats: Object.assign({}, sess.stats), recorded: !!sess.recorded
+          stats: Object.assign({}, sess.stats), recorded: !!sess.recorded,batchStop:sess.batchStop,lastCheckpoint:sess.lastCheckpoint
         };
         save();
       }
@@ -3785,6 +3842,7 @@ button,input,select,textarea{font-family:var(--ui)}
       var s = sess;
       while (s.pos < s.queue.length && !alive(s.queue[s.pos])) s.queue.splice(s.pos, 1);
       if (s.pos >= s.queue.length) return renderDone(v);
+      if(s.batchStop&&s.pos>=s.batchStop)return renderBatchDone(v);
       var it = ITEMS[s.queue[s.pos]], focus = document.body.classList.contains('focus');
       var head = el('div', 'shead' + (fresh ? ' fx-in' : ''));
       head.appendChild(ibtn('iconbtn sm', 'pause', pause, 'Tạm dừng, về trang bài học'));
@@ -3975,7 +4033,7 @@ button,input,select,textarea{font-family:var(--ui)}
         if(s.picked[pos]==='hard')return;
         ++ratingToken;ratingPending=false;pendingRatingFinish=null;
         s.stats.hard=(s.stats.hard||0)+1;s.picked[pos]='hard';
-        put('rate',id,'hard');put('hard',id,addDays(today(),1));
+        put('rate',id,'hard');put('hard',id,addDays(today(),1));window.dispatchEvent(new CustomEvent('nhi:review',{detail:{id:id,grade:'hard',lesson:s.L&&s.L.id,practice:s.kind!=='lesson'}}));
         haptic([14,40,14]);saveSess();render();
         react('hard',document.querySelector('#planBox .pcard'));
         return;
@@ -3987,7 +4045,7 @@ button,input,select,textarea{font-family:var(--ui)}
         if(token!==ratingToken||sess!==s||s.pos!==pos)return;
         ratingPending=false;pendingRatingFinish=null;
         if(window.NHI_HARD_MASCOT)window.NHI_HARD_MASCOT.clear();
-        s.stats[k]=(s.stats[k]||0)+1;s.picked[pos]=k;put('rate',id,k);
+        s.stats[k]=(s.stats[k]||0)+1;s.picked[pos]=k;put('rate',id,k);window.dispatchEvent(new CustomEvent('nhi:review',{detail:{id:id,grade:k,lesson:s.L&&s.L.id,practice:s.kind!=='lesson'}}));
         if(k==='known'){put('known',id,1);if(val('hard',id))put('hard',id,null);}
         else if(k==='mid'&&s.kind==='hard'&&val('hard',id))put('hard',id,null);
         expireUndo();haptic(14);s.selectedKo='';s.spoken=-1;s.pos++;
@@ -3996,6 +4054,23 @@ button,input,select,textarea{font-family:var(--ui)}
       }
       pendingRatingFinish=finish;
       if(animated)setTimeout(finish,430);else finish();
+    }
+    function renderBatchDone(v){
+      var s=sess,n=s.pos,total=s.queue.length;
+      if(s.lastCheckpoint!==n){s.lastCheckpoint=n;
+        try{var key='nhi-v2-batches-v1',arr=JSON.parse(lsGet(key)||'[]');
+          if(!Array.isArray(arr))arr=[];arr.push({lesson:s.L&&s.L.id||'',date:today(),at:Date.now(),position:n,total:total});
+          lsSet(key,JSON.stringify(arr.slice(-400)));}catch(e){}
+        saveSess();
+      }
+      var box=el('section','quiz nhi-v2-mini-done');
+      box.appendChild(el('div','nhi-v2-mini-icon','🐱 🌸 ✨'));
+      box.appendChild(el('h2',null,'Hoàn thành '+n+'/'+total+' thẻ!'));
+      box.appendChild(el('p','listinfo','Đã lưu lượt nhỏ. Chỉ hoàn thành toàn bài mới được tính một lần ôn theo lịch.'));
+      var row=el('div','prow');
+      row.appendChild(btn('primary','Tiếp tục 10 thẻ',function(){s.batchStop=Math.min(total,s.pos+10);saveSess();render();}));
+      row.appendChild(btn('ghost','Dừng và học tiếp sau',function(){pause();}));
+      box.appendChild(row);v.appendChild(box);
     }
     function renderDone(v) {
       var s = sess, p = el('div', 'quiz sdone');
@@ -4130,14 +4205,43 @@ button,input,select,textarea{font-family:var(--ui)}
       edits.forEach(applyEd);
       if (changed) { save(); onData(); if (state.mode === 'plan' && !sess) render(); }
     }
+    function snapshotV2(){
+      return {lessons:LESSONS.map(function(L){
+        var cur=current(L),done=val('done',L.id)||[],r=resumeFull[L.id]||{};
+        return {id:L.id,date:L.date,title:titleMain(L),sourceTitle:L.title,
+          due:cur&&cur.due||null,round:cur&&cur.step||0,status:cur&&cur.st||'done',
+          done:done.slice(),lastReview:done.length?done[done.length-1]:null,
+          resume:r.pos||0,total:L.ids.filter(alive).length,ids:L.ids.filter(alive)};}),
+        items:Object.keys(ITEMS).filter(alive).map(function(id){var x=ITEMS[id],ed=val('ed',id),note=val('note',id);
+          return {id:id,lesson:x.lesson,vi:ed&&ed.vi||x.vi,ko:ed&&ed.ko||x.ko,topic:x.topic||'',
+            type:x.type,note:note&&note.text||x.note||'',hard:!!val('hard',id),rate:val('rate',id)||'',known:!!val('known',id)};}),
+        active:!!sess,session:sess?{lesson:sess.L&&sess.L.id,kind:sess.kind,pos:sess.pos,total:sess.queue.length}:null,
+        syncEnabled:!!SYNC.cfg()};
+    }
+    function setViewV2(name){if(['home','days','topics','months'].indexOf(name)<0)return;view=name;home();}
     return {
       render: render, merge: merge, extras: applyExtras, follow: follow, active: function () { return !!sess; }, load: load, leave: function () { if (!page) leave(); }, route: route,
-      home: home, openDailyCreator: openDailyCreator, summary: summary, onData: function (fn) { dataCb = fn; },
+      home: home,setView:setViewV2,snapshot:snapshotV2,startLessonById:function(id){var L=BY_LESSON[id];if(L)startLesson(L);},startPractice:function(ids,title){start('free',ids,title||'Luyện tập');},openDailyCreator: openDailyCreator, summary: summary, onData: function (fn) { dataCb = fn; },
       appendChatExample:appendChatExample,
       ctx: function () { var it = curItem(); if (it) return { ko: it.ko, vi: it.vi, topic: it.topic, type: it.type }; return page && BY_LESSON[page] ? { lesson: BY_LESSON[page].title } : null; }
     };
   })();
-
+  // Public, read-only learning status and guarded navigation for the 2.0 UI.
+  window.NHI_PLAN_V2=PLAN;
+  // Create an actual custom flashcard with the existing database/sync mechanism.
+  window.NHI_CREATE_CARD_V2=function(ko,vi,note){
+    ko=String(ko||'').trim();vi=String(vi||'').trim();
+    if(!ko||!vi)return {created:false,message:'Cần có đủ một câu Hàn và một câu Việt'};
+    if(CARDS.some(function(c){return c.ko.trim()===ko&&c.vi.trim()===vi;}))
+      return {created:false,message:'Cặp Hàn–Việt đã tồn tại, không tạo trùng'};
+    var name='Hội thoại tiếng Hàn công việc',deck=Object.keys(custom.d).find(function(id){
+      return custom.d[id]&&!custom.d[id].del&&custom.d[id].name===name;
+    });
+    if(!deck)deck=addDeck(name);
+    var id=addCard(deck,vi,ko,String(note||'').slice(0,800));
+    customChanged();
+    return {created:true,id:id,deck:deck};
+  };
   /* ---------- Modes ---------- */
   function renderMode() {
     if (state.mode !== 'cards') stopAuto();
@@ -4587,6 +4691,10 @@ button,input,select,textarea{font-family:var(--ui)}
   /* ================= AI side window ================= */
   var AI = (function () {
     var KEY = 'nlc-ai-v1', LOGKEY = 'nlc-ai-log', cfg = { p: 'gemini', k: {}, m: {} }, log = [], busy = false, withCtx = true;
+    var THREADKEY='nhi-ai-threads-v2',threadId='',threads=[];
+    try{threads=JSON.parse(localStorage.getItem(THREADKEY)||'[]');if(!Array.isArray(threads))threads=[];}catch(e){threads=[];}
+    try{threadId=sessionStorage.getItem('nhi-ai-active-thread-v2')||'';}catch(e){};
+    if(!threadId)threadId='chat-'+Date.now().toString(36);
     var PROV = {
       gemini: { name: 'Google Gemini (có gói miễn phí)', model: 'gemini-3.5-flash-lite', link: 'https://aistudio.google.com/apikey', note: 'Lấy mã miễn phí tại aistudio.google.com/apikey (đăng nhập Google, bấm “Create API key”).' },
       claude: { name: 'Claude (Anthropic)', model: 'claude-haiku-4-5', link: 'https://console.anthropic.com/settings/keys', note: 'Lấy mã tại console.anthropic.com › API keys. Tính phí theo lượng dùng.' },
@@ -4595,9 +4703,42 @@ button,input,select,textarea{font-family:var(--ui)}
     var SYSTEM = 'Bạn là trợ lý học tiếng Hàn cho một người Việt đi làm ở nhà máy, thường họp và báo cáo với sếp người Hàn. Trả lời bằng tiếng Việt, ngắn gọn, đi thẳng vào câu hỏi. Khi giải thích một từ hay câu tiếng Hàn: nêu nghĩa, tách từ vựng và ngữ pháp chính, mức độ kính ngữ, rồi cho 1–2 ví dụ ngắn kèm nghĩa. Nếu bản dịch trong thẻ chưa tự nhiên thì đề xuất cách nói tốt hơn. Không dùng bảng.';
     try { var j = JSON.parse(lsGet(KEY) || '{}'); if (j && typeof j === 'object') { if (PROV[j.p]) cfg.p = j.p; cfg.k = j.k || {}; cfg.m = j.m || {}; } } catch (e) { }
     cfg.p='gemini'; // Default to Gemini; keys remain private on this device.
-    try { var lj = JSON.parse(sessionStorage.getItem(LOGKEY) || '[]'); if (Array.isArray(lj)) log = lj.filter(function (m) { return m && (m.r === 'me' || m.r === 'ai') && typeof m.t === 'string'; }); } catch (e) { }
+    try {var thread=threads.find(function(t){return t.id===threadId;});var lj=thread?thread.messages:JSON.parse(sessionStorage.getItem(LOGKEY)||'[]');if(Array.isArray(lj))log=lj.filter(function(m){return m&&(m.r==='me'||m.r==='ai')&&typeof m.t==='string';});}catch(e){}
     function saveCfg() { lsSet(KEY, JSON.stringify(cfg)); }
-    function saveLog() { try { sessionStorage.setItem(LOGKEY, JSON.stringify(log.slice(-30))); } catch (e) { } }
+    function saveLog() {
+      try {sessionStorage.setItem(LOGKEY,JSON.stringify(log.slice(-30)));}catch(e){}
+      saveThread();
+    }
+    function saveThread(){
+      try{
+        var first=log.find(function(m){return m.r==='me';});
+        var old=threads.find(function(t){return t.id===threadId;});
+        var title=old&&old.title||(first?first.t.slice(0,52):'Hội thoại mới');
+        var next={id:threadId,title:title,updated:Date.now(),messages:log.slice(-60)};
+        threads=threads.filter(function(x){return x.id!==threadId;});
+        if(log.length)threads.unshift(next);
+        threads=threads.slice(0,60);
+        localStorage.setItem(THREADKEY,JSON.stringify(threads));
+        sessionStorage.setItem('nhi-ai-active-thread-v2',threadId);
+        window.dispatchEvent(new Event('nhi:chat-history'));
+      }catch(e){console.warn('Nhi: không đủ dung lượng lưu lịch sử chat',e);}
+    }
+    function listThreads(){return threads.map(function(t){return {id:t.id,title:t.title,updated:t.updated,count:t.messages.length};});}
+    function newThread(title){
+      if(busy)return false;
+      saveThread();threadId='chat-'+Date.now().toString(36)+'-'+Math.random().toString(36).slice(2,6);
+      log=[];if(title)threads.unshift({id:threadId,title:String(title).slice(0,72),updated:Date.now(),messages:[]});
+      saveLog();paintLog();return true;
+    }
+    function switchThread(id){
+      if(busy)return false;
+      var t=threads.find(function(x){return x.id===id;});if(!t)return false;
+      saveThread();threadId=id;log=t.messages.slice();saveLog();paintLog();return true;
+    }
+    function renameThread(id,title){
+      var t=threads.find(function(x){return x.id===id;});if(!t||!title.trim())return false;
+      t.title=title.trim().slice(0,80);saveThread();return true;
+    }
     function key() { return (cfg.k[cfg.p] || '').trim(); }
     function normalizeGeminiModel(raw) {
       var name=String(raw || '').trim();
@@ -4777,7 +4918,8 @@ button,input,select,textarea{font-family:var(--ui)}
       $('aiBtn').addEventListener('click', function () { if (isOpen()) close(); else open(); });
       $('aiClose').addEventListener('click', close);
       $('aiCfgBtn').addEventListener('click', function () { paintSetup($('aiSetup').hidden); });
-      $('aiNewBtn').addEventListener('click', function () { log = []; saveLog(); paintLog(); });
+      $('aiNewBtn').title='Bắt đầu hội thoại mới (giữ lại hội thoại cũ)';$('aiNewBtn').setAttribute('aria-label','Hội thoại mới');
+      $('aiNewBtn').addEventListener('click', function () { newThread(); });
       $('aiProv').addEventListener('change', function () { cfg.p = this.value; saveCfg(); paintSetup(); });
       $('aiSetup').addEventListener('submit', function (e) { e.preventDefault(); cfg.p = $('aiProv').value; cfg.k[cfg.p] = $('aiKey').value.trim(); var m = $('aiModel').value.trim(); if(cfg.p==='gemini'){var normalized=normalizeGeminiModel(m);if(m&&!normalized){$('aiCheckStatus').textContent='Tên mô hình không hợp lệ. Hãy bấm Kiểm tra Gemini và chọn mô hình.';return;}m=normalized||PROV.gemini.model;} if (m && m !== PROV[cfg.p].model) cfg.m[cfg.p] = m; else delete cfg.m[cfg.p]; saveCfg(); paintSetup(!key()); });
       $('aiCheck').addEventListener('click',checkGemini);
@@ -4818,7 +4960,7 @@ button,input,select,textarea{font-family:var(--ui)}
         e.dataTransfer.effectAllowed='copy';
       });
     }
-    window.NLC_AI = { open: open, close: close };
+    window.NLC_AI = { open: open, close: close, ask:send, history:listThreads, switchThread:switchThread, newThread:newThread, renameThread:renameThread };
     return { init: init, open: open, close: close };
   })();
 
@@ -4866,5 +5008,6 @@ button,input,select,textarea{font-family:var(--ui)}
 <script src="nhi-card-controls-v8.js?v=20261115-v8"></script>
 <script src="nhi-kitten-meow-v1.js?v=20261115-meow-v1"></script>
 <script src="nhi-card-no-overlap-v1.js?v=20261115-safe-v1"></script>
+<script src="nhi-corner-v2.js?v=20261117-ux2"></script>
 
 </body></html>
