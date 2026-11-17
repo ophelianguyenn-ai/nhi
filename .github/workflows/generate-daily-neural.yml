@@ -1,4 +1,4 @@
-name: Generate selected daily lesson FPT Ban Mai and InJoon MP3
+name: Generate selected daily lesson FPT Marketplace Ban Mai and InJoon MP3
 on:
   pull_request:
     branches: [main]
@@ -26,12 +26,15 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-      - run: python -m pip install 'edge-tts>=7,<8' 'mutagen>=1.47,<2'
+      - name: Prepare speech generation and MP3 codec
+        run: |
+          python -m pip install 'edge-tts>=7,<8' 'mutagen>=1.47,<2'
+          command -v ffmpeg || (sudo apt-get update -qq && sudo apt-get install -y ffmpeg)
       - name: Validate FPT/Edge routing offline
         run: python -m unittest scripts/test_selected_voices.py -v
       - name: Generate InJoon and Ban Mai if protected FPT key exists
         env:
-          FPT_API_KEY: ${{ secrets.FPT_API_KEY }}
+          FPT_MARKETPLACE_API_KEY: ${{ secrets.FPT_MARKETPLACE_API_KEY }}
         run: python scripts/generate_daily_audio.py
       - name: Commit only successfully validated audio
         env:
