@@ -3643,7 +3643,10 @@ button,input,select,textarea{font-family:var(--ui)}
       ++ratingToken;ratingPending=false;pendingRatingFinish=null;
       stopSpeech(); expireUndo();
       if(window.NHI_HARD_MASCOT)window.NHI_HARD_MASCOT.clear();
-      if (sess.pos < sess.queue.length && sess.L) {
+      // Optional replay must not become the saved *scheduled* lesson session.
+      // Otherwise a later due-day study could resume a free run and fail to
+      // record its scheduled review when completed.
+      if (sess.pos < sess.queue.length && sess.L && sess.kind !== 'free') {
         resume[sess.L.id] = sess.queue.slice(sess.pos);
         resumeFull[sess.L.id] = {
           kind: sess.kind, queue: sess.queue.slice(), pos: sess.pos, title: sess.title,
