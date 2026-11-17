@@ -596,7 +596,7 @@ section:not([hidden]) > .quiz, section:not([hidden]) > #cardWrap, .list > .row:n
 }
 </style>
 
-<script src="hanja-v9.js?v=12"></script><script src="hanja-extra-v12.js"></script><script src="card-images-v11.js"></script><script src="nhi-google-images-v1.js?v=20261114-study-v7"></script><script src="nhi-hard-minimal-v1.js?v=20261114-study-v7"></script><script src="nhi-verified-pairs-20261117.js?v=1"></script><script src="nhi-phrases-v5.js?v=20261117-reviewed-pairs-v1"></script><script src="nhi-english-data-v6.js?v=20261113-reviewed-173"></script><script src="nhi-english-v5.js?v=20261115-v10-ipa-five"></script><script src="recorded-voices-v11.js?v=20261117-fpt-marketplace-banmai"></script>
+<script src="nhi-chat-voice-v1.js?v=20261117"></script><script src="hanja-v9.js?v=12"></script><script src="hanja-extra-v12.js"></script><script src="card-images-v11.js"></script><script src="nhi-google-images-v1.js?v=20261114-study-v7"></script><script src="nhi-hard-minimal-v1.js?v=20261114-study-v7"></script><script src="nhi-verified-pairs-20261117.js?v=1"></script><script src="nhi-phrases-v5.js?v=20261117-reviewed-pairs-v1"></script><script src="nhi-english-data-v6.js?v=20261113-reviewed-173"></script><script src="nhi-english-v5.js?v=20261115-v10-ipa-five"></script><script src="recorded-voices-v11.js?v=20261117-fpt-marketplace-banmai"></script>
 <script src="qrcode.js" defer></script>
 <link rel="stylesheet" href="nhi-seven-fixes-20261117.css?v=1"><link rel="stylesheet" href="refresh-v9.css?v=13"><link rel="stylesheet" href="study-enhancements-v13.css?v=14"><link rel="stylesheet" href="nhi-updates-v1.css?v=1"><link rel="stylesheet" href="nhi-ai-resize-v2.css?v=1"><link rel="stylesheet" href="nhi-study-motion-v3.css?v=3"><link rel="stylesheet" href="nhi-interface-v4.css?v=4"><link rel="stylesheet" href="nhi-interface-v5.css?v=20261113-rollback-stable-v1"><link rel="stylesheet" href="nhi-seasons-v1.css?v=20261113-cartoon-soft-1">
 <link rel="stylesheet" href="nhi-living-garden-v1.css?v=20261113-cartoon-butterflies-v1">
@@ -657,6 +657,7 @@ button,input,select,textarea{font-family:var(--ui)}
 <link rel="stylesheet" href="nhi-card-polish-v9.css?v=20261115-vi-centered-v10">
 <link rel="stylesheet" href="nhi-card-polish-v10.css?v=20261115-title-weight-v12">
 <link rel="stylesheet" href="nhi-cover-palette-v12.css?v=20261115-no-girl-frame-v13">
+<link rel="stylesheet" href="nhi-chat-image-notes-v1.css?v=20261117">
 <script>
 /* Pick exactly one of three cover colors when the document loads.
    Navigate/flip cards without changing it; no animation or interval. */
@@ -3835,7 +3836,9 @@ button,input,select,textarea{font-family:var(--ui)}
           illustration.addEventListener('click',function(e){
             e.stopPropagation();illustration.focus();illustration.classList.add('nhi-image-selected');
           });
-          illustration.addEventListener('blur',function(){illustration.classList.remove('nhi-image-selected');});
+          illustration.addEventListener('focusout',function(e){
+            if(!illustration.contains(e.relatedTarget))illustration.classList.remove('nhi-image-selected');
+          });
           illustration.addEventListener('keydown',function(e){
             if(e.key!=='Delete'&&e.key!=='Backspace')return;
             e.preventDefault();e.stopPropagation();e.stopImmediatePropagation();
@@ -4588,17 +4591,24 @@ button,input,select,textarea{font-family:var(--ui)}
       var items=window.NHI_PROMPTS?window.NHI_PROMPTS.list(!!(c&&c.ko),defaults):defaults;
       items.forEach(function (t) { var b = mkBtn('', t); b.addEventListener('click', function () { send(t); }); q.appendChild(b); });
     }
-    function paintLog() {
+    function paintLog(scrollMode) {
       var box = $('aiLog'); box.textContent = '';
-      // No auto-inserted welcome paragraph. The editable quick questions remain below.
+      // Keep the user's latest sent question in view instead of jumping to the
+      // bottom (where the AI loading bubble/long answer may be).
+      var lastSent = null;
       log.forEach(function (m) {
         var d = mk('div', 'aimsg ' + (m.r === 'me' ? 'me' : m.n ? 'ai note' : m.e ? 'err' : 'ai'));
-        if (m.r === 'me') d.textContent = m.t; else d.innerHTML = fmt(m.t);
+        if (m.r === 'me') { d.textContent = m.t; lastSent = d; }
+        else d.innerHTML = fmt(m.t);
         if (m.link) { var a = mk('a', 'ghost', 'Tạo khóa Gemini tại Google AI Studio'); a.href = m.link; a.target = '_blank'; a.rel = 'noopener'; a.style.marginTop = '8px'; d.appendChild(document.createElement('br')); d.appendChild(a); }
         box.appendChild(d);
       });
       if (busy) box.appendChild(mk('div', 'aimsg ai wait'));
-      box.scrollTop = box.scrollHeight;
+      if (scrollMode === 'sent' && lastSent) {
+        // Use positions inside aiLog only; do not scroll the whole document.
+        var target = lastSent.getBoundingClientRect().top - box.getBoundingClientRect().top + box.scrollTop - 14;
+        box.scrollTop = Math.max(0, target);
+      } else box.scrollTop = box.scrollHeight;
     }
     function paintSetup(force) {
       var f = $('aiSetup'); if (force !== undefined) f.hidden = !force;
@@ -4665,16 +4675,16 @@ button,input,select,textarea{font-family:var(--ui)}
       log.push({ r: 'me', t: text, c: ctx }); $('aiInput').value = ''; grow();
       if (!key()) {
         log.push({ r: 'ai', e: 1, n: 1, t: 'Chưa có mã Gemini. Mở Cài đặt AI, tạo khóa tại Google AI Studio rồi dán khóa vào đây một lần. Có gói miễn phí theo giới hạn tài khoản.', link: 'https://aistudio.google.com/apikey' });
-        saveLog(); paintLog(); paintSetup(true); return;
+        saveLog(); paintLog('sent'); paintSetup(true); return;
       }
-      busy = true; paintLog();
+      busy = true; paintLog('sent');
       var msgs = log.filter(function (m) { return !m.e; }).slice(-12).map(function (m, i, arr) { return { r: m.r, t: (m.r === 'me' && m.c && i === arr.length - 1 ? '[' + m.c + ']\n\n' : '') + m.t }; });
       while (msgs.length && msgs[0].r !== 'me') msgs.shift();
       call(msgs).then(function (t) { log.push({ r: 'ai', t: t }); }, function (err) {
         var msg = err && err.message ? err.message : 'Không gọi được AI.';
         if (/Failed to fetch|NetworkError|Load failed/i.test(msg)) msg = 'Không kết nối được tới máy chủ AI. Kiểm tra mạng; nếu vẫn lỗi, nhà cung cấp này có thể không cho gọi thẳng từ trình duyệt, hãy thử nhà cung cấp khác.';
         log.push({ r: 'ai', e: 1, t: msg });
-      }).then(function () { busy = false; saveLog(); paintLog(); });
+      }).then(function () { busy = false; saveLog(); paintLog('sent'); });
     }
     function grow() { var t = $('aiInput'); t.style.height = 'auto'; t.style.height = Math.min(140, t.scrollHeight + 2) + 'px'; }
     function init() {
