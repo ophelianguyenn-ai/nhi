@@ -111,6 +111,56 @@ try{
   },lesson.id);
   const due=await homeCalendar();
   assert(due.active&&!due.waiting,'Lesson did not appear on actual review due date');
+
+  // Regression for missed reviews 2, 3, 4 and 5. All four elapsed rounds
+  // must be marked pending, not silently moved to "Đã học".
+  await cal.evaluate(id=>{
+   const p=JSON.parse(localStorage.getItem('viko-plan-v1'));
+   const d=new Date();d.setDate(d.getDate()-200);
+   const base=[d.getFullYear(),String(d.getMonth()+1).padStart(2,'0'),String(d.getDate()).padStart(2,'0')].join('-');
+   p.done[id]={v:[base],t:Date.now()};
+   localStorage.setItem('viko-plan-v1',JSON.stringify(p));
+  },lesson.id);
+  const overdue=await homeCalendar();
+  assert(overdue.active&&!overdue.waiting,'Missed reviews must remain in Cần học');
+  const missed=await cal.evaluate(id=>{
+   const lessonLink=[...document.querySelectorAll('#planBox .nhi-plan-current .ptitle')].find(a=>a.getAttribute('href')==='#/bai/'+id);
+   const card=lessonLink?.closest('.plesson');
+   return {late:card?.querySelectorAll('.pchip.late').length,
+     done:card?.querySelectorAll('.pchip.done').length,
+     line:card?.querySelector('.pstatus')?.textContent||'',
+     dates:card?[...card.querySelectorAll('.pchip.late b')].map(e=>e.textContent):[]};
+  },lesson.id);
+  assert(missed.late===4&&missed.done===1,'All 4 missed review rounds must be marked, got '+JSON.stringify(missed));
+  assert(missed.line.includes('4 lượt cần học'),'Missing count of overdue review rounds');
+
+  // Viewing lesson details without pressing Học ngay does not count study.
+  await cal.$eval('#planBox .nhi-plan-current .ptitle[href="#/bai/'+lesson.id+'"]',e=>e.click());
+  await cal.waitForSelector('#planBox .phero');
+  const afterOpening=await cal.evaluate(id=>JSON.parse(localStorage.getItem('viko-plan-v1')).done?.[id]?.v.length,lesson.id);
+  assert(afterOpening===1,'Opening lesson detail falsely marked it studied');
+  // Starting and pausing an incomplete session must not complete any round.
+  await cal.evaluate(()=>{const b=[...document.querySelectorAll('#planBox button')].find(b=>/^(Học |Tiếp tục)/.test(b.textContent.trim()));if(!b)throw Error('Review start button missing');b.click();});
+  await cal.waitForSelector('#planBox .pcard',{timeout:12000});
+  await cal.$eval('#topbar .nhi-study-topbar button:first-child',e=>e.click());
+  const afterPause=await cal.evaluate(id=>JSON.parse(localStorage.getItem('viko-plan-v1')).done?.[id]?.v.length,lesson.id);
+  assert(afterPause===1,'Paused unfinished review was incorrectly marked complete');
+
+  // Existing completed rounds stay completed, but skipped later rounds do not.
+  await cal.evaluate(id=>{
+   const p=JSON.parse(localStorage.getItem('viko-plan-v1'));
+   const dn=p.done[id].v.slice();dn.push(new Date().toISOString().slice(0,10));
+   p.done[id]={v:dn,t:Date.now()};localStorage.setItem('viko-plan-v1',JSON.stringify(p));
+   localStorage.removeItem('viko-plan-sess-v1');
+  },lesson.id);
+  const twoDone=await homeCalendar();
+  assert(twoDone.active,'Later overdue rounds must remain in Cần học after an actual review');
+  const missedAfterReview=await cal.evaluate(id=>{
+   const link=[...document.querySelectorAll('#planBox .nhi-plan-current .ptitle')].find(a=>a.getAttribute('href')==='#/bai/'+id);
+   const card=link?.closest('.plesson');return {done:card?.querySelectorAll('.pchip.done').length,late:card?.querySelectorAll('.pchip.late').length};
+  },lesson.id);
+  assert(missedAfterReview.done===2&&missedAfterReview.late===3,
+   'Review progress should advance exactly one round: '+JSON.stringify(missedAfterReview));
  }finally{await calContext.close();}
  assert(errors.length===0,'Browser errors: '+errors.join('; '));
  console.log('SEVEN FIXES PASS',JSON.stringify({verifiedPairs:found.count,hardStayed:true,deletePersisted:true,autosave:true,dictionary:true,cat}));

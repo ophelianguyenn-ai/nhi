@@ -3027,10 +3027,19 @@ button,input,select,textarea{font-family:var(--ui)}
       return OFFSETS.map(function (off, i) {
         var due = i === 0 ? L.plan : addDays(base, off), st;
         if (i < done.length) st = 'done';
-        else if (i === done.length) st = due < T ? 'late' : due === T ? 'today' : 'next';
-        else st = 'future';
+        // Reviews 2–5 only become applicable after the learner actually
+        // completes their first study session. Never invent a studied round.
+        else if (i > 0 && !done.length) st = 'future';
+        // Every elapsed review milestone stays visibly due/late, even when
+        // an earlier review was missed. Only studying may clear it.
+        else if (due < T) st = 'late';
+        else if (due === T) st = 'today';
+        else st = i === done.length ? 'next' : 'future';
         return { step: i, due: due, st: st, on: done[i] || null };
       });
+    }
+    function pendingReviews(L) {
+      return schedule(L).filter(function (s) { return s.st === 'today' || s.st === 'late'; });
     }
     function current(L) { var s = schedule(L); for (var i = 0; i < s.length; i++) if (s[i].st !== 'done') return s[i]; return null; }
     function doneSteps(L) { return Math.min(OFFSETS.length, (val('done', L.id) || []).length); }
@@ -3051,6 +3060,7 @@ button,input,select,textarea{font-family:var(--ui)}
     function summary() {
       var due = [], late = [], cards = 0, upcoming = null;
       LESSONS.forEach(function (L) {
+        var counts=liveCount(L.ids);if(!counts[0]&&!counts[1])return;
         var c = current(L); if (!c) return;
         if (c.st === 'today') { due.push(L); cards += ordered(L.ids).length; }
         else if (c.st === 'late') { late.push(L); cards += ordered(L.ids).length; }
@@ -3266,7 +3276,9 @@ button,input,select,textarea{font-family:var(--ui)}
       var cur = current(L);
       if (!cur) return el('span', 'pstatus done', '✓ Đã hoàn thành cả 5 lần');
       var n = cur.st === 'late' ? daysBetween(cur.due, today()) : 0;
-      var msg = cur.st === 'late' ? '! Quá hạn ' + n + ' ngày' : cur.st === 'today' ? '● Hôm nay: ' + STEP[cur.step] : '○ ' + STEP[cur.step] + ' · ' + vn(cur.due, true);
+      var msg = cur.st === 'late' ? '! ' + STEP[cur.step] + ' quá hạn ' + n + ' ngày' : cur.st === 'today' ? '● Hôm nay: ' + STEP[cur.step] : '○ ' + STEP[cur.step] + ' · ' + vn(cur.due, true);
+      var pending = pendingReviews(L);
+      if (pending.length > 1) msg += ' · ' + pending.length + ' lượt cần học';
       return el('span', 'pstatus ' + cur.st, msg);
     }
     function lessonRing(L, cls) { var r = ring(doneSteps(L) / OFFSETS.length, doneSteps(L) + '/5', cls); r.title = 'Đã học ' + doneSteps(L) + ' / 5 lần'; return r; }
@@ -3377,11 +3389,16 @@ button,input,select,textarea{font-family:var(--ui)}
     function renderDays(v) {
       // Show a lesson in Cần học only on its review due date or when overdue.
       var active=[],waiting=[],threshold=today();
+      var notYetScheduled=0;
       LESSONS.forEach(function(L){
         var counts=liveCount(L.ids);
         if(!counts[0]&&!counts[1])return;
         var next=current(L);
-        (next&&next.due<=threshold?active:waiting).push(L);
+        if(next && next.due<=threshold) active.push(L);
+        else if(doneSteps(L)>0) waiting.push(L);
+        // A new, never-opened lesson is not an "already studied" lesson.
+        // It appears in Cần học on its first scheduled day.
+        else notYetScheduled++;
       });
       function groupedCards(target,entries) {
         var by={};entries.forEach(function(L){(by[L.date]=by[L.date]||[]).push(L);});
@@ -3402,10 +3419,12 @@ button,input,select,textarea{font-family:var(--ui)}
       var activeGrid=el('div','days-grid');
       groupedCards(activeGrid,active);
       if(!active.length)activeGrid.appendChild(el('p','listinfo','Hôm nay chưa có bài cần học. Các bài đã hoàn thành đang chờ đến đợt ôn tiếp theo.'));
-      upcoming.appendChild(activeGrid);v.appendChild(upcoming);
+      upcoming.appendChild(activeGrid);
+      if(notYetScheduled)upcoming.appendChild(el('p','listinfo',notYetScheduled+' bài mới chưa đến ngày học sẽ xuất hiện ở đây khi đến hạn.'));
+      v.appendChild(upcoming);
       var archived=el('section','nhi-plan-waiting');
       archived.appendChild(el('h3','nhi-bucket-title','🌷 Đã học · chờ lịch ôn tiếp theo'));
-      archived.appendChild(el('p','listinfo',waiting.length+' học phần được chuyển sang đây; tự quay lại phần Cần học đúng ngày đến hạn ôn.'));
+      archived.appendChild(el('p','listinfo',waiting.length+' học phần đã học ít nhất một lần; tự quay lại Cần học khi đến hạn ôn nếu chưa hoàn thành đủ 5 lượt.'));
       var details=el('details','nhi-waiting-details');
       details.appendChild(el('summary',null,'Xem '+waiting.length+' học phần đang chờ'));
       var waitingGrid=el('div','days-grid');groupedCards(waitingGrid,waiting);
@@ -3959,7 +3978,19 @@ button,input,select,textarea{font-family:var(--ui)}
       [['h', 'hard', 'Khó'], ['m', 'mid', 'Bình thường']].forEach(function (x) { var t = el('div', 'tile2 ' + x[0]); t.appendChild(el('b', null, s.stats[x[1]] || 0)); t.appendChild(document.createTextNode(x[2])); tiles.appendChild(t); });
       p.appendChild(tiles);
       if(undoHistory.length)p.appendChild(btn('pundo','↶ Hoàn tác',undoDelete,'Khôi phục thẻ vừa xóa (Ctrl+Z)'));
-      if (s.kind === 'lesson' && s.L && !s.recorded) { var dn = (val('done', s.L.id) || []).slice(); dn.push(today()); put('done', s.L.id, dn); s.recorded = true; delete resume[s.L.id]; delete resumeFull[s.L.id]; save(); saveSess(); }
+      if (s.kind === 'lesson' && s.L && !s.recorded) {
+        var pendingRound = current(s.L);
+        // Viewing the lesson, entering a session or reviewing ahead of its
+        // scheduled date does not earn a completed study round.
+        if (pendingRound && pendingRound.due <= today()) {
+          var dn = (val('done', s.L.id) || []).slice();
+          if (dn.length < OFFSETS.length) {
+            dn.push(today()); put('done', s.L.id, dn);
+          }
+          s.recorded = true; delete resume[s.L.id]; delete resumeFull[s.L.id];
+          save(); saveSess();
+        }
+      }
       if (s.kind === 'lesson' && s.L) { var nx = current(s.L); p.appendChild(el('p', 'pstatus done', nx ? '✓ ' + STEP[nx.step] + ' · ' + vn(nx.due, true) : '✓ Đã hoàn thành cả 5 lần.')); }
       var enids=(s.L?s.L.ids:s.queue).filter(function(id,i,a){return a.indexOf(id)===i&&alive(id)&&val('enHard',id);});if(enids.length)p.appendChild(btn('primary','Ôn chưa nhớ tiếng Anh ('+enids.length+')',function(){start('english',enids,s.title+' · chưa nhớ tiếng Anh',s.L);}));
       var row = el('div', 'prow');
