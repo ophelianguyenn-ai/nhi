@@ -56,7 +56,7 @@ try{
  assert(Math.abs(parseInt(height)-280)<4,'Image height was not applied: '+height);
  await page.$eval('#aiBtn',e=>e.click());await page.waitForSelector('#aiForm .nhi-chat-mic');
  assert(await page.$eval('.nhi-chat-voice-lang',e=>e.value)==='vi-VN','Expected Vietnamese microphone language');
- await page.click('#aiForm .nhi-chat-mic');
+ await page.$eval('#aiForm .nhi-chat-mic',e=>e.click());
  await page.evaluate(()=>{
   const rec=window.__chatRecognizer;
   rec.onresult({results:[{isFinal:true,0:{transcript:'Tôi muốn học tiếng Hàn'}}],resultIndex:0});rec.onend();
