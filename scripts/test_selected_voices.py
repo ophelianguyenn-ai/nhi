@@ -48,6 +48,19 @@ class VoiceMigrationTests(unittest.TestCase):
         self.assertEqual(seen[0].data, 'Xin chào ạ'.encode('utf-8'))
         self.assertNotIn('secret-value', seen[0].full_url)
 
+    def test_fpt_secret_trailing_newline_is_cleaned(self):
+        seen = []
+        def fake_open(req, timeout):
+            seen.append(req)
+            return FakeHTTP(json.dumps({'error': 0, 'async': 'https://example.org/clip.mp3'}).encode())
+        with patch.object(audio.request, 'urlopen', side_effect=fake_open):
+            audio._post_fpt('Xin chào', '  secret-value\\n')
+        self.assertEqual(seen[0].get_header('Api_key'), 'secret-value')
+
+    def test_fpt_secret_embedded_newline_is_rejected(self):
+        with self.assertRaisesRegex(ValueError, 'single-line'):
+            audio._post_fpt('Xin chào', 'secret\\nvalue')
+
     def test_fpt_error_and_non_https_url_fail_closed(self):
         for data in ({'error': 1, 'message': 'bad key'},
                      {'error': 0, 'async': 'http://example.org/no.mp3'}):
