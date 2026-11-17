@@ -1,31 +1,34 @@
 import fs from 'node:fs';
 import puppeteer from 'puppeteer-core';
 const assert=(v,m)=>{if(!v)throw Error(m);};
-const l=JSON.parse(fs.readFileSync('lessons.json','utf8')).lessons.find(x=>x.items.length>5),id=l.items[0][0];
+const l=JSON.parse(fs.readFileSync('lessons.json','utf8')).lessons.find(x=>x.items.length>5),ids=l.items.map(x=>x[0]);
 const img='iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+jRZkAAAAASUVORK5CYII=';
 const browser=await puppeteer.launch({headless:true,executablePath:process.env.CHROME_BIN||'/usr/bin/google-chrome',args:['--no-sandbox','--disable-setuid-sandbox','--disable-dev-shm-usage']});
 try{
  const page=await browser.newPage(),errors=[];page.on('pageerror',e=>errors.push(String(e)));
  await page.setViewport({width:1240,height:820});
- await page.evaluateOnNewDocument((id,img)=>{
+ await page.evaluateOnNewDocument((ids,img)=>{
   sessionStorage.setItem('nlc-cover-seen','1');
   localStorage.setItem('nlc-prefs-v1',JSON.stringify({fx:false}));
   if(!localStorage.getItem('viko-plan-v1')){
-   localStorage.setItem('viko-plan-v1',JSON.stringify({
-    img:{[id]:{v:{url:'data:image/png;base64,'+img,width:200,height:0,caption:'Hình mẫu'},t:Date.now()}},
-    note:{[id]:{v:{text:'Dòng đầu'+String.fromCharCode(10)+'Một từ dài: '+'a'.repeat(120)+String.fromCharCode(10)+'Dòng cuối',color:'#fff1ce'},t:Date.now()}}
-   }));
+   const imgs={},notes={};
+   ids.forEach(id=>{
+    imgs[id]={v:{url:'data:image/png;base64,'+img,width:200,height:0,caption:'Hình mẫu'},t:Date.now()};
+    notes[id]={v:{text:'Dòng đầu'+String.fromCharCode(10)+'Một từ dài: '+'a'.repeat(120)+String.fromCharCode(10)+'Dòng cuối',color:'#fff1ce'},t:Date.now()};
+   });
+   localStorage.setItem('viko-plan-v1',JSON.stringify({img:imgs,note:notes}));
   }
   window.SpeechRecognition=class{
    constructor(){window.__chatRecognizer=this;}
    start(){this.onstart?.();}
    stop(){this.onend?.();}
   };
- },id,img);
+ },ids,img);
  await page.goto('http://127.0.0.1:8765/#/bai/'+l.id,{waitUntil:'domcontentloaded'});
  await page.waitForSelector('#planBox .ppage',{timeout:15000});
  await page.evaluate(()=>[...document.querySelectorAll('#planBox button')].find(b=>/Học ngay|Học trước|Tiếp tục|Học lại|Ôn/.test(b.textContent))?.click());
  await page.waitForSelector('#planBox .pcard');
+ const cardID=await page.$eval('#planBox .pcard',e=>e.dataset.item);
  await page.$eval('#planBox .pfront',e=>e.click());
  await page.waitForSelector('#planBox .card-illustration img',{timeout:10000});
  const note=await page.evaluate(()=>{
@@ -41,14 +44,14 @@ try{
  await page.$eval('#planBox .nhi-image-adjust input[aria-label="Ngang hình"]',e=>{
   e.value='350';e.dispatchEvent(new Event('input',{bubbles:true}));e.dispatchEvent(new Event('change',{bubbles:true}));
  });
- await page.waitForFunction(id=>JSON.parse(localStorage.getItem('viko-plan-v1')).img?.[id]?.v?.width===350,{},id);
+ await page.waitForFunction(id=>JSON.parse(localStorage.getItem('viko-plan-v1')).img?.[id]?.v?.width===350,{},cardID);
  const after=await page.$eval('#planBox .pfront',e=>getComputedStyle(e).gridTemplateColumns);
  assert(before!==after,'Image width did not change grid: '+before+' / '+after);
  await page.$eval('#planBox .card-illustration img',e=>e.click());
  await page.$eval('#planBox .nhi-image-adjust input[aria-label="Cao hình"]',e=>{
   e.value='280';e.dispatchEvent(new Event('input',{bubbles:true}));e.dispatchEvent(new Event('change',{bubbles:true}));
  });
- await page.waitForFunction(id=>JSON.parse(localStorage.getItem('viko-plan-v1')).img?.[id]?.v?.height===280,{},id);
+ await page.waitForFunction(id=>JSON.parse(localStorage.getItem('viko-plan-v1')).img?.[id]?.v?.height===280,{},cardID);
  const height=await page.$eval('#planBox .card-illustration img',e=>getComputedStyle(e).height);
  assert(Math.abs(parseInt(height)-280)<4,'Image height was not applied: '+height);
  await page.click('#aiBtn');await page.waitForSelector('#aiForm .nhi-chat-mic');
@@ -68,7 +71,7 @@ try{
  assert(anchor.text==='Tôi muốn học tiếng Hàn'&&anchor.top>=0&&anchor.top<48,'Enter did not anchor last sent message: '+JSON.stringify(anchor));
  await page.reload({waitUntil:'domcontentloaded'});
  await page.waitForSelector('#planBox .pcard',{timeout:15000});
- const saved=await page.evaluate(id=>JSON.parse(localStorage.getItem('viko-plan-v1')).img[id].v,id);
+ const saved=await page.evaluate(id=>JSON.parse(localStorage.getItem('viko-plan-v1')).img[id].v,cardID);
  assert(saved.width===350&&saved.height===280,'Image dimensions did not survive reload');
  assert(errors.length===0,'Page errors: '+errors.join('; '));
  console.log('FOUR UI IMPROVEMENTS PASS',JSON.stringify({note,grid:[before,after],height,voice:true,anchor}));
