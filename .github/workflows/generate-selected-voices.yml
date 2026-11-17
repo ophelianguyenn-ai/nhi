@@ -61,7 +61,7 @@ jobs:
           CHOSEN_SCOPE: ${{ github.event_name == 'push' && 'daily' || inputs.scope || 'daily' }}
           CHOSEN_LANG: ${{ github.event_name == 'push' && 'both' || inputs.language || 'both' }}
           CHOSEN_OFFSET: ${{ github.event_name == 'push' && '0' || inputs.offset || '0' }}
-          CHOSEN_LIMIT: ${{ github.event_name == 'push' && '4' || inputs.limit || '30' }}
+          CHOSEN_LIMIT: ${{ github.event_name == 'push' && '2' || inputs.limit || '30' }}
           DRY_RUN: ${{ github.event_name == 'push' && 'false' || inputs.dry_run }}
         shell: bash
         run: |
