@@ -142,7 +142,7 @@ try{
   // Starting and pausing an incomplete session must not complete any round.
   await cal.evaluate(()=>{const b=[...document.querySelectorAll('#planBox button')].find(b=>/^(Học |Tiếp tục)/.test(b.textContent.trim()));if(!b)throw Error('Review start button missing');b.click();});
   await cal.waitForSelector('#planBox .pcard',{timeout:12000});
-  await cal.$eval('#planBox .shead button:first-child',e=>e.click());
+  await cal.$eval('#topbar .nhi-study-topbar button:first-child',e=>e.click());
   const afterPause=await cal.evaluate(id=>JSON.parse(localStorage.getItem('viko-plan-v1')).done?.[id]?.v.length,lesson.id);
   assert(afterPause===1,'Paused unfinished review was incorrectly marked complete');
 
