@@ -23,7 +23,7 @@ jobs:
       - name: Install the MP3 inspector and WAV converter
         run: |
           python -m pip install 'mutagen>=1.47,<2'
-          command -v ffmpeg
+          command -v ffmpeg || (sudo apt-get update -qq && sudo apt-get install -y ffmpeg)
       - name: Verify Marketplace integration without paid requests
         run: python -m unittest scripts/test_selected_voices.py -v
       - name: Create exactly one Ban Mai preview file, without modifying the manifest
