@@ -114,7 +114,9 @@ try{
    activeTitles:[...document.querySelectorAll('#planBox .nhi-plan-current .ptitle')].slice(0,4).map(a=>[a.textContent,a.getAttribute('href')]),
    waitingTitles:[...document.querySelectorAll('#planBox .nhi-plan-waiting .ptitle')].slice(0,4).map(a=>[a.textContent,a.getAttribute('href')]),
    headings:[...document.querySelectorAll('#planBox .nhi-bucket-title')].map(e=>e.textContent),
-   planText:document.querySelector('#planBox')?.textContent?.slice(0,250)
+   planText:document.querySelector('#planBox')?.textContent?.slice(0,250),
+   match:[...document.querySelectorAll('#planBox .ptitle')].filter(a=>a.getAttribute('href')?.endsWith(id)).map(a=>a.closest('.plesson')?.innerText?.slice(0,600)),
+   html:document.querySelector('#planBox .nhi-plan-waiting')?.innerHTML.slice(0,500)
   }),lesson.id);
   console.log('CALENDAR_DIAGNOSTICS',JSON.stringify({early,due,diagnostic}));
   assert(due.active&&!due.waiting,'Lesson did not appear on actual review due date');
