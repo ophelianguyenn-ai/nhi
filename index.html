@@ -4607,6 +4607,14 @@ button,input,select,textarea{font-family:var(--ui)}
       if (scrollMode === 'sent' && lastSent) {
         // Use positions inside aiLog only; do not scroll the whole document.
         var target = lastSent.getBoundingClientRect().top - box.getBoundingClientRect().top + box.scrollTop - 14;
+        // Ensure there is enough scroll room to put the sent bubble near the
+        // top even while the response is still loading at the end of the log.
+        var missing = target - (box.scrollHeight - box.clientHeight);
+        if (missing > 0) {
+          var spacer = mk('div', 'nhi-chat-scroll-space');
+          spacer.style.cssText = 'flex:0 0 auto;height:' + Math.ceil(missing + 16) + 'px;pointer-events:none';
+          spacer.setAttribute('aria-hidden','true'); box.appendChild(spacer);
+        }
         box.scrollTop = Math.max(0, target);
       } else box.scrollTop = box.scrollHeight;
     }
