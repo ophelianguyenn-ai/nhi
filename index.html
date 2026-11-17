@@ -3600,6 +3600,17 @@ button,input,select,textarea{font-family:var(--ui)}
       if (hd2.length) row2.appendChild(lbtn('ghost', 'flip', 'Ôn lại thẻ khó (' + hd2.length + ')', function () { start('hard', hd2, L.title + ' · thẻ khó', L); }));
       var enids=L.ids.filter(function(id){return alive(id)&&val('enHard',id);});if(enids.length)row2.appendChild(btn('ghost','Ôn chưa nhớ tiếng Anh ('+enids.length+')',function(){start('english',enids,L.title+' · chưa nhớ tiếng Anh',L);}));
       hd.appendChild(row2);
+      var modes=el('div','nhi-v2-lesson-modes');
+      modes.appendChild(el('p','nhi-v2-source-label','Nguồn: '+titleMain(L)+' · '+L.ids.filter(alive).length+' thẻ'));
+      var actions=el('div','nhi-v2-lesson-mode-buttons');
+      actions.appendChild(btn('primary','📇 Học flashcard',function(){startLesson(L);}));
+      [['write','✍️ Luyện viết'],['quiz','🧩 Trắc nghiệm'],['listen','🎧 Nghe']].forEach(function(x){
+        actions.appendChild(btn('ghost',x[1],function(){
+          if(window.NHI_V2_OPEN_LESSON_MODE)window.NHI_V2_OPEN_LESSON_MODE(L.id,x[0]);
+          else toast('Tính năng đang tải. Vui lòng thử lại.');
+        }));
+      });
+      modes.appendChild(actions);hd.appendChild(modes);
       wrap.appendChild(hd);
       var body = el('div', 'quiz'); body.appendChild(contentBlock(L.ids)); wrap.appendChild(body);
       v.appendChild(wrap);
