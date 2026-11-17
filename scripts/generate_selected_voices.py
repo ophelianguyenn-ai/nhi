@@ -80,9 +80,12 @@ def _post_fpt(phrase, api_key):
 
 
 def _fpt_bytes(phrase, api_key):
-    if not 3 <= len(phrase) <= 5000:
-        raise ValueError('Pilot accepts only 3–5000 characters per request')
-    return _post_fpt(phrase, api_key)
+    # Marketplace requires >=3 characters. Preserve the manifest's original
+    # text/key, but add punctuation to very short Vietnamese headwords for TTS.
+    spoken = phrase if len(phrase) >= 3 else phrase + '.'
+    if not 3 <= len(spoken) <= 5000:
+        raise ValueError('FPT accepts only 3–5000 characters per request')
+    return _post_fpt(spoken, api_key)
 
 
 def _encode_mp3(wav_bytes, mp3_path):
