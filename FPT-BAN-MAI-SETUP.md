@@ -1,32 +1,40 @@
-# Cấu hình giọng đọc: FPT Ban Mai + Microsoft InJoon
+# Giọng đọc Nhi's Learning Corner: FPT Marketplace Ban Mai + Microsoft InJoon
 
-**Giọng đã chọn**: tiếng Việt = FPT.AI Ban Mai (voice: banmai); tiếng Hàn = Microsoft Neural InJoon (ko-KR-InJoonNeural).
+**Giọng Việt:** Ban Mai nữ miền Bắc qua FPT Marketplace, model FPT.TTS-pro, voice std_banmai.  
+**Giọng Hàn:** InJoon qua Microsoft Neural, ko-KR-InJoonNeural.
 
-Website chỉ tải MP3 tĩnh. FPT API key không bao giờ được đưa lên GitHub Pages hoặc vào JavaScript công khai.
+## Vì sao không dùng FPT.AI Console cũ nữa?
 
-## Cần có FPT_API_KEY
+FPT.AI ngừng bán mới dịch vụ Console cho khách hàng cá nhân từ **06/07/2026**, và dừng các gói cá nhân cũ từ **29/08/2026**.
+Thông báo: https://fpt.ai/vi/tin-tuc/thong-bao-quan-trong-ve-viec-ngung-cung-cap-dich-vu-ca-nhan-tren-fpt-ai-console/
 
-1. Vào https://console.fpt.ai/, đăng ký/đăng nhập.
-2. Kích hoạt dịch vụ **Text to Speech**, tạo project và API key.
-3. Vào repo GitHub → Settings → Secrets and variables → Actions → New repository secret.
-4. Tên: **FPT_API_KEY**. Giá trị: API key của bạn. Không đưa key vào commit, tin nhắn hoặc các file công khai.
+Khóa lấy từ console.fpt.ai KHÔNG dùng thay thế cho API key Marketplace mới.
+Không tiếp tục sửa secret FPT_API_KEY cũ.
 
-Hướng dẫn chính thức: https://docs.fpt.ai/docs/vi/speech/api/text-to-speech/.
+## Bước duy nhất cần thực hiện trên tài khoản Marketplace
 
-## Chuyển giọng đọc từng đợt
+1. Đăng ký/đăng nhập https://marketplace.fptcloud.com/en/models/fpt-tts-pro
+2. Chọn Get API & Start Using (hoặc Try in Playground) và kiểm tra tài khoản có quyền dùng FPT.TTS-pro, giọng std_banmai; xem điều kiện/chi phí trước khi tạo.
+3. Mở https://marketplace.fptcloud.com/en/my-account#my-api-key
+4. Chọn Create new API Key và cấp quyền cho model FPT.TTS-pro (nếu giao diện yêu cầu).
+5. Mở https://github.com/ophelianguyenn-ai/so-tay-hop-tieng-han/settings/secrets/actions
+6. Thêm secret GitHub Actions tên **FPT_MARKETPLACE_API_KEY**, giá trị là khóa mới của Marketplace. Không dùng khóa Console cũ. Không gửi khóa trong chat hay đưa vào mã nguồn.
 
-Actions → **Prepare FPT Ban Mai and Korean InJoon audio batches** → Run workflow.
+Trang tài liệu FPT Marketplace: https://marketplace.fptcloud.com/en/models/fpt-tts-pro
 
-Mặc định: scope=daily, language=both, offset=0, limit=30, dry_run=true. Đây chỉ là bản xem trước, không gọi dịch vụ hoặc tính phí.
+## Tạo MP3 an toàn
 
-Sau khi thêm FPT_API_KEY, chuyển dry_run=false và chạy thử một đợt nhỏ (ví dụ limit=10). Đánh giá âm thanh trên web trước khi chuyển lượng lớn.
+Actions → **Prepare FPT Marketplace Ban Mai and Korean InJoon audio batches** → Run workflow.
+- Đầu tiên giữ dry_run=true để kiểm tra số câu, không phát sinh phí.
+- Sau đó chạy thử language=vi, scope=daily, limit=1 hoặc 2, dry_run=false. Kiểm tra âm thanh trước khi chuyển nhiều câu.
+- Chỉ chạy thêm khi kết quả chính xác. Ứng dụng không tự gọi FPT khi người dùng mở website.
+- scope=daily: dữ liệu của scripts/daily-audio-texts.json.
+- scope=all: các câu trong lessons.json và thẻ gốc.
+- limit=0 nghĩa là tất cả, có thể phát sinh chi phí lớn. Không dùng trừ khi đã dự toán.
 
-- scope=daily: 149 cặp câu trong bài học ngày đang chọn.
-- scope=all: tất cả câu có trong lessons.json và thẻ cổ điển tại index.html.
-- language=vi: chỉ FPT Ban Mai (cần khóa).
-- language=ko: chỉ InJoon (không cần FPT key).
-- offset và limit: chạy theo từng đợt; limit=0 nghĩa là không giới hạn, có thể gọi FPT hàng nghìn lần.
+API mới dùng POST https://mkp-api.fptcloud.com/v1/audio/speech với Authorization: Bearer [Marketplace key] và JSON {model: "FPT.TTS-pro", voice: "std_banmai", input: "...", response_format: "wav"}.
+File WAV được mã hóa sang MP3 bằng ffmpeg trên GitHub Actions, kiểm tra lại MP3 trước khi cập nhật audio-manifest.json.
 
-Mỗi câu chỉ chuyển sang giọng mới sau khi tải xuống và xác thực MP3. MP3 Hoài My/SunHi cũ không bị ghi đè, những câu chưa chuyển vẫn phát file trước đó. File audio-manifest.json ghi kèm provider và voice của file mới. Các workflow đời cũ cũng đã chuyển sang cùng bộ tạo giọng, tránh vô tình sinh thêm Hoài My/SunHi.
+Các MP3 Hoài My/SunHi cũ được giữ làm phương án dự phòng, không ghi đè; những câu chưa chuyển vẫn nghe được. Secret không bao giờ được xuất bản cùng GitHub Pages.
 
-Kiểm tra không cần API: python -m unittest scripts/test_selected_voices.py -v
+Kiểm thử offline không tốn tiền: python -m unittest scripts/test_selected_voices.py -v
