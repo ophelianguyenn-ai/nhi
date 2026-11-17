@@ -91,6 +91,8 @@ try{
   },lesson.id);
   async function homeCalendar(){
    await cal.goto('http://127.0.0.1:8765/#/bai/'+lesson.id,{waitUntil:'domcontentloaded'});
+   // A hash-only navigation does not reload the app's in-memory progress.
+   await cal.reload({waitUntil:'domcontentloaded'});
    await cal.waitForSelector('#planBox .ppage',{timeout:15000});
    await cal.$eval('#planBox .pback',e=>e.click());
    await cal.waitForSelector('#planBox .nhi-plan-waiting',{timeout:10000});
@@ -108,17 +110,6 @@ try{
    localStorage.setItem('viko-plan-v1',JSON.stringify(p));
   },lesson.id);
   const due=await homeCalendar();
-  const diagnostic=await cal.evaluate(id=>({
-   id,plan:JSON.parse(localStorage.getItem('viko-plan-v1')||'{}').done?.[id],
-   date:new Date().toString(),
-   activeTitles:[...document.querySelectorAll('#planBox .nhi-plan-current .ptitle')].slice(0,4).map(a=>[a.textContent,a.getAttribute('href')]),
-   waitingTitles:[...document.querySelectorAll('#planBox .nhi-plan-waiting .ptitle')].slice(0,4).map(a=>[a.textContent,a.getAttribute('href')]),
-   headings:[...document.querySelectorAll('#planBox .nhi-bucket-title')].map(e=>e.textContent),
-   planText:document.querySelector('#planBox')?.textContent?.slice(0,250),
-   match:[...document.querySelectorAll('#planBox .ptitle')].filter(a=>a.getAttribute('href')?.endsWith(id)).map(a=>a.closest('.plesson')?.innerText?.slice(0,600)),
-   html:document.querySelector('#planBox .nhi-plan-waiting')?.innerHTML.slice(0,500)
-  }),lesson.id);
-  console.log('CALENDAR_DIAGNOSTICS',JSON.stringify({early,due,diagnostic}));
   assert(due.active&&!due.waiting,'Lesson did not appear on actual review due date');
  }finally{await calContext.close();}
  assert(errors.length===0,'Browser errors: '+errors.join('; '));
