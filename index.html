@@ -657,7 +657,7 @@ button,input,select,textarea{font-family:var(--ui)}
 <link rel="stylesheet" href="nhi-card-polish-v9.css?v=20261115-vi-centered-v10">
 <link rel="stylesheet" href="nhi-card-polish-v10.css?v=20261115-title-weight-v12">
 <link rel="stylesheet" href="nhi-cover-palette-v12.css?v=20261115-no-girl-frame-v13">
-<link rel="stylesheet" href="nhi-chat-image-notes-v1.css?v=20261117"><link rel="stylesheet" href="nhi-chat-note-card-v2.css?v=20261117">
+<link rel="stylesheet" href="nhi-chat-image-notes-v1.css?v=20261117"><link rel="stylesheet" href="nhi-chat-note-card-v2.css?v=20261117"><link rel="stylesheet" href="nhi-original-gif-review-v1.css?v=20261117-r3">
 <script>
 /* Pick exactly one of three cover colors when the document loads.
    Navigate/flip cards without changing it; no animation or interval. */
@@ -3999,8 +3999,10 @@ button,input,select,textarea{font-family:var(--ui)}
       setFocus(false);
       // A cheerful cat takes the victory spotlight; no girl mascot at completion.
       var m = el('div','nhi-victory-cat-scene');
-      var cat=el('img','nhi-victory-cat');
-      cat.src='nhi-cat-phu-ba-20261117-v2.svg?v=2';
+      var cat=el('img','nhi-victory-cat nhi-original-gif');
+      // Exact previous image-generation output: eight original frames, 140 ms each.
+      // The caption is already drawn in the GIF; CSS hides its text duplicate.
+      cat.src='nhi-cat-original-8frames-20261117.gif?v=1';
       cat.onerror=function(){cat.onerror=null;cat.src='nhi-kitten-lifelike-v2.svg?v=20261115-kitten-v2';};
       cat.alt='Mèo trắng vui vẻ tung tiền, những tờ tiền đang bay và rơi';
       cat.loading='eager';m.appendChild(cat);
@@ -4030,12 +4032,12 @@ button,input,select,textarea{font-family:var(--ui)}
       if (s.kind === 'lesson' && s.L) { var nx = current(s.L); p.appendChild(el('p', 'pstatus done', nx ? '✓ ' + STEP[nx.step] + ' · ' + vn(nx.due, true) : '✓ Đã hoàn thành cả 5 lần.')); }
       var enids=(s.L?s.L.ids:s.queue).filter(function(id,i,a){return a.indexOf(id)===i&&alive(id)&&val('enHard',id);});if(enids.length)p.appendChild(btn('primary','Ôn chưa nhớ tiếng Anh ('+enids.length+')',function(){start('english',enids,s.title+' · chưa nhớ tiếng Anh',s.L);}));
       var row = el('div', 'prow');
-      row.appendChild(btn('primary', '↻ Học lại tất cả thẻ', function () {
+      var replayButton=btn('primary nhi-replay-button', '↻ Học lại tất cả thẻ', function () {
         var again=s.queue.filter(alive);
         if(!again.length){toast('Học phần hiện không có thẻ để học lại.');return;}
         // This is voluntary practice, not an extra scheduled review round.
         start('free',again,s.title.replace(/ · Học lại$/,'')+' · Học lại',s.L);
-      }));
+      });row.appendChild(replayButton);
       row.appendChild(lbtn('ghost', 'left', 'Xem lại thẻ cuối', function () { s.pos = Math.max(0, s.queue.length - 1); anim = 'prev'; saveSess(); render(); }));
       row.appendChild(btn('ghost', 'Xong', function () { sess = null; saveSess(); render(); }));
       p.appendChild(row); v.appendChild(p);
