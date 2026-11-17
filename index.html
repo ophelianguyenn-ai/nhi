@@ -3603,7 +3603,10 @@ button,input,select,textarea{font-family:var(--ui)}
       var modes=el('div','nhi-v2-lesson-modes');
       modes.appendChild(el('p','nhi-v2-source-label','Nguồn: '+titleMain(L)+' · '+L.ids.filter(alive).length+' thẻ'));
       var actions=el('div','nhi-v2-lesson-mode-buttons');
-      actions.appendChild(btn('primary','📇 Học flashcard',function(){startLesson(L);}));
+      var early=!!cur&&(cur.st==='next'||cur.st==='future')&&!alreadyStudied&&!rs.length;
+      var flash=btn('primary','📇 Học flashcard',function(){startLesson(L);});
+      if(early){flash.disabled=true;flash.title='Bài mới chỉ mở đúng ngày học, không tự học trước';}
+      actions.appendChild(flash);
       [['write','✍️ Luyện viết'],['quiz','🧩 Trắc nghiệm'],['listen','🎧 Nghe']].forEach(function(x){
         actions.appendChild(btn('ghost',x[1],function(){
           if(window.NHI_V2_OPEN_LESSON_MODE)window.NHI_V2_OPEN_LESSON_MODE(L.id,x[0]);
