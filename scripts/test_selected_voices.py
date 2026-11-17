@@ -1,4 +1,4 @@
-"""Offline, no-charge checks for the Ban Mai/InJoon migration."""
+"""Offline, non-billable checks for FPT Marketplace Ban Mai and Edge InJoon."""
 import asyncio
 import importlib.util
 import json
@@ -13,6 +13,7 @@ spec = importlib.util.spec_from_file_location('selected_voice_audio', module_pat
 audio = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(audio)
 
+VALID_WAV = b'RIFF' + bytes(4) + b'WAVE' + bytes(48)
 
 class FakeHTTP:
     def __init__(self, body):
@@ -24,66 +25,69 @@ class FakeHTTP:
     def read(self):
         return self.body
 
-
 class VoiceMigrationTests(unittest.TestCase):
-    def test_selected_voices_are_exact(self):
-        self.assertEqual(audio.VOICE, {'vi': 'banmai', 'ko': 'ko-KR-InJoonNeural'})
+    def test_correct_marketplace_voice_and_endpoint(self):
+        self.assertEqual(audio.VOICE, {'vi': 'std_banmai', 'ko': 'ko-KR-InJoonNeural'})
+        self.assertEqual(audio.FPT_MODEL, 'FPT.TTS-pro')
+        self.assertEqual(audio.FPT_ENDPOINT, 'https://mkp-api.fptcloud.com/v1/audio/speech')
 
-    def test_voice_specific_paths_preserve_legacy_audio(self):
+    def test_voice_specific_paths_do_not_overwrite_legacy(self):
         with tempfile.TemporaryDirectory() as tmp, patch.object(audio, 'ROOT', pathlib.Path(tmp)):
             p = audio.target_path('vi', 'Báo cáo tiến độ')
-            self.assertIn('/audio/vi/fpt-banmai-v1/', p.as_posix())
+            self.assertIn('/audio/vi/fpt-marketplace-banmai-v1/', p.as_posix())
             self.assertNotEqual(p.name, audio.target_path('ko', 'Báo cáo tiến độ').name)
 
-    def test_fpt_request_uses_secret_header_and_utf8_body(self):
+    def test_marketplace_auth_json_voice_and_binary_wav(self):
         seen = []
         def fake_open(req, timeout):
             seen.append(req)
-            return FakeHTTP(json.dumps({'error': 0, 'async': 'https://example.org/clip.mp3'}).encode())
+            return FakeHTTP(VALID_WAV)
         with patch.object(audio.request, 'urlopen', side_effect=fake_open):
-            url = audio._post_fpt('Xin chào ạ', 'secret-value')
-        self.assertEqual(url, 'https://example.org/clip.mp3')
-        self.assertEqual(seen[0].get_header('Api_key'), 'secret-value')
-        self.assertEqual(seen[0].get_header('Voice'), 'banmai')
-        self.assertEqual(seen[0].data, 'Xin chào ạ'.encode('utf-8'))
-        self.assertNotIn('secret-value', seen[0].full_url)
+            wav = audio._post_fpt('Xin chào ạ', ' marketplace-key ')
+        self.assertEqual(wav, VALID_WAV)
+        self.assertEqual(seen[0].full_url, audio.FPT_ENDPOINT)
+        self.assertEqual(seen[0].get_header('Authorization'), 'Bearer marketplace-key')
+        self.assertEqual(seen[0].get_header('Content-type'), 'application/json')
+        payload = json.loads(seen[0].data)
+        self.assertEqual(payload['model'], 'FPT.TTS-pro')
+        self.assertEqual(payload['voice'], 'std_banmai')
+        self.assertEqual(payload['input'], 'Xin chào ạ')
+        self.assertEqual(payload['response_format'], 'wav')
+        self.assertNotIn('marketplace-key', seen[0].full_url)
+        self.assertNotIn('marketplace-key', seen[0].data.decode())
 
-    def test_fpt_secret_trailing_newline_is_cleaned(self):
+    def test_formatting_whitespace_from_secret_is_sanitized(self):
         seen = []
-        def fake_open(req, timeout):
-            seen.append(req)
-            return FakeHTTP(json.dumps({'error': 0, 'async': 'https://example.org/clip.mp3'}).encode())
-        with patch.object(audio.request, 'urlopen', side_effect=fake_open):
-            audio._post_fpt('Xin chào', '  secret-value\n')
-        self.assertEqual(seen[0].get_header('Api_key'), 'secret-value')
+        with patch.object(audio.request, 'urlopen', side_effect=lambda req, timeout: (seen.append(req) or FakeHTTP(VALID_WAV))):
+            audio._post_fpt('Xin chào', 'key\nval\r\nue')
+        self.assertEqual(seen[0].get_header('Authorization'), 'Bearer keyvalue')
 
-    def test_fpt_secret_embedded_linebreaks_are_normalized(self):
-        seen = []
-        def fake_open(req, timeout):
-            seen.append(req)
-            return FakeHTTP(json.dumps({'error': 0, 'async': 'https://example.org/clip.mp3'}).encode())
-        with patch.object(audio.request, 'urlopen', side_effect=fake_open):
-            audio._post_fpt('Xin chào', 'se cr et\nvalue\r\n')
-        self.assertEqual(seen[0].get_header('Api_key'), 'secretvalue')
-
-    def test_fpt_secret_empty_value_is_rejected(self):
-        with self.assertRaisesRegex(ValueError, 'FPT_API_KEY format'):
-            audio._post_fpt('Xin chào', '  \n  ')
-
-    def test_fpt_error_and_non_https_url_fail_closed(self):
-        for data in ({'error': 1, 'message': 'bad key'},
-                     {'error': 0, 'async': 'http://example.org/no.mp3'}):
-            with patch.object(audio.request, 'urlopen',
-                              return_value=FakeHTTP(json.dumps(data).encode())):
+    def test_empty_secret_and_non_wav_response_rejected(self):
+        with self.assertRaisesRegex(ValueError, 'FPT_MARKETPLACE_API_KEY'):
+            audio._post_fpt('Xin chào', ' \n ')
+        for body in (b'{"error":"unauthorized"}', b'not-a-wav', b'RIFF' + bytes(30)):
+            with patch.object(audio.request, 'urlopen', return_value=FakeHTTP(body)):
                 with self.assertRaises(RuntimeError):
-                    audio._post_fpt('Xin chào', 'key')
+                    audio._post_fpt('Xin chào', 'sample-key')
 
     def test_minimum_and_maximum_text_length(self):
         for text in ('a', 'ab', 'x' * 5001):
             with self.assertRaises(ValueError):
                 audio._fpt_bytes(text, 'key')
 
-    def test_dry_run_and_missing_key_never_edit_manifest(self):
+    def test_mp3_conversion_uses_ffmpeg_and_deletes_temporary_wav(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            target = pathlib.Path(tmp) / 'output.mp3'
+            with patch.object(audio.subprocess, 'run') as runner:
+                audio._encode_mp3(VALID_WAV, target)
+                runner.assert_called_once()
+                args = runner.call_args.args[0]
+                self.assertEqual(args[0], 'ffmpeg')
+                self.assertIn('libmp3lame', args)
+                self.assertEqual(args[-1], str(target))
+                self.assertFalse(pathlib.Path(args[args.index('-i')+1]).exists())
+
+    def test_dry_run_and_missing_marketplace_key_never_edit_manifest(self):
         with tempfile.TemporaryDirectory() as tmp:
             root = pathlib.Path(tmp)
             (root / 'scripts').mkdir()
@@ -95,14 +99,13 @@ class VoiceMigrationTests(unittest.TestCase):
                                        offset=0, limit=30, delay=0,
                                        dry_run=True, allow_partial=False, max_failures=3)
             with patch.object(audio, 'ROOT', root), patch.object(audio, 'MANIFEST', path), \
-                    patch.dict('os.environ', {}, clear=True):
+                    patch.dict('os.environ', {'FPT_API_KEY': 'old-console-key'}, clear=True):
                 asyncio.run(audio.run(settings))
                 settings.language = 'vi'
                 settings.dry_run = False
-                with self.assertRaises(SystemExit):
+                with self.assertRaisesRegex(SystemExit, 'FPT_MARKETPLACE_API_KEY'):
                     asyncio.run(audio.run(settings))
             self.assertEqual(path.read_text(), '{}')
-
 
 if __name__ == '__main__':
     unittest.main()
