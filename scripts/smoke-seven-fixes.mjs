@@ -75,7 +75,7 @@ try{
   size:document.querySelector('#planBox .nhi-victory-cat')?.naturalWidth,
   text:document.querySelector('#planBox .sdone h2')?.textContent
  }));
- assert(cat.src?.includes('nhi-money-cat-20261117.svg')&&cat.size>0,'Money cat artwork not loaded');
+ assert(cat.src?.includes('nhi-cat-phu-ba-20261117-v2.svg')&&cat.size>0,'Money cat artwork not loaded');
  assert(cat.text==='Yeahhh đã học xong, Nhi sắp trở thành phú bà rồi ^^','Celebration caption incorrect');
  // Calendar: after studying, a lesson stays in Waiting until the actual due day.
  const calContext=await browser.createBrowserContext();

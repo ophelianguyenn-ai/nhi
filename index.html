@@ -657,7 +657,7 @@ button,input,select,textarea{font-family:var(--ui)}
 <link rel="stylesheet" href="nhi-card-polish-v9.css?v=20261115-vi-centered-v10">
 <link rel="stylesheet" href="nhi-card-polish-v10.css?v=20261115-title-weight-v12">
 <link rel="stylesheet" href="nhi-cover-palette-v12.css?v=20261115-no-girl-frame-v13">
-<link rel="stylesheet" href="nhi-chat-image-notes-v1.css?v=20261117">
+<link rel="stylesheet" href="nhi-chat-image-notes-v1.css?v=20261117"><link rel="stylesheet" href="nhi-chat-note-card-v2.css?v=20261117">
 <script>
 /* Pick exactly one of three cover colors when the document loads.
    Navigate/flip cards without changing it; no animation or interval. */
@@ -3071,7 +3071,7 @@ button,input,select,textarea{font-family:var(--ui)}
       return { loaded: loaded, due: due, late: late, cards: cards, hard: hardIds(), upcoming: upcoming, lessons: LESSONS.length, items: Object.keys(ITEMS).filter(alive).length };
     }
 
-    /* ---- toast / delete / one-click Undo (persists across reloads) ---- */
+    /* ---- single-card undo window; confirmed deletions remain tombstoned ---- */
     var toastTimer = null, undoKey = 'nhi-plan-deletions-v2', undoHistory = [];
     function saveUndo() { lsSet(undoKey, '[]'); }
     function undoUI() { var old=document.getElementById('nhi-undo-delete'); if(old)old.remove(); }
@@ -3111,7 +3111,17 @@ button,input,select,textarea{font-family:var(--ui)}
       if (!ITEMS[id] || val('del', id)) return;
       ++ratingToken; ratingPending=false; pendingRatingFinish=null;
       stopSpeech(); if(window.NHI_HARD_MASCOT)window.NHI_HARD_MASCOT.clear();
-      // A deletion is a permanent tombstone: do not re-import it on reload/sync.
+      // Delete immediately, but offer one-step local Undo until the next card
+      // navigation. A tombstone still remains after that window expires.
+      undoHistory=[{
+        id:id, del:val('del',id), hard:val('hard',id),
+        inSession:!!(sess&&sess.queue.includes(id)),
+        kind:sess&&sess.kind,title:sess&&sess.title,
+        pos:sess?sess.queue.indexOf(id):-1,
+        recorded:!!(sess&&sess.recorded),
+        lessonId:sess&&sess.L&&sess.L.id,
+        done:sess&&sess.L?(val('done',sess.L.id)||[]).slice():[]
+      }];
       put('del',id,1);
       if(val('hard',id))put('hard',id,null);
       Object.keys(resume).forEach(function(k){resume[k]=(resume[k]||[]).filter(function(x){return x!==id;});});
@@ -3126,8 +3136,8 @@ button,input,select,textarea{font-family:var(--ui)}
         sess.pos=Math.min(before,sess.queue.length);
         sess.selectedKo='';sess.spoken=-1;sess.flipped=false;
       }
-      undoHistory=[];saveUndo();save();saveSess();undoUI();
-      toast('Đã xóa vĩnh viễn khỏi học phần: '+ITEMS[id].ko);
+      saveUndo();save();saveSess();undoUI();
+      toast('Đã xóa khỏi học phần · Có thể Hoàn tác trước khi sang thẻ khác');
       render();
     }
 
@@ -3932,7 +3942,7 @@ button,input,select,textarea{font-family:var(--ui)}
       if(!sess||ratingPending||sess.pos>=sess.queue.length)return;
       var s=sess,pos=s.pos,id=s.queue[pos],card=document.querySelector('#planBox .pcard');
       if(!id)return;
-      expireUndo();stopSpeech();if(window.NHI_STUDY)window.NHI_STUDY.feedback(k);
+      stopSpeech();if(window.NHI_STUDY)window.NHI_STUDY.feedback(k);
       // KHÓ records the grade, but stays on THIS card until the learner clicks Next.
       // Do not insert a duplicate card in the current session.
       if(k==='hard'){
@@ -3954,7 +3964,7 @@ button,input,select,textarea{font-family:var(--ui)}
         s.stats[k]=(s.stats[k]||0)+1;s.picked[pos]=k;put('rate',id,k);
         if(k==='known'){put('known',id,1);if(val('hard',id))put('hard',id,null);}
         else if(k==='mid'&&s.kind==='hard'&&val('hard',id))put('hard',id,null);
-        haptic(14);s.selectedKo='';s.spoken=-1;s.pos++;
+        expireUndo();haptic(14);s.selectedKo='';s.spoken=-1;s.pos++;
         s.flipped=false;s.hanja=false;s.editing=false;s.imagePicker=false;
         legendOpen=false;flipping=false;anim='next';saveSess();render();
       }
@@ -3967,7 +3977,7 @@ button,input,select,textarea{font-family:var(--ui)}
       // A cheerful cat takes the victory spotlight; no girl mascot at completion.
       var m = el('div','nhi-victory-cat-scene');
       var cat=el('img','nhi-victory-cat');
-      cat.src='nhi-money-cat-20261117.svg?v=1';
+      cat.src='nhi-cat-phu-ba-20261117-v2.svg?v=2';
       cat.onerror=function(){cat.onerror=null;cat.src='nhi-kitten-lifelike-v2.svg?v=20261115-kitten-v2';};
       cat.alt='Mèo trắng vui vẻ tung tiền, những tờ tiền đang bay và rơi';
       cat.loading='eager';m.appendChild(cat);
@@ -4009,6 +4019,26 @@ button,input,select,textarea{font-family:var(--ui)}
         }
         haptic([20, 60, 20, 60, 40]);
       }
+    }
+    function appendChatExample(raw) {
+      var it=curItem();if(!it || !alive(it.id))return false;
+      var lines=String(raw||'').replace(/\r/g,'').split(/\n+/).map(function(t){return t.trim();}).filter(Boolean);
+      if(!lines.length)return false;
+      var previous=val('note',it.id)||{text:it.note||'',color:'#fff1ce'};
+      var next=(String(previous.text||'').trimEnd()?String(previous.text).trimEnd()+'\n':'')+lines.join('\n');
+      put('note',it.id,{text:next,color:previous.color||'#fff1ce'});
+      // Preserve any edited rich-text range indices by only appending.
+      if(sess && sess.editing){
+        var form=document.querySelector('#planBox .editbox'),input=form&&form.querySelector('textarea[name="note"]');
+        if(input){
+          input.value=next;
+          var view=form.querySelector('[data-language="note"]');
+          if(view)view.textContent=next;
+          input.dispatchEvent(new Event('input',{bubbles:true}));
+        }
+      }else render();
+      toast('Đã thêm '+lines.length+' ví dụ vào ghi chú của thẻ.');
+      return true;
     }
     function askAi() { var it = curItem(); if (it && window.NLC_AI) window.NLC_AI.open(true); }
 
@@ -4069,6 +4099,7 @@ button,input,select,textarea{font-family:var(--ui)}
     return {
       render: render, merge: merge, extras: applyExtras, follow: follow, active: function () { return !!sess; }, load: load, leave: function () { if (!page) leave(); }, route: route,
       home: home, openDailyCreator: openDailyCreator, summary: summary, onData: function (fn) { dataCb = fn; },
+      appendChatExample:appendChatExample,
       ctx: function () { var it = curItem(); if (it) return { ko: it.ko, vi: it.vi, topic: it.topic, type: it.type }; return page && BY_LESSON[page] ? { lesson: BY_LESSON[page].title } : null; }
     };
   })();
@@ -4581,9 +4612,14 @@ button,input,select,textarea{font-family:var(--ui)}
     function ctxLine() { var c = PLAN.ctx(); if (!c) return ''; return c.ko ? 'Thẻ đang học (' + (c.type === 'w' ? 'từ vựng' : 'câu') + ', chủ đề ' + c.topic + '): ' + c.ko + ' = ' + c.vi : 'Bài đang mở: ' + c.lesson; }
     function paintCtx() {
       var box = $('aiCtx'), c = PLAN.ctx(); box.textContent = '';
-      box.hidden = !(c && c.ko);
-      if (box.hidden) return;
-      box.appendChild(mk('span', null, 'Đang hỏi về thẻ:')); var b = mk('b', null, c.ko); b.lang = 'ko'; box.appendChild(b); box.appendChild(mk('span', null, c.vi));
+      box.hidden = !(c && c.ko) && !window.NHI_READER_SPEED;
+      if (c && c.ko) {
+        var line = mk('span','nhi-ai-card-inline'),b = mk('b',null,c.ko);
+        b.lang='ko';line.appendChild(b);
+        line.appendChild(mk('span',null,' ('+c.vi+')'));
+        box.appendChild(line);
+      }
+      if(window.NHI_READER_SPEED)box.appendChild(window.NHI_READER_SPEED);
     }
     function paintQuick() {
       var q = $('aiQuick'), c = PLAN.ctx(); q.textContent = '';
@@ -4696,6 +4732,14 @@ button,input,select,textarea{font-family:var(--ui)}
     }
     function grow() { var t = $('aiInput'); t.style.height = 'auto'; t.style.height = Math.min(140, t.scrollHeight + 2) + 'px'; }
     function init() {
+      // The legacy compact-toolbar rule overrides later CSS on some screens.
+      // Pin the actual control to a true 38 × 38 square.
+      var gear=$('aiCfgBtn');
+      if(gear){
+        [['width','38px'],['height','38px'],['min-width','38px'],['min-height','38px'],
+         ['max-width','38px'],['max-height','38px'],['flex','0 0 38px'],['border-radius','6px'],
+         ['box-sizing','border-box']].forEach(function(x){gear.style.setProperty(x[0],x[1],'important');});
+      }
       $('aiBtn').addEventListener('click', function () { if (isOpen()) close(); else open(); });
       $('aiClose').addEventListener('click', close);
       $('aiCfgBtn').addEventListener('click', function () { paintSetup($('aiSetup').hidden); });
@@ -4709,6 +4753,36 @@ button,input,select,textarea{font-family:var(--ui)}
       $('aiInput').addEventListener('keydown', function (e) { if (e.key === 'Enter' && !e.shiftKey && !e.isComposing) { e.preventDefault(); send(this.value); } else if (e.key === 'Escape') close(); });
       // keep the "asking about this card" strip in step with the card on screen
       new MutationObserver(function () { if (isOpen()) { paintCtx(); paintQuick(); } }).observe($('planBox'), { childList: true });
+      window.NLC_NOTES={add:function(t){return PLAN.appendChatExample(t);}};
+      var panel=$('planBox');
+      panel.addEventListener('dragover',function(e){
+        if(e.target.closest('.pcard')&&e.dataTransfer&&
+          Array.from(e.dataTransfer.types||[]).includes('application/x-nhi-example')){
+          e.preventDefault();e.dataTransfer.dropEffect='copy';
+          var card=e.target.closest('.pcard');card.classList.add('nhi-chat-drop-hover');
+        }
+      });
+      panel.addEventListener('dragleave',function(e){
+        var card=e.target.closest('.pcard');if(card)card.classList.remove('nhi-chat-drop-hover');
+      });
+      panel.addEventListener('drop',function(e){
+        var card=e.target.closest('.pcard');
+        if(!card||!e.dataTransfer)return;
+        var t=e.dataTransfer.getData('application/x-nhi-example');
+        if(!t)return;
+        e.preventDefault();e.stopPropagation();card.classList.remove('nhi-chat-drop-hover');
+        PLAN.appendChatExample(t);
+      });
+      $('aiLog').addEventListener('dragstart',function(e){
+        var p=e.target.closest('.nhi-ai-paragraph');
+        if(!p||!e.dataTransfer)return;
+        var node=p.querySelector('.nhi-ai-paragraph-text'),selected=String(window.getSelection()||'').trim();
+        var txt=selected&&node&&node.contains(window.getSelection().anchorNode)?selected:node&&node.textContent||'';
+        if(!txt.trim())return;
+        e.dataTransfer.setData('text/plain',txt.trim());
+        e.dataTransfer.setData('application/x-nhi-example',txt.trim());
+        e.dataTransfer.effectAllowed='copy';
+      });
     }
     window.NLC_AI = { open: open, close: close };
     return { init: init, open: open, close: close };

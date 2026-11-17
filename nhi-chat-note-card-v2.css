@@ -1,0 +1,135 @@
+/* Review interactions and fixed-size card layout — 2026-11-17. */
+#aiPanel .aictx{
+  display:flex!important;flex-direction:row!important;align-items:center!important;
+  flex-wrap:nowrap!important;gap:8px!important;
+  min-width:0!important;padding:8px 11px!important;
+}
+#aiPanel .nhi-ai-card-inline{
+  display:inline-block;flex:1 1 auto;min-width:0;
+  white-space:nowrap!important;overflow-x:auto;overflow-y:hidden;
+  scrollbar-width:thin;line-height:1.65;
+}
+#aiPanel .nhi-ai-card-inline b{
+  white-space:nowrap;font-size:clamp(13px,3vw,17px)!important;
+}
+#aiPanel .nhi-ai-card-inline span{white-space:nowrap;font-size:13px}
+#aiPanel .nhi-ai-reader-speed{
+  display:inline-flex;align-items:center;gap:5px;flex:0 0 auto;
+  font:650 12px/1 var(--ui,system-ui);white-space:nowrap;
+}
+#aiPanel .nhi-ai-reader-speed select{
+  min-height:34px;height:34px;max-width:70px;width:64px;
+  border:1px solid var(--line);border-radius:8px;
+  background:var(--surface);color:var(--ink);padding:2px 4px;font-size:12px;
+}
+#aiPanel .nhi-ai-reader-setting{display:flex;flex-direction:column;gap:4px;margin-top:10px}
+#aiPanel #nhiReaderLanguage{max-width:100%;border:1px solid var(--line);
+  border-radius:10px;padding:8px;color:var(--ink);background:var(--surface)}
+#aiPanel #aiCfgBtn{
+  flex:0 0 38px!important;width:38px!important;height:38px!important;
+  min-width:38px!important;min-height:38px!important;
+  padding:7px!important;border-radius:7px!important;
+  aspect-ratio:1!important;
+}
+#aiPanel .nhi-ai-paragraph.nhi-ai-draggable-note{
+  display:flex;align-items:flex-start;gap:5px;min-width:0;
+}
+#aiPanel .nhi-ai-paragraph-text{flex:1 1 auto;min-width:0;overflow-wrap:anywhere}
+#aiPanel .nhi-ai-paragraph.nhi-ai-draggable-note{cursor:grab}
+#aiPanel .nhi-ai-paragraph.nhi-ai-draggable-note:active{cursor:grabbing}
+#aiPanel .nhi-ai-add-note,#aiPanel .nhi-add-to-note{
+  flex:0 0 25px!important;min-width:25px!important;width:25px!important;
+  height:27px!important;min-height:27px!important;display:inline-flex!important;
+  align-items:center;justify-content:center;padding:0!important;
+  background:var(--accent-soft);color:var(--accent-t);
+  border:1px solid var(--line);border-radius:7px;
+  cursor:pointer;font:800 16px var(--ui,system-ui);
+}
+#planBox .pcard.nhi-chat-drop-hover .pfront{
+  outline:3px dashed var(--accent-t)!important;outline-offset:-6px;
+  background:color-mix(in srgb,var(--accent-soft) 55%,var(--surface))!important;
+}
+html body #planBox .pcard:has(.pfront.nhi-with-image):not(:has(.nhi-editor-window-v5,.nhi-picture-picker)){
+  height:var(--nhi-v8-card-height,430px)!important;
+  min-height:330px!important;
+  max-height:calc(100dvh - 115px)!important;
+  box-sizing:border-box!important;
+  display:flex!important;flex-direction:column!important;
+  overflow:hidden!important;
+}
+html body #planBox .pcard:has(.pfront.nhi-with-image)>.card-top,
+html body #planBox .pcard:has(.pfront.nhi-with-image)>.cmeta,
+html body #planBox .pcard:has(.pfront.nhi-with-image)>.pnav,
+html body #planBox .pcard:has(.pfront.nhi-with-image)>.prate{
+  flex:0 0 auto!important;min-height:0!important;
+}
+html body #planBox .pcard:has(.pfront.nhi-with-image)>.pfront{
+  flex:1 1 auto!important;
+  min-height:0!important;height:auto!important;
+  max-height:none!important;
+  overflow-y:auto!important;overflow-x:hidden!important;
+  overscroll-behavior:contain;scrollbar-gutter:stable;
+  align-content:start!important;
+}
+html body #planBox .pcard .pfront.nhi-with-image>.card-illustration{
+  position:relative!important;align-self:start!important;
+}
+#planBox .card-illustration .nhi-image-stage{
+  width:100%!important;height:var(--nhi-image-height,auto)!important;
+  min-width:0!important;min-height:0!important;max-height:520px!important;
+  border-radius:10px;overflow:hidden;position:relative;
+  display:block;box-sizing:border-box;
+}
+html body #planBox .pcard .pfront .card-illustration .nhi-image-stage img{
+  display:block;width:100%!important;
+  height:var(--nhi-image-height,auto)!important;
+  max-height:520px!important;max-width:100%!important;
+  object-fit:contain!important;position:relative;
+  transform:translate(var(--nhi-image-x,0px),var(--nhi-image-y,0px))!important;
+  transition:none!important;
+  touch-action:none!important;
+}
+html body #planBox .pcard .nhi-image-adjust{
+  display:none;position:absolute!important;
+  z-index:20;top:6px;left:50%;right:auto;bottom:auto;
+  transform:translateX(-50%);margin:0!important;
+  width:min(225px,calc(100% - 10px))!important;
+  max-width:calc(100% - 10px)!important;
+  max-height:min(265px,70%)!important;overflow:auto;
+  padding:8px!important;gap:7px!important;
+  border:1px solid var(--accent-t);
+  background:color-mix(in srgb,var(--surface) 97%,transparent);
+  border-radius:12px;box-shadow:0 6px 20px #0002;
+}
+html body #planBox .pcard .card-illustration.nhi-image-selected .nhi-image-adjust{
+  display:grid!important;
+}
+#planBox .nhi-image-adjust-title{
+  font:750 11px/1.3 var(--ui,system-ui);color:var(--ink);
+  text-align:left;white-space:normal;
+}
+#planBox .nhi-image-actions{
+  display:flex!important;flex-wrap:wrap!important;gap:4px!important;
+}
+#planBox .nhi-image-actions button{
+  min-height:27px!important;height:auto!important;
+  padding:3px 5px!important;background:var(--surface);
+  color:var(--ink);font:650 10px/1.3 var(--ui,system-ui);
+  border:1px solid var(--line);border-radius:6px;box-shadow:none;
+}
+#planBox .nhi-image-actions button[aria-pressed=true]{
+  background:var(--accent-soft);border-color:var(--accent-t);
+}
+#planBox .pcard .prate .pundo{
+  grid-column:1/-1!important;min-height:32px!important;
+  height:34px!important;padding:4px 8px!important;
+  justify-self:center;max-width:220px;
+  border:1px solid var(--accent-t);border-radius:9px;
+  background:var(--accent-soft);color:var(--accent-t);
+}
+@media(max-width:470px){
+  #aiPanel .aictx{padding:6px!important;gap:5px!important}
+  #aiPanel .nhi-ai-reader-speed{font-size:0}
+  #aiPanel .nhi-ai-reader-speed select{width:58px;height:32px}
+  #planBox .pcard .nhi-image-adjust{width:min(220px,calc(100% - 10px))!important}
+}
