@@ -160,3 +160,17 @@ body.nhi-v2-panel-active #app #modeHead{display:none!important}
 @media(prefers-reduced-motion:reduce){
  #planBox .nhi-v2-goal-track>span{transition:none}
 }
+/* Preserve the original mascot, but give the redesigned page one clear CTA. */
+#planBox .nhi-v2-hero .tact{display:none!important}
+#planBox .nhi-v2-hero .tstats{margin-top:7px!important}
+#planBox .nhi-v2-lesson-modes{margin:13px 0 4px;border-top:1px dashed var(--line);padding-top:12px}
+#planBox .nhi-v2-lesson-mode-buttons{display:flex;flex-wrap:wrap;align-items:center;gap:7px}
+#planBox .nhi-v2-lesson-mode-buttons button{min-height:40px;white-space:normal}
+#planBox .nhi-v2-source-label{font-weight:700;font-size:12px;color:var(--muted);margin:1px 0 10px;line-height:1.5}
+#nhiV2Workspace .nhi-v2-options{display:grid;gap:7px}
+#nhiV2Workspace .nhi-v2-options button{width:100%;text-align:left;white-space:normal}
+#nhiV2Workspace .nhi-v2-question{font-size:clamp(18px,2.6vw,24px)!important;font-weight:800!important}
+@media(max-width:700px){
+ #planBox .nhi-v2-lesson-mode-buttons{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px}
+ #planBox .nhi-v2-lesson-mode-buttons button{min-width:0;padding:9px 4px}
+}
