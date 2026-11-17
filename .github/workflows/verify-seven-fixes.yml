@@ -9,6 +9,8 @@ on:
       - 'nhi-verified-pairs-20261117.js'
       - 'nhi-phrases-v5.js'
       - 'nhi-money-cat-20261117.svg'
+      - 'nhi-cat-original-8frames-20261117.gif'
+      - 'nhi-original-gif-review-v1.css'
       - 'nhi-longpress-dictionary-v1.js'
       - 'nhi-seven-fixes-20261117.css'
       - 'study-update-v6.js'
@@ -19,6 +21,8 @@ on:
     paths:
       - 'index.html'
       - 'nhi-money-cat-20261117.svg'
+      - 'nhi-cat-original-8frames-20261117.gif'
+      - 'nhi-original-gif-review-v1.css'
       - 'scripts/smoke-seven-fixes.mjs'
   workflow_dispatch:
 
