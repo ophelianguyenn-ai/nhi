@@ -4209,6 +4209,8 @@ button,input,select,textarea{font-family:var(--ui)}
       ctx: function () { var it = curItem(); if (it) return { ko: it.ko, vi: it.vi, topic: it.topic, type: it.type }; return page && BY_LESSON[page] ? { lesson: BY_LESSON[page].title } : null; }
     };
   })();
+  // Public, read-only learning status and guarded navigation for the 2.0 UI.
+  window.NHI_PLAN_V2=PLAN;
 
   /* ---------- Modes ---------- */
   function renderMode() {
@@ -4659,6 +4661,10 @@ button,input,select,textarea{font-family:var(--ui)}
   /* ================= AI side window ================= */
   var AI = (function () {
     var KEY = 'nlc-ai-v1', LOGKEY = 'nlc-ai-log', cfg = { p: 'gemini', k: {}, m: {} }, log = [], busy = false, withCtx = true;
+    var THREADKEY='nhi-ai-threads-v2',threadId='',threads=[];
+    try{threads=JSON.parse(localStorage.getItem(THREADKEY)||'[]');if(!Array.isArray(threads))threads=[];}catch(e){threads=[];}
+    try{threadId=sessionStorage.getItem('nhi-ai-active-thread-v2')||'';}catch(e){};
+    if(!threadId)threadId='chat-'+Date.now().toString(36);
     var PROV = {
       gemini: { name: 'Google Gemini (có gói miễn phí)', model: 'gemini-3.5-flash-lite', link: 'https://aistudio.google.com/apikey', note: 'Lấy mã miễn phí tại aistudio.google.com/apikey (đăng nhập Google, bấm “Create API key”).' },
       claude: { name: 'Claude (Anthropic)', model: 'claude-haiku-4-5', link: 'https://console.anthropic.com/settings/keys', note: 'Lấy mã tại console.anthropic.com › API keys. Tính phí theo lượng dùng.' },
@@ -4667,9 +4673,42 @@ button,input,select,textarea{font-family:var(--ui)}
     var SYSTEM = 'Bạn là trợ lý học tiếng Hàn cho một người Việt đi làm ở nhà máy, thường họp và báo cáo với sếp người Hàn. Trả lời bằng tiếng Việt, ngắn gọn, đi thẳng vào câu hỏi. Khi giải thích một từ hay câu tiếng Hàn: nêu nghĩa, tách từ vựng và ngữ pháp chính, mức độ kính ngữ, rồi cho 1–2 ví dụ ngắn kèm nghĩa. Nếu bản dịch trong thẻ chưa tự nhiên thì đề xuất cách nói tốt hơn. Không dùng bảng.';
     try { var j = JSON.parse(lsGet(KEY) || '{}'); if (j && typeof j === 'object') { if (PROV[j.p]) cfg.p = j.p; cfg.k = j.k || {}; cfg.m = j.m || {}; } } catch (e) { }
     cfg.p='gemini'; // Default to Gemini; keys remain private on this device.
-    try { var lj = JSON.parse(sessionStorage.getItem(LOGKEY) || '[]'); if (Array.isArray(lj)) log = lj.filter(function (m) { return m && (m.r === 'me' || m.r === 'ai') && typeof m.t === 'string'; }); } catch (e) { }
+    try {var thread=threads.find(function(t){return t.id===threadId;});var lj=thread?thread.messages:JSON.parse(sessionStorage.getItem(LOGKEY)||'[]');if(Array.isArray(lj))log=lj.filter(function(m){return m&&(m.r==='me'||m.r==='ai')&&typeof m.t==='string';});}catch(e){}
     function saveCfg() { lsSet(KEY, JSON.stringify(cfg)); }
-    function saveLog() { try { sessionStorage.setItem(LOGKEY, JSON.stringify(log.slice(-30))); } catch (e) { } }
+    function saveLog() {
+      try {sessionStorage.setItem(LOGKEY,JSON.stringify(log.slice(-30)));}catch(e){}
+      saveThread();
+    }
+    function saveThread(){
+      try{
+        var first=log.find(function(m){return m.r==='me';});
+        var old=threads.find(function(t){return t.id===threadId;});
+        var title=old&&old.title||(first?first.t.slice(0,52):'Hội thoại mới');
+        var next={id:threadId,title:title,updated:Date.now(),messages:log.slice(-60)};
+        threads=threads.filter(function(x){return x.id!==threadId;});
+        if(log.length)threads.unshift(next);
+        threads=threads.slice(0,60);
+        localStorage.setItem(THREADKEY,JSON.stringify(threads));
+        sessionStorage.setItem('nhi-ai-active-thread-v2',threadId);
+        window.dispatchEvent(new Event('nhi:chat-history'));
+      }catch(e){console.warn('Nhi: không đủ dung lượng lưu lịch sử chat',e);}
+    }
+    function listThreads(){return threads.map(function(t){return {id:t.id,title:t.title,updated:t.updated,count:t.messages.length};});}
+    function newThread(title){
+      if(busy)return false;
+      saveThread();threadId='chat-'+Date.now().toString(36)+'-'+Math.random().toString(36).slice(2,6);
+      log=[];if(title)threads.unshift({id:threadId,title:String(title).slice(0,72),updated:Date.now(),messages:[]});
+      saveLog();paintLog();return true;
+    }
+    function switchThread(id){
+      if(busy)return false;
+      var t=threads.find(function(x){return x.id===id;});if(!t)return false;
+      saveThread();threadId=id;log=t.messages.slice();saveLog();paintLog();return true;
+    }
+    function renameThread(id,title){
+      var t=threads.find(function(x){return x.id===id;});if(!t||!title.trim())return false;
+      t.title=title.trim().slice(0,80);saveThread();return true;
+    }
     function key() { return (cfg.k[cfg.p] || '').trim(); }
     function normalizeGeminiModel(raw) {
       var name=String(raw || '').trim();
@@ -4849,7 +4888,8 @@ button,input,select,textarea{font-family:var(--ui)}
       $('aiBtn').addEventListener('click', function () { if (isOpen()) close(); else open(); });
       $('aiClose').addEventListener('click', close);
       $('aiCfgBtn').addEventListener('click', function () { paintSetup($('aiSetup').hidden); });
-      $('aiNewBtn').addEventListener('click', function () { log = []; saveLog(); paintLog(); });
+      $('aiNewBtn').title='Bắt đầu hội thoại mới (giữ lại hội thoại cũ)';$('aiNewBtn').setAttribute('aria-label','Hội thoại mới');
+      $('aiNewBtn').addEventListener('click', function () { newThread(); });
       $('aiProv').addEventListener('change', function () { cfg.p = this.value; saveCfg(); paintSetup(); });
       $('aiSetup').addEventListener('submit', function (e) { e.preventDefault(); cfg.p = $('aiProv').value; cfg.k[cfg.p] = $('aiKey').value.trim(); var m = $('aiModel').value.trim(); if(cfg.p==='gemini'){var normalized=normalizeGeminiModel(m);if(m&&!normalized){$('aiCheckStatus').textContent='Tên mô hình không hợp lệ. Hãy bấm Kiểm tra Gemini và chọn mô hình.';return;}m=normalized||PROV.gemini.model;} if (m && m !== PROV[cfg.p].model) cfg.m[cfg.p] = m; else delete cfg.m[cfg.p]; saveCfg(); paintSetup(!key()); });
       $('aiCheck').addEventListener('click',checkGemini);
@@ -4890,7 +4930,7 @@ button,input,select,textarea{font-family:var(--ui)}
         e.dataTransfer.effectAllowed='copy';
       });
     }
-    window.NLC_AI = { open: open, close: close };
+    window.NLC_AI = { open: open, close: close, ask:send, history:listThreads, switchThread:switchThread, newThread:newThread, renameThread:renameThread };
     return { init: init, open: open, close: close };
   })();
 
