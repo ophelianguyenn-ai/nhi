@@ -71,9 +71,12 @@ class VoiceMigrationTests(unittest.TestCase):
                     audio._post_fpt('Xin chào', 'sample-key')
 
     def test_minimum_and_maximum_text_length(self):
-        for text in ('a', 'ab', 'x' * 5001):
+        for text in ('a', 'x' * 5001):
             with self.assertRaises(ValueError):
                 audio._fpt_bytes(text, 'key')
+        with patch.object(audio, '_post_fpt', return_value=VALID_WAV) as synth:
+            self.assertEqual(audio._fpt_bytes('xe', 'key'), VALID_WAV)
+            synth.assert_called_once_with('xe.', 'key')
 
     def test_mp3_conversion_uses_ffmpeg_and_deletes_temporary_wav(self):
         with tempfile.TemporaryDirectory() as tmp:
