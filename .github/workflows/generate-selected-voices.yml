@@ -2,7 +2,7 @@ name: Prepare FPT Ban Mai and Korean InJoon audio batches
 
 on:
   # One-shot, low-cost pilot on an explicitly named commit only.
-  # Whitespace from pasted GitHub secrets is sanitized by the generator.
+  # Pilot push is Korean-only while FPT rejects the provided API secret with HTTP 401.
   # Later workflow edits never trigger paid synthesis automatically.
   push:
     branches: [main]
@@ -59,7 +59,7 @@ jobs:
         env:
           FPT_API_KEY: ${{ secrets.FPT_API_KEY }}
           CHOSEN_SCOPE: ${{ github.event_name == 'push' && 'daily' || inputs.scope || 'daily' }}
-          CHOSEN_LANG: ${{ github.event_name == 'push' && 'both' || inputs.language || 'both' }}
+          CHOSEN_LANG: ${{ github.event_name == 'push' && 'ko' || inputs.language || 'both' }}
           CHOSEN_OFFSET: ${{ github.event_name == 'push' && '0' || inputs.offset || '0' }}
           CHOSEN_LIMIT: ${{ github.event_name == 'push' && '2' || inputs.limit || '30' }}
           DRY_RUN: ${{ github.event_name == 'push' && 'false' || inputs.dry_run }}
