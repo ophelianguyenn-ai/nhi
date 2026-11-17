@@ -173,7 +173,7 @@ function renderPractice(){
 }
 function renderListenSpeak(){
  const items=visibleItems();const it=items[0];
- const select=items.slice(0,80).map(x=>'<option value="'+esc(x.id)+'">'+esc(x.vi.slice(0,90))+'</option>').join('');
+ const select=items.slice(0,80).map(x=>'<option value="'+esc(x.id)+'"'+(x.id===(selectedItemId||items[0]?.id)?' selected':'')+'>'+esc(x.vi.slice(0,90))+'</option>').join('');
  return pageTitle(panel==='listen'?'🎧 Nghe không nhìn chữ':'🎤 Luyện nói tiếng Hàn',
  panel==='listen'?'Nghe trước, tự gõ lại rồi mới hiện chữ.':'Thu âm và nghe lại câu của chính bạn, đối chiếu với giọng mẫu.')
  +'<section class="nhi-v2-surface"><label for="nhiV2ListenSelect">Chọn câu trong dữ liệu thật</label><select id="nhiV2ListenSelect">'+select+'</select>'
@@ -244,7 +244,7 @@ function updateSource(){
  if(!t||t==='Lịch học')return;
  let b=$('#nhiV2Source');if(!b){b=document.createElement('p');b.id='nhiV2Source';p.appendChild(b);}
  const deck=$('#decks [aria-pressed="true"]')||$('#decks .active'),source=deck?.textContent?.trim()||'Bộ đang chọn';
- const value=t+' · Bộ: '+source+' · Luyện từ học phần hiện tại';
+ const value=t+' · Bộ: '+source+' · Dữ liệu theo bộ lọc đã chọn';
  if(b.textContent!==value)b.textContent=value;
 }
 function hookSettings(){
@@ -327,7 +327,7 @@ function recordLearning(){
  },10000);
 }
 function loadAnswer(){
- const id=$('#nhiV2ListenSelect')?.value,items=visibleItems(),it=items.find(x=>x.id===id)||items[0];return it;
+ const id=$('#nhiV2ListenSelect')?.value||selectedItemId,items=visibleItems(),it=items.find(x=>x.id===id)||items[0];return it;
 }
 function playSample(){const it=loadAnswer();if(!it)return status('Không có câu để luyện');window.NHI_SPEECH?.speak(it.ko,'ko-KR');}
 async function recordToggle(){
@@ -438,7 +438,16 @@ function installRestorePreview(){
    const txt=await file.text(),obj=JSON.parse(txt);
    const keys=obj?.keys||{},count=Object.keys(keys).length;
    const ok=obj.type==='nhi-full-local-export'&&count>0;
-   const msg=ok?'Tệp hợp lệ: '+count+' nhóm dữ liệu. Chưa nhập hay ghi đè. Để khôi phục, dùng quy trình sao lưu toàn bộ ở Cài đặt nâng cao.':'Tệp này không đúng định dạng sao lưu đầy đủ của Nhi Learning Corner.';
+   let checked=false;
+   if(ok){
+     const stamp='__nhi_v2_restore_dryrun__';
+     try{
+       localStorage.setItem(stamp,JSON.stringify(keys));
+       const test=JSON.parse(localStorage.getItem(stamp)||'{}');
+       checked=Object.keys(test).length===count&&Object.keys(keys).every(k=>test[k]===keys[k]);
+     }finally{localStorage.removeItem(stamp);}
+   }
+   const msg=ok?(checked?'✓ Kiểm tra khôi phục thử thành công: ':'Tệp hợp lệ nhưng không thể thử khôi phục: ')+count+' nhóm dữ liệu. Dữ liệu thật chưa bị ghi đè.':'Tệp không đúng định dạng sao lưu đầy đủ của Nhi Learning Corner.';
    alert(msg);
   }catch(e){alert('Không đọc được JSON. Dữ liệu hiện tại không thay đổi.');}
   input.value='';
@@ -453,9 +462,14 @@ function installImportPreview(){
   const raw=form.bulk?.value||'',lines=raw.split(/\r?\n/).filter(Boolean),d=data(),norm=s=>clean(s).replace(/\s+/g,'');
   const seen=new Set(d.items.map(x=>norm(x.vi)+'|'+norm(x.ko))),unique=[],duplicates=[],bad=[];
   lines.forEach(line=>{
-   const parts=line.split(/\t|\s+\|\s+|;/).map(x=>x.trim()).filter(Boolean);
-   if(parts.length<2){bad.push(line);return;}
-   const key=norm(parts[0])+'|'+norm(parts[1]);
+   const separators=['\t',' = ',' | ',' - ',' – ',';',' : '];
+   let parts=null;
+   if(line.includes('\t'))parts=line.split('\t');
+   else for(const sep of separators){const i=line.indexOf(sep);if(i>0){parts=[line.slice(0,i),line.slice(i+sep.length)];break;}}
+   if(!parts||parts.length<2||!parts[0].trim()||!parts[1].trim()){bad.push(line);return;}
+   let a=parts[0].trim(),b=parts[1].trim();
+   if(/[가-힣]/.test(a)&&!/[가-힣]/.test(b)){const temp=a;a=b;b=temp;}
+   const key=norm(a)+'|'+norm(b);
    if(seen.has(key))duplicates.push(line);
    else{seen.add(key);unique.push(line);}
   });
@@ -473,6 +487,10 @@ function init(){
   const b=e.target.closest('[data-v2-act]');if(!b)return;handle(b.dataset.v2Act);
  });
  wrap.addEventListener('input',e=>{
+  if(e.target.dataset.v2Grammar!=null){
+   const g=patterns[Number(e.target.dataset.v2Grammar)];
+   if(g){const saved=read(GRAMMAR,{});saved[g.name]=e.target.value;write(GRAMMAR,saved);}
+  }
   if(e.target.id==='nhiV2SearchInput'){
    term=e.target.value;const start=e.target.selectionStart;renderPanel();
    const next=$('#nhiV2SearchInput');if(next){next.focus({preventScroll:true});next.setSelectionRange(start,start);}
@@ -485,12 +503,13 @@ function init(){
    const g=patterns[Number(e.target.dataset.v2Grammar)];
    const saved=read(GRAMMAR,{});saved[g.name]=e.target.value;write(GRAMMAR,saved);
   }
-  if(e.target.id==='nhiV2ListenSelect'){answerRevealed=false;transcript='';renderPanel();}
+  if(e.target.id==='nhiV2ListenSelect'){selectedItemId=e.target.value;answerRevealed=false;transcript='';renderPanel();}
  });
  const log=$('#aiLog');if(log){
   new MutationObserver(()=>attachExamples()).observe(log,{childList:true,subtree:true});
   attachExamples();
  }
+ window.NHI_V2_OPEN_LESSON_MODE=function(id,mode){sourceLesson=id;scope='lesson';exercisePos=0;exerciseAnswer='';exerciseFeedback='';selectedItemId='';answerRevealed=false;setPanel(['write','quiz','listen','speak'].includes(mode)?mode:'practice');};
  window.addEventListener('nhi:lessons-ready',()=>{if(panel)renderPanel();});
  window.addEventListener('nhi:chat-history',()=>{if(panel==='threads')renderPanel();});
  const mode=$('#modeHead');if(mode)new MutationObserver(()=>updateSource()).observe(mode,{childList:true,subtree:true});
