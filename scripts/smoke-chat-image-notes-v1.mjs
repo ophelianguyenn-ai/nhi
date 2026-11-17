@@ -124,17 +124,24 @@ try{
  await page.waitForFunction(()=>document.querySelectorAll('#aiLog .nhi-ai-draggable-note').length>=2,{timeout:6000});
  console.log('SMOKE_STEP 14 line102');
  await page.evaluate(()=>{
-   const source=document.querySelector('#aiLog .nhi-ai-draggable-note');
+   const source=[...document.querySelectorAll('#aiLog .nhi-ai-draggable-note')]
+     .find(e=>e.textContent.includes('Ví dụ một'));
+   if(!source)throw Error('Example 1 not rendered as draggable');
    const data=new DataTransfer();
    source.dispatchEvent(new DragEvent('dragstart',{bubbles:true,cancelable:true,dataTransfer:data}));
+   console.log('DRAG_SOURCE',source.textContent,'DRAG_TEXT',data.getData('application/x-nhi-example'));
    const target=document.querySelector('#planBox .pcard');
    target.dispatchEvent(new DragEvent('dragover',{bubbles:true,cancelable:true,dataTransfer:data}));
    target.dispatchEvent(new DragEvent('drop',{bubbles:true,cancelable:true,dataTransfer:data}));
  });
  console.log('SMOKE_STEP 15 line110');
  await page.waitForFunction(id=>JSON.parse(localStorage.getItem('viko-plan-v1')).note?.[id]?.v?.text.includes('Ví dụ một'),{},cardID);
- await page.$eval('#aiLog .nhi-ai-draggable-note:nth-child(2) .nhi-add-to-note',e=>e.click()).catch(async()=>{
-   await page.$eval('#aiLog .nhi-add-to-note:last-of-type',e=>e.click());
+ await page.$eval('#aiLog .nhi-ai-draggable-note',_=>true);
+ await page.evaluate(()=>{
+   const second=[...document.querySelectorAll('#aiLog .nhi-ai-draggable-note')]
+     .find(e=>e.textContent.includes('Ví dụ hai'));
+   if(!second)throw Error('Example 2 not rendered');
+   second.querySelector('.nhi-add-to-note').click();
  });
  const added=await page.evaluate(id=>JSON.parse(localStorage.getItem('viko-plan-v1')).note?.[id]?.v?.text,cardID);
  assert(added.includes('Ví dụ một')&&added.includes('Ví dụ hai')&&added.indexOf('Ví dụ hai')>added.indexOf('Ví dụ một'),
