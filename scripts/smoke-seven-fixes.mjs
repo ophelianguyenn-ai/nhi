@@ -31,7 +31,7 @@ try{
  });
  assert(clean&&clean[0]==='원주 이음부'&&clean[1]==='안녕하세요 반갑습니다'&&clean[2]==='',
    'Words in parentheses still spoken: '+JSON.stringify(clean));
- assert(!(await page.$$eval('#planBox button',es=>es.some;e=>e.textContent.includes('Học trước')))),
+ assert(!(await page.$$eval('#planBox button', els => els.some(e => e.textContent.includes('Học trước')))),
    'Lesson still displays Học trước');
  await page.evaluate(()=>[...document.querySelectorAll('#planBox button')].find(b=>/Học ngay|Học trước|Tiếp tục|Học lại/.test(b.textContent)).click());
  await page.waitForSelector('#planBox .pcard',{timeout:10000});
