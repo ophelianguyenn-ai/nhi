@@ -40,6 +40,7 @@ try{
  assert(note?.preservesLines&&note.whiteSpace==='pre-wrap'&&note.wrap==='anywhere'&&note.width<=note.parent+3,'Note wrapping failed: '+JSON.stringify(note));
  await page.$eval('#planBox .card-illustration img',e=>e.click());
  assert(await page.$eval('#planBox .nhi-image-adjust',e=>getComputedStyle(e).display)!=='none','Click did not show image sliders');
+ const fixedCardHeight=await page.$eval('#planBox .pcard',e=>e.getBoundingClientRect().height);
  const before=await page.$eval('#planBox .pfront',e=>getComputedStyle(e).gridTemplateColumns);
  await page.$eval('#planBox .nhi-image-adjust input[aria-label="Ngang hình"]',e=>{
   e.value='350';e.dispatchEvent(new Event('input',{bubbles:true}));e.dispatchEvent(new Event('change',{bubbles:true}));
@@ -54,7 +55,27 @@ try{
  await page.waitForFunction(id=>JSON.parse(localStorage.getItem('viko-plan-v1')).img?.[id]?.v?.height===280,{},cardID);
  const height=await page.$eval('#planBox .card-illustration img',e=>getComputedStyle(e).height);
  assert(Math.abs(parseInt(height)-280)<4,'Image height was not applied: '+height);
+ const newCardHeight=await page.$eval('#planBox .pcard',e=>e.getBoundingClientRect().height);
+ assert(Math.abs(newCardHeight-fixedCardHeight)<3,
+   'Card grew when image height changed: '+fixedCardHeight+' vs '+newCardHeight);
+ // Moving the drawing should save offsets independently from width and height.
+ await page.$eval('#planBox .card-illustration img',im=>{
+   im.dispatchEvent(new PointerEvent('pointerdown',{pointerId:6,pointerType:'mouse',button:0,clientX:120,clientY:160,bubbles:true}));
+   im.dispatchEvent(new PointerEvent('pointermove',{pointerId:6,pointerType:'mouse',button:0,clientX:143,clientY:172,bubbles:true}));
+   im.dispatchEvent(new PointerEvent('pointerup',{pointerId:6,pointerType:'mouse',button:0,clientX:143,clientY:172,bubbles:true}));
+ });
+ await page.waitForFunction(id=>(JSON.parse(localStorage.getItem('viko-plan-v1')).img?.[id]?.v?.offsetX||0)>=20,{},cardID);
  await page.$eval('#aiBtn',e=>e.click());await page.waitForSelector('#aiForm .nhi-chat-mic');
+ const ctx=await page.$eval('#aiCtx',e=>({
+   text:e.textContent.trim(),row:getComputedStyle(e).flexDirection,
+   speed:!!e.querySelector('.nhi-ai-reader-speed')
+ }));
+ assert(!ctx.text.includes('Đang hỏi về thẻ')&&ctx.row==='row'&&ctx.speed,
+   'AI context was not merged into a single row: '+JSON.stringify(ctx));
+ assert(await page.$eval('#aiSetup',e=>!!e.querySelector('#nhiReaderLanguage')),
+   'Reader auto-detect language not moved into chat settings');
+ assert(await page.$eval('#aiCfgBtn',e=>getComputedStyle(e).borderRadius).includes('7px'),
+   'AI settings icon not square');
  assert(await page.$eval('.nhi-chat-voice-lang',e=>e.value)==='vi-VN','Expected Vietnamese microphone language');
  await page.$eval('#aiForm .nhi-chat-mic',e=>e.click());
  await page.evaluate(()=>{
@@ -69,6 +90,42 @@ try{
   return {text:sent.textContent,top:sent.getBoundingClientRect().top-log.getBoundingClientRect().top,scroll:log.scrollTop};
  });
  assert(anchor.text==='Tôi muốn học tiếng Hàn'&&anchor.top>=0&&anchor.top<48,'Enter did not anchor last sent message: '+JSON.stringify(anchor));
+
+ // The reader creates draggable, individual paragraphs; their drop target is
+ // the current flashcard note. Mobile users can tap the + control instead.
+ await page.evaluate(()=>{
+   const m=document.createElement('div');m.className='aimsg ai';
+   m.textContent='예문 첫째 = Ví dụ một\\n예문 둘째 = Ví dụ hai';
+   document.getElementById('aiLog').appendChild(m);
+ });
+ await page.waitForFunction(()=>document.querySelectorAll('#aiLog .nhi-ai-draggable-note').length>=2,{timeout:6000});
+ await page.evaluate(()=>{
+   const source=document.querySelector('#aiLog .nhi-ai-draggable-note');
+   const data=new DataTransfer();
+   source.dispatchEvent(new DragEvent('dragstart',{bubbles:true,cancelable:true,dataTransfer:data}));
+   const target=document.querySelector('#planBox .pcard');
+   target.dispatchEvent(new DragEvent('dragover',{bubbles:true,cancelable:true,dataTransfer:data}));
+   target.dispatchEvent(new DragEvent('drop',{bubbles:true,cancelable:true,dataTransfer:data}));
+ });
+ await page.waitForFunction(id=>JSON.parse(localStorage.getItem('viko-plan-v1')).note?.[id]?.v?.text.includes('Ví dụ một'),{},cardID);
+ await page.$eval('#aiLog .nhi-ai-draggable-note:nth-child(2) .nhi-add-to-note',e=>e.click()).catch(async()=>{
+   await page.$eval('#aiLog .nhi-add-to-note:last-of-type',e=>e.click());
+ });
+ const added=await page.evaluate(id=>JSON.parse(localStorage.getItem('viko-plan-v1')).note?.[id]?.v?.text,cardID);
+ assert(added.includes('Ví dụ một')&&added.includes('Ví dụ hai')&&added.indexOf('Ví dụ hai')>added.indexOf('Ví dụ một'),
+   'Dragging and tapping examples did not append separate note lines: '+added);
+ // Accidental card deletion can be undone until a NEW card is visited.
+ await page.$eval('#aiClose',e=>e.click());
+ const deletedId=await page.$eval('#planBox .pcard',e=>e.dataset.item);
+ await page.$eval('#planBox .nhi-card-corner-trash',e=>e.click());
+ assert(await page.$('#planBox .prate .pundo'),'Undo disappeared immediately after deletion');
+ await page.$eval('#planBox .prate .pundo',e=>e.click());
+ assert(await page.$eval('#planBox .pcard',e=>e.dataset.item)===deletedId,'Undo did not restore the same card');
+ await page.$eval('#planBox .nhi-card-corner-trash',e=>e.click());
+ await page.$eval('#planBox .nhi-next-v3',e=>e.click());
+ assert(!(await page.$('#planBox .prate .pundo')),'Undo must expire after advancing one new card');
+ assert(await page.evaluate(id=>!!JSON.parse(localStorage.getItem('viko-plan-v1')).del?.[id]?.v,deletedId),
+   'Deletion tombstone was lost when Undo expired');
  await page.reload({waitUntil:'domcontentloaded'});
  await page.waitForSelector('#planBox .pcard',{timeout:15000});
  const saved=await page.evaluate(id=>JSON.parse(localStorage.getItem('viko-plan-v1')).img[id].v,cardID);
