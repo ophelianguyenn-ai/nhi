@@ -21,6 +21,18 @@ try{
   return {count:keys.length,chiller:ch,hasAPI:!!window.NHI_PHRASES_V5};
  });
  assert(found.hasAPI&&found.count===59&&found.chiller.length>=3,'59 verified sentence alignments not loaded');
+ const clean=await page.evaluate(()=>{
+  const f=window.NHI_SPEECH?.clean;
+  return f&&[
+   f('원주 이음부 (mối nối chu vi)'),
+   f('안녕하세요（nghĩa Việt） 반갑습니다 [giải thích]'),
+   f('(chỉ chú thích)')
+  ];
+ });
+ assert(clean&&clean[0]==='원주 이음부'&&clean[1]==='안녕하세요 반갑습니다'&&clean[2]==='',
+   'Words in parentheses still spoken: '+JSON.stringify(clean));
+ assert(!(await page.$eval('#planBox button',es=>es.some(e=>e.textContent.includes('Học trước')))),
+   'Lesson still displays Học trước');
  await page.evaluate(()=>[...document.querySelectorAll('#planBox button')].find(b=>/Học ngay|Học trước|Tiếp tục|Học lại/.test(b.textContent)).click());
  await page.waitForSelector('#planBox .pcard',{timeout:10000});
  const before=await page.$eval('#planBox .pcard',e=>e.dataset.item);
@@ -60,7 +72,7 @@ try{
  await page.mouse.move(x,y);await page.mouse.down();await new Promise(r=>setTimeout(r,760));await page.mouse.up();
  await page.waitForFunction(()=>!!document.querySelector('.nhi-dictionary-dock iframe')?.src.includes('kovidict'),{timeout:5000});
  assert(await page.$eval('#planBox .pcard',e=>e.dataset.item)!==next,'Unexpected return to deleted card');
- // The end screen uses the SVG money cat, and displays the requested exact caption.
+ // The end screen must use the exact GIF generated earlier, with a replay button.
  const last=lesson.items[0][0];
  await page.evaluate((id,lessonId)=>{
   localStorage.setItem('viko-plan-sess-v1',JSON.stringify({
@@ -73,10 +85,24 @@ try{
  const cat=await page.evaluate(()=>({
   src:document.querySelector('#planBox .nhi-victory-cat')?.getAttribute('src'),
   size:document.querySelector('#planBox .nhi-victory-cat')?.naturalWidth,
-  text:document.querySelector('#planBox .sdone h2')?.textContent
+  height:document.querySelector('#planBox .nhi-victory-cat')?.naturalHeight,
+  text:document.querySelector('#planBox .sdone h2')?.textContent,
+  replay:!![...document.querySelectorAll('#planBox .sdone button')].find(x=>x.textContent.includes('Học lại')),
+  animation:getComputedStyle(document.querySelector('#planBox .nhi-victory-cat')).animationName
  }));
- assert(cat.src?.includes('nhi-cat-phu-ba-20261117-v2.svg')&&cat.size>0,'Money cat artwork not loaded');
+ assert(cat.src?.includes('nhi-cat-original-8frames-20261117.gif')&&cat.size===307&&cat.height===623,
+  'The exact original 8-frame generated GIF was not loaded: '+JSON.stringify(cat));
  assert(cat.text==='Yeahhh đã học xong, Nhi sắp trở thành phú bà rồi ^^','Celebration caption incorrect');
+ assert(cat.replay&&cat.animation==='none','Replay button missing or CSS distorts GIF: '+JSON.stringify(cat));
+ const beforeReplay=await page.evaluate(id=>(JSON.parse(localStorage.getItem('viko-plan-v1')||'{}').done?.[id]?.v||[]).length,lesson.id);
+ await page.evaluate(()=>[...document.querySelectorAll('#planBox .sdone button')].find(x=>x.textContent.includes('Học lại')).click());
+ await page.waitForSelector('#planBox .pcard');
+ const replay=await page.evaluate(id=>({
+  firstCard:!!document.querySelector('#planBox .pcard'),
+  rounds:(JSON.parse(localStorage.getItem('viko-plan-v1')||'{}').done?.[id]?.v||[]).length
+ }),lesson.id);
+ assert(replay.firstCard&&replay.rounds===beforeReplay,
+  'Replay must not add a scheduled review round: '+JSON.stringify(replay));
  // Calendar: after studying, a lesson stays in Waiting until the actual due day.
  const calContext=await browser.createBrowserContext();
  try{
