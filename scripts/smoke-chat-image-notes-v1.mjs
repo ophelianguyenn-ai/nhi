@@ -86,6 +86,7 @@ try{
    text:e.textContent.trim(),row:getComputedStyle(e).flexDirection,
    speed:!!e.querySelector('.nhi-ai-reader-speed')
  }));
+ console.log('AI_CONTEXT_DIAGNOSTIC',JSON.stringify(ctx));
  assert(!ctx.text.includes('Đang hỏi về thẻ')&&ctx.row==='row'&&ctx.speed,
    'AI context was not merged into a single row: '+JSON.stringify(ctx));
  assert(await page.$eval('#aiSetup',e=>!!e.querySelector('#nhiReaderLanguage')),
@@ -156,4 +157,6 @@ try{
  assert(saved.width===350&&saved.height===280,'Image dimensions did not survive reload');
  assert(errors.length===0,'Page errors: '+errors.join('; '));
  console.log('FOUR UI IMPROVEMENTS PASS',JSON.stringify({note,grid:[before,after],height,voice:true,anchor}));
-}finally{await browser.close();}
+}catch(err){
+ console.error('ORIGINAL_SMOKE_ERROR',err&&err.stack||String(err));throw err;
+}finally{try{await browser.close();}catch(e){console.error('SMOKE_CLOSE_ERROR',String(e));}}
