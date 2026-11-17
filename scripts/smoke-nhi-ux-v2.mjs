@@ -67,12 +67,12 @@ try{
  const grading=await page.evaluate(()=>{
   let n=0;
   for(let i=0;i<10;i++){
-   const b=document.querySelector('#planBox .prate .mid');
+   const b=document.querySelector('#planBox .prate .nhi-next-v3');
    if(!b)break;b.click();n++;
   }
   return n;
  });
- assert(grading===10,'Unable to rate ten cards: '+grading);
+ assert(grading===10,'Unable to navigate ten cards: '+grading);
  await page.waitForSelector('#planBox .nhi-v2-mini-done',{timeout:10000});
  const state=await page.evaluate(id=>{
   const s=JSON.parse(localStorage.getItem('viko-plan-sess-v1')||'{}'),p=JSON.parse(localStorage.getItem('viko-plan-v1')||'{}');
