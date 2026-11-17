@@ -11,19 +11,19 @@ import hashlib
 import json
 import os
 import pathlib
-import re
 import tempfile
-import time
-from urllib import error, parse, request
+import subprocess
+from urllib import request
 
 from mutagen.mp3 import MP3
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
 MANIFEST = ROOT / 'audio-manifest.json'
-FPT_ENDPOINT = 'https://api.fpt.ai/hmi/tts/v5'
-VOICE = {'vi': 'banmai', 'ko': 'ko-KR-InJoonNeural'}
-PROVIDER = {'vi': 'fpt', 'ko': 'microsoft-edge'}
-VOICE_DIR = {'vi': 'fpt-banmai-v1', 'ko': 'edge-injoon-v1'}
+FPT_ENDPOINT = 'https://mkp-api.fptcloud.com/v1/audio/speech'
+FPT_MODEL = 'FPT.TTS-pro'
+VOICE = {'vi': 'std_banmai', 'ko': 'ko-KR-InJoonNeural'}
+PROVIDER = {'vi': 'fpt-marketplace', 'ko': 'microsoft-edge'}
+VOICE_DIR = {'vi': 'fpt-marketplace-banmai-v1', 'ko': 'edge-injoon-v1'}
 
 
 def collect(scope):
@@ -55,48 +55,50 @@ def current_entry(entry, lang):
 
 
 def _post_fpt(phrase, api_key):
-    # FPT keys must be a single line. A pasted Actions secret may contain
-    # stray spaces, line wraps, CRLFs or newlines: remove whitespace only,
-    # without ever logging the original or normalized secret.
+    """Call the CURRENT FPT Marketplace endpoint; returns binary WAV, not old async URL.
+
+    Requires a Marketplace API key, distinct from the discontinued Console key.
+    """
     api_key = ''.join(api_key.split())
     if not api_key or any(ord(ch) < 33 or ord(ch) == 127 for ch in api_key):
-        raise ValueError('FPT_API_KEY format is invalid: use the raw API key only')
-    payload = phrase.encode('utf-8')
+        raise ValueError('FPT_MARKETPLACE_API_KEY is missing or has invalid characters')
+    payload = json.dumps({
+        'model': FPT_MODEL,
+        'voice': VOICE['vi'],
+        'input': phrase,
+        'response_format': 'wav',
+    }, ensure_ascii=False).encode('utf-8')
     req = request.Request(FPT_ENDPOINT, data=payload, method='POST', headers={
-        'api_key': api_key, 'voice': VOICE['vi'], 'speed': '0',
-        'format': 'mp3', 'Cache-Control': 'no-cache'})
-    with request.urlopen(req, timeout=35) as response:
-        result = json.loads(response.read().decode('utf-8'))
-    if str(result.get('error', '0')) not in ('0', '') or result.get('success') is False or result.get('success') == 'false':
-        raise RuntimeError(f'FPT rejected synthesis: {result.get("message", "unknown error")}')
-    url = result.get('async') or result.get('message')
-    if not isinstance(url, str) or parse.urlparse(url).scheme != 'https':
-        raise RuntimeError('FPT response did not contain a usable HTTPS audio URL')
-    return url
-
-
-def _download_fpt(url, timeout_seconds=165):
-    """FPT returns an asynchronous URL; it may need up to two minutes to exist."""
-    deadline = time.monotonic() + timeout_seconds
-    last = None
-    while time.monotonic() < deadline:
-        try:
-            req = request.Request(url, headers={'User-Agent': 'NHI-Learning-Corner-Audio/1.0'})
-            with request.urlopen(req, timeout=30) as response:
-                content = response.read()
-            if len(content) < 500:
-                raise ValueError('Audio file is not ready or is too short')
-            return content
-        except (error.HTTPError, error.URLError, TimeoutError, ValueError) as exc:
-            last = exc
-            time.sleep(min(5, max(0.1, deadline-time.monotonic())))
-    raise RuntimeError(f'FPT async MP3 did not become available: {last}')
+        'Authorization': f'Bearer {api_key}',
+        'Content-Type': 'application/json',
+    })
+    with request.urlopen(req, timeout=90) as response:
+        data = response.read()
+    if len(data) < 44 or data[:4] != b'RIFF' or data[8:12] != b'WAVE':
+        raise RuntimeError('FPT Marketplace returned an invalid WAV response; audio not published')
+    return data
 
 
 def _fpt_bytes(phrase, api_key):
     if not 3 <= len(phrase) <= 5000:
-        raise ValueError('FPT accepts only 3–5000 characters per request')
-    return _download_fpt(_post_fpt(phrase, api_key))
+        raise ValueError('Pilot accepts only 3–5000 characters per request')
+    return _post_fpt(phrase, api_key)
+
+
+def _encode_mp3(wav_bytes, mp3_path):
+    """Convert documented FPT Marketplace WAV output to the website's MP3 format."""
+    if not wav_bytes.startswith(b'RIFF') or wav_bytes[8:12] != b'WAVE':
+        raise ValueError('Invalid WAV input')
+    with tempfile.NamedTemporaryFile(prefix='nhi-fpt-', suffix='.wav', dir=mp3_path.parent, delete=False) as raw:
+        raw.write(wav_bytes)
+        wav_path = pathlib.Path(raw.name)
+    try:
+        subprocess.run(
+            ['ffmpeg', '-nostdin', '-hide_banner', '-loglevel', 'error', '-y',
+             '-i', str(wav_path), '-codec:a', 'libmp3lame', '-q:a', '4', str(mp3_path)],
+            check=True, capture_output=True, timeout=90)
+    finally:
+        wav_path.unlink(missing_ok=True)
 
 
 async def _generate(lang, phrase, dest, api_key):
@@ -106,8 +108,8 @@ async def _generate(lang, phrase, dest, api_key):
     temp = pathlib.Path(name)
     try:
         if lang == 'vi':
-            content = await asyncio.to_thread(_fpt_bytes, phrase, api_key)
-            temp.write_bytes(content)
+            wav_bytes = await asyncio.to_thread(_fpt_bytes, phrase, api_key)
+            await asyncio.to_thread(_encode_mp3, wav_bytes, temp)
         else:
             import edge_tts
             await edge_tts.Communicate(phrase, VOICE[lang]).save(str(temp))
@@ -129,13 +131,13 @@ async def run(args):
                if not (current_entry(manifest.get(f'{lang}|{phrase}'), lang)
                        and (ROOT / manifest[f'{lang}|{phrase}']['src']).is_file())]
     print(f'Scope: {args.scope}; selected: {len(entries)}; need voice replacement: {len(pending)}', flush=True)
-    print(f'Providers: Vietnamese FPT Ban Mai; Korean Microsoft InJoon', flush=True)
+    print(f'Providers: Vietnamese FPT Marketplace TTS-pro Ban Mai; Korean Microsoft InJoon', flush=True)
     if args.dry_run:
         for lang, phrase in pending[:20]:
             print(f'  {lang} -> {VOICE[lang]}: {phrase[:100]}')
         return
-    if any(lang == 'vi' for lang, _ in pending) and not os.environ.get('FPT_API_KEY'):
-        raise SystemExit('FPT_API_KEY is required to generate Ban Mai. Add it as a GitHub Actions secret; no audio changed.')
+    if any(lang == 'vi' for lang, _ in pending) and not os.environ.get('FPT_MARKETPLACE_API_KEY'):
+        raise SystemExit('FPT_MARKETPLACE_API_KEY is required (Marketplace, not the discontinued Console key). No audio changed.')
     failures = []
     updates = 0
     for i, (lang, phrase) in enumerate(pending, 1):
@@ -144,7 +146,7 @@ async def run(args):
             if dest.is_file() and dest.stat().st_size > 500:
                 duration = round(MP3(str(dest)).info.length, 3)
             else:
-                duration = await _generate(lang, phrase, dest, os.environ.get('FPT_API_KEY', ''))
+                duration = await _generate(lang, phrase, dest, os.environ.get('FPT_MARKETPLACE_API_KEY', ''))
             manifest[f'{lang}|{phrase}'] = {'src': dest.relative_to(ROOT).as_posix(),
                                           'start': 0, 'end': duration,
                                           'provider': PROVIDER[lang], 'voice': VOICE[lang]}
