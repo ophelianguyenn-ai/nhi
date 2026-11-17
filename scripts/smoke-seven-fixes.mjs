@@ -140,7 +140,7 @@ try{
   const afterOpening=await cal.evaluate(id=>JSON.parse(localStorage.getItem('viko-plan-v1')).done?.[id]?.v.length,lesson.id);
   assert(afterOpening===1,'Opening lesson detail falsely marked it studied');
   // Starting and pausing an incomplete session must not complete any round.
-  await cal.evaluate(()=>[...document.querySelectorAll('#planBox button')].find(b=>/Học ngay|Tiếp tục/.test(b.textContent))?.click());
+  await cal.evaluate(()=>{const b=[...document.querySelectorAll('#planBox button')].find(b=>/^(Học |Tiếp tục)/.test(b.textContent.trim()));if(!b)throw Error('Review start button missing');b.click();});
   await cal.waitForSelector('#planBox .pcard',{timeout:12000});
   await cal.$eval('#planBox .shead button:first-child',e=>e.click());
   const afterPause=await cal.evaluate(id=>JSON.parse(localStorage.getItem('viko-plan-v1')).done?.[id]?.v.length,lesson.id);
