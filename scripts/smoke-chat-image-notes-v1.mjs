@@ -76,8 +76,12 @@ try{
    e.dispatchEvent(new Event('change',{bubbles:true}));
  });
  console.log('SMOKE_STEP 9 line67');
- await page.waitForFunction(id=>(JSON.parse(localStorage.getItem('viko-plan-v1')).img?.[id]?.v?.offsetX||0)>=20,{},cardID);
+ const offsets=await page.evaluate(id=>JSON.parse(localStorage.getItem('viko-plan-v1')).img?.[id]?.v,cardID);
+ console.log('IMAGE_OFFSETS',JSON.stringify({width:offsets?.width,height:offsets?.height,x:offsets?.offsetX,y:offsets?.offsetY}));
+ assert(offsets&&offsets.offsetX>=20,'Image X offset not stored: '+JSON.stringify(offsets));
+ console.log('SMOKE_CHAT_OPEN');
  await page.$eval('#aiBtn',e=>e.click());await page.waitForSelector('#aiForm .nhi-chat-mic');
+ console.log('SMOKE_CHAT_CONTEXT');
  const ctx=await page.$eval('#aiCtx',e=>({
    text:e.textContent.trim(),row:getComputedStyle(e).flexDirection,
    speed:!!e.querySelector('.nhi-ai-reader-speed')
