@@ -46,7 +46,7 @@
  },true);
  ['pointerup','pointercancel','scroll'].forEach(type=>document.addEventListener(type,reset,true));
  document.addEventListener('contextmenu',function(e){
-   if(press&&e.target.closest(zone)){e.preventDefault();}
+   if(e.target.closest(zone)){e.preventDefault();}
  },true);
  // A completed long press must not also toggle highlight/flip the card.
  document.addEventListener('click',function(e){
