@@ -3,10 +3,6 @@ name: Prepare FPT Marketplace Ban Mai and Korean InJoon audio batches
 # Run manually in small groups after adding a valid Marketplace API key.
 # Default dry run NEVER calls the billable FPT endpoint.
 on:
-  push:
-    branches: [main]
-    paths:
-      - .github/workflows/generate-selected-voices.yml
   workflow_dispatch:
     inputs:
       scope:
@@ -42,7 +38,6 @@ concurrency:
 
 jobs:
   generate:
-    if: ${{ github.event_name == 'workflow_dispatch' || startsWith(github.event.head_commit.message, 'banmai-pilot:') }}
     runs-on: ubuntu-latest
     timeout-minutes: 120
     steps:
@@ -59,11 +54,11 @@ jobs:
       - name: Generate only the requested batch with protected Marketplace key
         env:
           FPT_MARKETPLACE_API_KEY: ${{ secrets.FPT_MARKETPLACE_API_KEY }}
-          CHOSEN_SCOPE: ${{ github.event_name == 'push' && 'daily' || inputs.scope || 'daily' }}
-          CHOSEN_LANG: ${{ github.event_name == 'push' && 'vi' || inputs.language || 'both' }}
-          CHOSEN_OFFSET: ${{ github.event_name == 'push' && '0' || inputs.offset || '0' }}
-          CHOSEN_LIMIT: ${{ github.event_name == 'push' && '1' || inputs.limit || '10' }}
-          DRY_RUN: ${{ github.event_name == 'push' && 'false' || inputs.dry_run }}
+          CHOSEN_SCOPE: ${{ inputs.scope || 'daily' }}
+          CHOSEN_LANG: ${{ inputs.language || 'both' }}
+          CHOSEN_OFFSET: ${{ inputs.offset || '0' }}
+          CHOSEN_LIMIT: ${{ inputs.limit || '10' }}
+          DRY_RUN: ${{ inputs.dry_run }}
         shell: bash
         run: |
           set -euo pipefail
@@ -71,7 +66,7 @@ jobs:
           if [[ "$DRY_RUN" == 'true' ]]; then args+=(--dry-run); fi
           python scripts/generate_selected_voices.py "${args[@]}"
       - name: Commit only completed audio and updated manifest
-        if: ${{ github.event_name == 'push' || inputs.dry_run == false }}
+        if: ${{ inputs.dry_run == false }}
         shell: bash
         run: |
           set -euo pipefail
@@ -89,7 +84,7 @@ jobs:
             exit 1
           fi
       - name: Deploy migrated audio to GitHub Pages
-        if: ${{ github.event_name == 'push' || inputs.dry_run == false }}
+        if: ${{ inputs.dry_run == false }}
         env:
           GH_TOKEN: ${{ github.token }}
         run: gh workflow run deploy-pages.yml --ref main
