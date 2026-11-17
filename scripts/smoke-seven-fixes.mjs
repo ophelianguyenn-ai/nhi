@@ -108,6 +108,15 @@ try{
    localStorage.setItem('viko-plan-v1',JSON.stringify(p));
   },lesson.id);
   const due=await homeCalendar();
+  const diagnostic=await cal.evaluate(id=>({
+   id,plan:JSON.parse(localStorage.getItem('viko-plan-v1')||'{}').done?.[id],
+   date:new Date().toString(),
+   activeTitles:[...document.querySelectorAll('#planBox .nhi-plan-current .ptitle')].slice(0,4).map(a=>[a.textContent,a.getAttribute('href')]),
+   waitingTitles:[...document.querySelectorAll('#planBox .nhi-plan-waiting .ptitle')].slice(0,4).map(a=>[a.textContent,a.getAttribute('href')]),
+   headings:[...document.querySelectorAll('#planBox .nhi-bucket-title')].map(e=>e.textContent),
+   planText:document.querySelector('#planBox')?.textContent?.slice(0,250)
+  }),lesson.id);
+  console.log('CALENDAR_DIAGNOSTICS',JSON.stringify({early,due,diagnostic}));
   assert(due.active&&!due.waiting,'Lesson did not appear on actual review due date');
  }finally{await calContext.close();}
  assert(errors.length===0,'Browser errors: '+errors.join('; '));
