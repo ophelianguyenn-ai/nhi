@@ -596,9 +596,9 @@ section:not([hidden]) > .quiz, section:not([hidden]) > #cardWrap, .list > .row:n
 }
 </style>
 
-<script src="hanja-v9.js?v=12"></script><script src="hanja-extra-v12.js"></script><script src="card-images-v11.js"></script><script src="nhi-google-images-v1.js?v=20261114-study-v7"></script><script src="nhi-hard-minimal-v1.js?v=20261114-study-v7"></script><script src="nhi-phrases-v5.js?v=20261116-paired-whole-card-v1"></script><script src="nhi-english-data-v6.js?v=20261113-reviewed-173"></script><script src="nhi-english-v5.js?v=20261115-v10-ipa-five"></script><script src="recorded-voices-v11.js?v=20261117-fpt-marketplace-banmai"></script>
+<script src="hanja-v9.js?v=12"></script><script src="hanja-extra-v12.js"></script><script src="card-images-v11.js"></script><script src="nhi-google-images-v1.js?v=20261114-study-v7"></script><script src="nhi-hard-minimal-v1.js?v=20261114-study-v7"></script><script src="nhi-verified-pairs-20261117.js?v=1"></script><script src="nhi-phrases-v5.js?v=20261117-reviewed-pairs-v1"></script><script src="nhi-english-data-v6.js?v=20261113-reviewed-173"></script><script src="nhi-english-v5.js?v=20261115-v10-ipa-five"></script><script src="recorded-voices-v11.js?v=20261117-fpt-marketplace-banmai"></script>
 <script src="qrcode.js" defer></script>
-<link rel="stylesheet" href="refresh-v9.css?v=13"><link rel="stylesheet" href="study-enhancements-v13.css?v=14"><link rel="stylesheet" href="nhi-updates-v1.css?v=1"><link rel="stylesheet" href="nhi-ai-resize-v2.css?v=1"><link rel="stylesheet" href="nhi-study-motion-v3.css?v=3"><link rel="stylesheet" href="nhi-interface-v4.css?v=4"><link rel="stylesheet" href="nhi-interface-v5.css?v=20261113-rollback-stable-v1"><link rel="stylesheet" href="nhi-seasons-v1.css?v=20261113-cartoon-soft-1">
+<link rel="stylesheet" href="nhi-seven-fixes-20261117.css?v=1"><link rel="stylesheet" href="refresh-v9.css?v=13"><link rel="stylesheet" href="study-enhancements-v13.css?v=14"><link rel="stylesheet" href="nhi-updates-v1.css?v=1"><link rel="stylesheet" href="nhi-ai-resize-v2.css?v=1"><link rel="stylesheet" href="nhi-study-motion-v3.css?v=3"><link rel="stylesheet" href="nhi-interface-v4.css?v=4"><link rel="stylesheet" href="nhi-interface-v5.css?v=20261113-rollback-stable-v1"><link rel="stylesheet" href="nhi-seasons-v1.css?v=20261113-cartoon-soft-1">
 <link rel="stylesheet" href="nhi-living-garden-v1.css?v=20261113-cartoon-butterflies-v1">
 <style>
 #nhi-movable{position:fixed;z-index:48;width:calc(var(--nhi-size,112px) + 30px);padding:4px 8px 7px;border:1px solid var(--line);border-radius:18px;background:var(--surface);box-shadow:0 5px 20px #0002;touch-action:none;display:flex;flex-direction:column;align-items:center;gap:2px}
@@ -3098,20 +3098,26 @@ button,input,select,textarea{font-family:var(--ui)}
     }
     function del(id) {
       if (!ITEMS[id] || val('del', id)) return;
-      var inSession = !!(sess && sess.queue[sess.pos] === id);
-      ++ratingToken;ratingPending=false;pendingRatingFinish=null;
-      stopSpeech(); if(window.NHI_HARD_MASCOT)window.NHI_HARD_MASCOT.clear(); undoHistory=[];
-      undoHistory.push({ id: id, t: Date.now(), del: val('del', id), hard: val('hard', id),
-        inSession: inSession, kind: inSession ? sess.kind : '', title: inSession ? sess.title : '',
-        pos: inSession ? sess.pos : -1, lessonId: inSession && sess.L ? sess.L.id : null,
-        recorded: inSession ? !!sess.recorded : false,
-        done: inSession && sess.L ? val('done', sess.L.id) : null });
-      undoHistory = undoHistory.slice(-15); saveUndo();
-      if(sess){sess.spoken=-1;sess.selectedKo='';}
-      put('del', id, 1);
-      if (val('hard', id)) put('hard', id, null);
-      undoUI();
-      toast('Đã xoá “' + ITEMS[id].ko + '”');
+      ++ratingToken; ratingPending=false; pendingRatingFinish=null;
+      stopSpeech(); if(window.NHI_HARD_MASCOT)window.NHI_HARD_MASCOT.clear();
+      // A deletion is a permanent tombstone: do not re-import it on reload/sync.
+      put('del',id,1);
+      if(val('hard',id))put('hard',id,null);
+      Object.keys(resume).forEach(function(k){resume[k]=(resume[k]||[]).filter(function(x){return x!==id;});});
+      Object.keys(resumeFull).forEach(function(k){
+        var old=resumeFull[k];if(!old||!Array.isArray(old.queue))return;
+        var before=old.queue.slice(0,old.pos||0).filter(function(x){return x!==id;}).length;
+        old.queue=old.queue.filter(function(x){return x!==id;});old.pos=Math.min(before,old.queue.length);
+      });
+      if(sess){
+        var before=sess.queue.slice(0,sess.pos).filter(function(x){return x!==id;}).length;
+        sess.queue=sess.queue.filter(function(x){return x!==id;});
+        sess.pos=Math.min(before,sess.queue.length);
+        sess.selectedKo='';sess.spoken=-1;sess.flipped=false;
+      }
+      undoHistory=[];saveUndo();save();saveSess();undoUI();
+      toast('Đã xóa vĩnh viễn khỏi học phần: '+ITEMS[id].ko);
+      render();
     }
 
     /* ---- highlight: tap a Vietnamese phrase, it and its Korean match light up ---- */
@@ -3369,17 +3375,41 @@ button,input,select,textarea{font-family:var(--ui)}
       paintResults(res, main);
     }
     function renderDays(v) {
-      v.classList.add('days-grid');
-      var by = {}; LESSONS.forEach(function (L) { (by[L.date] = by[L.date] || []).push(L); });
-      Object.keys(by).sort().reverse().forEach(function (date) {
-        var group = el('section', 'day-group'); v.appendChild(group); var ls = by[date], ids = []; ls.forEach(function (L) { ids = ids.concat(L.ids); });
-        var c = liveCount(ids), lab = el('div', 'pday'); lab.style.setProperty('--day', dayColor(date));
-        lab.appendChild(el('b', null, vn(date, true)));
-        lab.appendChild(el('span', 'wd', WEEKDAY[parse(date).getDay()]));
-        lab.appendChild(el('span', null, c[0] + ' từ vựng · ' + c[1] + ' câu' + (ls.length > 1 ? ' · ' + ls.length + ' bài nhỏ' : '')));
-        group.appendChild(lab);
-        ls.forEach(function (L) { group.appendChild(lessonCard(L)); });
+      // Studied lessons are hidden until their next due date is at most 2 days away.
+      var active=[],waiting=[],threshold=addDays(today(),2);
+      LESSONS.forEach(function(L){
+        var counts=liveCount(L.ids);
+        if(!counts[0]&&!counts[1])return;
+        var next=current(L);
+        (next&&next.due<=threshold?active:waiting).push(L);
       });
+      function groupedCards(target,entries) {
+        var by={};entries.forEach(function(L){(by[L.date]=by[L.date]||[]).push(L);});
+        Object.keys(by).sort().reverse().forEach(function(date){
+          var group=el('section','day-group'),ls=by[date],ids=[];
+          ls.forEach(function(L){ids=ids.concat(L.ids);});
+          var c=liveCount(ids),label=el('div','pday');label.style.setProperty('--day',dayColor(date));
+          label.appendChild(el('b',null,vn(date,true)));
+          label.appendChild(el('span','wd',WEEKDAY[parse(date).getDay()]));
+          label.appendChild(el('span',null,c[0]+' từ vựng · '+c[1]+' câu'));
+          group.appendChild(label);
+          ls.forEach(function(L){group.appendChild(lessonCard(L));});
+          target.appendChild(group);
+        });
+      }
+      var upcoming=el('section','nhi-plan-current');
+      upcoming.appendChild(el('h3','nhi-bucket-title','📚 Cần học · đến hạn trong 2 ngày'));
+      var activeGrid=el('div','days-grid');
+      groupedCards(activeGrid,active);
+      if(!active.length)activeGrid.appendChild(el('p','listinfo','Hôm nay chưa có bài cần học. Các bài đã hoàn thành đang chờ đến đợt ôn tiếp theo.'));
+      upcoming.appendChild(activeGrid);v.appendChild(upcoming);
+      var archived=el('section','nhi-plan-waiting');
+      archived.appendChild(el('h3','nhi-bucket-title','🌷 Đã học · chờ lịch ôn tiếp theo'));
+      archived.appendChild(el('p','listinfo',waiting.length+' học phần được chuyển sang đây; tự quay lại phần Cần học khi còn 2 ngày đến hạn.'));
+      var details=el('details','nhi-waiting-details');
+      details.appendChild(el('summary',null,'Xem '+waiting.length+' học phần đang chờ'));
+      var waitingGrid=el('div','days-grid');groupedCards(waitingGrid,waiting);
+      details.appendChild(waitingGrid);archived.appendChild(details);v.appendChild(archived);
     }
     function renderTopics(v) {
       var g = el('div', 'tgrid');
@@ -3820,38 +3850,37 @@ button,input,select,textarea{font-family:var(--ui)}
       haptic(6); saveSess(); render();
     }
     function rate(k) {
-      if (!sess || ratingPending || sess.pos >= sess.queue.length) return;
-      expireUndo(); stopSpeech(); if(window.NHI_STUDY)window.NHI_STUDY.feedback(k);
-      var s = sess, pos = s.pos, id = s.queue[pos], card = document.querySelector('#planBox .pcard');
-      if (!id) return;
-      var token = ++ratingToken;
-      var animated = !!(card && card.isConnected && prefs.fx && !reduceMotion());
-      ratingPending = animated || k==='hard';
-      if (animated) {
-        card.classList.add('nhi-rating-busy', 'nhi-rate-' + k);
-        var button = card.querySelector('.prate .' + k);
-        if(button)button.setAttribute('aria-pressed', 'true');
+      if(!sess||ratingPending||sess.pos>=sess.queue.length)return;
+      var s=sess,pos=s.pos,id=s.queue[pos],card=document.querySelector('#planBox .pcard');
+      if(!id)return;
+      expireUndo();stopSpeech();if(window.NHI_STUDY)window.NHI_STUDY.feedback(k);
+      // KHÓ records the grade, but stays on THIS card until the learner clicks Next.
+      // Do not insert a duplicate card in the current session.
+      if(k==='hard'){
+        if(s.picked[pos]==='hard')return;
+        ++ratingToken;ratingPending=false;pendingRatingFinish=null;
+        s.stats.hard=(s.stats.hard||0)+1;s.picked[pos]='hard';
+        put('rate',id,'hard');put('hard',id,addDays(today(),1));
+        haptic([14,40,14]);saveSess();render();
+        react('hard',document.querySelector('#planBox .pcard'));
+        return;
       }
+      var token=++ratingToken,animated=!!(card&&card.isConnected&&prefs.fx&&!reduceMotion());
+      ratingPending=animated;
+      if(animated){card.classList.add('nhi-rating-busy','nhi-rate-'+k);var button=card.querySelector('.prate .'+k);if(button)button.setAttribute('aria-pressed','true');}
       function finish(){
-        if (token !== ratingToken || sess !== s || s.pos !== pos) return;
-        if(window.NHI_HARD_MASCOT&&window.NHI_HARD_MASCOT.resizing&&window.NHI_HARD_MASCOT.resizing()){setTimeout(finish,200);return;}
-        ratingPending = false; pendingRatingFinish=null;
+        if(token!==ratingToken||sess!==s||s.pos!==pos)return;
+        ratingPending=false;pendingRatingFinish=null;
         if(window.NHI_HARD_MASCOT)window.NHI_HARD_MASCOT.clear();
-        s.stats[k] = (s.stats[k] || 0) + 1; s.picked[pos] = k;
-        put('rate', id, k);
-        var T = today();
-        if (k === 'known') { put('known', id, 1); if (val('hard', id)) put('hard', id, null); }
-        else if (k === 'hard') { s.queue.splice(Math.min(pos + 4, s.queue.length), 0, id); put('hard', id, addDays(T, 1)); }
-        else if (k === 'mid') { if (s.kind === 'hard' && val('hard', id)) put('hard', id, null); }
-        haptic(k === 'hard' ? [14, 40, 14] : 14);
-        s.selectedKo=''; s.spoken=-1; s.pos++; s.flipped = false; s.hanja = false; s.editing = false; s.imagePicker = false;
-        legendOpen = false; flipping = false; anim = 'next';
-        saveSess(); render();
+        s.stats[k]=(s.stats[k]||0)+1;s.picked[pos]=k;put('rate',id,k);
+        if(k==='known'){put('known',id,1);if(val('hard',id))put('hard',id,null);}
+        else if(k==='mid'&&s.kind==='hard'&&val('hard',id))put('hard',id,null);
+        haptic(14);s.selectedKo='';s.spoken=-1;s.pos++;
+        s.flipped=false;s.hanja=false;s.editing=false;s.imagePicker=false;
+        legendOpen=false;flipping=false;anim='next';saveSess();render();
       }
       pendingRatingFinish=finish;
-      if(k==='hard'){react(k,card);setTimeout(finish,2200);}
-      else if(animated)setTimeout(finish,430);
-      else finish();
+      if(animated)setTimeout(finish,430);else finish();
     }
     function renderDone(v) {
       var s = sess, p = el('div', 'quiz sdone');
@@ -3859,15 +3888,15 @@ button,input,select,textarea{font-family:var(--ui)}
       // A cheerful cat takes the victory spotlight; no girl mascot at completion.
       var m = el('div','nhi-victory-cat-scene');
       var cat=el('img','nhi-victory-cat');
-      cat.src='nhi-kitten-photo-v3.svg?v=20261115-kitten-photo-v3';
+      cat.src='nhi-money-cat-20261117.svg?v=1';
       cat.onerror=function(){cat.onerror=null;cat.src='nhi-kitten-lifelike-v2.svg?v=20261115-kitten-v2';};
-      cat.alt='Mèo đáng yêu vẫy chân chúc mừng hoàn thành bài học';
+      cat.alt='Mèo trắng vui vẻ tung tiền, những tờ tiền đang bay và rơi';
       cat.loading='eager';m.appendChild(cat);
       // A yellow thumbs-up emoji was distracting; the kitten paws do the celebrating.
       p.appendChild(m);
       if (window.NHI_VICTORY_CAT) window.NHI_VICTORY_CAT.attach(cat);
-      p.appendChild(el('h2', null, '🎉 Chúc mừng, bạn đã hoàn thành!'));
-      p.appendChild(el('p', 'nhi-victory-message', 'Tuyệt vời! Mỗi thẻ đã học là một bước tiến mới. ✨'));
+      p.appendChild(el('h2', null, 'Yeahhh đã học xong, Nhi sắp trở thành phú bà rồi ^^'));
+      p.appendChild(el('p', 'nhi-victory-message', 'Tiền rơi, kiến thức tăng! ✨💸'));
       p.appendChild(el('p', 'listinfo', s.title));
       var tiles = el('div', 'tiles');
       [['h', 'hard', 'Khó'], ['m', 'mid', 'Bình thường']].forEach(function (x) { var t = el('div', 'tile2 ' + x[0]); t.appendChild(el('b', null, s.stats[x[1]] || 0)); t.appendChild(document.createTextNode(x[2])); tiles.appendChild(t); });
@@ -3937,7 +3966,8 @@ button,input,select,textarea{font-family:var(--ui)}
         Object.keys(rem).forEach(function (k) {
           var r = rem[k], l = ps[sec][k];
           if (!r || typeof r !== 'object') return;
-          if (!l || (r.t || 0) > (l.t || 0)) { var v = r.v; if ((sec === 'done' || sec === 'hl') && v && typeof v === 'object' && !Array.isArray(v)) v = Object.keys(v).map(function (x) { return v[x]; }); ps[sec][k] = { v: v === undefined ? null : v, t: r.t || 0 }; changed = true; if (sec === 'ed') edits.push(k); }
+          if (sec === 'del' && l && l.v && !r.v) return; // deletion cannot be undone by stale remote data
+           if (!l || (r.t || 0) > (l.t || 0)) { var v = r.v; if ((sec === 'done' || sec === 'hl') && v && typeof v === 'object' && !Array.isArray(v)) v = Object.keys(v).map(function (x) { return v[x]; }); ps[sec][k] = { v: v === undefined ? null : v, t: r.t || 0 }; changed = true; if (sec === 'ed') edits.push(k); }
           else if ((l.t || 0) > (r.t || 0)) SYNC.queue('L/' + sec + '/' + k, l);
         });
         if (full) Object.keys(ps[sec]).forEach(function (k) { if (!rem[k]) SYNC.queue('L/' + sec + '/' + k, ps[sec][k]); });
@@ -4611,7 +4641,8 @@ button,input,select,textarea{font-family:var(--ui)}
 <script src="backup-portable-v1.js"></script>
 <script src="nhi-ai-resize-v2.js?v=20261114-study-v7"></script>
 <script src="nhi-fireworks-v3.js?v=3"></script>
-<script src="study-update-v6.js?v=20261115-toggle-dock"></script>
+<script src="study-update-v6.js?v=20261117-vi-dict"></script>
+<script src="nhi-longpress-dictionary-v1.js?v=20261117"></script>
 <script src="nhi-interface-v5.js?v=20261114"></script>
 <script src="nhi-november-v15.js?v=20261114-ux-v17"></script>
 <script src="nhi-seasons-v1.js?v=20261113-original-garden-v2"></script>
