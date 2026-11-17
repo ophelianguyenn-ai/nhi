@@ -67,10 +67,13 @@ try{
  assert(Math.abs(newCardHeight-fixedCardHeight)<3,
    'Card grew when image height changed: '+fixedCardHeight+' vs '+newCardHeight);
  // Moving the drawing should save offsets independently from width and height.
- await page.$eval('#planBox .card-illustration img',im=>{
-   im.dispatchEvent(new PointerEvent('pointerdown',{pointerId:6,pointerType:'mouse',button:0,clientX:120,clientY:160,bubbles:true}));
-   im.dispatchEvent(new PointerEvent('pointermove',{pointerId:6,pointerType:'mouse',button:0,clientX:143,clientY:172,bubbles:true}));
-   im.dispatchEvent(new PointerEvent('pointerup',{pointerId:6,pointerType:'mouse',button:0,clientX:143,clientY:172,bubbles:true}));
+ await page.$eval('#planBox .nhi-image-adjust input[aria-label="Vị trí ngang hình"]',e=>{
+   e.value='25';e.dispatchEvent(new Event('input',{bubbles:true}));
+   e.dispatchEvent(new Event('change',{bubbles:true}));
+ });
+ await page.$eval('#planBox .nhi-image-adjust input[aria-label="Vị trí dọc hình"]',e=>{
+   e.value='15';e.dispatchEvent(new Event('input',{bubbles:true}));
+   e.dispatchEvent(new Event('change',{bubbles:true}));
  });
  console.log('SMOKE_STEP 9 line67');
  await page.waitForFunction(id=>(JSON.parse(localStorage.getItem('viko-plan-v1')).img?.[id]?.v?.offsetX||0)>=20,{},cardID);
