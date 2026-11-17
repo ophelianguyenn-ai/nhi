@@ -151,12 +151,45 @@ let audioContext;
 function feedback(kind){try{audioContext=audioContext||new(window.AudioContext||window.webkitAudioContext)();audioContext.resume().catch(()=>{});const now=audioContext.currentTime;(kind==='hard'?[330,261,196]:[392,440]).forEach((f,i)=>{const o=audioContext.createOscillator(),g=audioContext.createGain(),t=now+i*.13;o.type='sine';o.frequency.setValueAtTime(f,t);g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(.07,t+.015);g.gain.exponentialRampToValueAtTime(.001,t+.2);o.connect(g);g.connect(audioContext.destination);o.start(t);o.stop(t+.22);});}catch(e){}}
 function initReader(){
  const log=document.getElementById('aiLog');if(!log)return;
- const bar=make('div','nhi-reader-toolbar'),language=make('select'),speed=make('select');language.setAttribute('aria-label','Ngôn ngữ đọc AI');for(const [value,label]of [['auto','Tự nhận diện'],['vi-VN','Tiếng Việt'],['ko-KR','Tiếng Hàn'],['en-US','Tiếng Anh']]){const o=make('option',null,label);o.value=value;language.append(o);}speed.setAttribute('aria-label','Tốc độ đọc AI');for(const r of [.5,.75,1,1.25,1.5,2]){const o=make('option',null,r+'×');o.value=r;o.selected=r===1;speed.append(o);}bar.append(language,speed);log.before(bar);
+ const language=make('select'),speed=make('select');
+ language.id='nhiReaderLanguage';
+ language.setAttribute('aria-label','Ngôn ngữ đọc AI');
+ for(const [value,label] of [['auto','Tự nhận diện'],['vi-VN','Tiếng Việt'],['ko-KR','Tiếng Hàn'],['en-US','Tiếng Anh']]){
+   const o=make('option',null,label);o.value=value;language.append(o);
+ }
+ speed.setAttribute('aria-label','Tốc độ đọc AI');
+ for(const r of [.5,.75,1,1.25,1.5,2]){const o=make('option',null,r+'×');o.value=r;speed.append(o);}
+ const languageRow=make('label','flabel nhi-ai-reader-setting');
+ languageRow.append(make('span',null,'Ngôn ngữ đọc (tự nhận diện)'));
+ languageRow.append(language);
+ document.getElementById('aiSetup')?.append(languageRow);
+ const speedRow=make('label','nhi-ai-reader-speed');
+ speedRow.title='Điều chỉnh tốc độ nghe';speedRow.append(make('span',null,'Tốc độ'));
+ speedRow.append(speed);window.NHI_READER_SPEED=speedRow;
+ const readerPrefsKey='nhi-ai-reader-prefs-v2';
+ try{
+  const prefs=JSON.parse(localStorage.getItem(readerPrefsKey)||'{}');
+  if(prefs.language && [...language.options].some(o=>o.value===prefs.language))language.value=prefs.language;
+  if(prefs.speed && [...speed.options].some(o=>o.value===String(prefs.speed)))speed.value=String(prefs.speed);
+ }catch(_e){}
+ function saveReaderPrefs(){try{localStorage.setItem(readerPrefsKey,JSON.stringify({language:language.value,speed:speed.value}));}catch(_e){}}
+ language.addEventListener('change',saveReaderPrefs);speed.addEventListener('change',saveReaderPrefs);
  let token=0,active=null;
  function stop(){token++;window.NHI_SPEECH.stop();if(active){active.setAttribute('aria-pressed','false');active=null;}}
  function pieces(text){const lines=String(text).split(/\n+/).filter(x=>x.trim()),out=[];for(const line of lines){const chunks=line.match(/[가-힣]+(?:[ \t]+[가-힣]+)*|[^가-힣]+/g)||[line];for(const t of chunks){if(!t.trim())continue;out.push({text:t,lang:language.value!=='auto'?language.value:/[가-힣]/.test(t)?'ko-KR':/[àáạảãăâđêôơưếệềễểấậầẩẫớờởỡợứừửữự]/i.test(t)?'vi-VN':'en-US'});}}return out;}
  function readFrom(b){if(active===b&&window.NHI_SPEECH.active()){stop();return;}stop();active=b;b.setAttribute('aria-pressed','true');const blocks=[...log.querySelectorAll('.nhi-ai-paragraph')],start=blocks.indexOf(b.parentElement),queue=blocks.slice(start).flatMap(p=>pieces(p.querySelector('.nhi-ai-paragraph-text').textContent)),mine=token;function next(){if(token!==mine)return;const item=queue.shift();if(!item){if(active)active.setAttribute('aria-pressed','false');active=null;return;}window.NHI_SPEECH.speak(item.text,item.lang,next,Number(speed.value));}next();}
- function mount(){for(const msg of log.querySelectorAll('.aimsg.ai:not(.wait)')){if(msg.dataset.readerMounted)continue;msg.dataset.readerMounted='true';const source=msg.cloneNode(true),links=[...source.querySelectorAll('a')].map(a=>{const link=a.cloneNode(true);a.remove();return link;}),paragraphs=source.innerHTML.split(/<br\s*\/?\s*>|\n+/i);msg.replaceChildren();for(const paragraph of paragraphs){const text=make('span','nhi-ai-paragraph-text');text.innerHTML=paragraph;if(!text.textContent.trim())continue;const p=make('div','nhi-ai-paragraph'),b=button('',()=>readFrom(b));b.innerHTML=icon('headphones');b.classList.add('nhi-read-message');b.setAttribute('aria-label','Đọc từ đoạn này trở xuống / dừng');b.setAttribute('aria-pressed','false');p.append(b,text);msg.append(p);}for(const link of links)msg.append(link);}}
+ function mount(){for(const msg of log.querySelectorAll('.aimsg.ai:not(.wait)')){if(msg.dataset.readerMounted)continue;msg.dataset.readerMounted='true';const source=msg.cloneNode(true),links=[...source.querySelectorAll('a')].map(a=>{const link=a.cloneNode(true);a.remove();return link;}),paragraphs=source.innerHTML.split(/<br\s*\/?\s*>|\n+/i);msg.replaceChildren();for(const paragraph of paragraphs){const text=make('span','nhi-ai-paragraph-text');text.innerHTML=paragraph;if(!text.textContent.trim())continue;const p=make('div','nhi-ai-paragraph'),b=button('',()=>readFrom(b));
+ b.innerHTML=icon('headphones');b.classList.add('nhi-read-message');b.setAttribute('aria-label','Đọc từ đoạn này trở xuống / dừng');b.setAttribute('aria-pressed','false');
+ p.classList.add('nhi-ai-draggable-note');p.draggable=true;
+ p.title='Kéo câu này thả vào thẻ để lưu vào ghi chú';
+ const add=button('＋',()=>{
+   const saved=window.NLC_NOTES?.add(text.textContent);
+   if(saved){add.textContent='✓';setTimeout(()=>{if(add.isConnected)add.textContent='＋';},1100);}
+ });
+ add.classList.add('nhi-add-to-note');
+ add.title='Thêm ví dụ này vào ghi chú trên thẻ đang học';
+ add.setAttribute('aria-label','Thêm câu này vào ghi chú thẻ');
+ p.append(b,text,add);msg.append(p);}for(const link of links)msg.append(link);}}
 
  new MutationObserver(mount).observe(log,{childList:true});mount();document.getElementById('aiClose').addEventListener('click',stop);document.getElementById('aiNewBtn').addEventListener('click',stop);
 }
