@@ -2,6 +2,7 @@ name: Prepare FPT Ban Mai and Korean InJoon audio batches
 
 on:
   # One-shot, low-cost pilot on an explicitly named commit only.
+  # Whitespace from pasted GitHub secrets is sanitized by the generator.
   # Later workflow edits never trigger paid synthesis automatically.
   push:
     branches: [main]
