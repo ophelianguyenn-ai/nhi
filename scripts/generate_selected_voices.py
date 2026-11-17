@@ -55,6 +55,11 @@ def current_entry(entry, lang):
 
 
 def _post_fpt(phrase, api_key):
+    # GitHub secrets pasted from a text editor sometimes carry trailing newlines.
+    # Trim outer whitespace but reject any embedded control characters.
+    api_key = api_key.strip()
+    if not api_key or any(ord(ch) < 33 or ord(ch) == 127 for ch in api_key):
+        raise ValueError('FPT_API_KEY format is invalid: please use a single-line API key')
     payload = phrase.encode('utf-8')
     req = request.Request(FPT_ENDPOINT, data=payload, method='POST', headers={
         'api_key': api_key, 'voice': VOICE['vi'], 'speed': '0',
