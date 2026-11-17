@@ -3375,8 +3375,8 @@ button,input,select,textarea{font-family:var(--ui)}
       paintResults(res, main);
     }
     function renderDays(v) {
-      // Studied lessons are hidden until their next due date is at most 2 days away.
-      var active=[],waiting=[],threshold=addDays(today(),2);
+      // Show a lesson in Cần học only on its review due date or when overdue.
+      var active=[],waiting=[],threshold=today();
       LESSONS.forEach(function(L){
         var counts=liveCount(L.ids);
         if(!counts[0]&&!counts[1])return;
@@ -3398,14 +3398,14 @@ button,input,select,textarea{font-family:var(--ui)}
         });
       }
       var upcoming=el('section','nhi-plan-current');
-      upcoming.appendChild(el('h3','nhi-bucket-title','📚 Cần học · đến hạn trong 2 ngày'));
+      upcoming.appendChild(el('h3','nhi-bucket-title','📚 Cần học · đến hạn hôm nay hoặc quá hạn'));
       var activeGrid=el('div','days-grid');
       groupedCards(activeGrid,active);
       if(!active.length)activeGrid.appendChild(el('p','listinfo','Hôm nay chưa có bài cần học. Các bài đã hoàn thành đang chờ đến đợt ôn tiếp theo.'));
       upcoming.appendChild(activeGrid);v.appendChild(upcoming);
       var archived=el('section','nhi-plan-waiting');
       archived.appendChild(el('h3','nhi-bucket-title','🌷 Đã học · chờ lịch ôn tiếp theo'));
-      archived.appendChild(el('p','listinfo',waiting.length+' học phần được chuyển sang đây; tự quay lại phần Cần học khi còn 2 ngày đến hạn.'));
+      archived.appendChild(el('p','listinfo',waiting.length+' học phần được chuyển sang đây; tự quay lại phần Cần học đúng ngày đến hạn ôn.'));
       var details=el('details','nhi-waiting-details');
       details.appendChild(el('summary',null,'Xem '+waiting.length+' học phần đang chờ'));
       var waitingGrid=el('div','days-grid');groupedCards(waitingGrid,waiting);
