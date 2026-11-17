@@ -657,7 +657,7 @@ button,input,select,textarea{font-family:var(--ui)}
 <link rel="stylesheet" href="nhi-card-polish-v9.css?v=20261115-vi-centered-v10">
 <link rel="stylesheet" href="nhi-card-polish-v10.css?v=20261115-title-weight-v12">
 <link rel="stylesheet" href="nhi-cover-palette-v12.css?v=20261115-no-girl-frame-v13">
-<link rel="stylesheet" href="nhi-chat-image-notes-v1.css?v=20261117"><link rel="stylesheet" href="nhi-chat-note-card-v2.css?v=20261117">
+<link rel="stylesheet" href="nhi-chat-image-notes-v1.css?v=20261117"><link rel="stylesheet" href="nhi-chat-note-card-v2.css?v=20261117"><link rel="stylesheet" href="nhi-original-gif-review-v1.css?v=20261117-r3">
 <script>
 /* Pick exactly one of three cover colors when the document loads.
    Navigate/flip cards without changing it; no animation or interval. */
@@ -1322,10 +1322,24 @@ button,input,select,textarea{font-family:var(--ui)}
   function stopSpeech() { ++speechRequest; speaking = false; pausedSpeech = false; if (window.NHI_AUDIO) window.NHI_AUDIO.stop(); if (canSpeak) window.speechSynthesis.cancel(); }
   function toggleSpeech(text,lang) { if (speaking) stopSpeech(); else speak(text,lang); }
 
+  // Ignore explanatory words in parentheses when speaking; keep written
+  // translations visible. Supports both Western and fullwidth brackets.
+  function speechWithoutBrackets(input) {
+    var value=String(input==null?'':input);
+    var old='';
+    // Repeat to remove nested bracket groups from inside outward.
+    for(var n=0;n<8&&value!==old;n++){
+      old=value;
+      value=value.replace(/\([^()]*\)|（[^（）]*）|\[[^\[\]]*\]|【[^【】]*】|\{[^{}]*\}/g,' ');
+    }
+    return value.replace(/\s+([,.!?;:。！？])/g,'$1').replace(/[ \t]{2,}/g,' ').trim();
+  }
   async function speak(text, lang, onend, speed) {
+    text=speechWithoutBrackets(text);
     var request = ++speechRequest;
     speaking = true; pausedSpeech = false;
     var complete = function () { if (request !== speechRequest) return; speaking = false; if (onend) onend(); };
+    if(!text){complete();return;}
     lang = lang || 'ko-KR';
     var pre = lang.slice(0, 2).toLowerCase();
     if (canSpeak) window.speechSynthesis.cancel();
@@ -1349,7 +1363,7 @@ button,input,select,textarea{font-family:var(--ui)}
     } catch (e) { complete(); }
   }
   document.addEventListener('visibilitychange',function(){if(document.hidden)stopSpeech();});
-  window.NHI_SPEECH = {speak:speak, stop:stopSpeech, toggle:toggleSpeech,
+  window.NHI_SPEECH = {speak:speak, clean:speechWithoutBrackets, stop:stopSpeech, toggle:toggleSpeech,
     pause:function(){ pausedSpeech=true; if(window.NHI_AUDIO)window.NHI_AUDIO.pause(); if(canSpeak)window.speechSynthesis.pause(); },
     resume:function(){ pausedSpeech=false; if(window.NHI_AUDIO)window.NHI_AUDIO.resume(); if(canSpeak)window.speechSynthesis.resume(); },
     active:function(){return speaking;}, paused:function(){return pausedSpeech;} };
@@ -3340,7 +3354,6 @@ button,input,select,textarea{font-family:var(--ui)}
       var act = el('div', 'tact');
       var first = s.late[0] || s.due[0];
       if (first) act.appendChild(lbtn('primary white big', 'bolt', 'Học ngay', function () { startLesson(first); }));
-      else if (s.upcoming) act.appendChild(lbtn('primary white big', 'bolt', 'Học trước bài ' + vn(s.upcoming.due), function () { startLesson(s.upcoming.L); }));
       if (s.hard.length) act.appendChild(lbtn('ghostw', 'flip', 'Ôn lại các thẻ khó (' + s.hard.length + ')', function () { start('hard', s.hard, 'Ôn lại các thẻ khó'); }));
       box.appendChild(act);
       return box;
@@ -3526,9 +3539,19 @@ button,input,select,textarea{font-family:var(--ui)}
       var row = el('div', 'prow'), cur = current(L); row.appendChild(statusLine(L));
       hd.appendChild(row);
       var rs = (resume[L.id] || []).filter(alive);
-      var label = rs.length ? 'Tiếp tục (còn ' + rs.length + ' thẻ)' : !cur ? 'Học lại' : cur.st === 'next' ? 'Học trước' : (cur.step ? 'Học ' + STEP[cur.step].toLowerCase() : 'Học ngay');
+      var alreadyStudied=(val('done',L.id)||[]).length>0;
+      var notDue=!!cur && (cur.st==='next'||cur.st==='future');
+      var label = rs.length ? 'Tiếp tục (còn ' + rs.length + ' thẻ)' :
+        !cur ? 'Học lại' : notDue ? (alreadyStudied ? 'Học lại' : 'Chờ đến ngày học') :
+        (cur.step ? 'Học ' + STEP[cur.step].toLowerCase() : 'Học ngay');
       var row2 = el('div', 'prow');
-      row2.appendChild(lbtn('primary big', 'bolt', label, function () { startLesson(L); }));
+      var launch=lbtn('primary big', 'bolt', label, function () {
+        if(rs.length)return startLesson(L);
+        if(!cur||notDue)return start('free',ordered(L.ids),titleMain(L)+' · Học lại',L);
+        return startLesson(L);
+      });
+      if(notDue&&!alreadyStudied&&!rs.length){launch.disabled=true;launch.title='Bài mới sẽ mở học vào đúng ngày đến hạn';}
+      row2.appendChild(launch);
       row2.appendChild(lbtn('ghost', 'edit', 'Sửa tên học phần', function () { openDailyEditor(L); }));
       var hd2 = hardIds(L.ids);
       if (hd2.length) row2.appendChild(lbtn('ghost', 'flip', 'Ôn lại thẻ khó (' + hd2.length + ')', function () { start('hard', hd2, L.title + ' · thẻ khó', L); }));
@@ -3620,7 +3643,10 @@ button,input,select,textarea{font-family:var(--ui)}
       ++ratingToken;ratingPending=false;pendingRatingFinish=null;
       stopSpeech(); expireUndo();
       if(window.NHI_HARD_MASCOT)window.NHI_HARD_MASCOT.clear();
-      if (sess.pos < sess.queue.length && sess.L) {
+      // Optional replay must not become the saved *scheduled* lesson session.
+      // Otherwise a later due-day study could resume a free run and fail to
+      // record its scheduled review when completed.
+      if (sess.pos < sess.queue.length && sess.L && sess.kind !== 'free') {
         resume[sess.L.id] = sess.queue.slice(sess.pos);
         resumeFull[sess.L.id] = {
           kind: sess.kind, queue: sess.queue.slice(), pos: sess.pos, title: sess.title,
@@ -3976,8 +4002,10 @@ button,input,select,textarea{font-family:var(--ui)}
       setFocus(false);
       // A cheerful cat takes the victory spotlight; no girl mascot at completion.
       var m = el('div','nhi-victory-cat-scene');
-      var cat=el('img','nhi-victory-cat');
-      cat.src='nhi-cat-phu-ba-20261117-v2.svg?v=2';
+      var cat=el('img','nhi-victory-cat nhi-original-gif');
+      // Exact previous image-generation output: eight original frames, 140 ms each.
+      // The caption is already drawn in the GIF; CSS hides its text duplicate.
+      cat.src='nhi-cat-original-8frames-20261117.gif?v=1';
       cat.onerror=function(){cat.onerror=null;cat.src='nhi-kitten-lifelike-v2.svg?v=20261115-kitten-v2';};
       cat.alt='Mèo trắng vui vẻ tung tiền, những tờ tiền đang bay và rơi';
       cat.loading='eager';m.appendChild(cat);
@@ -4007,8 +4035,14 @@ button,input,select,textarea{font-family:var(--ui)}
       if (s.kind === 'lesson' && s.L) { var nx = current(s.L); p.appendChild(el('p', 'pstatus done', nx ? '✓ ' + STEP[nx.step] + ' · ' + vn(nx.due, true) : '✓ Đã hoàn thành cả 5 lần.')); }
       var enids=(s.L?s.L.ids:s.queue).filter(function(id,i,a){return a.indexOf(id)===i&&alive(id)&&val('enHard',id);});if(enids.length)p.appendChild(btn('primary','Ôn chưa nhớ tiếng Anh ('+enids.length+')',function(){start('english',enids,s.title+' · chưa nhớ tiếng Anh',s.L);}));
       var row = el('div', 'prow');
+      var replayButton=btn('primary nhi-replay-button', '↻ Học lại tất cả thẻ', function () {
+        var again=s.queue.filter(alive);
+        if(!again.length){toast('Học phần hiện không có thẻ để học lại.');return;}
+        // This is voluntary practice, not an extra scheduled review round.
+        start('free',again,s.title.replace(/ · Học lại$/,'')+' · Học lại',s.L);
+      });row.appendChild(replayButton);
       row.appendChild(lbtn('ghost', 'left', 'Xem lại thẻ cuối', function () { s.pos = Math.max(0, s.queue.length - 1); anim = 'prev'; saveSess(); render(); }));
-      row.appendChild(btn('primary', 'Xong', function () { sess = null; saveSess(); render(); }));
+      row.appendChild(btn('ghost', 'Xong', function () { sess = null; saveSess(); render(); }));
       p.appendChild(row); v.appendChild(p);
       if (!s.celebrated) {
         s.celebrated = true; saveSess();
