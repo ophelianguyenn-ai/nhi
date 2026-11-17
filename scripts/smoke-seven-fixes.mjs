@@ -77,6 +77,39 @@ try{
  }));
  assert(cat.src?.includes('nhi-money-cat-20261117.svg')&&cat.size>0,'Money cat artwork not loaded');
  assert(cat.text==='Yeahhh đã học xong, Nhi sắp trở thành phú bà rồi ^^','Celebration caption incorrect');
+ // Calendar: after studying, a lesson stays in Waiting until the actual due day.
+ const calContext=await browser.createBrowserContext();
+ try{
+  const cal=await calContext.newPage();
+  await cal.evaluateOnNewDocument((id)=>{
+   sessionStorage.setItem('nlc-cover-seen','1');
+   localStorage.setItem('nlc-prefs-v1',JSON.stringify({fx:false}));
+   if(!localStorage.getItem('viko-plan-v1')){
+    const d=new Date(),today=[d.getFullYear(),String(d.getMonth()+1).padStart(2,'0'),String(d.getDate()).padStart(2,'0')].join('-');
+    localStorage.setItem('viko-plan-v1',JSON.stringify({done:{[id]:{v:[today],t:Date.now()}}}));
+   }
+  },lesson.id);
+  async function homeCalendar(){
+   await cal.goto('http://127.0.0.1:8765/#/bai/'+lesson.id,{waitUntil:'domcontentloaded'});
+   await cal.waitForSelector('#planBox .ppage',{timeout:15000});
+   await cal.$eval('#planBox .pback',e=>e.click());
+   await cal.waitForSelector('#planBox .nhi-plan-waiting',{timeout:10000});
+   return cal.evaluate(id=>({
+    active:[...document.querySelectorAll('#planBox .nhi-plan-current .ptitle')].some(a=>a.getAttribute('href')?.endsWith(id)),
+    waiting:[...document.querySelectorAll('#planBox .nhi-plan-waiting .ptitle')].some(a=>a.getAttribute('href')?.endsWith(id))
+   }),lesson.id);
+  }
+  const early=await homeCalendar();
+  assert(!early.active&&early.waiting,'Lesson appeared 3 days before due date');
+  await cal.evaluate(id=>{
+   const p=JSON.parse(localStorage.getItem('viko-plan-v1'));
+   const d=new Date();d.setDate(d.getDate()-3);
+   p.done[id]={v:[[d.getFullYear(),String(d.getMonth()+1).padStart(2,'0'),String(d.getDate()).padStart(2,'0')].join('-')],t:Date.now()};
+   localStorage.setItem('viko-plan-v1',JSON.stringify(p));
+  },lesson.id);
+  const due=await homeCalendar();
+  assert(due.active&&!due.waiting,'Lesson did not appear on actual review due date');
+ }finally{await calContext.close();}
  assert(errors.length===0,'Browser errors: '+errors.join('; '));
  console.log('SEVEN FIXES PASS',JSON.stringify({verifiedPairs:found.count,hardStayed:true,deletePersisted:true,autosave:true,dictionary:true,cat}));
 }finally{await browser.close();}
