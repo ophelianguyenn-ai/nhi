@@ -87,7 +87,7 @@ try{
  await page.$eval('#nhiV2TopNav [data-v2-nav="today"]',e=>e.click());
  const mobile=await page.evaluate(()=>({
   visible:!!document.querySelector('#nhiV2TopNav'),
-  nav:document.querySelector('#nhiV2TopNav').getBoundingClientRect(),
+  nav:(()=>{const r=document.querySelector('#nhiV2TopNav').getBoundingClientRect();return {width:r.width,height:r.height,top:r.top};})(),
   hasDashboard:!!document.querySelector('#planBox .nhi-v2-priorities'),
   width:document.documentElement.scrollWidth,inner:window.innerWidth
  }));
