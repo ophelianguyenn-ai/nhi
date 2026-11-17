@@ -1,11 +1,11 @@
-name: Migrate built-in MP3 (FPT Ban Mai and Korean InJoon)
+name: Migrate built-in MP3 (FPT Marketplace Ban Mai and Korean InJoon)
 
 # Explicit batches only. Never automatically spend FPT API credits on a push.
 on:
   workflow_dispatch:
     inputs:
       language:
-        description: 'both / vi (FPT Ban Mai) / ko (InJoon)'
+        description: 'both / vi (FPT Marketplace Ban Mai) / ko (InJoon)'
         type: choice
         options: [both, vi, ko]
         default: both
@@ -38,9 +38,10 @@ jobs:
           python-version: '3.12'
       - name: Install selected voice engines and MP3 validator
         run: python -m pip install 'edge-tts>=7,<8' 'mutagen>=1.47,<2'
+          command -v ffmpeg || (sudo apt-get update -qq && sudo apt-get install -y ffmpeg)
       - name: Generate verified replacements in requested batch
         env:
-          FPT_API_KEY: ${{ secrets.FPT_API_KEY }}
+          FPT_MARKETPLACE_API_KEY: ${{ secrets.FPT_MARKETPLACE_API_KEY }}
           VOICE_LANG: ${{ inputs.language || 'both' }}
           VOICE_OFFSET: ${{ inputs.offset || '0' }}
           VOICE_LIMIT: ${{ inputs.limit || '30' }}
