@@ -47,6 +47,8 @@ function figure(it,value,onResize){
   }
   var w=slider('Ngang',110,680,width,function(value){width=value;});
   var h=slider('Cao',80,520,height||240,function(value){height=value;});
+  var x=slider('Vị trí ngang',-140,140,offsetX,function(value){offsetX=value;});
+  var y=slider('Vị trí dọc',-140,140,offsetY,function(value){offsetY=value;});
   var actions=node('div');actions.className='nhi-image-actions';
   var move=node('button','✥ Kéo vị trí ảnh');move.type='button';move.className='nhi-image-move-mode';
   move.setAttribute('aria-pressed','true');
@@ -77,8 +79,10 @@ function figure(it,value,onResize){
     f.style.setProperty('--nhi-image-x',offsetX+'px');
     f.style.setProperty('--nhi-image-y',offsetY+'px');
     w.input.value=width;h.input.value=height||240;
+    x.input.value=offsetX;y.input.value=offsetY;
     w.output.textContent=width+' px';
     h.output.textContent=height?height+' px':'Tự động';
+    x.output.textContent=offsetX+' px';y.output.textContent=offsetY+' px';
   }
   function commit(){
     onResize(Object.assign({},v,{width:Math.round(width),height:Math.round(height),
