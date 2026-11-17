@@ -11,3 +11,14 @@
 .nhi-victory-message{text-align:center}
 #planBox .answer.ko,#planBox .prompt,#planBox .vi-under{touch-action:pan-y;-webkit-touch-callout:none}
 @media(prefers-reduced-motion:reduce){.nhi-victory-cat{animation:none!important}}
+
+/* Override earlier fixed-size kitten rules while retaining the mascot's own motion. */
+html body #planBox .sdone .nhi-victory-cat-scene{
+ width:min(410px,92vw)!important;max-width:100%!important;
+ min-height:0!important;display:flex!important;align-items:center;justify-content:center;
+}
+html body #planBox .sdone .nhi-victory-cat{
+ width:100%!important;height:auto!important;max-width:100%!important;
+ aspect-ratio:1!important;object-fit:contain!important;
+}
+html body #planBox .sdone h2{font-size:clamp(21px,4vw,32px)!important;max-width:800px;text-wrap:balance}
