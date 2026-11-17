@@ -30,7 +30,8 @@ function dictionary(word,kind){
     && dock.dataset.kind===kind && dock.dataset.word===word){
    dock.hidden=true;document.body.classList.remove('dictionary-open');layout();return;
  }
- const url=kind==='en'?'https://vdict.com/'+encodeURIComponent(word)+',1,0,0.html':
+ const url=kind==='vi'?'https://vi.wiktionary.org/wiki/'+encodeURIComponent(word):
+ kind==='en'?'https://vdict.com/'+encodeURIComponent(word)+',1,0,0.html':
  'https://korean.dict.naver.com/'+(kind==='ko-en'?'koendict':'kovidict')+'/#/search?query='+encodeURIComponent(word);
  if(!dock){
   dock=make('aside','nhi-dictionary-dock');dock.id='nhiDictionary';dock.setAttribute('aria-label','Cửa sổ từ điển');
@@ -51,7 +52,7 @@ function dictionary(word,kind){
   grip.onkeydown=e=>{if(!['ArrowLeft','ArrowRight'].includes(e.key))return;e.preventDefault();dictWidth=Math.max(220,Math.min(innerWidth-260,dictWidth+(e.key==='ArrowLeft'?24:-24)));persist();layout();};
  }
  dock.dataset.kind=kind;dock.dataset.word=word;
- dock.querySelector('strong').textContent=(kind==='en'?'VDict':kind==='ko-en'?'Naver Hàn–Anh':'Naver Hàn–Việt')+' · '+word;
+ dock.querySelector('strong').textContent=(kind==='vi'?'Từ điển tiếng Việt':kind==='en'?'VDict':kind==='ko-en'?'Naver Hàn–Anh':'Naver Hàn–Việt')+' · '+word;
  dock.querySelector('iframe').src=url;dock.querySelector('a').href=url;dock.hidden=false;document.body.classList.add('dictionary-open');layout();
 }
 function dictionaryButtons(root,value){

@@ -86,25 +86,29 @@ function align(it,all){
  return output.length?output:[[vi,ko]];
 }
 function expand(it,all){
+ const vi=String(it.vi||''),ko=String(it.ko||'');
  const supplied=Array.isArray(it.pairs)?it.pairs:[];
- const base=supplied.length>1?supplied.map(p=>p.slice()):[];
- const auto=align(it,all);
- if(!base.length){
-  // Keep a supplied whole-card translation linked when the auto segmenter
-  // has no verified bilingual subpairs. Otherwise its VI-only and KO-only
-  // fragments make a tap on the front unable to colour the matching back.
-  const whole=supplied.length===1?supplied[0]:null;
-  if(Array.isArray(whole)&&lower(whole[0]).trim()===lower(it.vi).trim()
-     &&String(whole[1]||'').trim()===String(it.ko||'').trim()
-     &&!auto.some(p=>p[0]&&p[1]))return [whole.slice()];
-  return auto;
+ function valid(p){
+  return Array.isArray(p)&&p.length===2&&typeof p[0]==='string'&&typeof p[1]==='string'
+   &&p[0].trim()&&p[1].trim()&&has(vi,p[0])&&ko.includes(p[1]);
  }
- for(const pair of auto){
-  const vi=pair[0]||'',ko=pair[1]||'';
-  if(base.some(p=>(vi&&p[0]&&(lower(p[0]).includes(lower(vi))||lower(vi).includes(lower(p[0]))))||(ko&&p[1]&&(p[1].includes(ko)||ko.includes(p[1])))))continue;
-  base.push(pair);
+ // A learner's own corrections always take priority over built-in segmentation.
+ if(it.edited){const fixed=supplied.filter(valid);return fixed.length?fixed:[[vi,ko]];}
+ const reviewed=(window.NHI_VERIFIED_PAIRS||{})[it.id];
+ if(Array.isArray(reviewed)&&reviewed.length>1&&reviewed.every(valid))return reviewed.map(p=>p.slice());
+ // Two historical sentence cards contain an orphan one-language fragment.
+ // Keep them as accurately linked whole sentences, not misleading partial pairs.
+ if(it.id==='se57a6b5af5'||it.id==='saf0711f7c4')return [[vi,ko]];
+ const authored=supplied.filter(valid);
+ if(it.type==='w'){
+  // A vocabulary entry is one lexical unit, even when legacy data contain
+  // isolated Vietnamese and Korean fragments with no corresponding translation.
+  return authored.length>1?authored:[[vi,ko]];
  }
- return base;
+ if(authored.length>1)return authored.map(p=>p.slice());
+ // Automatic matches are hints, never display disconnected one-language spans.
+ const inferred=align(it,all).filter(valid);
+ return inferred.length>1?inferred:[[vi,ko]];
 }
 window.NHI_PHRASES_V5={align,expand};
 })();
