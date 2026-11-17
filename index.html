@@ -3546,11 +3546,11 @@ button,input,select,textarea{font-family:var(--ui)}
         (cur.step ? 'Học ' + STEP[cur.step].toLowerCase() : 'Học ngay');
       var row2 = el('div', 'prow');
       var launch=lbtn('primary big', 'bolt', label, function () {
-        if(!cur||notDue)start('free',ordered(L.ids),titleMain(L)+' · Học lại',L);
-        else startLesson(L);
+        if(rs.length)return startLesson(L);
+        if(!cur||notDue)return start('free',ordered(L.ids),titleMain(L)+' · Học lại',L);
+        return startLesson(L);
       });
       if(notDue&&!alreadyStudied&&!rs.length){launch.disabled=true;launch.title='Bài mới sẽ mở học vào đúng ngày đến hạn';}
-      else if(rs.length){launch.onclick=function(){startLesson(L);};}
       row2.appendChild(launch);
       row2.appendChild(lbtn('ghost', 'edit', 'Sửa tên học phần', function () { openDailyEditor(L); }));
       var hd2 = hardIds(L.ids);
