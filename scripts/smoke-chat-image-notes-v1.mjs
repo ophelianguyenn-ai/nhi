@@ -54,7 +54,7 @@ try{
  await page.waitForFunction(id=>JSON.parse(localStorage.getItem('viko-plan-v1')).img?.[id]?.v?.height===280,{},cardID);
  const height=await page.$eval('#planBox .card-illustration img',e=>getComputedStyle(e).height);
  assert(Math.abs(parseInt(height)-280)<4,'Image height was not applied: '+height);
- await page.click('#aiBtn');await page.waitForSelector('#aiForm .nhi-chat-mic');
+ await page.$eval('#aiBtn',e=>e.click());await page.waitForSelector('#aiForm .nhi-chat-mic');
  assert(await page.$eval('.nhi-chat-voice-lang',e=>e.value)==='vi-VN','Expected Vietnamese microphone language');
  await page.click('#aiForm .nhi-chat-mic');
  await page.evaluate(()=>{
