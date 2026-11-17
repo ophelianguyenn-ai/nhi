@@ -8,38 +8,86 @@ function figure(it,value,onResize){
   var im=node('img');im.src=v.url;im.alt=v.caption||it.vi;im.loading='lazy';im.referrerPolicy='no-referrer';im.draggable=false;
   im.onerror=function(){im.hidden=true;};f.appendChild(im);
   var cap=node('figcaption',v.caption||it.vi);
-  if(v.source&&/^https:\/\//.test(v.source)){cap.appendChild(node('br'));var link=node('a',v.credit||'Nguồn ảnh');link.href=v.source;link.target='_blank';link.rel='noopener noreferrer';cap.appendChild(link);}
+  if(v.source&&/^https:\/\//.test(v.source)){
+    cap.appendChild(node('br'));var link=node('a',v.credit||'Nguồn ảnh');
+    link.href=v.source;link.target='_blank';link.rel='noopener noreferrer';cap.appendChild(link);
+  }
   f.appendChild(cap);
   if(typeof onResize==='function'){
     var width=Math.max(110,Math.min(680,Number(v.width)||220));
-    f.dataset.resizable='true';f.setAttribute('aria-label','Kéo trực tiếp trên hình để thay đổi kích thước');
-    im.title='Giữ và kéo trên hình để thu nhỏ hoặc phóng to';
+    var height=Math.max(0,Math.min(520,Number(v.height)||0));
+    f.dataset.resizable='true';
+    f.setAttribute('aria-label','Nhấn một lần để điều chỉnh chiều ngang và chiều cao của ảnh');
+    im.title='Nhấn một lần để mở chỉnh kích thước; có thể kéo ảnh để điều chỉnh';
     im.style.touchAction='none';
+    var controls=node('div');controls.className='nhi-image-adjust';controls.setAttribute('role','group');
+    controls.setAttribute('aria-label','Điều chỉnh hình minh họa');
+    function slider(label,min,max,current){
+      var l=node('label');l.appendChild(node('span',label));
+      var input=node('input');input.type='range';input.min=min;input.max=max;input.step='5';
+      input.value=String(current);input.setAttribute('aria-label',label+' hình');
+      var display=node('output',String(current)+' px');
+      l.append(input,display);controls.appendChild(l);
+      input.addEventListener('input',function(e){
+        if(label==='Ngang')width=Number(input.value);
+        else height=Number(input.value);
+        display.textContent=input.value+' px';paint();
+        e.stopPropagation();
+      });
+      input.addEventListener('change',function(e){paint();commit();e.stopPropagation();});
+      ['click','pointerdown','pointerup','keydown'].forEach(function(ev){
+        input.addEventListener(ev,function(e){e.stopPropagation();});
+      });
+      return input;
+    }
+    var inputW=slider('Ngang',110,680,width);
+    var inputH=slider('Cao',80,520,height||240);
+    controls.addEventListener('click',function(e){e.stopPropagation();});
+    controls.addEventListener('pointerdown',function(e){e.stopPropagation();});
+    controls.addEventListener('keydown',function(e){e.stopPropagation();});
+    f.appendChild(controls);
     function paint(){
       f.style.setProperty('--nhi-image-width',width+'px');
-      var parent=f.closest('.pfront');if(parent)parent.style.setProperty('--nhi-image-width',width+'px');
+      var parent=f.closest('.pfront');
+      if(parent)parent.style.setProperty('--nhi-image-width',width+'px');
+      f.style.setProperty('--nhi-image-height',height?height+'px':'auto');
+      inputW.value=String(width);
+      inputH.value=String(height||240);
+      inputW.nextSibling.textContent=width+' px';
+      inputH.nextSibling.textContent=height?height+' px':'Tự động';
     }
+    function commit(){onResize(Object.assign({},v,{width:Math.round(width),height:Math.round(height)}));}
+    f.addEventListener('click',function(e){
+      if(e.target.closest('.nhi-image-adjust'))return;
+      f.classList.add('nhi-image-selected');
+    });
     var drag=null;
     im.addEventListener('pointerdown',function(e){
       if(e.pointerType==='mouse'&&e.button!==0)return;
       e.preventDefault();e.stopPropagation();
-      paint();
-      drag={id:e.pointerId,x:e.clientX,y:e.clientY,width:width};
-      f.classList.add('nhi-image-dragging');im.setPointerCapture(e.pointerId);
+      f.classList.add('nhi-image-selected');
+      drag={id:e.pointerId,x:e.clientX,y:e.clientY,width:width,height:height||Math.max(100,im.getBoundingClientRect().height),moved:false};
+      try{im.setPointerCapture(e.pointerId);}catch(_e){}
     });
     im.addEventListener('pointermove',function(e){
       if(!drag||e.pointerId!==drag.id)return;
-      var parent=f.closest('.pfront'),maxWidth=parent?Math.max(160,Math.min(680,parent.clientWidth*.75)):680;
-      width=Math.max(110,Math.min(maxWidth,drag.width+Math.max(e.clientX-drag.x,e.clientY-drag.y)));
-      paint();e.stopPropagation();
+      var dx=e.clientX-drag.x,dy=e.clientY-drag.y;
+      if(Math.abs(dx)+Math.abs(dy)<=5&&!drag.moved)return;
+      drag.moved=true;
+      var parent=f.closest('.pfront'),limit=parent?Math.max(150,Math.min(680,parent.clientWidth*.55)):680;
+      width=Math.round(Math.max(110,Math.min(limit,drag.width+dx)));
+      height=Math.round(Math.max(80,Math.min(520,drag.height+dy)));
+      f.classList.add('nhi-image-dragging');paint();e.stopPropagation();
     });
     function finish(e){
-      if(!drag)return;
-      drag=null;f.classList.remove('nhi-image-dragging');
-      onResize(Object.assign({},v,{width:Math.round(width)}));
-      if(e)e.stopPropagation();
+      if(!drag||e.pointerId!==drag.id)return;
+      var moved=drag.moved;drag=null;f.classList.remove('nhi-image-dragging');
+      f.classList.add('nhi-image-selected');paint();
+      if(moved)commit(); // Simple click only opens controls; does not save.
+      e.stopPropagation();
     }
     im.addEventListener('pointerup',finish);im.addEventListener('pointercancel',finish);
+    // The figure is attached after creation, so set the parent grid width then.
     requestAnimationFrame(paint);
   }
   return f;
