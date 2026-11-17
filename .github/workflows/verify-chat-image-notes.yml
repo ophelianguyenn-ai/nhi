@@ -7,6 +7,8 @@ on:
       - 'card-images-v11.js'
       - 'nhi-chat-voice-v1.js'
       - 'nhi-chat-image-notes-v1.css'
+      - 'nhi-chat-note-card-v2.css'
+      - 'nhi-cat-phu-ba-20261117-v2.svg'
       - 'scripts/smoke-chat-image-notes-v1.mjs'
       - '.github/workflows/verify-chat-image-notes.yml'
   push:
@@ -40,5 +42,7 @@ jobs:
           done
           cat /tmp/nhi-chat-test.log
           exit 1
+      - name: Verify animated kitten SVG structure
+        run: python3 -c "import xml.etree.ElementTree as E; r=E.parse('nhi-cat-phu-ba-20261117-v2.svg').getroot(); assert r.tag.endswith('svg'); assert 'animation:' in open('nhi-cat-phu-ba-20261117-v2.svg').read()"
       - name: Verify microphone, notes, chat scroll and image reflow
         run: node scripts/smoke-chat-image-notes-v1.mjs
