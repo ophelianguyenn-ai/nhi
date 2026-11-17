@@ -658,6 +658,7 @@ button,input,select,textarea{font-family:var(--ui)}
 <link rel="stylesheet" href="nhi-card-polish-v10.css?v=20261115-title-weight-v12">
 <link rel="stylesheet" href="nhi-cover-palette-v12.css?v=20261115-no-girl-frame-v13">
 <link rel="stylesheet" href="nhi-chat-image-notes-v1.css?v=20261117"><link rel="stylesheet" href="nhi-chat-note-card-v2.css?v=20261117"><link rel="stylesheet" href="nhi-original-gif-review-v1.css?v=20261117-r3">
+<link rel="stylesheet" href="nhi-corner-v2.css?v=20261117-ux2">
 <script>
 /* Pick exactly one of three cover colors when the document loads.
    Navigate/flip cards without changing it; no animation or interval. */
@@ -1683,6 +1684,7 @@ button,input,select,textarea{font-family:var(--ui)}
     if (quiz.answered) return;
     var c = BY_ID[quiz.id], ok = id === c.id, fb = $('qFb');
     quiz.answered = true; quiz.picked = id; quiz.total++;
+    window.dispatchEvent(new CustomEvent('nhi:quiz',{detail:{id:c.id,correct:ok,at:Date.now()}}));
     if (ok) { quiz.right++; fb.className = 'feedback ok'; fb.textContent = 'Đúng rồi.'; }
     else {
       fb.className = 'feedback bad';
@@ -2386,6 +2388,7 @@ button,input,select,textarea{font-family:var(--ui)}
       res[qi] = ok; total++; if (ok) right++; else wrongIds.push(q.id);
     });
     P.score = { res: res, mt: mt, right: right, total: total, wrongIds: wrongIds };
+    window.dispatchEvent(new CustomEvent('nhi:test',{detail:{right:right,total:total,wrongIds:wrongIds.slice(),at:Date.now()}}));
     test.graded = true;
     wrongIds.forEach(markWrong);
     paintTest();
@@ -4211,7 +4214,20 @@ button,input,select,textarea{font-family:var(--ui)}
   })();
   // Public, read-only learning status and guarded navigation for the 2.0 UI.
   window.NHI_PLAN_V2=PLAN;
-
+  // Create an actual custom flashcard with the existing database/sync mechanism.
+  window.NHI_CREATE_CARD_V2=function(ko,vi,note){
+    ko=String(ko||'').trim();vi=String(vi||'').trim();
+    if(!ko||!vi)return {created:false,message:'Cần có đủ một câu Hàn và một câu Việt'};
+    if(CARDS.some(function(c){return c.ko.trim()===ko&&c.vi.trim()===vi;}))
+      return {created:false,message:'Cặp Hàn–Việt đã tồn tại, không tạo trùng'};
+    var name='Hội thoại tiếng Hàn công việc',deck=Object.keys(custom.d).find(function(id){
+      return custom.d[id]&&!custom.d[id].del&&custom.d[id].name===name;
+    });
+    if(!deck)deck=addDeck(name);
+    var id=addCard(deck,vi,ko,String(note||'').slice(0,800));
+    customChanged();
+    return {created:true,id:id,deck:deck};
+  };
   /* ---------- Modes ---------- */
   function renderMode() {
     if (state.mode !== 'cards') stopAuto();
@@ -4978,5 +4994,6 @@ button,input,select,textarea{font-family:var(--ui)}
 <script src="nhi-card-controls-v8.js?v=20261115-v8"></script>
 <script src="nhi-kitten-meow-v1.js?v=20261115-meow-v1"></script>
 <script src="nhi-card-no-overlap-v1.js?v=20261115-safe-v1"></script>
+<script src="nhi-corner-v2.js?v=20261117-ux2"></script>
 
 </body></html>
