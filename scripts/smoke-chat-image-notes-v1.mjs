@@ -91,7 +91,7 @@ try{
    'AI context was not merged into a single row: '+JSON.stringify(ctx));
  assert(await page.$eval('#aiSetup',e=>!!e.querySelector('#nhiReaderLanguage')),
    'Reader auto-detect language not moved into chat settings');
- assert(await page.$eval('#aiCfgBtn',e=>getComputedStyle(e).borderRadius).includes('7px'),
+ assert((await page.$eval('#aiCfgBtn',e=>getComputedStyle(e).borderRadius)).includes('7px'),
    'AI settings icon not square');
  assert(await page.$eval('.nhi-chat-voice-lang',e=>e.value)==='vi-VN','Expected Vietnamese microphone language');
  await page.$eval('#aiForm .nhi-chat-mic',e=>e.click());
