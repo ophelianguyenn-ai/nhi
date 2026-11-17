@@ -3,7 +3,7 @@ name: Prepare FPT Marketplace Ban Mai and Korean InJoon audio batches
 # Run manually in small groups after adding a valid Marketplace API key.
 # Default dry run NEVER calls the billable FPT endpoint.
 on:
-  # Explicit, one-time approved rollout on a commit named "banmai-rollout:".
+  # Explicit, one-time approved all-built-in-phrases rollout on a commit named "banmai-rollout:".
   # Generated audio commits do NOT trigger this workflow.
   push:
     branches: [main]
@@ -61,10 +61,10 @@ jobs:
       - name: Generate only the requested batch with protected Marketplace key
         env:
           FPT_MARKETPLACE_API_KEY: ${{ secrets.FPT_MARKETPLACE_API_KEY }}
-          CHOSEN_SCOPE: ${{ github.event_name == 'push' && 'daily' || inputs.scope || 'daily' }}
+          CHOSEN_SCOPE: ${{ github.event_name == 'push' && 'all' || inputs.scope || 'daily' }}
           CHOSEN_LANG: ${{ github.event_name == 'push' && 'vi' || inputs.language || 'both' }}
           CHOSEN_OFFSET: ${{ github.event_name == 'push' && '0' || inputs.offset || '0' }}
-          CHOSEN_LIMIT: ${{ github.event_name == 'push' && '149' || inputs.limit || '10' }}
+          CHOSEN_LIMIT: ${{ github.event_name == 'push' && '0' || inputs.limit || '10' }}
           DRY_RUN: ${{ github.event_name == 'push' && 'false' || inputs.dry_run }}
         shell: bash
         run: |
