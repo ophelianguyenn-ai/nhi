@@ -62,14 +62,13 @@ try{
  assert(await page.$eval('#planBox .pcard',e=>e.dataset.item)!==next,'Unexpected return to deleted card');
  // The end screen uses the SVG money cat, and displays the requested exact caption.
  const last=lesson.items[0][0];
- await page.evaluate(id=>{
+ await page.evaluate((id,lessonId)=>{
   localStorage.setItem('viko-plan-sess-v1',JSON.stringify({
-   kind:'free',title:'Kiểm tra mèo tung tiền',lesson:null,queue:[id],pos:1,
+   kind:'lesson',title:'Kiểm tra mèo tung tiền',lesson:lessonId,queue:[id],pos:1,
    picked:{},again:{},stats:{hard:0,mid:0},recorded:false,celebrated:false
   }));
- },last);
- await page.goto('http://127.0.0.1:8765/#',{waitUntil:'domcontentloaded'});
- await page.goto('http://127.0.0.1:8765/#/bai/'+lesson.id,{waitUntil:'domcontentloaded'});
+ },last,lesson.id);
+ await page.reload({waitUntil:'domcontentloaded'});
  await page.waitForFunction(()=>document.querySelector('#planBox .nhi-victory-cat')?.complete,{timeout:16000});
  const cat=await page.evaluate(()=>({
   src:document.querySelector('#planBox .nhi-victory-cat')?.getAttribute('src'),
