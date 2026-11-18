@@ -1,4 +1,4 @@
-/* Nhi 2.0 regression: real lesson data, pastel layout, 10-card SRS safety. */
+/* Nhi 2.0 regression: real lesson data, responsive layout and continuous SRS. */
 import fs from 'node:fs';
 import puppeteer from 'puppeteer-core';
 const lessons=JSON.parse(fs.readFileSync('lessons.json','utf8')).lessons;
@@ -121,32 +121,37 @@ try{
  await page.waitForSelector('#nhiLessonSettings .nhi-merge-source-row');
  await page.$eval('#nhiLessonSettings .nhi-merge-source-row button',e=>e.click());
  await page.waitForFunction((n)=>window.NHI_PLAN_V2.snapshot().lessons.length===n,{},beforeMerge.total);
- console.log('STEP chunk resume');
+ console.log('STEP uninterrupted lesson and manual resume');
  await page.evaluate(id=>{
   document.querySelector('#nhiV2TopNav [data-v2-nav="today"]').click();
   window.NHI_PLAN_V2.startLessonById(id);
  },lesson.id);
  await page.waitForSelector('#planBox .pcard');
- assert(await page.$eval('#nhiV2TopNav',el=>getComputedStyle(el).display==='none'),'Bottom navigation must hide while flipping cards');
+ assert(await page.$eval('#nhiV2TopNav',el=>getComputedStyle(el).display==='none'),
+  'Bottom navigation must hide while studying');
  const doneBefore=await page.evaluate(id=>(JSON.parse(localStorage.getItem('viko-plan-v1')||'{}').done?.[id]?.v||[]).length,lesson.id);
  const grading=await page.evaluate(()=>{
   let n=0;
-  for(let i=0;i<10;i++){
+  for(let i=0;i<11;i++){
    const b=document.querySelector('#planBox .prate .nhi-next-v3');
-   if(!b)break;b.click();n++;
+   if(!b)break;
+   b.click();n++;
   }
   return n;
  });
- assert(grading===10,'Unable to navigate ten cards: '+grading);
- await page.waitForSelector('#planBox .nhi-v2-mini-done',{timeout:10000});
+ assert(grading===11,'Unable to navigate eleven cards without stopping: '+grading);
+ assert(!!await page.$('#planBox .pcard')&&!await page.$('#planBox .nhi-v2-mini-done'),
+  'Learning session should not stop at ten cards');
  const state=await page.evaluate(id=>{
-  const s=JSON.parse(localStorage.getItem('viko-plan-sess-v1')||'{}'),p=JSON.parse(localStorage.getItem('viko-plan-v1')||'{}');
-  return {pos:s.pos,batch:s.batchStop,done:p.done?.[id]?.v?.length||0,savedBatches:(JSON.parse(localStorage.getItem('nhi-v2-batches-v1')||'[]')).length};
+  const s=JSON.parse(localStorage.getItem('viko-plan-sess-v1')||'{}');
+  const p=JSON.parse(localStorage.getItem('viko-plan-v1')||'{}');
+  return {pos:s.pos,done:p.done?.[id]?.v?.length||0,hasCheckpoint:!!document.querySelector('#planBox .nhi-v2-mini-done')};
  },lesson.id);
- assert(state.pos===10&&state.done===doneBefore&&state.savedBatches>=1,'Ten-card checkpoint incorrectly completed lesson: '+JSON.stringify(state));
- await page.$eval('#planBox .nhi-v2-mini-done button.ghost',e=>e.click());
+ assert(state.pos===11&&state.done===doneBefore&&!state.hasCheckpoint,
+  'Continuous session has an unwanted checkpoint: '+JSON.stringify(state));
+ await page.$eval('#topbar .nhi-study-topbar button',b=>b.click());
  const resumed=await page.evaluate(id=>JSON.parse(localStorage.getItem('viko-plan-v1')||'{}').resumeFull?.[id]?.pos,lesson.id);
- assert(resumed===10,'Checkpoint cannot resume after pause: '+resumed);
+ assert(resumed===11,'Manual pause did not save the continuous lesson position: '+resumed);
  console.log('STEP mobile nav');
  await page.setViewport({width:390,height:800});
  await page.$eval('#nhiV2TopNav [data-v2-nav="today"]',e=>e.click());
