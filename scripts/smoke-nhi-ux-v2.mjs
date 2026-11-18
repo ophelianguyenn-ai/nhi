@@ -41,8 +41,18 @@ try{
  assert(!!await page.$('#planBox .nhi-day-separated .nhi-lesson-white'),'Missing separate white lesson cards');
  const card=await page.$eval('#planBox .nhi-plan-current .nhi-lesson-white',e=>({
   height:e.getBoundingClientRect().height,
+  width:e.getBoundingClientRect().width,
+  layout:getComputedStyle(e).display,
+  gridRows:getComputedStyle(e).gridTemplateRows,
+  gridColumns:getComputedStyle(e).gridTemplateColumns,
   next:e.querySelector('.nhi-next-review')?.textContent||'',
-  hiddenDetails:!!e.querySelector('.pstatus,.nhi-compact-resume')
+  hiddenDetails:!!e.querySelector('.pstatus,.nhi-compact-resume'),
+  children:[...e.children].map(x=>({
+    cls:x.className?.baseVal||x.className,
+    height:Math.round(x.getBoundingClientRect().height),
+    width:Math.round(x.getBoundingClientRect().width),
+    grid:getComputedStyle(x).gridArea
+  }))
  }));
  assert(card.height<=200&&card.next.includes('Lượt')&&!card.hiddenDetails,'Calendar card should be compact with only next-review footer: '+JSON.stringify(card));
  assert(!await page.$('#planBox .nhi-day-combined'),'Calendar still has combined day cards');
