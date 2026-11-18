@@ -324,6 +324,7 @@ function recordLearning(){
   log.minutes[day]=(log.minutes[day]||0)+elapsed/1000;write(KEY,log);
   const percent=Math.min(100,(log.minutes[day]/600)*100);
   const b=$('.nhi-v2-goal-track span');if(b)b.style.width=percent+'%';
+  const count=$('.nhi-goal-count');if(count)count.textContent=Math.floor(log.minutes[day]/60)+'/10 phút';
  },10000);
 }
 function loadAnswer(){
