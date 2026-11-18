@@ -139,8 +139,8 @@ try{
   });
  }
  await check('Back navigation: Sổ tay → Hôm nay → Bìa',async()=>{
-  await page.$eval('#nhiV2TopNav [data-v2-nav="notebook"]',e=>e.click());
-  await page.waitForFunction(()=>location.hash==='#/so-tay');
+  await page.goto('http://127.0.0.1:8765/#/so-tay',{waitUntil:'domcontentloaded'});
+  await page.waitForSelector('#nhiV2Workspace [data-v2-grammar="0"]');
   await page.$eval('#nhiV2Back',e=>e.click());
   await page.waitForFunction(()=>location.hash==='#/hom-nay');
   await page.$eval('#nhiV2Back',e=>e.click());
@@ -161,6 +161,7 @@ try{
    document.querySelector('#nhiV2TopNav [data-v2-nav="calendar"]').click();
   });
   await page.$eval('#nhiV2TopNav [data-v2-nav="today"]',e=>e.click());
+  await page.waitForFunction(()=>/3\/10 phút/.test(document.querySelector('#planBox .nhi-hero-goals')?.textContent||''),{timeout:8000});
   const text=await page.$eval('#planBox .nhi-hero-goals',e=>e.textContent);
   assert(/3\/10 phút/.test(text)&&/1\/10 từ/.test(text),'Incorrect real study metrics: '+text);
   assert(/Hôm qua: 1 phút/.test(text),'Yesterday comparison absent: '+text);
