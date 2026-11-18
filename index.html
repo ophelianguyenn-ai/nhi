@@ -855,6 +855,102 @@ body.nhi-in-study #nhiV2TopNav,body.nhi-in-study .nhi-hide-while-flipping,body.n
   #planBox .nhi-lesson-white>.nhi-next-review{font-size:11px}
 }
 
+
+/* November 18: routes, responsive three-day calendar and accessible interaction polish. */
+#planBox .nhi-plan-current .days-grid,#planBox .nhi-plan-waiting .days-grid{
+  display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:13px!important;align-items:start;
+}
+#planBox .nhi-day-separated{margin:0!important;gap:7px!important;min-width:0}
+#planBox .nhi-day-separated .pday{gap:5px 8px;min-width:0;padding:10px!important}
+#planBox .nhi-day-separated .pday b{font-size:clamp(14px,1.4vw,18px)}
+#planBox .nhi-day-separated .pday span{font-size:11px}
+#planBox .nhi-day-separated .nhi-lesson-white{column-gap:7px!important;padding:9px!important;grid-template-columns:32px minmax(0,1fr) 65px!important}
+#planBox .nhi-lesson-white>.ring{width:32px!important;height:32px!important}
+#planBox .nhi-lesson-white>.ring b{font-size:9px!important}
+#planBox .nhi-lesson-white .nhi-compact-copy .ptitle{font-size:13px;line-height:1.3}
+#planBox .nhi-lesson-white .ttag{font-size:10px;padding:2px 6px}
+#planBox .nhi-lesson-white>.primary{min-width:62px!important;padding:0 8px!important}
+#planBox .nhi-lesson-white>.nhi-next-review{padding:5px 8px!important;min-height:22px!important;font-size:12px}
+#planBox .nhi-next-review .nhi-review-symbol{font-size:15px;display:inline-flex;gap:5px;align-items:center}
+#planBox .nhi-next-review time{font-weight:850;color:var(--ink);font-variant-numeric:tabular-nums}
+#planBox .nhi-due-name .ttags{gap:4px;margin-top:5px}
+#planBox .nhi-due-name .ttag{font-size:10px;padding:2px 7px}
+/* Navigation: strong visible active state and raised hover for touch-capable desktop. */
+#nhiV2TopNav [data-v2-nav],#nhiV2Back{
+  cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;justify-content:center;
+  border:1px solid transparent;background:transparent;color:var(--muted);
+  font:750 12px/1.3 var(--ui,system-ui);border-radius:13px;padding:9px 12px;min-height:37px;
+  transition:transform .18s ease,box-shadow .18s ease,background .18s ease,color .18s ease,border-color .18s ease;
+}
+#nhiV2TopNav [data-v2-nav][aria-current="page"]{
+  color:#16688b!important;background:#e0f4fb!important;border-color:#76c8e3!important;
+  box-shadow:0 0 0 3px #f5fcff,0 0 0 5px #80cbe8,0 3px 9px #2b769526!important;
+  transform:translateY(-1px);
+}
+#nhiV2TopNav [data-v2-nav]:hover,#nhiV2Back:hover{
+  transform:translateY(-4px)!important;box-shadow:0 6px 13px #2a61752a!important;
+  background:var(--accent-soft);border-color:var(--accent-d);color:var(--accent-t);
+}
+#nhiV2Back{margin-right:auto;gap:5px;white-space:nowrap;background:color-mix(in srgb,var(--accent-soft) 35%,var(--surface));border-color:var(--line)}
+#planBox .nhi-v2-priority,#planBox .nhi-lesson-white,#planBox .nhi-day-separated .pday,#planBox .nhi-due-row,#planBox .nhi-v2-priority button,#planBox .nhi-hero-start,
+#nhiV2Workspace .nhi-v2-surface,#nhiV2Workspace button{
+  transition:transform .19s ease,box-shadow .19s ease,filter .19s ease;
+}
+@media(hover:hover) and (prefers-reduced-motion:no-preference){
+  #planBox .nhi-v2-priority:hover,#planBox .nhi-lesson-white:hover,#planBox .nhi-day-separated .pday:hover,#planBox .nhi-due-row:hover,#nhiV2Workspace .nhi-v2-surface:hover{transform:translateY(-3px)!important;box-shadow:0 8px 17px #385a7024!important}
+  #planBox .nhi-v2-priority button:hover,#planBox .nhi-hero-start:hover,#nhiV2Workspace button:hover{transform:translateY(-3px)!important;filter:brightness(1.04)}
+}
+@media(max-width:1160px){#planBox .nhi-plan-current .days-grid,#planBox .nhi-plan-waiting .days-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important}}
+@media(max-width:730px){
+  #planBox .nhi-plan-current .days-grid,#planBox .nhi-plan-waiting .days-grid{grid-template-columns:minmax(0,1fr)!important}
+  #nhiV2Back{margin-right:5px;flex:0 0 auto}
+  #nhiV2TopNav [data-v2-nav]{flex:0 0 auto;min-width:90px;font-size:11px}
+}
+@media(prefers-reduced-motion:reduce){#nhiV2TopNav [data-v2-nav],#nhiV2Back{transition:none!important;transform:none!important}}
+
+
+/* Today: move Học ngay to the badge row and show two real-data goals below. */
+#planBox .nhi-calendar-hero.nhi-v2-hero{
+  grid-template-rows:auto auto auto!important;row-gap:13px!important;
+}
+#planBox .nhi-calendar-hero.nhi-v2-hero .nhi-hero-activity{
+  grid-column:1/-1;grid-row:2;display:flex;align-items:center;justify-content:space-between;
+  gap:10px;flex-wrap:wrap;min-width:0
+}
+#planBox .nhi-calendar-hero.nhi-v2-hero .nhi-hero-activity .tstats{
+  grid-column:auto;grid-row:auto;margin:0!important;display:flex;gap:7px;flex-wrap:wrap;
+}
+#planBox .nhi-calendar-hero.nhi-v2-hero .nhi-hero-activity .nhi-hero-start{
+  display:inline-flex!important;align-items:center;justify-content:center;min-height:44px!important;
+  min-width:145px!important;padding:0 18px!important;border-radius:14px!important;
+  font-weight:850;font-size:14px!important;white-space:nowrap;
+}
+#planBox .nhi-calendar-hero.nhi-v2-hero .nhi-hero-goals{
+  grid-column:1/-1;grid-row:3;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:12px;padding-top:13px;border-top:1px solid color-mix(in srgb,var(--accent-t) 17%,transparent);
+}
+#planBox .nhi-goal-mini{
+  background:color-mix(in srgb,var(--surface) 62%,transparent);border:1px solid color-mix(in srgb,var(--accent-t) 16%,transparent);
+  border-radius:14px;padding:11px 13px;display:grid;gap:9px;min-width:0;
+}
+#planBox .nhi-goal-mini .nhi-goal-head{display:flex;justify-content:space-between;align-items:center;gap:6px;flex-wrap:wrap;font-size:13px}
+#planBox .nhi-goal-mini .nhi-goal-head b{font-size:13px}
+#planBox .nhi-goal-mini .nhi-goal-count{font-size:13px;color:var(--accent-t)}
+#planBox .nhi-goal-mini .nhi-v2-goal-track{height:9px;border-radius:30px;overflow:hidden;background:#deedf3}
+#planBox .nhi-goal-mini .nhi-v2-goal-track>span{display:block;height:100%;width:0;border-radius:30px;background:#1b7c9e}
+#planBox .nhi-goal-mini.nhi-goal-words .nhi-v2-goal-track>span{background:#3e9a7f}
+#planBox .nhi-goal-mini .nhi-goal-compare{color:var(--muted);font-size:11px}
+#planBox .nhi-goal-word-list{grid-column:1/-1;margin:0;padding:2px 6px;font-size:12px}
+#planBox .nhi-goal-word-list summary{cursor:pointer;font-weight:750}
+#planBox .nhi-goal-word-list ul{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:4px 12px;margin:8px 0 0;padding-left:22px;max-height:140px;overflow-y:auto}
+@media(max-width:570px){
+  #planBox .nhi-calendar-hero.nhi-v2-hero .nhi-hero-activity{gap:10px;align-items:stretch}
+  #planBox .nhi-calendar-hero.nhi-v2-hero .nhi-hero-activity .nhi-hero-start{flex:1 1 100%;width:100%}
+  #planBox .nhi-calendar-hero.nhi-v2-hero .nhi-hero-goals{grid-template-columns:minmax(0,1fr);gap:9px}
+  #planBox .nhi-goal-word-list ul{grid-template-columns:1fr}
+}
+
+#nhiV2Back[hidden]{display:none!important}
 </style>
 </head>
 <body>
@@ -1204,10 +1300,10 @@ body.nhi-in-study #nhiV2TopNav,body.nhi-in-study .nhi-hide-while-flipping,body.n
     <h1>Nhi’s<em>Learning Corner</em></h1>
     <p class="lead"><span lang="ko">오늘도 화이팅!</span></p>
     <!-- Removed permanently: cover lesson/card counters -->
-    <button type="button" class="primary white" id="coverGo">Vào học thôi!</button>
+    <button type="button" class="primary white" id="coverGo">Vào học ngay</button>
   </div>
 </div>
-<script>(function () { try { var forceCover = /(?:[?&])cover=1(?:&|$)/.test(location.search); if (!forceCover && (/^#\/bai\//.test(location.hash) || /^#lk=/.test(location.hash) || sessionStorage.getItem('nlc-cover-seen') || (localStorage.getItem('viko-plan-sess-v1') || '').length > 2)) document.getElementById('cover').hidden = true; else document.body.classList.add('cover-on'); } catch (e) { } })();</script>
+<script>(function () { try { var forceCover = /(?:[?&])cover=1(?:&|$)/.test(location.search); if (!forceCover && ((/^#\/(?:bai\/|hom-nay|lich-hoc|luyen-tap|so-tay|tien-do|tim-kiem|hoi-ai|den-han|cai-dat|lich-su)/.test(location.hash)) || /^#lk=/.test(location.hash))) document.getElementById('cover').hidden = true; else document.body.classList.add('cover-on'); } catch (e) { } })();</script>
 <canvas id="confetti" hidden></canvas>
 
 <script>
@@ -3492,8 +3588,15 @@ body.nhi-in-study #nhiV2TopNav,body.nhi-in-study .nhi-hide-while-flipping,body.n
 
     /* ---- routing: #/bai/<id> opens a lesson as its own page ---- */
     function route() {
-      var m = /^#\/bai\/([\w-]+)$/.exec(location.hash || '');
+      var hash=location.hash||'',m=/^#\/bai\/([\w-]+)$/.exec(hash);
       page = m && BY_LESSON[m[1]] ? (mergeDestination(m[1]) || m[1]) : null;
+      if(!m){
+        if(hash==='#/hom-nay')view='home';
+        else if(hash==='#/den-han')view='overdue';
+        else if(hash==='#/lich-hoc/chu-de')view='topics';
+        else if(hash==='#/lich-hoc/thang')view='months';
+        else if(hash==='#/lich-hoc')view='days';
+      }
       if (m && page && page !== m[1]) history.replaceState(null, '', location.pathname + location.search + '#/bai/' + page);
       document.body.classList.toggle('plan-page', !!page);
       // A saved lesson deep link must always have the visible "plan" section.
@@ -3509,7 +3612,12 @@ body.nhi-in-study #nhiV2TopNav,body.nhi-in-study .nhi-hide-while-flipping,body.n
     }
     window.addEventListener('hashchange', function () { if (sess && sess.L && sess.L.id !== (location.hash.split('/')[2] || '')) leave(); route(); window.scrollTo(0, 0); });
     function openLesson(id) { location.hash = '#/bai/' + id; }
-    function home() { if (sess) leave(); if (location.hash) { history.replaceState(null, '', location.pathname + location.search); } page = null; document.body.classList.remove('plan-page'); if (state.mode === 'plan') render(); }
+    function home(keepRoute) { if (sess) leave(); if (location.hash && !keepRoute) { history.replaceState(null, '', location.pathname + location.search); } page = null; document.body.classList.remove('plan-page'); if (state.mode === 'plan') render(); }
+    function navigatePlanView(name) {
+      var href={home:'#/hom-nay',days:'#/lich-hoc',topics:'#/lich-hoc/chu-de',months:'#/lich-hoc/thang',overdue:'#/den-han'}[name];
+      if(!href)return;view=name;
+      if(location.hash===href)home(true);else location.hash=href;
+    }
 
     /* ---- views ---- */
     function render() {
@@ -3621,22 +3729,29 @@ body.nhi-in-study #nhiV2TopNav,body.nhi-in-study .nhi-hide-while-flipping,body.n
       var rs=(resume[L.id]||[]).filter(alive),saved=resumeFull[L.id];
       var continuing=!!(saved&&saved.pos>0)||!!rs.length;
       p.appendChild(btn('primary',continuing?'Tiếp tục':'Mở bài',function(){openLesson(L.id);}));
-      var footer=el('div','nhi-next-review');
-      var completed=doneSteps(L);
+      var footer=el('div','nhi-next-review'),completed=doneSteps(L);
+      footer.appendChild(el('span','nhi-review-symbol','🗓️'));
       if(completed>=OFFSETS.length){
-        footer.textContent='✓ Đã hoàn thành đủ 5 lượt học và ôn';
+        footer.appendChild(el('span','nhi-review-symbol','✅'));
+        footer.setAttribute('aria-label','Đã hoàn thành cả năm lượt học và ôn');
+        footer.title='Đã hoàn thành cả 5 lượt học và ôn';
         footer.classList.add('completed');
-      }else if(!completed){
-        // Reviews are actually anchored to the first *completed* learning day.
-        // Before that first session, show a clearly qualified estimated round 2 date.
-        var projectedBase=L.plan>today()?L.plan:today();
-        footer.textContent='🗓 Ngày ôn tiếp theo · Lượt 2/5 (dự kiến): '+vn(addDays(projectedBase,OFFSETS[1]),true);
-        footer.title='Ngày ôn dự kiến. Lịch sẽ tự tính lại theo ngày hoàn thành lượt học đầu tiên.';
       }else{
-        var next=schedule(L)[completed];
-        footer.textContent='🗓 Ngày ôn tiếp theo · Lượt '+(completed+1)+'/5: '+vn(next.due,true);
-        footer.title=STEP[next.step]+' · '+vn(next.due,true);
-        if(next.st==='late')footer.classList.add('late');
+        var nextDate,round=completed+1,isProjected=completed===0;
+        if(isProjected){
+          // No invented completed first round: show an explicitly *estimated* second date.
+          var projectedBase=L.plan>today()?L.plan:today();
+          nextDate=addDays(projectedBase,OFFSETS[1]);
+          round=2;
+        }else nextDate=schedule(L)[completed].due;
+        var symbols=['①','②','③','④','⑤'];
+        footer.appendChild(el('span','nhi-review-symbol',symbols[round-1]));
+        if(isProjected)footer.appendChild(el('span','nhi-review-symbol','⏳'));
+        var time=el('time',null,vn(nextDate,true));time.dateTime=nextDate;footer.appendChild(time);
+        var description='Lượt '+round+'/5'+(isProjected?' dự kiến':'')+' · ngày ôn '+vn(nextDate,true);
+        footer.setAttribute('aria-label',description);
+        footer.title=description;
+        if(!isProjected&&nextDate<today())footer.classList.add('late');
       }
       p.appendChild(footer);
       return p;
@@ -3659,6 +3774,19 @@ body.nhi-in-study #nhiV2TopNav,body.nhi-in-study .nhi-hide-while-flipping,body.n
       start(restored && restored.kind ? restored.kind : (!cur || cur.st === 'next' ? 'free' : 'lesson'),
         q, titleMain(L) + (cur ? ' · ' + STEP[cur.step] : ''), L, restored);
     }
+    function dailyStudyMetrics(){
+      var T=today(),Y=addDays(T,-1),m={minutes:{},ratings:[]};
+      try{var stored=JSON.parse(lsGet('nhi-v2-learning-metrics-v1')||'{}');if(stored&&typeof stored==='object')m=stored;}catch(e){}
+      var mins=m.minutes||{},ratings=Array.isArray(m.ratings)?m.ratings:[];
+      var todayIds={},yesterdayIds={};
+      ratings.forEach(function(r){
+        if(!r||!r.id||!ITEMS[r.id]||ITEMS[r.id].type!=='w'||!Number.isFinite(Number(r.at)))return;
+        var d=new Date(Number(r.at)),when=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+        if(when===T)todayIds[r.id]=true;else if(when===Y)yesterdayIds[r.id]=true;
+      });
+      return {todaySeconds:Math.max(0,Number(mins[T])||0),yesterdaySeconds:Math.max(0,Number(mins[Y])||0),
+        wordIds:Object.keys(todayIds),yesterdayWords:Object.keys(yesterdayIds).length};
+    }
     function todayCard() {
       var s=summary(),box=el('section','thero nhi-calendar-hero'),txt=el('div'),d=new Date();
       txt.appendChild(el('p','eyebrow',WEEKDAY[d.getDay()]+' · '+vn(today(),true)));
@@ -3666,27 +3794,38 @@ body.nhi-in-study #nhiV2TopNav,body.nhi-in-study .nhi-hide-while-flipping,body.n
       txt.appendChild(el('h2',null,count?'Hôm nay cần học':'Hôm nay xong hết rồi!'));
       box.appendChild(txt);
       var mascot=el('div','nhi-calendar-girl');mascot.innerHTML=girl(count?'smile':'grin',true);box.appendChild(mascot);
-      var stats=el('div','tstats');
+      // Badges and the only study CTA share the same row.
+      var activity=el('div','nhi-hero-activity'),stats=el('div','tstats');
       function stat(num,label,cls){var x=el('span','tstat'+(cls?' '+cls:''));x.appendChild(el('b',null,num));x.appendChild(document.createTextNode(label));stats.appendChild(x);}
-      stat(s.due.length,'bài đến hạn');
-      stat(s.late.length,'bài quá hạn',s.late.length?'late':'');
-      box.appendChild(stats);
-      // Former white goal tile and calendar tile are now one integrated hero footer.
-      var lower=el('div','nhi-hero-lower'),goal=el('div','nhi-goal-inline');
-      var goalHead=el('div','nhi-goal-head');
-      goalHead.appendChild(el('b',null,'🎯 Mục tiêu học 10 phút'));
-      var seconds=0;
-      try{var metrics=JSON.parse(lsGet('nhi-v2-learning-metrics-v1')||'{}');seconds=Number((metrics.minutes||{})[today()])||0;}catch(e){}
-      goalHead.appendChild(el('span','nhi-goal-count',Math.floor(seconds/60)+'/10 phút'));
-      goal.appendChild(goalHead);
-      var track=el('div','nhi-v2-goal-track'),fill=el('span');
-      fill.style.width=Math.min(100,Math.max(0,seconds/600*100))+'%';
-      track.appendChild(fill);goal.appendChild(track);
-      goal.appendChild(el('small',null,'Tự ghi nhận thời gian khi đang học bài'));
-      lower.appendChild(goal);
-      var first=s.late[0]||s.due[0];
-      if(first)lower.appendChild(lbtn('primary white big nhi-v2-start nhi-hero-start','bolt','Học ngay',function(){startLesson(first);}));
-      box.appendChild(lower);
+      stat(s.due.length,'bài đến hạn');stat(s.late.length,'bài quá hạn',s.late.length?'late':'');
+      activity.appendChild(stats);
+      var first=s.late[0]||s.due[0],start=btn('primary nhi-hero-start nhi-v2-start','▶ Học ngay',function(){if(first)startLesson(first);});
+      if(!first){start.disabled=true;start.title='Không có bài đang đến hạn';}
+      activity.appendChild(start);box.appendChild(activity);
+      var metrics=dailyStudyMetrics(),goals=el('div','nhi-hero-goals');
+      function goal(icon,label,unit,actual,target,prev,cls){
+        var tile=el('div','nhi-goal-mini '+cls),head=el('div','nhi-goal-head');
+        head.appendChild(el('b',null,icon+' '+label));
+        head.appendChild(el('strong','nhi-goal-count',actual+'/'+target+' '+unit));
+        tile.appendChild(head);
+        var bar=el('div','nhi-v2-goal-track'),fill=el('span');
+        fill.style.width=Math.min(100,actual/target*100)+'%';bar.appendChild(fill);tile.appendChild(bar);
+        var diff=actual-prev,comparison=(diff>0?'↗ +':diff<0?'↘ ':'↔ ')+diff;
+        tile.appendChild(el('small','nhi-goal-compare','Hôm qua: '+prev+' '+unit+' · '+comparison+' '+unit));
+        return tile;
+      }
+      goals.appendChild(goal('⏱️','Thời gian học','phút',Math.floor(metrics.todaySeconds/60),10,
+        Math.floor(metrics.yesterdaySeconds/60),'nhi-goal-time'));
+      goals.appendChild(goal('📚','Từ vựng đã ôn','từ',metrics.wordIds.length,10,metrics.yesterdayWords,'nhi-goal-words'));
+      if(metrics.wordIds.length){
+        var details=el('details','nhi-goal-word-list');
+        details.appendChild(el('summary',null,'📖 Từ đã ôn hôm nay ('+metrics.wordIds.length+')'));
+        var words=el('ul');
+        metrics.wordIds.slice(0,20).forEach(function(id){var it=ITEMS[id];if(it)words.appendChild(el('li',null,it.vi+' · '+it.ko));});
+        if(metrics.wordIds.length>20)words.appendChild(el('li',null,'… và '+(metrics.wordIds.length-20)+' từ khác'));
+        details.appendChild(words);goals.appendChild(details);
+      }
+      box.appendChild(goals);
       return box;
     }
 
@@ -3738,10 +3877,10 @@ body.nhi-in-study #nhiV2TopNav,body.nhi-in-study .nhi-hide-while-flipping,body.n
         row.appendChild(copy);row.appendChild(btn('primary',r&&r.pos>0?'Tiếp tục':'Học',function(){startLesson(L);}));
         group.appendChild(row);
       });
-      group.appendChild(btn('ghost','Xem tất cả bài đến hạn ('+all.length+')',function(){view='overdue';render();}));v.appendChild(group);
+      group.appendChild(btn('ghost','Xem tất cả bài đến hạn ('+all.length+')',function(){navigatePlanView('overdue');}));v.appendChild(group);
       var browse=el('details','nhi-v2-browse');browse.appendChild(el('summary',null,'📚 Duyệt học phần và chủ đề'));
       var links=el('div','nhi-v2-browse-links');
-      [['days','Lịch học'],['topics','Chủ đề'],['months','Tháng']].forEach(function(x){links.appendChild(btn('ghost',x[1],function(){view=x[0];render();}));});
+      [['days','Lịch học'],['topics','Chủ đề'],['months','Tháng']].forEach(function(x){links.appendChild(btn('ghost',x[1],function(){navigatePlanView(x[0]);}));});
       browse.appendChild(links);v.appendChild(browse);
     }
     function renderDueList(v) {
@@ -3749,7 +3888,7 @@ body.nhi-in-study #nhiV2TopNav,body.nhi-in-study .nhi-hide-while-flipping,body.n
       var wrap = el('section', 'nhi-due-list');
       var header = el('div', 'nhi-due-list-head');
       header.appendChild(el('h2', null, 'Bài đến hạn (' + arr.length + ')'));
-      header.appendChild(btn('ghost', '← Hôm nay', function () { view='home'; render(); }));
+      header.appendChild(btn('ghost', '← Hôm nay', function () { navigatePlanView('home'); }));
       wrap.appendChild(header);
       if (!arr.length) wrap.appendChild(el('p', 'listinfo', 'Hiện không có bài đến hạn.'));
       arr.sort(function (a, b) { return current(a).due.localeCompare(current(b).due); });
@@ -3760,6 +3899,7 @@ body.nhi-in-study #nhiV2TopNav,body.nhi-in-study .nhi-hide-while-flipping,body.n
         var name = el('div', 'nhi-due-name');
         name.appendChild(el('b', null, vn(L.date, true) + ' · ' + titleMain(L)));
         name.appendChild(el('small', null, d > 0 ? 'Quá hạn ' + d + ' ngày' : 'Đến hạn hôm nay'));
+        name.appendChild(topicTags(L,3));
         line.appendChild(name);
         line.appendChild(el('span', 'nhi-due-count', c[0] + ' từ · ' + c[1] + ' câu'));
         wrap.appendChild(line);
@@ -3774,7 +3914,7 @@ body.nhi-in-study #nhiV2TopNav,body.nhi-in-study .nhi-hide-while-flipping,body.n
       headText.appendChild(el('h2',null,view==='days'?'🗓 Lịch học':view==='topics'?'📚 Chủ đề':'📅 Theo tháng'));
       headText.appendChild(el('p',null,'Bài học được sắp xếp theo ngày và lịch ôn.'));
       head.appendChild(headText);
-      head.appendChild(btn('ghost','← Hôm nay',function(){view='home';render();}));
+      head.appendChild(btn('ghost','← Hôm nay',function(){navigatePlanView('home');}));
       v.appendChild(head);
       var tools = el('div', 'ptools'), sb = el('div', 'psearch');
       sb.innerHTML = ic('search');
@@ -3792,7 +3932,7 @@ body.nhi-in-study #nhiV2TopNav,body.nhi-in-study .nhi-hide-while-flipping,body.n
       inp.addEventListener('input', function () { query = inp.value; clr.hidden = !query; paintResults(res, main); });
       v.appendChild(res);
       var tabs = el('div', 'tabs ptabs');
-      [['days', 'Theo ngày'], ['topics', 'Chủ đề'], ['months', 'Tháng']].forEach(function (x) { var b = btn('', x[1], function () { view = x[0]; render(); }); b.setAttribute('aria-selected', String(view === x[0])); tabs.appendChild(b); });
+      [['days', 'Theo ngày'], ['topics', 'Chủ đề'], ['months', 'Tháng']].forEach(function (x) { var b = btn('', x[1], function () { navigatePlanView(x[0]); }); b.setAttribute('aria-selected', String(view === x[0])); tabs.appendChild(b); });
       main.appendChild(tabs);
       if (view === 'days') { main.appendChild(legend()); renderDays(main); } else if (view === 'topics') renderTopics(main); else renderMonths(main);
       if (fresh) main.classList.add('stagger');
@@ -3917,7 +4057,7 @@ body.nhi-in-study #nhiV2TopNav,body.nhi-in-study .nhi-hide-while-flipping,body.n
       var wrap = el('div', 'ppage' + (fresh ? ' stagger' : '')); wrap.style.setProperty('--day', dayColor(L.date));
       if (sess && sess.L && sess.L.id === L.id) { renderSession(wrap, fresh); v.appendChild(wrap); return; }
       var hero = el('div', 'phero'), top = el('div', 'pnavtop');
-      var back = el('a', 'pback'); back.href = '#'; back.innerHTML = ic('left'); back.appendChild(document.createTextNode('Lịch học')); top.appendChild(back);
+      var back = el('a', 'pback'); back.href = '#/lich-hoc'; back.innerHTML = ic('left'); back.appendChild(document.createTextNode('Lịch học')); top.appendChild(back);
       top.appendChild(el('span', 'pdate', WEEKDAY[parse(L.date).getDay()] + ' · ' + vn(L.date, true)));
       hero.appendChild(top);
       var ht = el('div'), c = liveCount(L.ids);
@@ -4568,7 +4708,7 @@ body.nhi-in-study #nhiV2TopNav,body.nhi-in-study .nhi-hide-while-flipping,body.n
         active:!!sess,session:sess?{lesson:sess.L&&sess.L.id,kind:sess.kind,pos:sess.pos,total:sess.queue.length}:null,
         syncEnabled:!!SYNC.cfg()};
     }
-    function setViewV2(name){if(['home','days','topics','months'].indexOf(name)<0)return;view=name;home();}
+    function setViewV2(name){if(['home','days','topics','months','overdue'].indexOf(name)<0)return;view=name;home(true);}
     return {
       render: render, merge: merge, extras: applyExtras, follow: follow, active: function () { return !!sess; }, load: load, leave: function () { if (!page) leave(); }, route: route,
       home: home,setView:setViewV2,snapshot:snapshotV2,startLessonById:function(id){var L=BY_LESSON[id];if(L)startLesson(L);},startPractice:function(ids,title){start('free',ids,title||'Luyện tập');},openDailyCreator: openDailyCreator, summary: summary, onData: function (fn) { dataCb = fn; },
@@ -5010,15 +5150,16 @@ body.nhi-in-study #nhiV2TopNav,body.nhi-in-study .nhi-hide-while-flipping,body.n
       $('menuList').addEventListener('click', function (e) {
         var b = e.target.closest('[data-mode]'); if (!b) return;
         menu(false);
-        if (b.dataset.mode === 'plan') PLAN.home();
+        if (b.dataset.mode === 'plan') PLAN.home(/^#\/(?:hom-nay|lich-hoc|den-han)/.test(location.hash));
         else if (location.hash) history.replaceState(null, '', location.pathname + location.search);
         state.mode = b.dataset.mode; state.flipped = false; saveUi(); document.body.classList.remove('plan-page'); renderMode(); ACTIVE_CARD.cards(); window.scrollTo(0, 0);
       });
       $('menuDaily').addEventListener('click', function () { menu(false); PLAN.openDailyCreator(); });
-      $('menuCover').addEventListener('click', function () { menu(false); cover(true); });
-      $('brandFaceBtn').addEventListener('click', function () { menu(false); cover(true); });
-      $('brandBtn').addEventListener('click', function () { menu(false); PLAN.home(); if(state.mode !== 'plan'){state.mode='plan';saveUi();renderMode();} window.scrollTo({top:0,behavior:'smooth'}); });
-      $('coverGo').addEventListener('click', function () { haptic(14); cover(false); });
+      $('menuCover').addEventListener('click', function () { menu(false); location.hash='#/bia'; cover(true); });
+      $('brandFaceBtn').addEventListener('click', function () { menu(false); location.hash='#/bia'; cover(true); });
+      $('brandBtn').addEventListener('click', function () { menu(false); location.hash='#/hom-nay'; window.scrollTo({top:0,behavior:'smooth'}); });
+      window.NHI_COVER={open:function(){cover(true);},close:function(){cover(false);}};
+      $('coverGo').addEventListener('click', function () { haptic(14); cover(false); location.hash='#/hom-nay'; });
       $('setBtn').addEventListener('click', function () { menu(false); sheet(true); });
       $('setSheet').addEventListener('click', function (e) {
         if (e.target.closest('[data-close]')) { sheet(false); return; }

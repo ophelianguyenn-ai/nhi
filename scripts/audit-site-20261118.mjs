@@ -28,6 +28,13 @@ try{
  await page.setViewport({width:1360,height:880});
  await page.goto('http://127.0.0.1:8765/#',{waitUntil:'domcontentloaded'});
  await page.waitForFunction(()=>window.NHI_PLAN_V2?.snapshot?.().lessons.length>10,{timeout:24000});
+ await check('Cover first, entrance to Today',async()=>{
+  assert(await page.$eval('#cover',e=>!e.hidden),'Root URL must open the cover');
+  await page.$eval('#coverGo',e=>e.click());
+  await page.waitForFunction(()=>location.hash==='#/hom-nay');
+  assert(await page.$eval('#nhiV2TopNav [data-v2-nav="today"]',e=>e.getAttribute('aria-current')==='page'),'Today not active');
+  return 'Cover → #/hom-nay';
+ });
  await page.$eval('#nhiV2TopNav [data-v2-nav="today"]',e=>e.click());
  await page.waitForSelector('#planBox .nhi-v2-priorities');
  await check('Integrated Today: one goal and one Học ngay button',async()=>{
@@ -36,10 +43,11 @@ try{
    if(!hero)throw Error('Today hero missing');
    if(document.querySelector('#planBox .nhi-today-secondary, #planBox .nhi-goal-tile, #planBox .nhi-calendar-shortcut'))
     throw Error('Old standalone white goal/calendar tiles remain');
-   const goal=hero.querySelector('.nhi-goal-inline .nhi-v2-goal-track span');
-   const count=hero.querySelector('.nhi-goal-count');
+   const goal=hero.querySelector('.nhi-goal-time .nhi-v2-goal-track span');
+   const count=hero.querySelector('.nhi-goal-time .nhi-goal-count');
+   const words=hero.querySelector('.nhi-goal-words .nhi-goal-count');
    const buttons=[...hero.querySelectorAll('button')].filter(x=>x.textContent.includes('Học ngay'));
-   if(!goal||!count)throw Error('10-minute progress is not embedded in the blue hero');
+   if(!goal||!count||!words)throw Error('Minute and vocabulary goals are not both in the blue hero');
    if(buttons.length!==1)throw Error('Expected exactly one Học ngay CTA in the hero');
    if(!/Học ngay/.test(hero.textContent))throw Error('Missing study action');
    if(/Xem ngày học và lịch ôn|Ôn lại các thẻ khó/.test(hero.textContent))throw Error('Removed actions still in hero');
@@ -72,13 +80,25 @@ try{
    if(cards.some(c=>/Bài ngày\s+\d{1,2}\.\d{1,2}/.test(c.textContent)))throw Error('Date text repeated in white card');
    if(cards.some(c=>c.querySelectorAll('.nhi-next-review').length!==1))throw Error('Expected one next-review date line per card');
    if(cards.some(c=>c.querySelector('.pstatus,.nhi-compact-resume')))throw Error('Status/unfinished labels make the compact card too tall');
-   if(cards.some(c=>!/Lượt [2-5]\/5|Đã hoàn thành đủ 5 lượt/.test(c.querySelector('.nhi-next-review')?.textContent||'')))
-     throw Error('Missing next review round/date');
+   if(cards.some(c=>!c.querySelector('.nhi-next-review[aria-label]')))throw Error('Missing accessible review round');
+   if(cards.some(c=>!c.querySelector('.nhi-next-review time')&&!c.querySelector('.nhi-next-review.completed')))
+     throw Error('Missing next-review date');
+   if(cards.some(c=>/Ngày ôn tiếp theo|Lượt \d\/5/.test(c.querySelector('.nhi-next-review')?.textContent||'')))
+     throw Error('Review footer should use only icons and date');
    const heights=cards.slice(0,8).map(c=>Math.round(c.getBoundingClientRect().height));
    if(Math.max(...heights)>200)throw Error('White lesson card is still too tall: '+heights.join(','));
    const box=getComputedStyle(cards[0]);
    return groups.length+' day groups / '+cards.length+' compact cards / heights '+heights.join(',')+' / '+box.backgroundColor;
   });
+ });
+ await check('Desktop calendar shows three day columns',async()=>{
+  const result=await page.evaluate(()=>{
+   const grid=document.querySelector('#planBox .nhi-plan-current .days-grid');
+   const cols=getComputedStyle(grid).gridTemplateColumns.trim().split(/\s+/);
+   return {columns:cols.length,width:grid.getBoundingClientRect().width};
+  });
+  assert(result.columns===3,'Expected 3 day columns: '+JSON.stringify(result));
+  return JSON.stringify(result);
  });
  await check('Lesson details list five dates',async()=>{
   await page.$eval('#planBox .nhi-plan-current .nhi-lesson-white button.primary',e=>e.click());
@@ -108,9 +128,46 @@ try{
   await check('Navigation '+id,async()=>{
    await page.$eval('#nhiV2TopNav [data-v2-nav="'+id+'"]',x=>x.click());
    await page.waitForSelector(selector,{timeout:7000});
-   return 'rendered '+id;
+   const route=await page.evaluate(id=>({hash:location.hash,active:document.querySelector('#nhiV2TopNav [data-v2-nav="'+id+'"]')?.getAttribute('aria-current')}),id);
+   const expected={notebook:'#/so-tay',progress:'#/tien-do',search:'#/tim-kiem',practice:'#/luyen-tap'}[id];
+   assert(route.hash===expected&&route.active==='page','Route or active nav incorrect: '+JSON.stringify(route));
+   await page.reload({waitUntil:'domcontentloaded'});
+   await page.waitForSelector(selector,{timeout:17000});
+   const active=await page.$eval('#nhiV2TopNav [data-v2-nav="'+id+'"]',e=>e.getAttribute('aria-current'));
+   assert(active==='page','Refresh lost active navigation on '+id);
+   return route.hash+' reload persisted';
   });
  }
+ await check('Back navigation: Sổ tay → Hôm nay → Bìa',async()=>{
+  await page.goto('http://127.0.0.1:8765/#/so-tay',{waitUntil:'domcontentloaded'});
+  await page.waitForSelector('#nhiV2Workspace [data-v2-grammar="0"]');
+  await page.$eval('#nhiV2Back',e=>e.click());
+  await page.waitForFunction(()=>location.hash==='#/hom-nay');
+  await page.$eval('#nhiV2Back',e=>e.click());
+  await page.waitForFunction(()=>location.hash==='#/bia');
+  assert(await page.$eval('#cover',e=>!e.hidden),'Back from Today should open cover');
+  await page.$eval('#coverGo',e=>e.click());
+  await page.waitForFunction(()=>location.hash==='#/hom-nay');
+  return 'navigation from notebook to cover works';
+ });
+ await check('Minutes, vocabulary and yesterday in Today goal',async()=>{
+  await page.evaluate(()=>{
+   const today=new Date(),y=new Date(today);y.setDate(today.getDate()-1);
+   const stamp=d=>d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+   const id=window.NHI_PLAN_V2.snapshot().items.find(x=>x.type==='w')?.id;
+   localStorage.setItem('nhi-v2-learning-metrics-v1',JSON.stringify({
+    minutes:{[stamp(today)]:180,[stamp(y)]:60},ratings:[{id,grade:'hard',at:Date.now()}]
+   }));
+   document.querySelector('#nhiV2TopNav [data-v2-nav="calendar"]').click();
+  });
+  await page.$eval('#nhiV2TopNav [data-v2-nav="today"]',e=>e.click());
+  await page.waitForFunction(()=>/3\/10 phút/.test(document.querySelector('#planBox .nhi-hero-goals')?.textContent||''),{timeout:8000});
+  const text=await page.$eval('#planBox .nhi-hero-goals',e=>e.textContent);
+  assert(/3\/10 phút/.test(text)&&/1\/10 từ/.test(text),'Incorrect real study metrics: '+text);
+  assert(/Hôm qua: 1 phút/.test(text),'Yesterday comparison absent: '+text);
+  assert(!!await page.$('#planBox .nhi-goal-word-list li'),'Vocabulary list absent');
+  return text.slice(0,160);
+ });
  // Test the actual requested screens at narrow widths, not only the flashcard screen.
  for(const section of ['today','calendar']){
   for(const width of [320,390,768,1360]){

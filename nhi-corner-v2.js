@@ -34,24 +34,69 @@ function date(s){if(!s)return '—';const p=s.split('-');return p[2]+'/'+p[1]+'/
 function status(s){let x=$('#nhiV2Toast');if(!x){x=document.createElement('div');x.id='nhiV2Toast';x.setAttribute('role','status');document.body.appendChild(x);}x.textContent=s;x.hidden=false;clearTimeout(status.t);status.t=setTimeout(()=>x.hidden=true,3400);}
 function button(action,text,cls='ghost'){return '<button type="button" class="'+cls+'" data-v2-act="'+esc(action)+'">'+esc(text)+'</button>'}
 function pageTitle(t,sub=''){return '<div class="nhi-v2-title"><h2>'+esc(t)+'</h2>'+ (sub?'<p>'+esc(sub)+'</p>':'')+'</div>'}
+const ROUTES={today:'#/hom-nay',calendar:'#/lich-hoc',practice:'#/luyen-tap',notebook:'#/so-tay',
+ progress:'#/tien-do',search:'#/tim-kiem',chat:'#/hoi-ai',settings:'#/cai-dat',
+ threads:'#/lich-su',speak:'#/luyen-noi',listen:'#/luyen-nghe',
+ quiz:'#/luyen-tap/trac-nghiem',write:'#/luyen-tap/viet',errors:'#/so-tay/loi'};
+const previousRoutes=[];
+function setActiveNav(name){
+ const active=name==='quiz'||name==='write'||name==='speak'||name==='listen'?'practice':name==='errors'?'notebook':name;
+ $$('#nhiV2TopNav [data-v2-nav]').forEach(b=>{
+  if(active&&b.dataset.v2Nav===active)b.setAttribute('aria-current','page');else b.removeAttribute('aria-current');
+ });
+ const back=$('#nhiV2Back');if(back)back.hidden=!active&&!/^#\/bai\//.test(location.hash);
+}
 function setPanel(next){
  panel=next||'';document.body.classList.toggle('nhi-v2-panel-active',!!panel);
  const wrap=$('#nhiV2Workspace');if(!wrap)return;
- wrap.hidden=!panel;$$('.nhi-v2-top [data-v2-nav]').forEach(b=>b.setAttribute('aria-current',b.dataset.v2Nav===panel?'page':'false'));
+ wrap.hidden=!panel;
  if(panel){renderPanel();window.scrollTo({top:0,behavior:'smooth'});}
 }
-function route(next){
- if(next==='chat'){setPanel('');window.NLC_AI?.open();return}
- if(next==='today'||next==='calendar'){
-  setPanel('');const btn=$('#tab-plan');if(btn)btn.click();
-  P()?.setView?.(next==='today'?'home':'days');
-  return;
+function showRoute(name){
+ if(name==='chat'){setPanel('');window.NLC_AI?.open();setActiveNav('chat');return;}
+ if(name==='today'||name==='calendar'){
+  setPanel('');
+  const plan=$('#tab-plan');if(plan&&$('#view-plan')?.hidden)plan.click();
+  const hash=location.hash;
+  const view=name==='today'?'home':hash==='#/lich-hoc/chu-de'?'topics':hash==='#/lich-hoc/thang'?'months':'days';
+  P()?.setView?.(view);setActiveNav(name);return;
  }
- if(['notebook','errors','progress','search','practice','speak','settings','listen','threads'].includes(next)){
-  setPanel(next);return;
+ if(['notebook','errors','progress','search','practice','speak','settings','listen','threads','quiz','write'].includes(name)){
+  setPanel(name);setActiveNav(name);return;
  }
- const button=$('#tab-'+next);if(button){setPanel('');button.click();}
+ const legacy=$('#tab-'+name);if(legacy){setPanel('');legacy.click();}
+ setActiveNav(name);
 }
+function applyHashRoute(){
+ const hash=location.hash||'';
+ if(/^#\/bai\//.test(hash)){setPanel('');setActiveNav('calendar');return;}
+ if(hash==='#/bia'){setPanel('');window.NHI_COVER?.open?.();setActiveNav('');return;}
+ const hit=Object.keys(ROUTES).find(k=>ROUTES[k]===hash);
+ const name=hit||(hash==='#/lich-hoc/chu-de'||hash==='#/lich-hoc/thang'?'calendar':hash==='#/den-han'?'today':null);
+ if(name){
+  if(!$('#cover')?.hidden)window.NHI_COVER?.close?.();
+  showRoute(name);
+  if(hash==='#/den-han')P()?.setView?.('overdue');
+  document.title=({today:'Hôm nay',calendar:'Lịch học',practice:'Luyện tập',notebook:'Sổ tay',
+   progress:'Tiến độ',search:'Tìm kiếm',chat:'Hỏi AI'})[name]||'Nhi’s Learning Corner';
+ }else if(!hash){setPanel('');setActiveNav(null);}
+}
+function route(next){
+ const href=ROUTES[next];if(!href){showRoute(next);return;}
+ const current=location.hash;
+ if(current!==href){
+  if(current&&current!=='#/bia'&&previousRoutes.length<20)previousRoutes.push(current);
+  location.hash=href;
+ }else applyHashRoute();
+}
+function goBack(){
+ const current=location.hash;
+ if(!current||current==='#/hom-nay'){location.hash='#/bia';return;}
+ let target=previousRoutes.pop();
+ if(!target||target===current||target==='#/bia')target=/^#\/bai\//.test(current)?'#/lich-hoc':'#/hom-nay';
+ location.hash=target;
+}
+
 function firstLesson(){const d=data();return d.lessons.find(x=>x.status==='today')||d.lessons.find(x=>x.status==='late')||d.lessons[0]||null;}
 function visibleItems(){const d=data(),l=d.lessons.find(x=>x.id===sourceLesson)||firstLesson();return scope==='all'?d.items:(l?d.items.filter(it=>l.ids.includes(it.id)):d.items);}
 function renderPanel(){
@@ -213,23 +258,29 @@ function renderSettings(){
  +'<p class="nhi-v2-hint">Nên xuất bản sao lưu trước khi xóa hoặc nhập đè dữ liệu. Không nên sửa đồng thời cùng một thẻ trên hai thiết bị khi chưa đồng bộ xong.</p>';
 }
 function nav(){
- const old=$('#nhiV2TopNav');if(old)return;
- const bar=document.createElement('nav');bar.id='nhiV2TopNav';bar.className='nhi-v2-top';
- bar.setAttribute('aria-label','Điều hướng chính');
- const opts=[['today','🏠 Hôm nay'],['calendar','🗓 Lịch học'],['practice','🧩 Luyện tập'],['notebook','📒 Sổ tay'],['progress','📈 Tiến độ'],['search','🔎 Tìm kiếm'],['chat','💬 Hỏi AI']];
- opts.forEach(x=>{const b=document.createElement('button');b.type='button';b.dataset.v2Nav=x[0];b.textContent=x[1];b.addEventListener('click',()=>route(x[0]));bar.appendChild(b);});
- const header=$('#topbar');header.after(bar);
- const workspace=document.createElement('section');workspace.id='nhiV2Workspace';workspace.hidden=true;workspace.setAttribute('aria-live','polite');
- $('#app').insertBefore(workspace,$('#app').firstChild);
+ if($('#nhiV2TopNav'))return;
+ const bar=document.createElement('nav');bar.id='nhiV2TopNav';bar.className='nhi-v2-top';bar.setAttribute('aria-label','Điều hướng chính');
+ const back=document.createElement('button');back.id='nhiV2Back';back.type='button';
+ back.textContent='← Trở về';back.title='Về trang trước (hoặc Hôm nay)';back.addEventListener('click',goBack);bar.appendChild(back);
+ const opts=[['today','🏠 Hôm nay'],['calendar','🗓 Lịch học'],['practice','🧩 Luyện tập'],
+  ['notebook','📒 Sổ tay'],['progress','📈 Tiến độ'],['search','🔎 Tìm kiếm'],['chat','💬 Hỏi AI']];
+ opts.forEach(([id,label])=>{
+  const a=document.createElement('a');a.dataset.v2Nav=id;a.href=ROUTES[id];a.textContent=label;
+  a.addEventListener('click',e=>{if(e.button!==0||e.metaKey||e.ctrlKey||e.altKey||e.shiftKey)return;e.preventDefault();route(id);});
+  bar.appendChild(a);
+ });
+ $('#topbar').after(bar);
+ const workspace=document.createElement('section');workspace.id='nhiV2Workspace';workspace.hidden=true;
+ workspace.setAttribute('aria-live','polite');$('#app').insertBefore(workspace,$('#app').firstChild);
  const menu=$('#menuList');if(menu){
   const group=document.createElement('details');group.className='nhi-v2-menu-group';
   const summary=document.createElement('summary');summary.textContent='🧩 Luyện tập · Mở các chế độ';group.appendChild(summary);
   ['cards','write','test','match','quiz','list','words','sets'].forEach(x=>{const b=$('#tab-'+x);if(b)group.appendChild(b);});
   menu.insertBefore(group,menu.querySelector('hr'));
-  [['today','🏠 Hôm nay'],['calendar','🗓 Lịch học'],['notebook','📒 Sổ tay'],['progress','📈 Tiến độ'],['search','🔎 Tìm kiếm'],['speak','🎤 Luyện nói']].forEach(x=>{
+  [['today','🏠 Hôm nay'],['calendar','🗓 Lịch học'],['notebook','📒 Sổ tay'],['progress','📈 Tiến độ'],
+   ['search','🔎 Tìm kiếm'],['speak','🎤 Luyện nói']].forEach(x=>{
    const b=document.createElement('button');b.type='button';b.textContent=x[1];
-   b.addEventListener('click',()=>{$('#menuBtn')?.click();route(x[0]);});
-   menu.insertBefore(b,group);
+   b.addEventListener('click',()=>{$('#menuBtn')?.click();route(x[0]);});menu.insertBefore(b,group);
   });
   $('#tab-plan').textContent='🏠 Trang Hôm nay / Lịch học';
  }
@@ -237,7 +288,9 @@ function nav(){
  history.textContent='☷';history.title='Lịch sử hội thoại có tên';history.setAttribute('aria-label','Lịch sử hội thoại');
  history.addEventListener('click',()=>{$('#aiClose')?.click();route('threads')});
  $('#aiPanel .aihead')?.insertBefore(history,$('#aiCfgBtn'));
+ setActiveNav(null);
 }
+
 function updateSource(){
  const p=$('#modeHead');if(!p||document.body.classList.contains('nhi-v2-panel-active'))return;
  const t=$('#modeTitle')?.textContent||'';
@@ -510,13 +563,15 @@ function init(){
   new MutationObserver(()=>attachExamples()).observe(log,{childList:true,subtree:true});
   attachExamples();
  }
- window.NHI_V2_OPEN_LESSON_MODE=function(id,mode){sourceLesson=id;scope='lesson';exercisePos=0;exerciseAnswer='';exerciseFeedback='';selectedItemId='';answerRevealed=false;setPanel(['write','quiz','listen','speak'].includes(mode)?mode:'practice');};
+ window.NHI_V2_OPEN_LESSON_MODE=function(id,mode){sourceLesson=id;scope='lesson';exercisePos=0;exerciseAnswer='';exerciseFeedback='';selectedItemId='';answerRevealed=false;route(['write','quiz','listen','speak'].includes(mode)?mode:'practice');};
  window.addEventListener('nhi:lessons-ready',()=>{if(panel)renderPanel();});
  window.addEventListener('nhi:chat-history',()=>{if(panel==='threads')renderPanel();});
  const mode=$('#modeHead');if(mode)new MutationObserver(()=>updateSource()).observe(mode,{childList:true,subtree:true});
- window.addEventListener('hashchange',()=>{if(/^#\/bai\//.test(location.hash))setPanel('');});
+ window.addEventListener('hashchange',applyHashRoute);
+ window.addEventListener('popstate',applyHashRoute);
  const h=$('#aiBtn');if(h)h.setAttribute('title','Hỏi AI · giữ nguyên chat kéo giãn');
  updateSource();
+ applyHashRoute();
  // One-time client-side copy of learning state only (never credentials or keys).
  try{if(!localStorage.getItem('nhi-v2-rollback-progress-20261117')){const old=localStorage.getItem('viko-plan-v1');if(old)localStorage.setItem('nhi-v2-rollback-progress-20261117',old);}}catch(e){}
 }
