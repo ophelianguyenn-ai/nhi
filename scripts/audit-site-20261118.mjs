@@ -232,7 +232,7 @@ try{
     const css=getComputedStyle(document.documentElement);
     return Array.from({length:22},(_,i)=>css.getPropertyValue('--nhi-pair-'+(i+1)).trim().toLowerCase());
   });
-  const approved=['#f1767a','#fa82c0','#fefa49','#feae48','#6fdd7c','#50cbfb','#b970c6'];
+  const approved=['#f48f92','#fb99cb','#fefb6a','#febd69','#89e394','#70d4fc','#c68ad0'];
   assert(palette.slice(0,7).every((c,i)=>c===approved[i])&&palette.slice(7).every(c=>!c),
    'Only the seven approved reference colors may remain: '+JSON.stringify(palette));
   assert(x[1].viSelected===false&&x[1].koSelected===false&&x[1].background==='rgba(0, 0, 0, 0)',
