@@ -26,10 +26,10 @@ try{
  console.log('STEP dashboard');
  await page.$eval('#nhiV2TopNav [data-v2-nav="today"]',e=>e.click());
  await page.waitForSelector('#planBox .nhi-v2-priorities');
- assert(await page.$eval('#planBox .nhi-v2-priority',es=>es.length)<=3,'Dashboard exceeded 3 priority lessons');
+ assert(await page.$$eval('#planBox .nhi-v2-priority',es=>es.length)<=3,'Dashboard exceeded 3 priority lessons');
  assert(!!await page.$('#planBox .nhi-today-secondary .nhi-calendar-shortcut'),'Calendar shortcut missing outside Today banner');
  assert(!await page.$('#planBox .nhi-v2-hero .ghostw'),'Calendar/hard card buttons should not be inside Today banner');
- const priorityColors=await page.$eval('#planBox .nhi-v2-priority',es=>es.map(e=>e.style.getPropertyValue('--priority-color')));
+ const priorityColors=await page.$$eval('#planBox .nhi-v2-priority',es=>es.map(e=>e.style.getPropertyValue('--priority-color')));
  assert(priorityColors.length<=1||new Set(priorityColors).size===priorityColors.length,'Priority lesson colors are repeated');
  assert(!!await page.$('#planBox .nhi-v2-start'),'No 10-minute CTA');
  console.log('STEP calendar');
