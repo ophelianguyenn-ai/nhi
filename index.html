@@ -1173,8 +1173,13 @@ html body #planBox .pcard .pfront .nhi-card-details .nhi-card-note{
   white-space:pre-wrap!important;overflow-wrap:anywhere!important;word-break:break-word!important;
   text-align:left!important;
 }
+html body:has(#planBox .sdone),
+html body:has(#planBox .sdone) #view-plan,
+html body:has(#planBox .sdone) #planBox{
+  background:var(--nhi-victory-bg,#fff8f5)!important;
+}
 html body #planBox .sdone{
-  --nhi-victory-bg:#fff8f5;
+  --nhi-victory-bg:var(--nhi-victory-bg,#fff8f5);
   background:var(--nhi-victory-bg)!important;
   background-image:none!important;
   border:0!important;box-shadow:none!important;
@@ -1201,8 +1206,8 @@ html body #planBox .sdone img.nhi-victory-cat.nhi-original-gif{
   max-width:100%!important;max-height:100%!important;
   aspect-ratio:307/623!important;object-fit:contain!important;
   animation:none!important;
-  -webkit-mask-image:radial-gradient(ellipse farthest-side at center,#000 79%,transparent 100%);
-  mask-image:radial-gradient(ellipse farthest-side at center,#000 79%,transparent 100%);
+  -webkit-mask-image:radial-gradient(ellipse farthest-side at center,#000 94%,transparent 100%);
+  mask-image:radial-gradient(ellipse farthest-side at center,#000 94%,transparent 100%);
 }
 html body #planBox .sdone .tiles{width:min(100%,350px)!important;margin:1px auto!important;gap:7px!important}
 html body #planBox .sdone .tile2{padding:5px 8px!important}
@@ -4922,7 +4927,11 @@ html body #planBox .sdone .listinfo,html body #planBox .sdone .pstatus{margin:2p
           var context=canvas.getContext('2d',{willReadFrequently:true});if(!context)return;
           context.drawImage(cat,0,0,8,8);
           var edge=context.getImageData(0,0,1,1).data;
-          if(edge[3]>200)p.style.setProperty('--nhi-victory-bg','rgb('+edge[0]+','+edge[1]+','+edge[2]+')');
+          if(edge[3]>200){
+            var color='rgb('+edge[0]+','+edge[1]+','+edge[2]+')';
+            p.style.setProperty('--nhi-victory-bg',color);
+            document.body.style.setProperty('--nhi-victory-bg',color);
+          }
         }catch(_e){}
       });
       m.appendChild(cat);
