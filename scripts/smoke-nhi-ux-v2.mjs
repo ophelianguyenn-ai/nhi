@@ -32,7 +32,14 @@ try{
  await page.$eval('#nhiV2TopNav [data-v2-nav="calendar"]',e=>e.click());
  await page.waitForSelector('#planBox .nhi-plan-current');
  assert(!!await page.$('#planBox .nhi-plan-waiting'),'Missing waiting panel');
- assert(!!await page.$('#planBox .nhi-v2-review-details'),'Missing collapsible review milestones');
+ assert(!!await page.$('#planBox .nhi-day-combined .nhi-compact-lesson'),'Missing compact integrated day cards');
+ assert(!await page.$('#planBox .nhi-v2-review-details'),'Calendar still duplicates the five review dates');
+ assert(!await page.$('#planBox .nhi-v2-intro'),'Today greeting panel should be merged with hero');
+ // Five review dates are visible in the lesson detail without an extra click.
+ await page.evaluate(id=>{location.hash='#/bai/'+id;},lesson.id);
+ await page.waitForSelector('#planBox .ppage .psched');
+ assert((await page.$eval('#planBox .ppage .psched .pchip',es=>es.length))===5,'Lesson detail must show all five review dates');
+ await page.$eval('#planBox .pback',e=>e.click());
  console.log('STEP search');
  await page.$eval('#nhiV2TopNav [data-v2-nav="search"]',e=>e.click());
  await page.waitForSelector('#nhiV2SearchInput');
