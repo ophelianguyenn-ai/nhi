@@ -1103,6 +1103,24 @@ body.nhi-in-study #nhiV2TopNav,body.nhi-in-study .nhi-hide-while-flipping,body.n
   font-weight:800;animation:none!important;
 }
 .hl-item .nhi-clear-highlight{font-size:12px;padding:4px 9px;white-space:nowrap}
+.nhi-transparent-btn{
+  display:inline-flex;align-items:center;justify-content:center;gap:6px;
+  width:auto!important;max-width:100%;min-height:28px;padding:5px 9px!important;
+  border-radius:10px!important;border:1px solid var(--edge)!important;
+  background:var(--surface)!important;color:var(--ink)!important;
+  font-size:12px!important;line-height:1.2!important;font-weight:700!important;
+  white-space:normal;cursor:pointer;
+}
+.nhi-transparent-btn[hidden]{display:none!important}
+.nhi-transparent-btn::before{
+  content:"";width:14px;height:14px;flex:none;border-radius:3px;border:1px solid var(--edge);
+  background:conic-gradient(#fff 25%,#d8d8df 0 50%,#fff 0 75%,#d8d8df 0) 0 0/8px 8px;
+}
+.nhi-transparent-actions{display:flex;justify-content:center;margin:3px 12px 8px}
+#planBox .pitems .nhi-transparent-btn{max-width:112px;font-size:11px!important}
+#view-cards .nhi-transparent-btn{flex:none;min-height:32px}
+#view-sets .nhi-transparent-btn,#list .nhi-transparent-btn{max-width:120px}
+
 .ph.nhi-phrase-selected::before,.ph.nhi-phrase-selected::after{content:none!important;display:none!important}
 .ph.nhi-hl-second{background:none!important;background-image:none!important;text-decoration:none!important;border-bottom:0!important}
 .ph.tap{touch-action:manipulation}
@@ -1223,6 +1241,7 @@ body.nhi-in-study #nhiV2TopNav,body.nhi-in-study .nhi-hide-while-flipping,body.n
         <div class="hl-list" id="cHl" hidden></div>
         <div class="card-bottom">
           <span class="hint" id="cHint"></span>
+          <button type="button" class="ghost nhi-transparent-btn" id="cClearCurrent" title="Bỏ tô cả cặp Việt–Hàn vừa chọn" hidden>Trong suốt · Bỏ tô</button>
           <button type="button" class="speak" id="cSpeak" aria-label="Nghe tiếng Hàn" title="Nghe tiếng Hàn">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 5 6 9H3v6h3l5 4V5Z" fill="currentColor" stroke="none"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M18.5 5.5a9 9 0 0 1 0 13"/></svg>
           </button>
@@ -1773,6 +1792,7 @@ body.nhi-in-study #nhiV2TopNav,body.nhi-in-study .nhi-hide-while-flipping,body.n
     colors[i]=next;
     setP(id,{h:h,h2:null,hc:colors});
   }
+  var classicLastHighlighted=null;
   function clearHl(id,i){
     var entry=getP(id),h=(entry.h||[]).filter(function(index){return index!==i;});
     var colors=Object.assign({},entry.hc||{});
@@ -1791,7 +1811,8 @@ body.nhi-in-study #nhiV2TopNav,body.nhi-in-study .nhi-hide-while-flipping,body.n
     var sp = document.createElement('button'); sp.type = 'button'; sp.className = 'speak'; sp.dataset.say = p[1];
     sp.setAttribute('aria-label', 'Nghe tiếng Hàn'); sp.title = 'Nghe tiếng Hàn'; sp.innerHTML = $('cSpeak').innerHTML; d.appendChild(sp);
     var rm=document.createElement('button');rm.type='button';rm.className='ghost nhi-clear-highlight';
-    rm.textContent='Bỏ tô';rm.title='Bỏ màu cho cả cặp Việt–Hàn';
+    rm.classList.add('nhi-transparent-btn');
+    rm.textContent='Trong suốt · Bỏ tô';rm.title='Bỏ màu cho cả cặp Việt–Hàn';
     rm.dataset.act='unhl';rm.dataset.id=cardId;rm.dataset.i=i;d.appendChild(rm);
     return d;
   }
@@ -2112,7 +2133,10 @@ body.nhi-in-study #nhiV2TopNav,body.nhi-in-study .nhi-hide-while-flipping,body.n
     if (koEl.nextElementSibling !== pe) koEl.insertAdjacentElement('afterend', pe);
     pe.textContent = c.pr;
     pe.hidden = !(state.pron && koShown && c.pr);
-    $('cHint').textContent = 'Chạm vào chữ để tô sáng · chạm chỗ trống để ' + (state.flipped ? 'úp thẻ' : (vk ? 'xem tiếng Hàn' : 'xem tiếng Việt'));
+    $('cHint').textContent = 'Chạm vào chữ để đổi màu · chọn Trong suốt để bỏ tô · chạm chỗ trống để ' + (state.flipped ? 'úp thẻ' : (vk ? 'xem tiếng Hàn' : 'xem tiếng Việt'));
+    var classicClear=$('cClearCurrent');
+    var match=classicLastHighlighted&&classicLastHighlighted.id===c.id?classicLastHighlighted:null;
+    classicClear.hidden=!match||phraseColorIndex((p.hc||{})[match.i],match.i)===PHRASE_COLOR_CLEAR;
     // Highlighted phrases of this card, listed for closer study
     var box = $('cHl'), hs = (p.h || []).slice().sort(function (a, b) { return a - b; });
     box.textContent = '';
@@ -2230,6 +2254,14 @@ body.nhi-in-study #nhiV2TopNav,body.nhi-in-study .nhi-hide-while-flipping,body.n
     var xb = document.createElement('button'); xb.type = 'button'; xb.className = 'xs'; xb.dataset.act = 'x'; xb.textContent = 'X';
     xb.setAttribute('aria-pressed', String(!!p.x)); xb.setAttribute('aria-label', 'Đánh dấu học lại'); xb.title = 'Đánh dấu học lại';
     ctrl.appendChild(xb);
+    if(classicLastHighlighted&&classicLastHighlighted.id===c.id&&
+       phraseColorIndex((p.hc||{})[classicLastHighlighted.i],classicLastHighlighted.i)!==PHRASE_COLOR_CLEAR){
+      var un=document.createElement('button');
+      un.type='button';un.className='ghost nhi-transparent-btn';
+      un.dataset.act='unhl-pair';un.dataset.i=classicLastHighlighted.i;
+      un.textContent='Trong suốt · Bỏ tô';un.title='Bỏ tô cặp Việt–Hàn vừa chạm';
+      ctrl.appendChild(un);
+    }
     var seg = document.createElement('div'); seg.className = 'seg'; seg.setAttribute('role', 'group'); seg.setAttribute('aria-label', 'Mức độ thuộc');
     [['h', 'Khó'], ['m', 'Vừa'], ['e', 'Dễ']].forEach(function (l) {
       var b = document.createElement('button'); b.type = 'button'; b.dataset.act = 'lv'; b.dataset.lv = l[0]; b.textContent = l[1];
@@ -2274,7 +2306,7 @@ body.nhi-in-study #nhiV2TopNav,body.nhi-in-study .nhi-hide-while-flipping,body.n
         var ctrl = document.createElement('div'); ctrl.className = 'ctrl';
         var sp = document.createElement('button'); sp.type = 'button'; sp.className = 'speak'; sp.dataset.say = p[1];
         sp.setAttribute('aria-label', 'Nghe tiếng Hàn'); sp.title = 'Nghe tiếng Hàn'; sp.innerHTML = $('cSpeak').innerHTML; ctrl.appendChild(sp);
-        var rm = document.createElement('button'); rm.type = 'button'; rm.className = 'ghost'; rm.dataset.act = 'unhl'; rm.textContent = 'Bỏ tô'; ctrl.appendChild(rm);
+        var rm = document.createElement('button'); rm.type = 'button'; rm.className = 'ghost nhi-transparent-btn'; rm.dataset.act = 'unhl'; rm.textContent = 'Trong suốt · Bỏ tô'; ctrl.appendChild(rm);
         li.appendChild(ctrl);
         box.appendChild(li);
       });
@@ -3388,6 +3420,7 @@ body.nhi-in-study #nhiV2TopNav,body.nhi-in-study .nhi-hide-while-flipping,body.n
     function val(sec, k) { var e = ps[sec][k]; return e ? e.v : null; }
     function put(sec, k, v) { var e = { v: v, t: Date.now() }; ps[sec][k] = e; save(); SYNC.queue('L/' + sec + '/' + k, e); }
     var view = 'home', sess = null, page = null;
+    var lastHighlightedPair=null; // Last phrase the learner tapped in a daily lesson/card.
     var lastKey = '', anim = '', flipping = false, legendOpen = false, query = '', topicSel = '';
     var ratingPending = false, ratingToken = 0, pendingRatingFinish = null;
 
@@ -3843,6 +3876,31 @@ body.nhi-in-study #nhiV2TopNav,body.nhi-in-study .nhi-hide-while-flipping,body.n
       if(val('hl2',id))put('hl2',id,null);
       put('hlc',id,colors);
     }
+    function clearPhraseHl(id,i){
+      var selected=val('hl',id)||[],colors=Object.assign({},val('hlc',id)||{});
+      if(!Array.isArray(selected))selected=Object.keys(selected).map(function(k){return selected[k];});
+      colors[i]=PHRASE_COLOR_CLEAR;
+      put('hl',id,selected.filter(function(index){return index!==i;}));
+      if(val('hl2',id))put('hl2',id,null);
+      put('hlc',id,colors);
+    }
+    function canClearHighlightedPair(id){
+      var recent=lastHighlightedPair;
+      if(!recent||recent.id!==id)return false;
+      var colors=val('hlc',id)||{};
+      return Object.prototype.hasOwnProperty.call(colors,recent.i)&&
+        phraseColorIndex(colors[recent.i],recent.i)!==PHRASE_COLOR_CLEAR;
+    }
+    function transparentButton(id,after){
+      var b=btn('ghost nhi-transparent-btn','Trong suốt · Bỏ tô',function(e){
+        e.preventDefault();e.stopPropagation();
+        if(!lastHighlightedPair||lastHighlightedPair.id!==id)return;
+        clearPhraseHl(id,lastHighlightedPair.i);
+        lastHighlightedPair=null;
+        after();
+      },'Bỏ tô cả cụm tiếng Việt và nghĩa tiếng Hàn vừa chọn');
+      return b;
+    }
 
     /* ---- routing: #/bai/<id> opens a lesson as its own page ---- */
     function route() {
@@ -4292,6 +4350,9 @@ body.nhi-in-study #nhiV2TopNav,body.nhi-in-study .nhi-hide-while-flipping,body.n
       var right = el('span', 'prow');
       if (it.type === 'w' && it.n > 1) right.appendChild(el('span', 'ptag cnt', '×' + it.n));
       var rt = val('rate', it.id); if (rt && RATE_NAME[rt]) right.appendChild(el('span', 'ptag r-' + rt, RATE_NAME[rt]));
+      if (canClearHighlightedPair(it.id))right.appendChild(transparentButton(it.id,function(){
+        if(li.parentNode)li.parentNode.replaceChild(itemRow(it,withSrc),li);
+      }));
       if (canSpeak) right.appendChild(ibtn('picon', 'vol', function () { speak(it.ko, 'ko-KR'); }, 'Nghe tiếng Hàn'));
       right.appendChild(ibtn('picon del', 'trash', function () { del(it.id); render(); }, 'Xoá khỏi danh sách'));
       li.appendChild(right);
@@ -4696,6 +4757,11 @@ body.nhi-in-study #nhiV2TopNav,body.nhi-in-study .nhi-hide-while-flipping,body.n
         flip();
       });
       c.appendChild(f);
+      if(canClearHighlightedPair(it.id)){
+        var clearActions=el('div','nhi-transparent-actions');
+        clearActions.appendChild(transparentButton(it.id,function(){render();}));
+        c.appendChild(clearActions);
+      }
       // The unused background around the entire card should also flip it.
       c.addEventListener('click', function(e) {
         if(e.target.closest('.pfront,.pdel,.pundo,.legendpop,.nhi-card-dictionaries,.nhi-english-v5,figure,button,input,textarea,select,a,[contenteditable]'))return;
@@ -4902,7 +4968,9 @@ body.nhi-in-study #nhiV2TopNav,body.nhi-in-study .nhi-hide-while-flipping,body.n
     document.addEventListener('click', function (e) {
       if (legendOpen && !e.target.closest('.legendpop') && !e.target.closest('[aria-expanded]')) { legendOpen = false; var lp = document.querySelector('.legendpop'); if (lp) lp.remove(); var bk = document.querySelector('.cicons [aria-expanded]'); if (bk) bk.setAttribute('aria-expanded', 'false'); if (e.target.closest('.pfront')) { e.stopPropagation(); return; } }
       var ph = e.target.closest('#planBox .ph.tap'); if (!ph) return;
-      e.stopPropagation(); var chosen=ITEMS[ph.dataset.item].pairs[+ph.dataset.hi];if(sess&&chosen&&chosen[1])sess.selectedKo=chosen[1]; toggleHl(ph.dataset.item, +ph.dataset.hi); haptic(6);
+      e.stopPropagation(); var chosen=ITEMS[ph.dataset.item].pairs[+ph.dataset.hi];if(sess&&chosen&&chosen[1])sess.selectedKo=chosen[1];
+      lastHighlightedPair={id:ph.dataset.item,i:+ph.dataset.hi};
+      toggleHl(ph.dataset.item, +ph.dataset.hi); haptic(6);
       // repaint only the row / card that changed
       var it = ITEMS[ph.dataset.item], li = ph.closest('li[data-item]');
       if (li) li.parentNode.replaceChild(itemRow(it, li.dataset.src === '1'), li); else render();
@@ -5118,9 +5186,9 @@ body.nhi-in-study #nhiV2TopNav,body.nhi-in-study .nhi-hide-while-flipping,body.n
   $('card').addEventListener('click', function (e) {
     var say = e.target.closest('[data-say]');
     if (say) { e.stopPropagation(); speak(say.dataset.say); return; }
-    if (e.target.closest('.speak,.hl-list,.nhi-english-v5')) return;
+    if (e.target.closest('.speak,.hl-list,.nhi-english-v5,.nhi-transparent-btn')) return;
     var sg = e.target.closest('.ph');
-    if (sg) { var c = currentCard(); if (c) { toggleHl(c.id, +sg.dataset.i); renderCard(); } return; }
+    if (sg) { var c = currentCard(); if (c) { classicLastHighlighted={id:c.id,i:+sg.dataset.i};toggleHl(c.id,+sg.dataset.i);renderCard(); } return; }
     // Text without a pair does nothing; only empty space flips the card
     if (e.target.closest('.prompt, .answer, .pron')) return;
     flip();
@@ -5128,7 +5196,13 @@ body.nhi-in-study #nhiV2TopNav,body.nhi-in-study .nhi-hide-while-flipping,body.n
   $('card').addEventListener('keydown', function (e) { if (e.key === 'Enter' && !e.target.closest('button')) { e.preventDefault(); flip(); } });
   $('cHl').addEventListener('click', function(e){
     var rm=e.target.closest('[data-act="unhl"]');if(!rm)return;
-    e.stopPropagation();clearHl(rm.dataset.id,+rm.dataset.i);renderCard();
+    e.stopPropagation();clearHl(rm.dataset.id,+rm.dataset.i);classicLastHighlighted=null;renderCard();
+  });
+  $('cClearCurrent').addEventListener('click',function(e){
+    e.preventDefault();e.stopPropagation();
+    var c=currentCard(),last=classicLastHighlighted;
+    if(!c||!last||last.id!==c.id)return;
+    clearHl(c.id,last.i);classicLastHighlighted=null;renderCard();
   });
   $('cSpeak').addEventListener('click', function (e) { e.stopPropagation(); var c = currentCard(); if(c){var lang=(state.dir==='vk')===!state.flipped?'vi':'ko';toggleSpeech(c[lang],lang==='vi'?'vi-VN':'ko-KR');} });
   $('prev').addEventListener('click', function () { go(-1); });
@@ -5152,10 +5226,11 @@ body.nhi-in-study #nhiV2TopNav,body.nhi-in-study .nhi-hide-while-flipping,body.n
   });
   $('list').addEventListener('click', function (e) {
     var sg = e.target.closest('.ph');
-    if (sg) { var rid = sg.closest('.row').dataset.id; toggleHl(rid, +sg.dataset.i); updateRow(rid); return; }
+    if (sg) { var rid = sg.closest('.row').dataset.id; classicLastHighlighted={id:rid,i:+sg.dataset.i};toggleHl(rid,+sg.dataset.i);updateRow(rid);return; }
     var b = e.target.closest('[data-act]'); if (!b) return;
     var id = b.closest('.row').dataset.id, act = b.dataset.act;
     if (act === 'speak') { speak(BY_ID[id].ko); return; }
+    if (act === 'unhl-pair') {clearHl(id,+b.dataset.i);classicLastHighlighted=null;updateRow(id);return;}
     if (act === 'x') setP(id, { x: !getP(id).x });
     if (act === 'lv') { var p = getP(id); setP(id, { lv: p.lv === b.dataset.lv ? null : b.dataset.lv }); }
     updateRow(id);
