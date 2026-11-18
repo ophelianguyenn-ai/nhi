@@ -192,7 +192,7 @@ try{
   assert(count===5,'Expected 5 milestones, saw '+count);
   return '5 review dates visibly rendered';
  });
- await check('Random phrase colors match both languages and never use half-fill underline',async()=>{
+ await check('Random full-background highlights match both languages without half-fill underline',async()=>{
   const result=await page.evaluate(()=>{
     const rows=[...document.querySelectorAll('#planBox .pitems li[data-item]')];
     let first=null;
@@ -214,27 +214,29 @@ try{
       const ko=updated.querySelector('.pko .ph.tap[data-hi="'+first.pair+'"]');
       const v=getComputedStyle(vi),k=getComputedStyle(ko);
       results.push({color:v.color,koColor:k.color,selected:vi.classList.contains('nhi-phrase-selected')&&ko.classList.contains('nhi-phrase-selected'),
-        background:v.backgroundColor,gradient:v.backgroundImage,decoration:v.textDecorationLine});
+        background:v.backgroundColor,koBackground:k.backgroundColor,gradient:v.backgroundImage,decoration:v.textDecorationLine,breakMode:v.boxDecorationBreak});
     }
     return {...first,results};
   });
   const x=result.results;
   assert(x.length===10&&x.every(z=>z.selected&&z.color===z.koColor),
    'Paired languages do not always have matching colors: '+JSON.stringify(result));
-  assert(x.every(z=>z.background==='rgba(0, 0, 0, 0)'&&z.gradient==='none'&&z.decoration==='none'),
-   'A phrase still uses painted or underlined background: '+JSON.stringify(result));
-  assert(x.every((z,i)=>!i||z.color!==x[i-1].color),'Two consecutive taps chose the same color');
-  assert(new Set(x.map(z=>z.color)).size>=3,'Repeated taps did not sample diverse colors');
+  assert(x.every(z=>z.background&&z.background!=='rgba(0, 0, 0, 0)'&&z.background!=='transparent'&&z.background===z.koBackground),
+   'Selected phrases must have matching opaque highlights, not text-only colors: '+JSON.stringify(result));
+  assert(x.every(z=>z.gradient==='none'&&z.decoration==='none'&&z.breakMode==='clone'),
+   'Highlight must cover the full phrase without gradient or underline: '+JSON.stringify(result));
+  assert(x.every((z,i)=>!i||z.background!==x[i-1].background),'Consecutive taps reused the same background');
+  assert(new Set(x.map(z=>z.background)).size>=3,'Random backgrounds did not show varied colors');
   await page.reload({waitUntil:'domcontentloaded'});
   await page.waitForSelector('#planBox .ppage .pitems li[data-item]',{timeout:15000});
   const saved=await page.evaluate(x=>{
     const row=document.querySelector('#planBox .pitems li[data-item="'+x.id+'"]');
     const vi=row?.querySelector('.pvi .ph.tap[data-hi="'+x.pair+'"]');
     const ko=row?.querySelector('.pko .ph.tap[data-hi="'+x.pair+'"]');
-    return {vi:vi?getComputedStyle(vi).color:'',ko:ko?getComputedStyle(ko).color:''};
+    return {vi:vi?getComputedStyle(vi).backgroundColor:'',ko:ko?getComputedStyle(ko).backgroundColor:''};
   },result);
-  assert(saved.vi===x.at(-1).color&&saved.ko===saved.vi,'Random pair color was lost on reload: '+JSON.stringify(saved));
-  return 'Ten random recolors, both languages synchronized, no underline/background, persistence on reload';
+  assert(saved.vi===x.at(-1).background&&saved.ko===saved.vi,'Random pair highlight lost on reload: '+JSON.stringify(saved));
+  return 'Ten random solid backgrounds, both languages synchronized, no underline or half-fill, persists after reload';
  });
  await check('Lesson merge settings',async()=>{
   await page.$eval('#planBox .ppage button',()=>{
