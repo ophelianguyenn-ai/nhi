@@ -950,6 +950,7 @@ body.nhi-in-study #nhiV2TopNav,body.nhi-in-study .nhi-hide-while-flipping,body.n
   #planBox .nhi-goal-word-list ul{grid-template-columns:1fr}
 }
 
+#nhiV2Back[hidden]{display:none!important}
 </style>
 </head>
 <body>
@@ -5157,6 +5158,7 @@ body.nhi-in-study #nhiV2TopNav,body.nhi-in-study .nhi-hide-while-flipping,body.n
       $('menuCover').addEventListener('click', function () { menu(false); location.hash='#/bia'; cover(true); });
       $('brandFaceBtn').addEventListener('click', function () { menu(false); location.hash='#/bia'; cover(true); });
       $('brandBtn').addEventListener('click', function () { menu(false); location.hash='#/hom-nay'; window.scrollTo({top:0,behavior:'smooth'}); });
+      window.NHI_COVER={open:function(){cover(true);},close:function(){cover(false);}};
       $('coverGo').addEventListener('click', function () { haptic(14); cover(false); location.hash='#/hom-nay'; });
       $('setBtn').addEventListener('click', function () { menu(false); sheet(true); });
       $('setSheet').addEventListener('click', function (e) {
