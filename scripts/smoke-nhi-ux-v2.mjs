@@ -26,15 +26,21 @@ try{
  console.log('STEP dashboard');
  await page.$eval('#nhiV2TopNav [data-v2-nav="today"]',e=>e.click());
  await page.waitForSelector('#planBox .nhi-v2-priorities');
- assert(await page.$$eval('#planBox .nhi-v2-priority',es=>es.length)<=3,'Dashboard exceeded 3 priority lessons');
+ assert(await page.$eval('#planBox .nhi-v2-priority',es=>es.length)<=3,'Dashboard exceeded 3 priority lessons');
+ assert(!!await page.$('#planBox .nhi-today-secondary .nhi-calendar-shortcut'),'Calendar shortcut missing outside Today banner');
+ assert(!await page.$('#planBox .nhi-v2-hero .ghostw'),'Calendar/hard card buttons should not be inside Today banner');
+ const priorityColors=await page.$eval('#planBox .nhi-v2-priority',es=>es.map(e=>e.style.getPropertyValue('--priority-color')));
+ assert(priorityColors.length<=1||new Set(priorityColors).size===priorityColors.length,'Priority lesson colors are repeated');
  assert(!!await page.$('#planBox .nhi-v2-start'),'No 10-minute CTA');
  console.log('STEP calendar');
  await page.$eval('#nhiV2TopNav [data-v2-nav="calendar"]',e=>e.click());
  await page.waitForSelector('#planBox .nhi-plan-current');
  assert(!!await page.$('#planBox .nhi-plan-waiting'),'Missing waiting panel');
- assert(!!await page.$('#planBox .nhi-day-combined .nhi-compact-lesson'),'Missing compact integrated day cards');
+ assert(!!await page.$('#planBox .nhi-day-separated .nhi-lesson-white'),'Missing separate white lesson cards');
+ assert(!await page.$('#planBox .nhi-day-combined'),'Calendar still has combined day cards');
+ assert(!await page.$('#planBox .nhi-v2-hero'),'Calendar should not repeat Today's hero');
  assert(!await page.$('#planBox .nhi-v2-review-details'),'Calendar still duplicates the five review dates');
- assert(!await page.$('#planBox .nhi-v2-intro'),'Today greeting panel should be merged with hero');
+ assert(!await page.$('#planBox .nhi-v2-intro'),'Redundant greeting panel remains');
  // Five review dates are visible in the lesson detail without an extra click.
  await page.evaluate(id=>{location.hash='#/bai/'+id;},lesson.id);
  await page.waitForSelector('#planBox .ppage .psched');
