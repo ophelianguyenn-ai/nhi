@@ -56,6 +56,31 @@ try{
    return 'No standalone tiles; goal and visible Học ngay inside hero';
   });
  });
+ await check('Học ngay is white/blue and directly adjacent to due counters',async()=>{
+  const results=[];
+  for(const width of [1360,390]){
+   await page.setViewport({width,height:880});
+   const result=await page.evaluate(()=>{
+    const container=document.querySelector('#planBox .nhi-v2-hero .nhi-hero-activity');
+    const badges=container?.querySelector('.tstats');
+    const button=container?.querySelector('.nhi-hero-start');
+    if(!container||!badges||!button)throw Error('Missing due badges or Học ngay');
+    const left=badges.getBoundingClientRect(),right=button.getBoundingClientRect();
+    const bg=getComputedStyle(button).backgroundColor,ink=getComputedStyle(button).color;
+    return {gap:Math.round(right.left-left.right),sameRow:Math.abs(right.top-left.top)<28,
+      background:bg,color:ink,text:button.textContent.trim(),
+      right:Math.round(right.right),viewport:innerWidth};
+   });
+   assert(result.background==='rgb(255, 255, 255)'&&result.color==='rgb(23, 109, 146)',
+     'Học ngay does not have white background and blue lettering: '+JSON.stringify(result));
+   if(width===1360)assert(result.sameRow&&result.gap>=0&&result.gap<=14,
+     'Học ngay should be tight beside due counts, not pinned to the far right: '+JSON.stringify(result));
+   assert(result.right<=width+12,'CTA overflows the viewport: '+JSON.stringify(result));
+   results.push({width,...result});
+  }
+  await page.setViewport({width:1360,height:880});
+  return JSON.stringify(results);
+ });
  await check('Priority palettes and topic badges',async()=>{
   const d=await page.$$eval('#planBox .nhi-v2-priority',es=>es.map(e=>({
    color:e.style.getPropertyValue('--priority-color'),
