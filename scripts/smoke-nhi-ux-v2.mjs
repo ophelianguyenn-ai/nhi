@@ -65,12 +65,44 @@ try{
  await page.$eval('#nhiV2TopNav [data-v2-nav="practice"]',e=>e.click());
  await page.evaluate(()=>document.querySelector('#nhiV2SettingsTabs')?.querySelector('[data-stab="advanced"]')?.click());
  assert(!!await page.$('#nhiV2SettingsTabs'),'Settings basic/advanced tabs missing');
+ console.log('STEP reversible lesson merging');
+ const mergeSource=lesson.id,mergeTarget=lessons.find(x=>x.id!==lesson.id&&x.items.length>=8)?.id;
+ assert(!!mergeTarget,'No second lesson available for merging');
+ await page.$eval('#nhiV2TopNav [data-v2-nav="today"]',e=>e.click());
+ await page.evaluate(id=>{location.hash='#/bai/'+id;},mergeSource);
+ await page.waitForSelector('#planBox .ppage .nhi-v2-review-heading');
+ const beforeMerge=await page.evaluate((from,to)=>{
+  const all=window.NHI_PLAN_V2.snapshot().lessons;
+  return {total:all.length,source:all.find(x=>x.id===from)?.ids.length,target:all.find(x=>x.id===to)?.ids.length};
+ },mergeSource,mergeTarget);
+ assert(beforeMerge.source>0&&beforeMerge.target>0,'Merge test lessons not found');
+ await page.evaluate(()=>{window.confirm=()=>true;});
+ await page.$eval('#planBox .ppage button',()=>{const b=[...document.querySelectorAll('#planBox .ppage button')].find(x=>x.textContent.includes('Cài đặt bài'));if(!b)throw Error('Missing lesson settings');b.click();});
+ await page.waitForSelector('#nhiLessonSettings select');
+ await page.$eval('#nhiLessonSettings select',(el,id)=>{el.value=id;el.dispatchEvent(new Event('change',{bubbles:true}));},mergeTarget);
+ await page.$eval('#nhiLessonSettings .primary',e=>e.click());
+ await page.waitForFunction((id,before)=>{
+  const arr=window.NHI_PLAN_V2.snapshot().lessons;
+  return arr.length===before-1&&arr.some(x=>x.id===id);
+ },{},mergeTarget,beforeMerge.total);
+ const merged=await page.evaluate((from,to)=>{
+  const all=window.NHI_PLAN_V2.snapshot().lessons;
+  const dest=all.find(x=>x.id===to);
+  return {count:all.length,hasSource:all.some(x=>x.id===from),targetCards:dest?.ids.length||0};
+ },mergeSource,mergeTarget);
+ assert(!merged.hasSource&&merged.targetCards===beforeMerge.source+beforeMerge.target,
+  'Merging lost cards or did not remove source from calendar: '+JSON.stringify(merged));
+ await page.$eval('#planBox .ppage button',()=>{const b=[...document.querySelectorAll('#planBox .ppage button')].find(x=>x.textContent.includes('Cài đặt bài'));if(!b)throw Error('Missing settings after merge');b.click();});
+ await page.waitForSelector('#nhiLessonSettings .nhi-merge-source-row');
+ await page.$eval('#nhiLessonSettings .nhi-merge-source-row button',e=>e.click());
+ await page.waitForFunction((n)=>window.NHI_PLAN_V2.snapshot().lessons.length===n,{},beforeMerge.total);
  console.log('STEP chunk resume');
  await page.evaluate(id=>{
   document.querySelector('#nhiV2TopNav [data-v2-nav="today"]').click();
   window.NHI_PLAN_V2.startLessonById(id);
  },lesson.id);
  await page.waitForSelector('#planBox .pcard');
+ assert(await page.$eval('#nhiV2TopNav',el=>getComputedStyle(el).display==='none'),'Bottom navigation must hide while flipping cards');
  const doneBefore=await page.evaluate(id=>(JSON.parse(localStorage.getItem('viko-plan-v1')||'{}').done?.[id]?.v||[]).length,lesson.id);
  const grading=await page.evaluate(()=>{
   let n=0;
