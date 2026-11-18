@@ -1,0 +1,50 @@
+name: Audit Nhi Full Website
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'index.html'
+      - 'nhi-corner-v2.js'
+      - 'nhi-corner-v2.css'
+      - 'scripts/audit-site-20261118.mjs'
+      - '.github/workflows/audit-site-20261118.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'index.html'
+      - 'scripts/audit-site-20261118.mjs'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install browser automation
+        run: npm install --no-save --no-package-lock puppeteer-core@24
+      - name: Start website locally
+        run: |
+          python3 -m http.server 8765 --bind 127.0.0.1 >/tmp/nhi-audit-http.log 2>&1 &
+          for i in $(seq 1 30); do
+            if curl -sf http://127.0.0.1:8765/index.html >/dev/null; then exit 0; fi
+            sleep 1
+          done
+          cat /tmp/nhi-audit-http.log
+          exit 1
+      - name: Inspect Today, Calendar, lessons, practice, mobile and assets
+        run: node scripts/audit-site-20261118.mjs
+      - name: Upload audit screenshots and results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: nhi-site-audit-20261118
+          path: |
+            /tmp/nhi-site-audit/*.png
+            /tmp/nhi-site-audit-report.json
+          if-no-files-found: ignore
+          retention-days: 10
