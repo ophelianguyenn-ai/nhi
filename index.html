@@ -667,6 +667,54 @@ button,input,select,textarea{font-family:var(--ui)}
   document.documentElement.dataset.nhiCoverTitle=shades[Math.floor(Math.random()*shades.length)];
 })();
 </script>
+
+<style id="nhi-compact-calendar-20261118">
+/* The Today greeting, actions and daily goal share one hero. */
+#planBox .nhi-calendar-hero .nhi-v2-goal{grid-column:1/-1;display:grid;grid-template-columns:auto minmax(70px,1fr);gap:5px 12px;align-items:center;padding:10px 13px;border-radius:14px;background:color-mix(in srgb,var(--surface) 73%,transparent);font-size:13px}
+#planBox .nhi-calendar-hero .nhi-v2-goal-track{height:9px;border-radius:30px;background:color-mix(in srgb,var(--accent-t) 15%,var(--surface));overflow:hidden}
+#planBox .nhi-calendar-hero .nhi-v2-goal-track span{display:block;height:100%;width:0;background:var(--accent-t)}
+#planBox .nhi-calendar-hero .nhi-v2-goal small{grid-column:1/-1;color:var(--muted)}
+#planBox .nhi-calendar-hero .tact{gap:8px}
+#planBox .nhi-calendar-hero .tact .ghostw{min-height:42px}
+/* Priorities inherit the same distinct day palettes and topic badges as the calendar. */
+#planBox .nhi-v2-priorities{display:flex;flex-direction:column;gap:10px}
+#planBox .nhi-v2-priority{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;padding:14px;border:1px solid color-mix(in srgb,var(--day) 55%,var(--surface));border-left:7px solid var(--day);border-radius:16px;background:color-mix(in srgb,var(--day) 14%,var(--surface));box-shadow:0 2px 0 color-mix(in srgb,var(--day) 20%,var(--surface))}
+#planBox .nhi-v2-priority>div{flex:1 1 180px;min-width:0;display:flex;flex-direction:column;gap:5px}
+#planBox .nhi-v2-priority .ttags{margin:2px 0 4px}
+#planBox .nhi-v2-priority .nhi-v2-order{width:max-content;color:var(--day);font-weight:900}
+#planBox .nhi-v2-priority-title{font-size:15px;font-weight:800;color:var(--ink);text-decoration:none;overflow-wrap:anywhere}
+#planBox .nhi-v2-priority>.primary{min-height:40px}
+/* A single colored day block replaces separate white cards and duplicated headings/counts. */
+#planBox .nhi-day-combined{background:color-mix(in srgb,var(--day) 13%,var(--surface));border:1px solid color-mix(in srgb,var(--day) 42%,var(--surface));border-radius:18px;overflow:hidden;margin-block:10px;box-shadow:0 3px 0 color-mix(in srgb,var(--day) 22%,var(--surface))}
+#planBox .nhi-day-combined .pday{margin:0;border-radius:0;box-shadow:none;background:color-mix(in srgb,var(--day) 20%,var(--surface));padding:10px 14px}
+#planBox .nhi-day-combined .nhi-day-lessons{padding:4px 12px 8px}
+#planBox .nhi-compact-lesson{display:flex;align-items:center;gap:12px;justify-content:space-between;padding:9px 3px;min-width:0}
+#planBox .nhi-compact-lesson+.nhi-compact-lesson{border-top:1px solid color-mix(in srgb,var(--day) 22%,var(--line))}
+#planBox .nhi-compact-copy{display:flex;flex-direction:column;gap:5px;min-width:0;flex:1}
+#planBox .nhi-compact-copy .pstatus{font-size:12px}
+#planBox .nhi-compact-lesson>.primary{min-height:38px;flex:none;padding:0 13px}
+#planBox .nhi-compact-resume{color:var(--muted)}
+#planBox .nhi-v2-review-heading{font-size:15px;margin:0 0 12px;font-weight:800}
+#planBox .ppage>.quiz .psched{margin:0 0 10px}
+#planBox .nhi-due-list{display:flex;flex-direction:column;gap:7px}
+#planBox .nhi-due-list-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:8px}
+#planBox .nhi-due-list-head h2{font-size:20px}
+#planBox .nhi-due-row{display:flex;gap:10px;justify-content:space-between;align-items:center;flex-wrap:wrap;padding:11px 12px;background:color-mix(in srgb,var(--day) 9%,var(--surface));border-left:4px solid var(--day);border-radius:10px;color:var(--ink);text-decoration:none}
+#planBox .nhi-due-row:hover{background:color-mix(in srgb,var(--day) 18%,var(--surface))}
+#planBox .nhi-due-name{display:flex;flex-direction:column;gap:3px;flex:1 1 200px}
+#planBox .nhi-due-name b{font-size:13px;line-height:1.35}
+#planBox .nhi-due-name small{font-size:12px;color:var(--p-late)}
+#planBox .nhi-due-count{font-size:12px;color:var(--muted);white-space:nowrap}
+.nhi-lesson-settings{width:min(600px,calc(100% - 24px));max-height:90dvh;overflow:auto;border:2px solid var(--line);border-radius:22px;padding:22px;background:var(--surface);color:var(--ink);box-shadow:var(--sh-2)}
+.nhi-lesson-settings::backdrop{background:rgb(0 0 0 / .48)}
+.nhi-lesson-settings-content{display:flex;flex-direction:column;gap:12px}
+.nhi-lesson-settings-content .sheethead{display:flex;align-items:center;justify-content:space-between}
+.nhi-lesson-settings-content .field{width:100%;min-height:44px;padding:8px 12px;border:2px solid var(--line);background:var(--surface);color:var(--ink);border-radius:12px}
+.nhi-lesson-settings-content hr{width:100%;border:0;border-top:1px solid var(--line)}
+.nhi-merge-source-row{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:8px;border-radius:10px;background:var(--sunk);font-size:13px}
+body.nhi-in-study #nhiV2TopNav,body.nhi-in-study .nhi-hide-while-flipping,body.nhi-in-study .nhi-bottom-nav,body.nhi-in-study #nhi-bottom-nav,body.nhi-in-study .bottom-navigation,body.nhi-in-study .bottom-nav{display:none!important}
+@media(max-width:520px){#planBox .nhi-day-combined .pday{gap:5px 9px}#planBox .nhi-calendar-hero .tact>*{flex:1 1 140px;justify-content:center}#planBox .nhi-v2-priority{padding:12px}#planBox .nhi-due-row{align-items:flex-start}}
+</style>
 </head>
 <body>
 <header class="topbar" id="topbar">
@@ -2800,7 +2848,7 @@ button,input,select,textarea{font-family:var(--ui)}
   /* ================= Lịch học theo ngày: bài theo ngày nhập + ôn lặp lại 5 mốc ================= */
   var PLAN = (function () {
     var KEY = 'viko-plan-v1', SKEY = 'viko-plan-sess-v1', OFFSETS = [0, 3, 13, 50, 180], STEP = ['Học mới', 'Ôn 1', 'Ôn 2', 'Ôn 3', 'Ôn 4'];
-    var SECS = ['done', 'known', 'hard', 'del', 'rate', 'hl', 'hl2', 'ed', 'hj', 'img', 'note', 'fmt', 'enHard'];
+    var SECS = ['done', 'known', 'hard', 'del', 'rate', 'hl', 'hl2', 'ed', 'hj', 'img', 'note', 'fmt', 'enHard', 'merged'];
     var RATE_NAME = { known: 'Biết rồi', hard: 'Khó', mid: 'Bình thường' };
     var ST_ICON = { done: '✓', today: '●', late: '!', next: '○', future: '○' };
     // every colour here is dark enough for white text; no reds or oranges, so a day never looks "overdue"
@@ -2901,6 +2949,7 @@ button,input,select,textarea{font-family:var(--ui)}
         L.ids.push(r[0]);
       });
       if (!L.ids.length) return false;
+      L.ownIds = L.ids.slice(); // Retain each lesson's original cards when a group is merged.
       L.plan = L.plan || L.date;
       LESSONS.push(L); BY_LESSON[L.id] = L;
       if (DATES.indexOf(L.date) < 0) DATES.push(L.date);
@@ -3009,11 +3058,110 @@ button,input,select,textarea{font-family:var(--ui)}
       dlg.addEventListener('close', function () { dlg.remove(); $('menuDaily').focus(); }); dlg.showModal(); date.focus();
     }
     function normItems(L) { var it = L.items; if (it && !Array.isArray(it)) it = Object.keys(it).sort(function (a, b) { return a - b; }).map(function (k) { return it[k]; }); return (it || []).map(function (r) { return Array.isArray(r) ? r : Object.keys(r).sort(function (a, b) { return a - b; }).map(function (k) { return r[k]; }); }); }
+    // A merge is only a reversible mapping: no card or review record is deleted.
+    // Individual card IDs stay stable, preserving marks, edits and notes.
+    function mergeDestination(id) {
+      var seen = {}, cursor = id, next;
+      while ((next = val('merged', cursor)) && BY_LESSON[next]) {
+        if (seen[cursor]) return null;
+        seen[cursor] = true; cursor = next;
+      }
+      return cursor;
+    }
+    function visibleLessons() {
+      return LESSONS.filter(function (L) { var to = mergeDestination(L.id); return !to || to === L.id; });
+    }
+    function resetMergedOwnership() {
+      LESSONS.forEach(function (L) {
+        L.ids = (L.ownIds || L.ids).slice();
+        L.ids.forEach(function (id) {
+          if (ITEMS[id]) { ITEMS[id].lesson = L.id; ITEMS[id].date = L.date; }
+        });
+      });
+    }
+    function applyMergedLessons() {
+      resetMergedOwnership();
+      LESSONS.forEach(function (from) {
+        var toId = mergeDestination(from.id), to = toId && BY_LESSON[toId];
+        if (!to || to.id === from.id) return;
+        (from.ownIds || []).forEach(function (id) {
+          if (!ITEMS[id] || to.ids.indexOf(id) >= 0) return;
+          to.ids.push(id);
+          ITEMS[id].lesson = to.id; ITEMS[id].date = to.date;
+        });
+      });
+    }
+    function mergeLessons(fromId, toId) {
+      if (!loaded || sess) throw new Error('Hãy kết thúc buổi học đang mở trước khi gộp.');
+      if (!BY_LESSON[fromId] || !BY_LESSON[toId] || fromId === toId) throw new Error('Chọn hai bài học khác nhau.');
+      var finalTo = mergeDestination(toId);
+      if (!finalTo || finalTo === fromId || mergeDestination(fromId) === finalTo) throw new Error('Không thể gộp một bài vào chính nó.');
+      put('merged', fromId, finalTo);
+      applyMergedLessons(); onData(); SYNC.flush();
+      return BY_LESSON[finalTo];
+    }
+    function unmergeLesson(fromId) {
+      if (!val('merged', fromId)) return;
+      put('merged', fromId, null);
+      applyMergedLessons(); onData(); SYNC.flush();
+    }
+    function openLessonSettings(L) {
+      var previous = document.getElementById('nhiLessonSettings'); if (previous) previous.remove();
+      var dlg = el('dialog', 'nhi-lesson-settings'); dlg.id = 'nhiLessonSettings';
+      dlg.setAttribute('aria-labelledby', 'nhiLessonSettingsTitle');
+      var form = el('div', 'nhi-lesson-settings-content');
+      var head = el('div', 'sheethead');
+      var heading = el('h2', null, '⚙ Cài đặt bài học'); heading.id = 'nhiLessonSettingsTitle';
+      head.appendChild(heading); head.appendChild(btn('ghost', '×', function () { dlg.close(); }));
+      form.appendChild(head);
+      form.appendChild(el('p', 'listinfo', vn(L.date, true) + ' · ' + titleMain(L)));
+      form.appendChild(btn('ghost', '✏️ Sửa tên và ngày học', function () { dlg.close(); openDailyEditor(L); }));
+      var separator = el('hr'); form.appendChild(separator);
+      form.appendChild(el('h3', null, 'Gộp bài học'));
+      var select = el('select', 'field'); select.setAttribute('aria-label', 'Chọn bài nhận thẻ');
+      select.appendChild(new Option('Chọn bài muốn gộp vào…', ''));
+      visibleLessons().filter(function (other) { return other.id !== L.id; })
+        .sort(function (a,b) { return b.date.localeCompare(a.date); }).forEach(function (other) {
+          var n = liveCount(other.ids);
+          select.appendChild(new Option(vn(other.date, true) + ' · ' + titleMain(other) + ' (' + n[0] + ' từ, ' + n[1] + ' câu)', other.id));
+        });
+      form.appendChild(select);
+      form.appendChild(el('p', 'listinfo', 'Thẻ, đánh dấu và ghi chú đều được giữ nguyên. Bài được gộp sẽ nằm trong bài đích và dùng lịch ôn của bài đích. Lịch sử ôn riêng của hai bài vẫn được lưu để có thể tách lại.'));
+      var error = el('p', 'notice'); error.setAttribute('role', 'alert'); form.appendChild(error);
+      var mergeButton = btn('primary', 'Gộp vào bài đã chọn', function () {
+        error.textContent = '';
+        if (!select.value) { error.textContent = 'Hãy chọn bài đích.'; return; }
+        var target = BY_LESSON[select.value]; if (!target) return;
+        if (!window.confirm('Gộp "' + titleMain(L) + '" vào "' + titleMain(target) + '"? Các thẻ được giữ nguyên, lịch ôn theo bài đích.')) return;
+        try {
+          var merged = mergeLessons(L.id, target.id);
+          dlg.close(); home(); openLesson(merged.id);
+          toast('Đã gộp bài. Có thể tách lại trong Cài đặt bài.');
+        } catch (ex) { error.textContent = ex.message; }
+      });
+      form.appendChild(mergeButton);
+      var sources = LESSONS.filter(function (other) { return other.id !== L.id && val('merged', other.id) && mergeDestination(other.id) === L.id; });
+      if (sources.length) {
+        form.appendChild(el('h3', null, 'Các bài đã gộp (' + sources.length + ')'));
+        sources.forEach(function (other) {
+          var line = el('div', 'nhi-merge-source-row');
+          line.appendChild(el('span', null, vn(other.date) + ' · ' + titleMain(other)));
+          line.appendChild(btn('ghost', 'Tách bài', function () {
+            unmergeLesson(other.id); dlg.close(); render(); toast('Đã tách bài ' + vn(other.date, true) + '.');
+          }));
+          form.appendChild(line);
+        });
+      }
+      dlg.appendChild(form); document.body.appendChild(dlg);
+      dlg.addEventListener('close', function () { dlg.remove(); }); dlg.showModal();
+    }
     function applyExtras(X) {
       if (!X || typeof X !== 'object') return;
       if (!loaded) { pendingExtras = Object.assign(pendingExtras || {}, X); return; }
+      resetMergedOwnership(); // Avoid accidentally replacing cards imported from a merged source.
       var changed = false;
       Object.keys(X).forEach(function (k) { var L = X[k]; if (!L || typeof L !== 'object' || k.charAt(0) === '_') return; var copy = { id: L.id || k, date: L.date, plan: L.plan || L.date, title: L.title || ('Bài ngày ' + vn(L.date)), items: normItems(L), extra: true, updatedAt: L.updatedAt || 0, sourceDeck: L.sourceDeck || '' }; if (validDate(copy.date) && (!dailyCache[k] || !dailyCache[k].updatedAt || copy.updatedAt >= dailyCache[k].updatedAt)) { dailyCache[k] = copy; if (addLesson(copy)) changed = true; } });
+      applyMergedLessons();
       if (changed) { cacheDaily(); DATES = LESSONS.map(function (L) { return L.date; }).filter(function (d, i, a) { return a.indexOf(d) === i; }).sort(); if (sess && sess.L && BY_LESSON[sess.L.id]) sess.L = BY_LESSON[sess.L.id]; onData(); if (!sess) { restoreSession(); route(); } }
     }
     function loadExtras() {
@@ -3032,6 +3180,7 @@ button,input,select,textarea{font-family:var(--ui)}
         loaded = true; loadErr = '';
         applyExtras(dailyCache);
         applyExtras(pendingExtras); pendingExtras = null;
+        applyMergedLessons();
         loadExtras();
         restoreSession();
         onData();
@@ -3077,7 +3226,7 @@ button,input,select,textarea{font-family:var(--ui)}
     // What is waiting today: lessons due, lessons overdue, cards in them, cards marked Khó
     function summary() {
       var due = [], late = [], cards = 0, upcoming = null;
-      LESSONS.forEach(function (L) {
+      visibleLessons().forEach(function (L) {
         var counts=liveCount(L.ids);if(!counts[0]&&!counts[1])return;
         var c = current(L); if (!c) return;
         if (c.st === 'today') { due.push(L); cards += ordered(L.ids).length; }
@@ -3203,7 +3352,8 @@ button,input,select,textarea{font-family:var(--ui)}
     /* ---- routing: #/bai/<id> opens a lesson as its own page ---- */
     function route() {
       var m = /^#\/bai\/([\w-]+)$/.exec(location.hash || '');
-      page = m && BY_LESSON[m[1]] ? m[1] : null;
+      page = m && BY_LESSON[m[1]] ? (mergeDestination(m[1]) || m[1]) : null;
+      if (m && page && page !== m[1]) history.replaceState(null, '', location.pathname + location.search + '#/bai/' + page);
       document.body.classList.toggle('plan-page', !!page);
       // A saved lesson deep link must always have the visible "plan" section.
       // The older route could leave .plan-page on the body while #view-plan was hidden,
@@ -3227,6 +3377,10 @@ button,input,select,textarea{font-family:var(--ui)}
       var previousScroll = window.scrollY || document.documentElement.scrollTop || 0;
       document.querySelector('#topbar .nhi-study-topbar')?.remove();
       document.body.classList.toggle('nhi-in-study',!!sess);
+      document.querySelectorAll('nav, footer, [role="navigation"]').forEach(function (candidate) {
+        var s = (candidate.textContent || '').replace(/\\s+/g, ' ');
+        if (/Hôm nay/.test(s) && /Lịch học/.test(s) && /Luyện tập/.test(s) && /Sổ tay/.test(s)) candidate.classList.add('nhi-hide-while-flipping');
+      });
       var v = $('planBox'); if (!v) return;
       // Resynchronize route and selected view before removing the previous card.
       if (state.mode !== 'plan') return;
@@ -3311,22 +3465,21 @@ button,input,select,textarea{font-family:var(--ui)}
     }
     function lessonRing(L, cls) { var r = ring(doneSteps(L) / OFFSETS.length, doneSteps(L) + '/5', cls); r.title = 'Đã học ' + doneSteps(L) + ' / 5 lần'; return r; }
     function lessonCard(L) {
-      var p = el('div', 'quiz plesson'); p.style.setProperty('--day', dayColor(L.date)); p.style.setProperty('--rc', dayColor(L.date));
-      p.appendChild(lessonRing(L));
-      var body = el('div', 'pbody'), c = liveCount(L.ids);
-      var a = el('a', 'ptitle', titleMain(L)); a.href = '#/bai/' + L.id; a.title = L.title; body.appendChild(a);
-      body.appendChild(topicTags(L));
-      body.appendChild(el('span', 'listinfo', c[0] + ' từ vựng · ' + c[1] + ' câu'));
-      p.appendChild(body);
-      var details=el('details','nhi-v2-review-details');
-      details.appendChild(el('summary',null,'Xem lịch ôn 5 lượt'));details.appendChild(chips(L));p.appendChild(details);
-      var finished=val('done',L.id)||[],partial=resumeFull[L.id];
-      if(finished.length)p.appendChild(el('p','nhi-v2-review-info','Ôn gần nhất: '+vn(finished[finished.length-1],true)));
-      if(partial&&partial.pos>0)p.appendChild(el('p','nhi-v2-review-info','✏️ Đang học dở · '+partial.pos+'/'+partial.queue.length+' thẻ'));
-      var row = el('div', 'prow'); row.appendChild(statusLine(L));
+      var p = el('div', 'nhi-compact-lesson'); p.dataset.lessonId = L.id;
+      p.style.setProperty('--day', dayColor(L.date));
+      var left = el('div', 'nhi-compact-copy');
+      // The day banner already shows the date and total vocabulary/sentences.
+      var title = titleMain(L);
+      if (!/^Bài ngày\s+\d{1,2}[.\/]\d{1,2}(?:[.\/]\d{4})?\s*$/i.test(title)) {
+        var a = el('a', 'ptitle', title); a.href = '#/bai/' + L.id; left.appendChild(a);
+      }
+      left.appendChild(topicTags(L, 3));
+      left.appendChild(statusLine(L));
+      var partial = resumeFull[L.id];
+      if (partial && partial.pos > 0) left.appendChild(el('small', 'nhi-compact-resume', '✏️ Đang học dở · ' + partial.pos + '/' + partial.queue.length));
+      p.appendChild(left);
       var rs = (resume[L.id] || []).filter(alive);
-      row.appendChild(btn('primary', rs.length ? 'Tiếp tục (' + rs.length + ' thẻ)' : 'Mở bài', function () { openLesson(L.id); }));
-      p.appendChild(row);
+      p.appendChild(btn('primary', rs.length ? 'Tiếp tục' : 'Mở bài', function () { openLesson(L.id); }));
       return p;
     }
     function startLesson(L) {
@@ -3361,9 +3514,12 @@ button,input,select,textarea{font-family:var(--ui)}
       box.appendChild(st);
       var act = el('div', 'tact');
       var first = s.late[0] || s.due[0];
-      if (first) act.appendChild(lbtn('primary white big', 'bolt', 'Học ngay', function () { startLesson(first); }));
+      if (first) act.appendChild(lbtn('primary white big nhi-v2-start', 'bolt', '▶ Bắt đầu học 10 phút', function () { startLesson(first); }));
       if (s.hard.length) act.appendChild(lbtn('ghostw', 'flip', 'Ôn lại các thẻ khó (' + s.hard.length + ')', function () { start('hard', s.hard, 'Ôn lại các thẻ khó'); }));
+      act.appendChild(btn('ghostw', '🗓 Xem lịch học', function () { view = 'days'; render(); }));
       box.appendChild(act);
+      var goal = el('div','nhi-v2-goal'); goal.innerHTML = '<b>🎯 Mục tiêu 10 phút</b><div class="nhi-v2-goal-track"><span></span></div><small>Thời gian được ghi nhận khi thực sự học</small>';
+      box.appendChild(goal);
       return box;
     }
     function allTopics() { var t = {}; Object.keys(ITEMS).forEach(function (id) { if (alive(id)) t[ITEMS[id].topic] = (t[ITEMS[id].topic] || 0) + 1; }); return Object.keys(t).sort(function (a, b) { return a.localeCompare(b, 'vi'); }); }
@@ -3396,21 +3552,16 @@ button,input,select,textarea{font-family:var(--ui)}
       var info=summary(),all=info.due.concat(info.late),seen={};
       all=all.filter(function(L){if(seen[L.id])return false;seen[L.id]=1;return true;});
       var banner=todayCard();banner.classList.add('nhi-v2-hero');v.appendChild(banner);
-      var intro=el('div','nhi-v2-intro');
-      intro.appendChild(el('p',null,'🌸 Một chút tiếng Hàn mỗi ngày, Nhi nhé!'));
-      var actions=el('div','nhi-v2-home-actions');
-      if(all.length)actions.appendChild(btn('primary nhi-v2-start','▶ Bắt đầu học 10 phút',function(){startLesson(all[0]);}));
-      else actions.appendChild(el('p','listinfo','Hôm nay không có bài đến hạn. Bạn có thể ôn lại những thẻ khó.'));
-      actions.appendChild(btn('ghost','🗓 Xem lịch học',function(){view='days';render();}));
-      intro.appendChild(actions);
-      var goal=el('div','nhi-v2-goal');goal.innerHTML='<b>🎯 Mục tiêu 10 phút</b><div class="nhi-v2-goal-track"><span></span></div><small>Thời gian được ghi nhận khi thực sự học</small>';
-      intro.appendChild(goal);v.appendChild(intro);
+      // No second greeting panel: the actions and goal are inside the Today hero.
       var group=el('section','nhi-v2-priorities');group.appendChild(el('h3',null,'🌟 3 bài ưu tiên'));
       if(!all.length)group.appendChild(el('p','listinfo','Các bài đã hoàn thành đang chờ lịch ôn tiếp theo.'));
       all.slice(0,3).forEach(function(L,i){
         var row=el('article','nhi-v2-priority'),copy=el('div');
+        row.style.setProperty('--day',dayColor(L.date));
+        row.style.setProperty('--tc',topicColor(topTopics(L,1)[0] || 'Từ thông dụng'));
         copy.appendChild(el('span','nhi-v2-order',String(i+1).padStart(2,'0')));
         var a=el('a','nhi-v2-priority-title',titleMain(L));a.href='#/bai/'+L.id;copy.appendChild(a);
+        copy.appendChild(topicTags(L,3));
         var n=liveCount(L.ids),r=resumeFull[L.id],est=Math.min(10,Math.max(2,Math.ceil(L.ids.length*.45)));
         copy.appendChild(el('p','listinfo',n[0]+' từ · '+n[1]+' câu · khoảng '+est+' phút'));
         copy.appendChild(statusLine(L));
@@ -3418,7 +3569,7 @@ button,input,select,textarea{font-family:var(--ui)}
         row.appendChild(copy);row.appendChild(btn('primary',r&&r.pos>0?'Tiếp tục':'Học',function(){startLesson(L);}));
         group.appendChild(row);
       });
-      group.appendChild(btn('ghost','Xem tất cả bài đến hạn ('+all.length+')',function(){view='days';render();}));v.appendChild(group);
+      group.appendChild(btn('ghost','Xem tất cả bài đến hạn ('+all.length+')',function(){view='overdue';render();}));v.appendChild(group);
       if(info.hard.length){var h=el('section','nhi-v2-hard-peek');h.appendChild(el('b',null,'🧠 '+info.hard.length+' thẻ khó'));
         h.appendChild(btn('ghost','Luyện thêm',function(){start('hard',info.hard,'Thẻ khó · Luyện thêm');}));v.appendChild(h);}
       var browse=el('details','nhi-v2-browse');browse.appendChild(el('summary',null,'📚 Duyệt học phần và chủ đề'));
@@ -3426,8 +3577,31 @@ button,input,select,textarea{font-family:var(--ui)}
       [['days','Lịch học'],['topics','Chủ đề'],['months','Tháng']].forEach(function(x){links.appendChild(btn('ghost',x[1],function(){view=x[0];render();}));});
       browse.appendChild(links);v.appendChild(browse);
     }
+    function renderDueList(v) {
+      var all = summary(), arr = all.late.concat(all.due);
+      var wrap = el('section', 'nhi-due-list');
+      var header = el('div', 'nhi-due-list-head');
+      header.appendChild(el('h2', null, 'Bài đến hạn (' + arr.length + ')'));
+      header.appendChild(btn('ghost', '← Hôm nay', function () { view='home'; render(); }));
+      wrap.appendChild(header);
+      if (!arr.length) wrap.appendChild(el('p', 'listinfo', 'Hiện không có bài đến hạn.'));
+      arr.sort(function (a, b) { return current(a).due.localeCompare(current(b).due); });
+      arr.forEach(function (L) {
+        var c = liveCount(L.ids), cur = current(L), d = cur ? daysBetween(cur.due, today()) : 0;
+        var line = el('a', 'nhi-due-row'); line.href='#/bai/'+L.id;
+        line.style.setProperty('--day',dayColor(L.date));
+        var name = el('div', 'nhi-due-name');
+        name.appendChild(el('b', null, vn(L.date, true) + ' · ' + titleMain(L)));
+        name.appendChild(el('small', null, d > 0 ? 'Quá hạn ' + d + ' ngày' : 'Đến hạn hôm nay'));
+        line.appendChild(name);
+        line.appendChild(el('span', 'nhi-due-count', c[0] + ' từ · ' + c[1] + ' câu'));
+        wrap.appendChild(line);
+      });
+      v.appendChild(wrap);
+    }
     function renderHome(v, fresh) {
       if(view==='home'){renderDashboard(v);return;}
+      if(view==='overdue'){renderDueList(v);return;}
       if (fresh) v.classList.add('stagger');
       v.appendChild(todayCard());
       var tools = el('div', 'ptools'), sb = el('div', 'psearch');
@@ -3457,7 +3631,7 @@ button,input,select,textarea{font-family:var(--ui)}
       // Show a lesson in Cần học only on its review due date or when overdue.
       var active=[],waiting=[],threshold=today();
       var notYetScheduled=0;
-      LESSONS.forEach(function(L){
+      visibleLessons().forEach(function(L){
         var counts=liveCount(L.ids);
         if(!counts[0]&&!counts[1])return;
         var next=current(L);
@@ -3470,14 +3644,17 @@ button,input,select,textarea{font-family:var(--ui)}
       function groupedCards(target,entries) {
         var by={};entries.forEach(function(L){(by[L.date]=by[L.date]||[]).push(L);});
         Object.keys(by).sort().reverse().forEach(function(date){
-          var group=el('section','day-group'),ls=by[date],ids=[];
+          var group=el('section','day-group nhi-day-combined'),ls=by[date],ids=[];
+          group.style.setProperty('--day',dayColor(date));
           ls.forEach(function(L){ids=ids.concat(L.ids);});
           var c=liveCount(ids),label=el('div','pday');label.style.setProperty('--day',dayColor(date));
           label.appendChild(el('b',null,vn(date,true)));
           label.appendChild(el('span','wd',WEEKDAY[parse(date).getDay()]));
           label.appendChild(el('span',null,c[0]+' từ vựng · '+c[1]+' câu'));
           group.appendChild(label);
-          ls.forEach(function(L){group.appendChild(lessonCard(L));});
+          var lessonRows=el('div','nhi-day-lessons');
+          ls.forEach(function(L){lessonRows.appendChild(lessonCard(L));});
+          group.appendChild(lessonRows);
           target.appendChild(group);
         });
       }
@@ -3512,7 +3689,7 @@ button,input,select,textarea{font-family:var(--ui)}
       v.appendChild(g);
     }
     function renderMonths(v) {
-      var months = {}; LESSONS.forEach(function (L) { var k = L.date.slice(0, 7); (months[k] = months[k] || []).push(L); });
+      var months = {}; visibleLessons().forEach(function (L) { var k = L.date.slice(0, 7); (months[k] = months[k] || []).push(L); });
       Object.keys(months).sort().reverse().forEach(function (k) {
         var ids = [], dates = {}; months[k].forEach(function (L) { ids = ids.concat(L.ids); dates[L.date] = 1; });
         var g = grouped(ids), p = el('div', 'quiz'), c = liveCount(ids);
@@ -3578,7 +3755,8 @@ button,input,select,textarea{font-family:var(--ui)}
       hero.appendChild(ht); hero.appendChild(lessonRing(L, 'lg'));
       wrap.appendChild(hero);
       var hd = el('div', 'quiz');
-      var t=el('details','nhi-v2-review-details');t.appendChild(el('summary',null,'Xem đủ 5 mốc ôn'));t.appendChild(chips(L));hd.appendChild(t);
+      hd.appendChild(el('h3','nhi-v2-review-heading','🗓 Lịch học và ôn · 5 mốc'));
+      hd.appendChild(chips(L));
       var row = el('div', 'prow'), cur = current(L); row.appendChild(statusLine(L));
       hd.appendChild(row);
       var rs = (resume[L.id] || []).filter(alive);
@@ -3595,7 +3773,7 @@ button,input,select,textarea{font-family:var(--ui)}
       });
       if(notDue&&!alreadyStudied&&!rs.length){launch.disabled=true;launch.title='Bài mới sẽ mở học vào đúng ngày đến hạn';}
       row2.appendChild(launch);
-      row2.appendChild(lbtn('ghost', 'edit', 'Sửa tên học phần', function () { openDailyEditor(L); }));
+      row2.appendChild(lbtn('ghost', 'edit', '⚙ Cài đặt bài', function () { openLessonSettings(L); }));
       var hd2 = hardIds(L.ids);
       if (hd2.length) row2.appendChild(lbtn('ghost', 'flip', 'Ôn lại thẻ khó (' + hd2.length + ')', function () { start('hard', hd2, L.title + ' · thẻ khó', L); }));
       var enids=L.ids.filter(function(id){return alive(id)&&val('enHard',id);});if(enids.length)row2.appendChild(btn('ghost','Ôn chưa nhớ tiếng Anh ('+enids.length+')',function(){start('english',enids,L.title+' · chưa nhớ tiếng Anh',L);}));
@@ -4203,10 +4381,10 @@ button,input,select,textarea{font-family:var(--ui)}
         if (full) Object.keys(ps[sec]).forEach(function (k) { if (!rem[k]) SYNC.queue('L/' + sec + '/' + k, ps[sec][k]); });
       });
       edits.forEach(applyEd);
-      if (changed) { save(); onData(); if (state.mode === 'plan' && !sess) render(); }
+      if (changed) { applyMergedLessons(); save(); onData(); if (state.mode === 'plan' && !sess) render(); }
     }
     function snapshotV2(){
-      return {lessons:LESSONS.map(function(L){
+      return {lessons:visibleLessons().map(function(L){
         var cur=current(L),done=val('done',L.id)||[],r=resumeFull[L.id]||{};
         return {id:L.id,date:L.date,title:titleMain(L),sourceTitle:L.title,
           due:cur&&cur.due||null,round:cur&&cur.step||0,status:cur&&cur.st||'done',
