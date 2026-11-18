@@ -30,16 +30,22 @@ try{
  await page.waitForFunction(()=>window.NHI_PLAN_V2?.snapshot?.().lessons.length>10,{timeout:24000});
  await page.$eval('#nhiV2TopNav [data-v2-nav="today"]',e=>e.click());
  await page.waitForSelector('#planBox .nhi-v2-priorities');
- await check('Today layout and buttons',async()=>{
+ await check('Integrated Today: one goal and one Học ngay button',async()=>{
   return await page.evaluate(()=>{
-   const b=document.querySelector('#planBox .nhi-v2-hero');
-   const heroText=(b?.textContent||'');
-   const shortcut=document.querySelector('#planBox .nhi-today-secondary .nhi-calendar-shortcut');
-   if(!b||!shortcut)throw Error('Today hero or calendar shortcut missing');
-   if(/Ôn lại các thẻ khó|Xem lịch học/.test(heroText))throw Error('Removed actions remain inside hero');
-   if(!/Bắt đầu học 10 phút/.test(heroText))throw Error('Start button missing');
-   if(!document.querySelector('#planBox .nhi-goal-tile'))throw Error('Goal tile missing');
-   return 'hero=start only, calendar shortcut and goal are outside';
+   const hero=document.querySelector('#planBox .nhi-v2-hero');
+   if(!hero)throw Error('Today hero missing');
+   if(document.querySelector('#planBox .nhi-today-secondary, #planBox .nhi-goal-tile, #planBox .nhi-calendar-shortcut'))
+    throw Error('Old standalone white goal/calendar tiles remain');
+   const goal=hero.querySelector('.nhi-goal-inline .nhi-v2-goal-track span');
+   const count=hero.querySelector('.nhi-goal-count');
+   const buttons=[...hero.querySelectorAll('button')].filter(x=>x.textContent.includes('Học ngay'));
+   if(!goal||!count)throw Error('10-minute progress is not embedded in the blue hero');
+   if(buttons.length!==1)throw Error('Expected exactly one Học ngay CTA in the hero');
+   if(!/Học ngay/.test(hero.textContent))throw Error('Missing study action');
+   if(/Xem ngày học và lịch ôn|Ôn lại các thẻ khó/.test(hero.textContent))throw Error('Removed actions still in hero');
+   if(getComputedStyle(buttons[0]).display==='none'||buttons[0].getBoundingClientRect().height<34)
+    throw Error('Learn CTA is hidden or too small');
+   return 'No standalone tiles; goal and visible Học ngay inside hero';
   });
  });
  await check('Priority palettes and topic badges',async()=>{
@@ -64,8 +70,14 @@ try{
    if(cards.some(c=>c.querySelector('.psched')||/Xem lịch ôn 5 lượt/.test(c.textContent)))throw Error('Calendar duplicates review dates');
    if(cards.some(c=>/\b\d+ từ vựng · \d+ câu\b/.test(c.textContent)))throw Error('Counts repeated in white card');
    if(cards.some(c=>/Bài ngày\s+\d{1,2}\.\d{1,2}/.test(c.textContent)))throw Error('Date text repeated in white card');
+   if(cards.some(c=>c.querySelectorAll('.nhi-next-review').length!==1))throw Error('Expected one next-review date line per card');
+   if(cards.some(c=>c.querySelector('.pstatus,.nhi-compact-resume')))throw Error('Status/unfinished labels make the compact card too tall');
+   if(cards.some(c=>!/Lượt [2-5]\/5|Đã hoàn thành đủ 5 lượt/.test(c.querySelector('.nhi-next-review')?.textContent||'')))
+     throw Error('Missing next review round/date');
+   const heights=cards.slice(0,8).map(c=>Math.round(c.getBoundingClientRect().height));
+   if(Math.max(...heights)>200)throw Error('White lesson card is still too tall: '+heights.join(','));
    const box=getComputedStyle(cards[0]);
-   return groups.length+' day groups / '+cards.length+' white cards / background '+box.backgroundColor;
+   return groups.length+' day groups / '+cards.length+' compact cards / heights '+heights.join(',')+' / '+box.backgroundColor;
   });
  });
  await check('Lesson details list five dates',async()=>{
@@ -119,6 +131,13 @@ try{
    });
   }
  }
+ await page.setViewport({width:390,height:840});
+ await page.$eval('#nhiV2TopNav [data-v2-nav="calendar"]',e=>e.click());
+ await check('Calendar card compact at phone width',async()=>{
+  const heights=await page.$$eval('#planBox .nhi-plan-current .nhi-lesson-white',cs=>cs.slice(0,5).map(c=>Math.round(c.getBoundingClientRect().height)));
+  assert(heights.length&&Math.max(...heights)<=250,'Tall mobile cards: '+heights.join(','));
+  return JSON.stringify(heights);
+ });
  await page.setViewport({width:1360,height:880});
  await check('Study card hides 7-item navigation',async()=>{
   await page.$eval('#nhiV2TopNav [data-v2-nav="today"]',x=>x.click());

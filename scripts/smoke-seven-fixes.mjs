@@ -153,10 +153,11 @@ try{
   const missed=await cal.evaluate(id=>{
    const card=document.querySelector('#planBox .nhi-plan-current [data-lesson-id="'+id+'"]');
    return {compact:!!card,hasDuplicateChips:!!card?.querySelector('.pchip'),
-     line:card?.querySelector('.pstatus')?.textContent||''};
+     next:card?.querySelector('.nhi-next-review')?.textContent||'',
+     extra:!!card?.querySelector('.pstatus')};
   },lesson.id);
-  assert(missed.compact&&!missed.hasDuplicateChips,'Calendar must have compact rows without duplicate milestones');
-  assert(missed.line.includes('4 lượt cần học'),'Missing count of overdue review rounds');
+  assert(missed.compact&&!missed.hasDuplicateChips&&!missed.extra,'Calendar must have one compact next-review footer');
+  assert(missed.next.includes('Lượt 2/5'),'Calendar should show next-review round 2 date');
   // Verify five milestones on the detail page, not inside calendar rows.
   await cal.$eval('#planBox .nhi-plan-current [data-lesson-id="'+lesson.id+'"] button.primary',e=>e.click());
   await cal.waitForSelector('#planBox .phero');
@@ -167,6 +168,8 @@ try{
   }));
   assert(visibleReviews.late===4&&visibleReviews.done===1&&visibleReviews.total===5,
     'Four overdue reviews must appear in the lesson detail: '+JSON.stringify(visibleReviews));
+  const detailsStatus=await cal.$eval('#planBox .ppage .pstatus',x=>x.textContent);
+  assert(detailsStatus.includes('4 lượt cần học'),'Overdue review count must remain in detail page');
   const afterOpening=await cal.evaluate(id=>JSON.parse(localStorage.getItem('viko-plan-v1')).done?.[id]?.v.length,lesson.id);
   assert(afterOpening===1,'Opening lesson detail falsely marked it studied');
   // Starting and pausing an incomplete session must not complete any round.

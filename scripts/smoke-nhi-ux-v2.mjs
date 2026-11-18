@@ -27,8 +27,10 @@ try{
  await page.$eval('#nhiV2TopNav [data-v2-nav="today"]',e=>e.click());
  await page.waitForSelector('#planBox .nhi-v2-priorities');
  assert(await page.$$eval('#planBox .nhi-v2-priority',es=>es.length)<=3,'Dashboard exceeded 3 priority lessons');
- assert(!!await page.$('#planBox .nhi-today-secondary .nhi-calendar-shortcut'),'Calendar shortcut missing outside Today banner');
- assert(!await page.$('#planBox .nhi-v2-hero .ghostw'),'Calendar/hard card buttons should not be inside Today banner');
+ assert(!!await page.$('#planBox .nhi-v2-hero .nhi-goal-inline .nhi-v2-goal-track'),'Goal should be inside Today hero');
+ assert(!await page.$('#planBox .nhi-today-secondary, #planBox .nhi-calendar-shortcut'),'Separate white Today tiles should be gone');
+ const learn=await page.$eval('#planBox .nhi-hero-start',e=>({text:e.textContent,visible:getComputedStyle(e).display!=='none'&&e.getBoundingClientRect().height>36}));
+ assert(learn.visible&&learn.text.includes('Học ngay'),'Học ngay must be visible and clickable');
  const priorityColors=await page.$$eval('#planBox .nhi-v2-priority',es=>es.map(e=>e.style.getPropertyValue('--priority-color')));
  assert(priorityColors.length<=1||new Set(priorityColors).size===priorityColors.length,'Priority lesson colors are repeated');
  assert(!!await page.$('#planBox .nhi-v2-start'),'No 10-minute CTA');
@@ -37,6 +39,22 @@ try{
  await page.waitForSelector('#planBox .nhi-plan-current');
  assert(!!await page.$('#planBox .nhi-plan-waiting'),'Missing waiting panel');
  assert(!!await page.$('#planBox .nhi-day-separated .nhi-lesson-white'),'Missing separate white lesson cards');
+ const card=await page.$eval('#planBox .nhi-plan-current .nhi-lesson-white',e=>({
+  height:e.getBoundingClientRect().height,
+  width:e.getBoundingClientRect().width,
+  layout:getComputedStyle(e).display,
+  gridRows:getComputedStyle(e).gridTemplateRows,
+  gridColumns:getComputedStyle(e).gridTemplateColumns,
+  next:e.querySelector('.nhi-next-review')?.textContent||'',
+  hiddenDetails:!!e.querySelector('.pstatus,.nhi-compact-resume'),
+  children:[...e.children].map(x=>({
+    cls:x.className?.baseVal||x.className,
+    height:Math.round(x.getBoundingClientRect().height),
+    width:Math.round(x.getBoundingClientRect().width),
+    grid:getComputedStyle(x).gridArea
+  }))
+ }));
+ assert(card.height<=200&&card.next.includes('Lượt')&&!card.hiddenDetails,'Calendar card should be compact with only next-review footer: '+JSON.stringify(card));
  assert(!await page.$('#planBox .nhi-day-combined'),'Calendar still has combined day cards');
  assert(!await page.$('#planBox .nhi-v2-hero'),'Calendar should not repeat the Today hero');
  assert(!await page.$('#planBox .nhi-v2-review-details'),'Calendar still duplicates the five review dates');
