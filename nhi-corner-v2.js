@@ -91,6 +91,8 @@ function route(next){
 }
 function goBack(){
  const current=location.hash;
+ // Always return from lesson details to the calendar, regardless of history.
+ if(/^#\/bai\//.test(current)){location.hash='#/lich-hoc';return;}
  if(!current||current==='#/hom-nay'){location.hash='#/bia';return;}
  let target=previousRoutes.pop();
  if(!target||target===current||target==='#/bia')target=/^#\/bai\//.test(current)?'#/lich-hoc':'#/hom-nay';
@@ -261,14 +263,16 @@ function nav(){
  if($('#nhiV2TopNav'))return;
  const bar=document.createElement('nav');bar.id='nhiV2TopNav';bar.className='nhi-v2-top';bar.setAttribute('aria-label','Điều hướng chính');
  const back=document.createElement('button');back.id='nhiV2Back';back.type='button';
- back.textContent='← Trở về';back.title='Về trang trước (hoặc Hôm nay)';back.addEventListener('click',goBack);bar.appendChild(back);
+ back.textContent='←';back.title='Quay lại';back.setAttribute('aria-label','Quay lại');back.addEventListener('click',goBack);bar.appendChild(back);
+ const tabs=document.createElement('div');tabs.className='nhi-v2-nav-tabs';
  const opts=[['today','🏠 Hôm nay'],['calendar','🗓 Lịch học'],['practice','🧩 Luyện tập'],
   ['notebook','📒 Sổ tay'],['progress','📈 Tiến độ'],['search','🔎 Tìm kiếm'],['chat','💬 Hỏi AI']];
  opts.forEach(([id,label])=>{
   const a=document.createElement('a');a.dataset.v2Nav=id;a.href=ROUTES[id];a.textContent=label;
   a.addEventListener('click',e=>{if(e.button!==0||e.metaKey||e.ctrlKey||e.altKey||e.shiftKey)return;e.preventDefault();route(id);});
-  bar.appendChild(a);
+  tabs.appendChild(a);
  });
+ bar.appendChild(tabs);
  $('#topbar').after(bar);
  const workspace=document.createElement('section');workspace.id='nhiV2Workspace';workspace.hidden=true;
  workspace.setAttribute('aria-live','polite');$('#app').insertBefore(workspace,$('#app').firstChild);

@@ -120,7 +120,7 @@ try{
    // A hash-only navigation does not reload the app's in-memory progress.
    await cal.reload({waitUntil:'domcontentloaded'});
    await cal.waitForSelector('#planBox .ppage',{timeout:15000});
-   await cal.$eval('#planBox .pback',e=>e.click());
+   await cal.$eval('#nhiV2Back',e=>e.click());
    await cal.$eval('#nhiV2TopNav [data-v2-nav="calendar"]',e=>e.click());
    await cal.waitForSelector('#planBox .nhi-plan-waiting',{timeout:10000});
    return cal.evaluate(id=>({

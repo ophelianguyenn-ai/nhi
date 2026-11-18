@@ -81,6 +81,21 @@ try{
   await page.setViewport({width:1360,height:880});
   return JSON.stringify(results);
  });
+ await check('Seven navigation links centered independent of arrow',async()=>{
+  const v=await page.evaluate(()=>{
+   const nav=document.getElementById('nhiV2TopNav'),tabs=nav?.querySelector('.nhi-v2-nav-tabs');
+   const back=nav?.querySelector('#nhiV2Back');
+   if(!nav||!tabs||!back)throw Error('Navigation shell is incomplete');
+   const nr=nav.getBoundingClientRect(),tr=tabs.getBoundingClientRect();
+   return {count:tabs.querySelectorAll('[data-v2-nav]').length,
+    centering:Math.round((tr.left+tr.right-nr.left-nr.right)/2),
+    arrow:back.textContent.trim(),
+    label:back.getAttribute('aria-label')};
+  });
+  assert(v.count===7&&Math.abs(v.centering)<=12,'Navigation is not centered: '+JSON.stringify(v));
+  assert(v.arrow==='←'&&v.label==='Quay lại','Back button must show only an accessible arrow: '+JSON.stringify(v));
+  return JSON.stringify(v);
+ });
  await check('Priority palettes and topic badges',async()=>{
   const d=await page.$$eval('#planBox .nhi-v2-priority',es=>es.map(e=>({
    color:e.style.getPropertyValue('--priority-color'),
@@ -177,6 +192,50 @@ try{
   assert(count===5,'Expected 5 milestones, saw '+count);
   return '5 review dates visibly rendered';
  });
+ await check('Random phrase colors match both languages and never use half-fill underline',async()=>{
+  const result=await page.evaluate(()=>{
+    const rows=[...document.querySelectorAll('#planBox .pitems li[data-item]')];
+    let first=null;
+    for(const row of rows){
+      const vi=[...row.querySelectorAll('.pvi .ph.tap')],ko=[...row.querySelectorAll('.pko .ph.tap')];
+      const match=vi.find(x=>ko.some(y=>y.dataset.hi===x.dataset.hi));
+      if(match){first={id:row.dataset.item,pair:match.dataset.hi};break;}
+    }
+    if(!first)throw Error('No paired Vietnamese-Korean phrase found in lesson detail');
+    const results=[];
+    for(let i=0;i<10;i++){
+      const row=document.querySelector('#planBox .pitems li[data-item="'+first.id+'"]');
+      const selector=(i%2?'.pko':'.pvi')+' .ph.tap[data-hi="'+first.pair+'"]';
+      const trigger=row.querySelector(selector);
+      if(!trigger)throw Error('One language lost its clickable phrase');
+      trigger.click();
+      const updated=document.querySelector('#planBox .pitems li[data-item="'+first.id+'"]');
+      const vi=updated.querySelector('.pvi .ph.tap[data-hi="'+first.pair+'"]');
+      const ko=updated.querySelector('.pko .ph.tap[data-hi="'+first.pair+'"]');
+      const v=getComputedStyle(vi),k=getComputedStyle(ko);
+      results.push({color:v.color,koColor:k.color,selected:vi.classList.contains('nhi-phrase-selected')&&ko.classList.contains('nhi-phrase-selected'),
+        background:v.backgroundColor,gradient:v.backgroundImage,decoration:v.textDecorationLine});
+    }
+    return {...first,results};
+  });
+  const x=result.results;
+  assert(x.length===10&&x.every(z=>z.selected&&z.color===z.koColor),
+   'Paired languages do not always have matching colors: '+JSON.stringify(result));
+  assert(x.every(z=>z.background==='rgba(0, 0, 0, 0)'&&z.gradient==='none'&&z.decoration==='none'),
+   'A phrase still uses painted or underlined background: '+JSON.stringify(result));
+  assert(x.every((z,i)=>!i||z.color!==x[i-1].color),'Two consecutive taps chose the same color');
+  assert(new Set(x.map(z=>z.color)).size>=3,'Repeated taps did not sample diverse colors');
+  await page.reload({waitUntil:'domcontentloaded'});
+  await page.waitForSelector('#planBox .ppage .pitems li[data-item]',{timeout:15000});
+  const saved=await page.evaluate(x=>{
+    const row=document.querySelector('#planBox .pitems li[data-item="'+x.id+'"]');
+    const vi=row?.querySelector('.pvi .ph.tap[data-hi="'+x.pair+'"]');
+    const ko=row?.querySelector('.pko .ph.tap[data-hi="'+x.pair+'"]');
+    return {vi:vi?getComputedStyle(vi).color:'',ko:ko?getComputedStyle(ko).color:''};
+  },result);
+  assert(saved.vi===x.at(-1).color&&saved.ko===saved.vi,'Random pair color was lost on reload: '+JSON.stringify(saved));
+  return 'Ten random recolors, both languages synchronized, no underline/background, persistence on reload';
+ });
  await check('Lesson merge settings',async()=>{
   await page.$eval('#planBox .ppage button',()=>{
    const b=[...document.querySelectorAll('#planBox .ppage button')].find(x=>x.textContent.includes('Cài đặt bài'));
@@ -187,6 +246,21 @@ try{
   assert(n>1,'No merge destination choices');
   await page.$eval('#nhiLessonSettings .sheethead button',b=>b.click());
   return (n-1)+' candidate merge targets';
+ });
+ await check('Lesson detail uses only global back arrow to Calendar',async()=>{
+  const ui=await page.evaluate(()=>({
+   hasOldPill:!!document.querySelector('#planBox .ppage .pback'),
+   arrow:document.querySelector('#nhiV2Back')?.textContent.trim(),
+   arrowLabel:document.querySelector('#nhiV2Back')?.getAttribute('aria-label'),
+   hash:location.hash
+  }));
+  assert(!ui.hasOldPill&&ui.arrow==='←'&&ui.arrowLabel==='Quay lại','Old Lịch học pill still shown: '+JSON.stringify(ui));
+  assert(ui.hash.startsWith('#/bai/'),'Not in lesson detail before returning');
+  await page.$eval('#nhiV2Back',button=>button.click());
+  await page.waitForFunction(()=>location.hash==='#/lich-hoc'&&!!document.querySelector('#planBox .nhi-plan-current'),{timeout:11000});
+  const active=await page.$eval('#nhiV2TopNav [data-v2-nav="calendar"]',x=>x.getAttribute('aria-current'));
+  assert(active==='page','Calendar tab not active after lesson back');
+  return 'Lesson detail → Calendar, no redundant pill';
  });
  // Browse all primary sections (data-only; tests never send API requests).
  for(const [id,selector] of [
