@@ -213,16 +213,30 @@ try{
       const vi=updated.querySelector('.pvi .ph.tap[data-hi="'+first.pair+'"]');
       const ko=updated.querySelector('.pko .ph.tap[data-hi="'+first.pair+'"]');
       const v=getComputedStyle(vi),k=getComputedStyle(ko);
-      results.push({color:v.color,koColor:k.color,selected:vi.classList.contains('nhi-phrase-selected')&&ko.classList.contains('nhi-phrase-selected'),
+      results.push({color:v.color,koColor:k.color,
+        viSelected:vi.classList.contains('nhi-phrase-selected'),koSelected:ko.classList.contains('nhi-phrase-selected'),
         background:v.backgroundColor,koBackground:k.backgroundColor,gradient:v.backgroundImage,decoration:v.textDecorationLine,breakMode:v.boxDecorationBreak});
     }
     return {...first,results};
   });
   const x=result.results;
-  assert(x.length===10&&x.every(z=>z.selected&&z.color===z.koColor),
-   'Paired languages do not always have matching colors: '+JSON.stringify(result));
-  assert(x.every(z=>z.background&&z.background!=='rgba(0, 0, 0, 0)'&&z.background!=='transparent'&&z.background===z.koBackground),
-   'Selected phrases must have matching opaque highlights, not text-only colors: '+JSON.stringify(result));
+  assert(x.length===10&&x.every(z=>z.viSelected===z.koSelected&&z.color===z.koColor&&z.background===z.koBackground),
+   'Paired languages must have identical colors and transparent state: '+JSON.stringify(result));
+  assert(x.every(z=>z.viSelected
+    ? z.background&&z.background!=='rgba(0, 0, 0, 0)'&&z.background!=='transparent'
+    : z.background==='rgba(0, 0, 0, 0)'||z.background==='transparent'),
+   'Colored pairs must be filled and transparent pairs must be unpainted: '+JSON.stringify(result));
+  const palette=await page.evaluate(()=>{
+    const css=getComputedStyle(document.documentElement);
+    return Array.from({length:8},(_,i)=>css.getPropertyValue('--nhi-pair-'+(i+1)).trim());
+  });
+  assert(palette.slice(0,7).every(Boolean)&&!palette[7],
+   'Expected exactly seven pastel highlighter colors: '+JSON.stringify(palette));
+  assert(palette.slice(0,7).every(c=>{
+    const rgb=c.match(/^#([0-9a-f]{6})$/i);if(!rgb)return false;
+    const channels=[0,2,4].map(i=>parseInt(rgb[1].slice(i,i+2),16));
+    return Math.min(...channels)>=180;
+  }),'All seven highlighter colors should be light pastels: '+JSON.stringify(palette));
   assert(x.every(z=>z.gradient==='none'&&z.decoration==='none'&&z.breakMode==='clone'),
    'Highlight must cover the full phrase without gradient or underline: '+JSON.stringify(result));
   assert(x.every((z,i)=>!i||z.background!==x[i-1].background),'Consecutive taps reused the same background');
@@ -236,7 +250,7 @@ try{
     return {vi:vi?getComputedStyle(vi).backgroundColor:'',ko:ko?getComputedStyle(ko).backgroundColor:''};
   },result);
   assert(saved.vi===x.at(-1).background&&saved.ko===saved.vi,'Random pair highlight lost on reload: '+JSON.stringify(saved));
-  return 'Ten random solid backgrounds, both languages synchronized, no underline or half-fill, persists after reload';
+  return 'Seven pastel colors plus transparent, no immediate repeats, VI–KO synchronized, persists after reload';
  });
  await check('Lesson merge settings',async()=>{
   await page.$eval('#planBox .ppage button',()=>{
