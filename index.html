@@ -951,6 +951,87 @@ body.nhi-in-study #nhiV2TopNav,body.nhi-in-study .nhi-hide-while-flipping,body.n
 }
 
 #nhiV2Back[hidden]{display:none!important}
+
+/* Follow-up: no outer halo around selected tab. Keep a soft fill and keyboard focus. */
+#nhiV2TopNav [data-v2-nav][aria-current="page"]{
+  background:#dff2fa!important;
+  color:#126d91!important;
+  border:1px solid #9ad7e9!important;
+  box-shadow:none!important;
+  transform:none!important;
+}
+#nhiV2TopNav [data-v2-nav][aria-current="page"]:hover{
+  background:#d2edf8!important;
+  box-shadow:0 5px 12px rgba(24,91,125,.12)!important;
+}
+#nhiV2TopNav [data-v2-nav]:focus-visible{
+  outline:2px solid var(--accent-d);outline-offset:3px;
+}
+/* Give each date card visibly more breathing room without breaking 3 dates per row. */
+#planBox .nhi-plan-current .days-grid,
+#planBox .nhi-plan-waiting .days-grid{
+  column-gap:20px!important;
+  row-gap:27px!important;
+}
+#planBox .nhi-day-separated{gap:10px!important}
+#planBox .nhi-day-separated .nhi-day-lessons{gap:12px!important}
+@media(max-width:730px){
+  #planBox .nhi-plan-current .days-grid,
+  #planBox .nhi-plan-waiting .days-grid{column-gap:14px!important;row-gap:21px!important}
+}
+/* A color-coded round number (1 green, 2 pink, 3 purple, 4 amber, 5 blue). */
+#planBox .nhi-lesson-white>.nhi-next-review{
+  gap:8px!important;align-items:center!important;
+}
+#planBox .nhi-review-round{
+  --review-ink:#2b7858;
+  --review-wash:#dff4e8;
+  display:inline-grid;place-items:center;flex:0 0 25px;
+  width:25px;height:25px;
+  border-radius:50%;
+  font:850 13px/1 var(--ui,system-ui);
+  color:var(--review-ink);
+  background:var(--review-wash);
+  border:1px solid color-mix(in srgb,var(--review-ink) 35%,transparent);
+}
+#planBox .nhi-review-round-1{--review-ink:#1c835c;--review-wash:#daf5e7}
+#planBox .nhi-review-round-2{--review-ink:#b84680;--review-wash:#fce2ef}
+#planBox .nhi-review-round-3{--review-ink:#8554b6;--review-wash:#efe3fb}
+#planBox .nhi-review-round-4{--review-ink:#a87520;--review-wash:#fff0cb}
+#planBox .nhi-review-round-5{--review-ink:#2878a6;--review-wash:#deeffb}
+#planBox .nhi-review-completed{font-size:15px;color:#22845c;font-weight:900}
+/* The CTA stays alongside the due/overdue badges and reads blue on white. */
+#planBox .nhi-calendar-hero.nhi-v2-hero .nhi-hero-activity .nhi-hero-start{
+  background:#fff!important;
+  color:#176d92!important;
+  border:1.5px solid #fff!important;
+  box-shadow:0 4px 0 rgba(37,112,149,.23)!important;
+  text-shadow:none!important;
+  font-weight:900!important;
+  letter-spacing:.01em;
+}
+#planBox .nhi-calendar-hero.nhi-v2-hero .nhi-hero-activity .nhi-hero-start:hover{
+  background:#f2fbff!important;
+  color:#095b82!important;
+  box-shadow:0 6px 14px rgba(18,100,141,.19)!important;
+}
+@media(max-width:570px){
+  #planBox .nhi-calendar-hero.nhi-v2-hero .nhi-hero-activity{
+    flex-wrap:wrap;align-items:center;
+  }
+  #planBox .nhi-calendar-hero.nhi-v2-hero .nhi-hero-activity .tstats{
+    flex:1 1 auto;min-width:0;
+  }
+  #planBox .nhi-calendar-hero.nhi-v2-hero .nhi-hero-activity .nhi-hero-start{
+    flex:0 0 auto!important;
+    width:auto!important;
+    min-width:104px!important;
+    min-height:41px!important;
+    padding:0 12px!important;
+    font-size:12px!important;
+  }
+}
+
 </style>
 </head>
 <body>
@@ -3730,23 +3811,22 @@ body.nhi-in-study #nhiV2TopNav,body.nhi-in-study .nhi-hide-while-flipping,body.n
       var continuing=!!(saved&&saved.pos>0)||!!rs.length;
       p.appendChild(btn('primary',continuing?'Tiếp tục':'Mở bài',function(){openLesson(L.id);}));
       var footer=el('div','nhi-next-review'),completed=doneSteps(L);
-      footer.appendChild(el('span','nhi-review-symbol','🗓️'));
       if(completed>=OFFSETS.length){
-        footer.appendChild(el('span','nhi-review-symbol','✅'));
+        footer.appendChild(el('span','nhi-review-completed','✓'));
+        footer.appendChild(el('span',null,'Đã hoàn thành 5/5 lượt'));
         footer.setAttribute('aria-label','Đã hoàn thành cả năm lượt học và ôn');
         footer.title='Đã hoàn thành cả 5 lượt học và ôn';
         footer.classList.add('completed');
       }else{
         var nextDate,round=completed+1,isProjected=completed===0;
         if(isProjected){
-          // No invented completed first round: show an explicitly *estimated* second date.
+          // Keep the true SRS schedule unchanged; no fictitious completed first round.
           var projectedBase=L.plan>today()?L.plan:today();
           nextDate=addDays(projectedBase,OFFSETS[1]);
           round=2;
         }else nextDate=schedule(L)[completed].due;
-        var symbols=['①','②','③','④','⑤'];
-        footer.appendChild(el('span','nhi-review-symbol',symbols[round-1]));
-        if(isProjected)footer.appendChild(el('span','nhi-review-symbol','⏳'));
+        // Color carries the round visually; full review information stays accessible.
+        footer.appendChild(el('span','nhi-review-round nhi-review-round-'+round,String(round)));
         var time=el('time',null,vn(nextDate,true));time.dateTime=nextDate;footer.appendChild(time);
         var description='Lượt '+round+'/5'+(isProjected?' dự kiến':'')+' · ngày ôn '+vn(nextDate,true);
         footer.setAttribute('aria-label',description);

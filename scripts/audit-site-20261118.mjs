@@ -91,6 +91,51 @@ try{
    return groups.length+' day groups / '+cards.length+' compact cards / heights '+heights.join(',')+' / '+box.backgroundColor;
   });
  });
+ await check('25 October has 27 distinct dated sublessons with preserved IDs and SRS plans',async()=>{
+  const detail=await page.evaluate(async()=>{
+    const r=await fetch('lessons.json',{cache:'no-store'});if(!r.ok)throw Error('Cannot fetch lessons.json');
+    const j=await r.json();
+    const all=j.lessons.filter(x=>/^2026-10-25-p\d{2}$/.test(x.id)).sort((a,b)=>a.id.localeCompare(b.id));
+    const checked=all.map((x,i)=>({
+      id:x.id,date:x.date,expected:new Date(Date.UTC(2026,9,25-i)).toISOString().slice(0,10),
+      cards:x.items.length,plan:x.plan
+    }));
+    const ids=all.flatMap(x=>x.items.map(it=>it[0]));
+    return {count:all.length,totalCards:ids.length,uniqueIds:new Set(ids).size,
+      distinctDates:new Set(all.map(x=>x.date)).size,
+      bad:checked.filter(x=>x.date!==x.expected),
+      examples:checked.slice(0,4).concat(checked.slice(-1))};
+  });
+  assert(detail.count===27&&detail.totalCards===1386&&detail.uniqueIds===1386,
+    'Cannot verify original card identities: '+JSON.stringify(detail));
+  assert(detail.distinctDates===27&&!detail.bad.length,'Dates are not independently assigned: '+JSON.stringify(detail));
+  assert(detail.examples[0].plan==='2026-11-04'&&detail.examples.at(-1).plan==='2026-11-17',
+    'Original review schedule changed: '+JSON.stringify(detail.examples));
+  return JSON.stringify(detail.examples);
+ });
+ await check('Selected tab has no blue outer halo',async()=>{
+  await page.mouse.move(0,0);
+  const state=await page.$eval('#nhiV2TopNav [data-v2-nav="calendar"]',e=>({
+    active:e.getAttribute('aria-current'),
+    shadow:getComputedStyle(e).boxShadow,
+    fill:getComputedStyle(e).backgroundColor
+  }));
+  assert(state.active==='page','Calendar tab not selected');
+  assert(state.shadow==='none','Selected tab still has an outside ring: '+JSON.stringify(state));
+  return JSON.stringify(state);
+ });
+ await check('Round badge uses color only, no calendar or hourglass emoji',async()=>{
+  const test=await page.$eval('#planBox .nhi-plan-current .nhi-lesson-white .nhi-next-review',e=>({
+    text:e.textContent,
+    number:e.querySelector('.nhi-review-round')?.textContent,
+    color:e.querySelector('.nhi-review-round')?getComputedStyle(e.querySelector('.nhi-review-round')).color:'',
+    aria:e.getAttribute('aria-label')
+  }));
+  assert(!/[🗓⏳]/u.test(test.text),'Disallowed calendar or hourglass in review footer: '+test.text);
+  assert(/^[1-5]$/.test(test.number||''),'Color-coded round number missing: '+JSON.stringify(test));
+  assert(/Lượt [1-5]\/5/.test(test.aria||''),'Accessible review round description missing');
+  return JSON.stringify(test);
+ });
  await check('Desktop calendar shows three day columns',async()=>{
   const result=await page.evaluate(()=>{
    const grid=document.querySelector('#planBox .nhi-plan-current .days-grid');
