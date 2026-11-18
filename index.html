@@ -1082,8 +1082,8 @@ body.nhi-in-study #nhiV2TopNav,body.nhi-in-study .nhi-hide-while-flipping,body.n
 }
 
 
-/* Color-only phrase pairs: one randomly chosen accent, shared by VI and KO.
-   Never use the former half-fill underline or highlighted background. */
+/* Full-coverage highlighter: one random solid pastel background per VI–KO phrase pair.
+   Never use the old half-height gradient, underline or text-color-only behavior. */
 :root{
   --nhi-pair-1:#bf365f;--nhi-pair-2:#196bb7;--nhi-pair-3:#874eb6;--nhi-pair-4:#13816e;
   --nhi-pair-5:#a85a14;--nhi-pair-6:#b43789;--nhi-pair-7:#4562b9;--nhi-pair-8:#517b1a;
@@ -1097,13 +1097,22 @@ body.nhi-in-study #nhiV2TopNav,body.nhi-in-study .nhi-hide-while-flipping,body.n
   --nhi-pair-13:#80e6ab;--nhi-pair-14:#ffa0c6;--nhi-pair-15:#8bc8ff;--nhi-pair-16:#e9d57a;
 }
 .ph.nhi-phrase-selected{
-  color:var(--nhi-phrase-current)!important;
-  -webkit-text-fill-color:var(--nhi-phrase-current)!important;
-  background:none!important;background-color:transparent!important;background-image:none!important;
+  /* Opaque, full-height background covers the entire word/collocation, even over line wraps. */
+  --nhi-highlight-base:#fff;
+  color:var(--ink)!important;
+  -webkit-text-fill-color:var(--ink)!important;
+  background:color-mix(in srgb,var(--nhi-phrase-current) 43%,var(--nhi-highlight-base))!important;
+  background-image:none!important;
+  -webkit-box-decoration-break:clone!important;
+  box-decoration-break:clone!important;
+  border-radius:5px!important;
   text-decoration:none!important;text-decoration-line:none!important;
   border:0!important;border-bottom:0!important;box-shadow:none!important;
-  padding:0!important;margin:0!important;
-  font-weight:850;animation:none!important;
+  padding:2px 4px!important;margin:0!important;
+  font-weight:800;animation:none!important;
+}
+:root[data-theme="dark"] .ph.nhi-phrase-selected{
+  --nhi-highlight-base:#19362c;
 }
 .ph.nhi-phrase-selected::before,.ph.nhi-phrase-selected::after{content:none!important;display:none!important}
 .ph.nhi-hl-second{background:none!important;background-image:none!important;text-decoration:none!important;border-bottom:0!important}
