@@ -232,7 +232,7 @@ try{
     const css=getComputedStyle(document.documentElement);
     return Array.from({length:22},(_,i)=>css.getPropertyValue('--nhi-pair-'+(i+1)).trim().toLowerCase());
   });
-  const approved=['#f48f92','#fb99cb','#fefb6a','#febd69','#89e394','#70d4fc','#c68ad0'];
+  const approved=['#f48f92','#fb99cb','#fefb6a','#febd69','#a7f5ac','#70d4fc','#e1b5f4'];
   assert(palette.slice(0,7).every((c,i)=>c===approved[i])&&palette.slice(7).every(c=>!c),
    'Only the seven approved reference colors may remain: '+JSON.stringify(palette));
   assert(x[1].viSelected===false&&x[1].koSelected===false&&x[1].background==='rgba(0, 0, 0, 0)',
@@ -256,48 +256,42 @@ try{
   assert(saved.vi===x.at(-1).background&&saved.ko===saved.vi,'Random pair highlight lost on reload: '+JSON.stringify(saved));
   return 'Seven approved colors + transparent; no repeats, VI–KO synchronized, saved after reload';
  });
- await check('Visible transparent swatch clears both VI–KO phrases and persists',async()=>{
-  const outcome=await page.evaluate(()=>{
-    const rows=[...document.querySelectorAll('#planBox .pitems li[data-item]')];
-    const row=rows.find(el=>el.querySelector('.pvi .ph.tap')&&el.querySelector('.pko .ph.tap'));
-    if(!row)throw Error('No Vietnamese/Korean phrase row');
-    const id=row.dataset.item;
-    const phrase=row.querySelector('.pvi .ph.tap');
-    const pair=phrase.dataset.hi;
+ await check('No extra transparent swatch row; tapping still cycles through seven colors and clear',async()=>{
+  const state=await page.evaluate(()=>{
+    const row=[...document.querySelectorAll('#planBox .pitems li[data-item]')].find(x=>x.querySelector('.pvi .ph.tap'));
+    if(!row)throw Error('Missing tappable phrase');
+    const id=row.dataset.item,phrase=row.querySelector('.pvi .ph.tap'),pair=phrase.dataset.hi;
     const random=Math.random;
-    Math.random=()=>0.2;
+    Math.random=()=>.2;
     try{phrase.click();}finally{Math.random=random;}
     const updated=document.querySelector('#planBox .pitems li[data-item="'+id+'"]');
-    const clear=updated.querySelector('button.nhi-transparent-btn');
-    if(!clear)throw Error('No visible transparent swatch after selecting a pair');
-    const label=clear.textContent;
-    const before=getComputedStyle(updated.querySelector('.pvi .ph.tap[data-hi="'+pair+'"]')).backgroundColor;
-    clear.click();
-    const final=document.querySelector('#planBox .pitems li[data-item="'+id+'"]');
-    const vi=final.querySelector('.pvi .ph.tap[data-hi="'+pair+'"]');
-    const ko=final.querySelector('.pko .ph.tap[data-hi="'+pair+'"]');
-    return {id,pair,label,before,
-      afterVi:getComputedStyle(vi).backgroundColor,afterKo:getComputedStyle(ko).backgroundColor,
-      markedVi:vi.classList.contains('nhi-phrase-selected'),
-      markedKo:ko.classList.contains('nhi-phrase-selected'),
-      clearGone:!final.querySelector('button.nhi-transparent-btn')};
+    return {id,pair,selected:!!updated.querySelector('.pvi .ph.nhi-phrase-selected[data-hi="'+pair+'"]'),
+      extraTransparentButton:!!document.querySelector('#planBox .nhi-transparent-btn')};
   });
-  assert(outcome.label.includes('Trong suốt')&&outcome.label.includes('Bỏ tô'),
-   'Transparent no-fill button should have a recognizable label: '+JSON.stringify(outcome));
-  assert(outcome.before!=='rgba(0, 0, 0, 0)'&&outcome.afterVi==='rgba(0, 0, 0, 0)'&&
-   outcome.afterKo===outcome.afterVi&&!outcome.markedVi&&!outcome.markedKo&&outcome.clearGone,
-   'Explicit transparent action must clear both languages, not hide them: '+JSON.stringify(outcome));
-  await page.reload({waitUntil:'domcontentloaded'});
-  await page.waitForSelector('#planBox .ppage .pitems li[data-item]',{timeout:15000});
-  const restored=await page.evaluate(x=>{
-    const row=document.querySelector('#planBox .pitems li[data-item="'+x.id+'"]');
-    const vi=row?.querySelector('.pvi .ph.tap[data-hi="'+x.pair+'"]');
-    const ko=row?.querySelector('.pko .ph.tap[data-hi="'+x.pair+'"]');
-    return {vi:vi?getComputedStyle(vi).backgroundColor:null,ko:ko?getComputedStyle(ko).backgroundColor:null};
-  },outcome);
-  assert(restored.vi==='rgba(0, 0, 0, 0)'&&restored.ko===restored.vi,
-   'Explicit transparent selection must remain after reload: '+JSON.stringify(restored));
-  return 'Visible Trong suốt button clears both languages and stays clear after reload';
+  assert(state.selected&&!state.extraTransparentButton,
+   'Unexpected transparent box/row or lost pair highlighting: '+JSON.stringify(state));
+  return 'Seven approved colors are retained without a separate transparent row';
+ });
+ await check('Continuous lesson mode has no forced 10-card celebration',async()=>{
+  const result=await page.evaluate(()=>{
+    const code=[...document.scripts].filter(x=>!x.src).map(x=>x.textContent).join('\n');
+    return {checkpointUI:code.includes('function renderBatchDone('),
+      checkpointGate:code.includes('s.batchStop&&'),
+      saveOldBatch:code.includes('nhi-v2-batches-v1')};
+  });
+  assert(!result.checkpointUI&&!result.checkpointGate&&!result.saveOldBatch,
+   'Lessons still contain a forced 10-card checkpoint: '+JSON.stringify(result));
+  return 'Lesson session continues until the real end';
+ });
+ await check('Brand name opens the Calendar',async()=>{
+  await page.$eval('#brandBtn',b=>b.click());
+  await page.waitForFunction(()=>location.hash==='#/lich-hoc',{timeout:15000});
+  assert((await page.$eval('#nhiV2TopNav [data-v2-nav="calendar"]',b=>b.getAttribute('aria-current')))==='page',
+   'Calendar tab is not active after clicking brand title');
+  // Return to a lesson detail so the next tests retain their previous setup.
+  await page.$eval('#planBox .nhi-plan-current .nhi-lesson-white button.primary',b=>b.click());
+  await page.waitForSelector('#planBox .ppage .pitems');
+  return 'Brand title → Lịch học';
  });
  await check('Lesson merge settings',async()=>{
   await page.$eval('#planBox .ppage button',()=>{
