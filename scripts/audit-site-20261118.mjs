@@ -256,6 +256,49 @@ try{
   assert(saved.vi===x.at(-1).background&&saved.ko===saved.vi,'Random pair highlight lost on reload: '+JSON.stringify(saved));
   return 'Seven approved colors + transparent; no repeats, VI–KO synchronized, saved after reload';
  });
+ await check('Visible transparent swatch clears both VI–KO phrases and persists',async()=>{
+  const outcome=await page.evaluate(()=>{
+    const rows=[...document.querySelectorAll('#planBox .pitems li[data-item]')];
+    const row=rows.find(el=>el.querySelector('.pvi .ph.tap')&&el.querySelector('.pko .ph.tap'));
+    if(!row)throw Error('No Vietnamese/Korean phrase row');
+    const id=row.dataset.item;
+    const phrase=row.querySelector('.pvi .ph.tap');
+    const pair=phrase.dataset.hi;
+    const random=Math.random;
+    Math.random=()=>0.2;
+    try{phrase.click();}finally{Math.random=random;}
+    const updated=document.querySelector('#planBox .pitems li[data-item="'+id+'"]');
+    const clear=updated.querySelector('button.nhi-transparent-btn');
+    if(!clear)throw Error('No visible transparent swatch after selecting a pair');
+    const label=clear.textContent;
+    const before=getComputedStyle(updated.querySelector('.pvi .ph.tap[data-hi="'+pair+'"]')).backgroundColor;
+    clear.click();
+    const final=document.querySelector('#planBox .pitems li[data-item="'+id+'"]');
+    const vi=final.querySelector('.pvi .ph.tap[data-hi="'+pair+'"]');
+    const ko=final.querySelector('.pko .ph.tap[data-hi="'+pair+'"]');
+    return {id,pair,label,before,
+      afterVi:getComputedStyle(vi).backgroundColor,afterKo:getComputedStyle(ko).backgroundColor,
+      markedVi:vi.classList.contains('nhi-phrase-selected'),
+      markedKo:ko.classList.contains('nhi-phrase-selected'),
+      clearGone:!final.querySelector('button.nhi-transparent-btn')};
+  });
+  assert(outcome.label.includes('Trong suốt')&&outcome.label.includes('Bỏ tô'),
+   'Transparent no-fill button should have a recognizable label: '+JSON.stringify(outcome));
+  assert(outcome.before!=='rgba(0, 0, 0, 0)'&&outcome.afterVi==='rgba(0, 0, 0, 0)'&&
+   outcome.afterKo===outcome.afterVi&&!outcome.markedVi&&!outcome.markedKo&&outcome.clearGone,
+   'Explicit transparent action must clear both languages, not hide them: '+JSON.stringify(outcome));
+  await page.reload({waitUntil:'domcontentloaded'});
+  await page.waitForSelector('#planBox .ppage .pitems li[data-item]',{timeout:15000});
+  const restored=await page.evaluate(x=>{
+    const row=document.querySelector('#planBox .pitems li[data-item="'+x.id+'"]');
+    const vi=row?.querySelector('.pvi .ph.tap[data-hi="'+x.pair+'"]');
+    const ko=row?.querySelector('.pko .ph.tap[data-hi="'+x.pair+'"]');
+    return {vi:vi?getComputedStyle(vi).backgroundColor:null,ko:ko?getComputedStyle(ko).backgroundColor:null};
+  },outcome);
+  assert(restored.vi==='rgba(0, 0, 0, 0)'&&restored.ko===restored.vi,
+   'Explicit transparent selection must remain after reload: '+JSON.stringify(restored));
+  return 'Visible Trong suốt button clears both languages and stays clear after reload';
+ });
  await check('Lesson merge settings',async()=>{
   await page.$eval('#planBox .ppage button',()=>{
    const b=[...document.querySelectorAll('#planBox .ppage button')].find(x=>x.textContent.includes('Cài đặt bài'));
