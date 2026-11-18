@@ -65,7 +65,7 @@ try{
  await page.waitForSelector('#planBox .ppage .psched');
  const reviewRows=await page.$$eval('#planBox .ppage .psched',es=>es.map(x=>x.querySelectorAll('.pchip').length));
  assert(reviewRows.includes(5),'Lesson detail must show all five review dates: '+JSON.stringify(reviewRows));
- await page.$eval('#planBox .pback',e=>e.click());
+ await page.$eval('#nhiV2Back',e=>e.click());
  console.log('STEP search');
  await page.$eval('#nhiV2TopNav [data-v2-nav="search"]',e=>e.click());
  await page.waitForSelector('#nhiV2SearchInput');
