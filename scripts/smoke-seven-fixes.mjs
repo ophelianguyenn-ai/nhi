@@ -124,8 +124,8 @@ try{
    await cal.$eval('#nhiV2TopNav [data-v2-nav="calendar"]',e=>e.click());
    await cal.waitForSelector('#planBox .nhi-plan-waiting',{timeout:10000});
    return cal.evaluate(id=>({
-    active:[...document.querySelectorAll('#planBox .nhi-plan-current .ptitle')].some(a=>a.getAttribute('href')?.endsWith(id)),
-    waiting:[...document.querySelectorAll('#planBox .nhi-plan-waiting .ptitle')].some(a=>a.getAttribute('href')?.endsWith(id))
+    active:!!document.querySelector('#planBox .nhi-plan-current [data-lesson-id="'+id+'"]'),
+    waiting:!!document.querySelector('#planBox .nhi-plan-waiting [data-lesson-id="'+id+'"]')
    }),lesson.id);
   }
   const early=await homeCalendar();
@@ -151,19 +151,22 @@ try{
   const overdue=await homeCalendar();
   assert(overdue.active&&!overdue.waiting,'Missed reviews must remain in Cần học');
   const missed=await cal.evaluate(id=>{
-   const lessonLink=[...document.querySelectorAll('#planBox .nhi-plan-current .ptitle')].find(a=>a.getAttribute('href')==='#/bai/'+id);
-   const card=lessonLink?.closest('.plesson');
-   return {late:card?.querySelectorAll('.pchip.late').length,
-     done:card?.querySelectorAll('.pchip.done').length,
-     line:card?.querySelector('.pstatus')?.textContent||'',
-     dates:card?[...card.querySelectorAll('.pchip.late b')].map(e=>e.textContent):[]};
+   const card=document.querySelector('#planBox .nhi-plan-current [data-lesson-id="'+id+'"]');
+   return {compact:!!card,hasDuplicateChips:!!card?.querySelector('.pchip'),
+     line:card?.querySelector('.pstatus')?.textContent||''};
   },lesson.id);
-  assert(missed.late===4&&missed.done===1,'All 4 missed review rounds must be marked, got '+JSON.stringify(missed));
+  assert(missed.compact&&!missed.hasDuplicateChips,'Calendar must have compact rows without duplicate milestones');
   assert(missed.line.includes('4 lượt cần học'),'Missing count of overdue review rounds');
-
-  // Viewing lesson details without pressing Học ngay does not count study.
-  await cal.$eval('#planBox .nhi-plan-current .ptitle[href="#/bai/'+lesson.id+'"]',e=>e.click());
+  // Verify five milestones on the detail page, not inside calendar rows.
+  await cal.$eval('#planBox .nhi-plan-current [data-lesson-id="'+lesson.id+'"] button.primary',e=>e.click());
   await cal.waitForSelector('#planBox .phero');
+  const visibleReviews=await cal.evaluate(()=>({
+   late:document.querySelectorAll('#planBox .ppage .pchip.late').length,
+   done:document.querySelectorAll('#planBox .ppage .pchip.done').length,
+   total:document.querySelectorAll('#planBox .ppage .psched .pchip').length
+  }));
+  assert(visibleReviews.late===4&&visibleReviews.done===1&&visibleReviews.total===5,
+    'Four overdue reviews must appear in the lesson detail: '+JSON.stringify(visibleReviews));
   const afterOpening=await cal.evaluate(id=>JSON.parse(localStorage.getItem('viko-plan-v1')).done?.[id]?.v.length,lesson.id);
   assert(afterOpening===1,'Opening lesson detail falsely marked it studied');
   // Starting and pausing an incomplete session must not complete any round.
@@ -182,12 +185,14 @@ try{
   },lesson.id);
   const twoDone=await homeCalendar();
   assert(twoDone.active,'Later overdue rounds must remain in Cần học after an actual review');
-  const missedAfterReview=await cal.evaluate(id=>{
-   const link=[...document.querySelectorAll('#planBox .nhi-plan-current .ptitle')].find(a=>a.getAttribute('href')==='#/bai/'+id);
-   const card=link?.closest('.plesson');return {done:card?.querySelectorAll('.pchip.done').length,late:card?.querySelectorAll('.pchip.late').length};
-  },lesson.id);
+  await cal.$eval('#planBox .nhi-plan-current [data-lesson-id="'+lesson.id+'"] button.primary',e=>e.click());
+  await cal.waitForSelector('#planBox .ppage .psched');
+  const missedAfterReview=await cal.evaluate(()=>({
+   done:document.querySelectorAll('#planBox .ppage .pchip.done').length,
+   late:document.querySelectorAll('#planBox .ppage .pchip.late').length
+  }));
   assert(missedAfterReview.done===2&&missedAfterReview.late===3,
-   'Review progress should advance exactly one round: '+JSON.stringify(missedAfterReview));
+    'Review progress should advance exactly one round: '+JSON.stringify(missedAfterReview));
  }finally{await calContext.close();}
  assert(errors.length===0,'Browser errors: '+errors.join('; '));
  console.log('SEVEN FIXES PASS',JSON.stringify({verifiedPairs:found.count,hardStayed:true,deletePersisted:true,autosave:true,dictionary:true,cat}));
