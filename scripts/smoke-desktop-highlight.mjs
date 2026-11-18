@@ -11,7 +11,7 @@ const fixture={id:LESSON,date:'2026-11-16',plan:'2026-11-16',title:'Kiểm tra t
 const ROOT='http://127.0.0.1:8765/';
 const browser=await puppeteer.launch({headless:true,executablePath:process.env.CHROME_BIN||'/usr/bin/google-chrome',
   args:['--no-sandbox','--disable-setuid-sandbox','--disable-dev-shm-usage']});
-const colorClass=names=>names.split(/\s+/).find(cls=>/^hl[1-4]$/.test(cls))||null;
+const isSelected=classes=>classes.split(/\s+/).includes('nhi-phrase-selected');
 async function check(name,viewport){
  const context=await browser.createBrowserContext();
  try{
@@ -46,23 +46,28 @@ async function check(name,viewport){
   const front=await page.evaluate(index=>{
    const el=[...document.querySelectorAll('#planBox .pfront .prompt .ph.tap')]
      .find(x=>x.dataset.hi===index);
-   return {className:el?.className||'',color:el?getComputedStyle(el).backgroundColor:null,
+   return {className:el?.className||'',color:el?getComputedStyle(el).color:null,
+     background:el?getComputedStyle(el).backgroundColor:null,
+     decoration:el?getComputedStyle(el).textDecorationLine:null,
      flipped:!!document.querySelector('#planBox .pfront .answer.ko')};
   },before.index);
   console.log(name+' FRONT '+JSON.stringify(front));
-  const firstColor=colorClass(front.className);
-  if(!firstColor || front.flipped)throw Error(name+': Click did not highlight front without flipping');
+  const firstColor=front.color;
+  if(!isSelected(front.className)||!firstColor||front.background!=='rgba(0, 0, 0, 0)'||front.decoration!=='none'||front.flipped)
+   throw Error(name+': Click did not recolor text cleanly without flipping');
   await page.$eval('#planBox .pfront',el=>el.click());
   await page.waitForSelector('#planBox .pfront .answer.ko',{timeout:10000});
   const back=await page.evaluate(index=>{
    const ko=[...document.querySelectorAll('#planBox .pfront .answer.ko .ph.tap')].find(x=>x.dataset.hi===index);
    const vi=[...document.querySelectorAll('#planBox .pfront .vi-under .ph.tap')].find(x=>x.dataset.hi===index);
    return {korean:ko?.className||'',vietnamese:vi?.className||'',
-     koreanColor:ko?getComputedStyle(ko).backgroundColor:null};
+     koreanColor:ko?getComputedStyle(ko).color:null,
+     vietnameseColor:vi?getComputedStyle(vi).color:null};
   },before.index);
   console.log(name+' BACK '+JSON.stringify(back));
-  if(colorClass(back.korean)!==firstColor || colorClass(back.vietnamese)!==firstColor)
-   throw Error(name+': Front and corresponding Korean/Vietnamese back phrases do not match');
+  if(!isSelected(back.korean)||!isSelected(back.vietnamese)||
+      back.koreanColor!==firstColor||back.vietnameseColor!==firstColor)
+   throw Error(name+': Front and corresponding Korean/Vietnamese text colors do not match');
   console.log(name+' PAIRED HIGHLIGHT PASS');
  }finally{await context.close();}
 }
