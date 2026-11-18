@@ -1082,26 +1082,17 @@ body.nhi-in-study #nhiV2TopNav,body.nhi-in-study .nhi-hide-while-flipping,body.n
 }
 
 
-/* Full-coverage highlighter: one random solid pastel background per VI–KO phrase pair.
-   Never use the old half-height gradient, underline or text-color-only behavior. */
+/* Seven soft highlighter colors shared by corresponding Vietnamese and Korean phrases.
+   The eighth, transparent state removes highlighting entirely. */
 :root{
-  --nhi-pair-1:#bf365f;--nhi-pair-2:#196bb7;--nhi-pair-3:#874eb6;--nhi-pair-4:#13816e;
-  --nhi-pair-5:#a85a14;--nhi-pair-6:#b43789;--nhi-pair-7:#4562b9;--nhi-pair-8:#517b1a;
-  --nhi-pair-9:#bd4850;--nhi-pair-10:#087b92;--nhi-pair-11:#9e502c;--nhi-pair-12:#694eb8;
-  --nhi-pair-13:#258258;--nhi-pair-14:#ab4a75;--nhi-pair-15:#286fa7;--nhi-pair-16:#90680b;
-}
-:root[data-theme="dark"]{
-  --nhi-pair-1:#ff8ba9;--nhi-pair-2:#81c4ff;--nhi-pair-3:#d2a5ff;--nhi-pair-4:#60e3bd;
-  --nhi-pair-5:#ffc077;--nhi-pair-6:#fc91dc;--nhi-pair-7:#a7b5ff;--nhi-pair-8:#b3e477;
-  --nhi-pair-9:#ff9993;--nhi-pair-10:#74dce9;--nhi-pair-11:#ffb69b;--nhi-pair-12:#c0a6ff;
-  --nhi-pair-13:#80e6ab;--nhi-pair-14:#ffa0c6;--nhi-pair-15:#8bc8ff;--nhi-pair-16:#e9d57a;
+  --nhi-pair-1:#ffe0ea;--nhi-pair-2:#d9eeff;--nhi-pair-3:#fff1b8;--nhi-pair-4:#ddf7e5;
+  --nhi-pair-5:#f0e2ff;--nhi-pair-6:#ffe8ce;--nhi-pair-7:#d8f5f3;
 }
 .ph.nhi-phrase-selected{
-  /* Opaque, full-height background covers the entire word/collocation, even over line wraps. */
-  --nhi-highlight-base:#fff;
-  color:var(--ink)!important;
-  -webkit-text-fill-color:var(--ink)!important;
-  background:color-mix(in srgb,var(--nhi-phrase-current) 43%,var(--nhi-highlight-base))!important;
+  /* Pastel background stays light and readable in both light and dark themes. */
+  color:#1f3346!important;
+  -webkit-text-fill-color:#1f3346!important;
+  background:var(--nhi-phrase-current)!important;
   background-image:none!important;
   -webkit-box-decoration-break:clone!important;
   box-decoration-break:clone!important;
@@ -1111,9 +1102,7 @@ body.nhi-in-study #nhiV2TopNav,body.nhi-in-study .nhi-hide-while-flipping,body.n
   padding:2px 4px!important;margin:0!important;
   font-weight:800;animation:none!important;
 }
-:root[data-theme="dark"] .ph.nhi-phrase-selected{
-  --nhi-highlight-base:#19362c;
-}
+.hl-item .nhi-clear-highlight{font-size:12px;padding:4px 9px;white-space:nowrap}
 .ph.nhi-phrase-selected::before,.ph.nhi-phrase-selected::after{content:none!important;display:none!important}
 .ph.nhi-hl-second{background:none!important;background-image:none!important;text-decoration:none!important;border-bottom:0!important}
 .ph.tap{touch-action:manipulation}
@@ -1728,13 +1717,25 @@ body.nhi-in-study #nhiV2TopNav,body.nhi-in-study .nhi-hide-while-flipping,body.n
     });
     return out.sort(function (a, b) { return a.s - b.s; });
   }
-  // A full-text color chosen randomly on every tap; never repeat the previous color.
-  var PHRASE_COLOR_TOTAL=16;
+  // Seven pastel colors + a transparent state (-1), never repeating the previous state.
+  // Old saved colors (0–15) are mapped to one of the seven pastel colors.
+  var PHRASE_COLOR_TOTAL=7, PHRASE_COLOR_CLEAR=-1, PHRASE_COLOR_LEGACY_TOTAL=16;
+  function phraseColorIndex(raw,i){
+    var color=Number(raw);
+    if(raw!==null&&raw!==undefined&&raw!==''&&Number.isInteger(color)){
+      if(color===PHRASE_COLOR_CLEAR)return PHRASE_COLOR_CLEAR;
+      if(color>=0&&color<PHRASE_COLOR_LEGACY_TOTAL)return color%PHRASE_COLOR_TOTAL;
+    }
+    return (i*7+4)%PHRASE_COLOR_TOTAL;
+  }
   function randomPhraseColor(previous){
-    var prev=Number(previous),valid=previous!==null&&previous!==undefined&&previous!==''&&
-      Number.isInteger(prev)&&prev>=0&&prev<PHRASE_COLOR_TOTAL;
-    var n=Math.floor(Math.random()*(PHRASE_COLOR_TOTAL-(valid?1:0)));
-    return valid&&n>=prev?n+1:n;
+    var hasPrevious=previous!==null&&previous!==undefined&&previous!=='';
+    var prev=hasPrevious?phraseColorIndex(previous,0):null;
+    var choices=[];
+    for(var color=0;color<PHRASE_COLOR_TOTAL;color++)if(color!==prev)choices.push(color);
+    // First tap always shows a color; later taps may choose "bỏ tô" (transparent).
+    if(hasPrevious&&prev!==PHRASE_COLOR_CLEAR)choices.push(PHRASE_COLOR_CLEAR);
+    return choices[Math.floor(Math.random()*choices.length)];
   }
   function segsOf(c) {
     if (!SEGS[c.id]) {
@@ -1751,10 +1752,10 @@ body.nhi-in-study #nhiV2TopNav,body.nhi-in-study .nhi-hide-while-flipping,body.n
       if(sg.s>pos)el.appendChild(document.createTextNode(text.slice(pos,sg.s)));
       var sp=document.createElement('span');
       sp.className='ph'+(tappable?' tap':'');
-      if(selected.indexOf(sg.i)>=0||Object.prototype.hasOwnProperty.call(colors,sg.i)){
+      var hasColor=Object.prototype.hasOwnProperty.call(colors,sg.i);
+      var color=phraseColorIndex(hasColor?colors[sg.i]:null,sg.i);
+      if(color!==PHRASE_COLOR_CLEAR&&(selected.indexOf(sg.i)>=0||hasColor)){
         sp.classList.add('nhi-phrase-selected');
-        var color=Number(colors[sg.i]);
-        if(!Number.isInteger(color)||color<0||color>=PHRASE_COLOR_TOTAL)color=(sg.i*7+4)%PHRASE_COLOR_TOTAL;
         sp.style.setProperty('--nhi-phrase-current','var(--nhi-pair-'+(color+1)+')');
       }
       sp.dataset.i=sg.i;sp.textContent=text.slice(sg.s,sg.e);
@@ -1764,20 +1765,33 @@ body.nhi-in-study #nhiV2TopNav,body.nhi-in-study .nhi-hide-while-flipping,body.n
   }
   function toggleHl(id,i){
     var entry=getP(id),h=(entry.h||[]).slice(),colors=Object.assign({},entry.hc||{});
-    if(h.indexOf(i)<0)h.push(i);
-    colors[i]=randomPhraseColor(Object.prototype.hasOwnProperty.call(colors,i)?colors[i]:null);
+    var previous=Object.prototype.hasOwnProperty.call(colors,i)?colors[i]:null;
+    var next=randomPhraseColor(previous);
+    h=h.filter(function(index){return index!==i;});
+    if(next!==PHRASE_COLOR_CLEAR)h.push(i);
+    colors[i]=next;
+    setP(id,{h:h,h2:null,hc:colors});
+  }
+  function clearHl(id,i){
+    var entry=getP(id),h=(entry.h||[]).filter(function(index){return index!==i;});
+    var colors=Object.assign({},entry.hc||{});
+    colors[i]=PHRASE_COLOR_CLEAR; // Keep the previous state so the next tap cannot repeat transparent.
     setP(id,{h:h,h2:null,hc:colors});
   }
 
-  function hlItem(p, i) {
+  function hlItem(p, i, color, cardId) {
     var d = document.createElement('div'); d.className = 'hl-item';
-    var sw = document.createElement('span'); sw.className = 'sw'; sw.style.background = 'var(--nhi-pair-' + ((Number(arguments[2])>=0&&Number(arguments[2])<PHRASE_COLOR_TOTAL?Number(arguments[2]):(i*7+4)%PHRASE_COLOR_TOTAL)+1) + ')'; d.appendChild(sw);
+    var sw = document.createElement('span'); sw.className = 'sw';
+    sw.style.background = 'var(--nhi-pair-' + (Math.max(0,phraseColorIndex(color,i))+1) + ')'; d.appendChild(sw);
     var v = document.createElement('span'); v.textContent = p[0]; d.appendChild(v);
     var ar = document.createElement('span'); ar.className = 'p'; ar.textContent = '→'; d.appendChild(ar);
     var k = document.createElement('span'); k.className = 'k'; k.lang = 'ko'; k.textContent = p[1]; d.appendChild(k);
     if (state.pron && p[2]) { var pr = document.createElement('span'); pr.className = 'p'; pr.textContent = p[2]; d.appendChild(pr); }
     var sp = document.createElement('button'); sp.type = 'button'; sp.className = 'speak'; sp.dataset.say = p[1];
     sp.setAttribute('aria-label', 'Nghe tiếng Hàn'); sp.title = 'Nghe tiếng Hàn'; sp.innerHTML = $('cSpeak').innerHTML; d.appendChild(sp);
+    var rm=document.createElement('button');rm.type='button';rm.className='ghost nhi-clear-highlight';
+    rm.textContent='Bỏ tô';rm.title='Bỏ màu cho cả cặp Việt–Hàn';
+    rm.dataset.act='unhl';rm.dataset.id=cardId;rm.dataset.i=i;d.appendChild(rm);
     return d;
   }
 
@@ -2105,7 +2119,7 @@ body.nhi-in-study #nhiV2TopNav,body.nhi-in-study .nhi-hide-while-flipping,body.n
     box.hidden = !(state.flipped && hs.length);
     if (!box.hidden) {
       var ttl = document.createElement('p'); ttl.className = 'hl-title'; ttl.textContent = 'Từ đã tô sáng'; box.appendChild(ttl);
-      hs.forEach(function(i){var pp=pairsOf(c)[i];if(pp)box.appendChild(hlItem(pp,i,(getP(c.id).hc||{})[i]));});
+      hs.forEach(function(i){var pp=pairsOf(c)[i];if(pp)box.appendChild(hlItem(pp,i,(getP(c.id).hc||{})[i],c.id));});
     }
     $('counter').textContent = (state.idx + 1) + ' / ' + queue.length;
     $('prev').disabled = state.idx === 0;
@@ -2245,8 +2259,14 @@ body.nhi-in-study #nhiV2TopNav,body.nhi-in-study .nhi-hide-while-flipping,body.n
         var li = document.createElement('li'); li.className = 'row'; li.dataset.id = c.id; li.dataset.i = i;
         var t = document.createElement('div');
         var vi = document.createElement('p'); vi.className = 'vi';
-        var st = document.createElement('span'); st.className = 'ph hl' + (i % 4 + 1); st.textContent = p[0]; vi.appendChild(st); t.appendChild(vi);
-        var ko = document.createElement('p'); ko.className = 'ko'; ko.lang = 'ko'; ko.textContent = p[1]; t.appendChild(ko);
+        var color=phraseColorIndex((getP(c.id).hc||{})[i],i);
+        if(color===PHRASE_COLOR_CLEAR)return;
+        var pairColor='var(--nhi-pair-'+(color+1)+')';
+        var st = document.createElement('span'); st.className = 'ph nhi-phrase-selected'; st.textContent = p[0];
+        st.style.setProperty('--nhi-phrase-current',pairColor);vi.appendChild(st);t.appendChild(vi);
+        var ko = document.createElement('p'); ko.className = 'ko'; ko.lang = 'ko';
+        var kt=document.createElement('span');kt.className='ph nhi-phrase-selected';kt.textContent=p[1];
+        kt.style.setProperty('--nhi-phrase-current',pairColor);ko.appendChild(kt);t.appendChild(ko);
         if (state.pron && p[2]) { var pn = document.createElement('p'); pn.className = 'pron'; pn.textContent = p[2]; t.appendChild(pn); }
         var src = document.createElement('span'); src.className = 'src'; src.textContent = DECK_NAME[c.deck] + ' · ' + c.vi; t.appendChild(src);
         li.appendChild(t);
@@ -2493,7 +2513,8 @@ body.nhi-in-study #nhiV2TopNav,body.nhi-in-study .nhi-hide-while-flipping,body.n
       var colorMap={},count=pairsOf(BY_ID[id]).length;
       Object.keys(v.hc).forEach(function(k){
         var i=Number(k),color=Number(v.hc[k]);
-        if(Number.isInteger(i)&&i>=0&&i<count&&Number.isInteger(color)&&color>=0&&color<PHRASE_COLOR_TOTAL)colorMap[i]=color;
+        if(Number.isInteger(i)&&i>=0&&i<count&&Number.isInteger(color)&&
+          (color===PHRASE_COLOR_CLEAR||(color>=0&&color<PHRASE_COLOR_LEGACY_TOTAL)))colorMap[i]=color;
       });
       if(Object.keys(colorMap).length)e.hc=colorMap;
     }
@@ -3794,10 +3815,10 @@ body.nhi-in-study #nhiV2TopNav,body.nhi-in-study .nhi-hide-while-flipping,body.n
       sg.forEach(function(g){
         if(g.s>pos)elm.appendChild(document.createTextNode(text.slice(pos,g.s)));
         var sp=el('span','ph'+(tappable?' tap':''),text.slice(g.s,g.e));
-        if(selected.indexOf(g.i)>=0||Object.prototype.hasOwnProperty.call(colors,g.i)){
+        var hasColor=Object.prototype.hasOwnProperty.call(colors,g.i);
+        var color=phraseColorIndex(hasColor?colors[g.i]:null,g.i);
+        if(color!==PHRASE_COLOR_CLEAR&&(selected.indexOf(g.i)>=0||hasColor)){
           sp.classList.add('nhi-phrase-selected');
-          var color=Number(colors[g.i]);
-          if(!Number.isInteger(color)||color<0||color>=PHRASE_COLOR_TOTAL)color=(g.i*7+4)%PHRASE_COLOR_TOTAL;
           sp.style.setProperty('--nhi-phrase-current','var(--nhi-pair-'+(color+1)+')');
         }
         sp.dataset.hi=g.i;sp.dataset.item=it.id;elm.appendChild(sp);pos=g.e;
@@ -3811,9 +3832,11 @@ body.nhi-in-study #nhiV2TopNav,body.nhi-in-study .nhi-hide-while-flipping,body.n
     function toggleHl(id,i){
       var selected=val('hl',id)||[],colors=Object.assign({},val('hlc',id)||{});
       if(!Array.isArray(selected))selected=Object.keys(selected).map(function(k){return selected[k];});
-      selected=selected.slice();
-      if(selected.indexOf(i)<0)selected.push(i);
-      colors[i]=randomPhraseColor(Object.prototype.hasOwnProperty.call(colors,i)?colors[i]:null);
+      var previous=Object.prototype.hasOwnProperty.call(colors,i)?colors[i]:null;
+      var next=randomPhraseColor(previous);
+      selected=selected.filter(function(index){return index!==i;});
+      if(next!==PHRASE_COLOR_CLEAR)selected.push(i);
+      colors[i]=next;
       put('hl',id,selected);
       if(val('hl2',id))put('hl2',id,null);
       put('hlc',id,colors);
@@ -5100,7 +5123,11 @@ body.nhi-in-study #nhiV2TopNav,body.nhi-in-study .nhi-hide-while-flipping,body.n
     if (e.target.closest('.prompt, .answer, .pron')) return;
     flip();
   });
-  $('card').addEventListener('keydown', function (e) { if (e.key === 'Enter') { e.preventDefault(); flip(); } });
+  $('card').addEventListener('keydown', function (e) { if (e.key === 'Enter' && !e.target.closest('button')) { e.preventDefault(); flip(); } });
+  $('cHl').addEventListener('click', function(e){
+    var rm=e.target.closest('[data-act="unhl"]');if(!rm)return;
+    e.stopPropagation();clearHl(rm.dataset.id,+rm.dataset.i);renderCard();
+  });
   $('cSpeak').addEventListener('click', function (e) { e.stopPropagation(); var c = currentCard(); if(c){var lang=(state.dir==='vk')===!state.flipped?'vi':'ko';toggleSpeech(c[lang],lang==='vi'?'vi-VN':'ko-KR');} });
   $('prev').addEventListener('click', function () { go(-1); });
   $('next').addEventListener('click', function () { go(1); });
@@ -5119,7 +5146,7 @@ body.nhi-in-study #nhiV2TopNav,body.nhi-in-study .nhi-hide-while-flipping,body.n
   $('words').addEventListener('click', function (e) {
     var say = e.target.closest('[data-say]'); if (say) { speak(say.dataset.say); return; }
     var b = e.target.closest('[data-act="unhl"]'); if (!b) return;
-    var li = b.closest('.row'); toggleHl(li.dataset.id, +li.dataset.i); renderWords();
+    var li = b.closest('.row'); clearHl(li.dataset.id, +li.dataset.i); renderWords();
   });
   $('list').addEventListener('click', function (e) {
     var sg = e.target.closest('.ph');
