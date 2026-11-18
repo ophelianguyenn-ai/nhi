@@ -27,7 +27,8 @@ try{
  await page.$eval('#nhiV2TopNav [data-v2-nav="today"]',e=>e.click());
  await page.waitForSelector('#planBox .nhi-v2-priorities');
  assert(await page.$$eval('#planBox .nhi-v2-priority',es=>es.length)<=3,'Dashboard exceeded 3 priority lessons');
- assert(!!await page.$('#planBox .nhi-v2-hero .nhi-goal-inline .nhi-v2-goal-track'),'Goal should be inside Today hero');
+ assert(!!await page.$('#planBox .nhi-v2-hero .nhi-goal-time .nhi-v2-goal-track'),'Minute goal should be inside Today hero');
+ assert(!!await page.$('#planBox .nhi-v2-hero .nhi-goal-words .nhi-v2-goal-track'),'Word goal should be inside Today hero');
  assert(!await page.$('#planBox .nhi-today-secondary, #planBox .nhi-calendar-shortcut'),'Separate white Today tiles should be gone');
  const learn=await page.$eval('#planBox .nhi-hero-start',e=>({text:e.textContent,visible:getComputedStyle(e).display!=='none'&&e.getBoundingClientRect().height>36}));
  assert(learn.visible&&learn.text.includes('Học ngay'),'Học ngay must be visible and clickable');
@@ -45,7 +46,7 @@ try{
   layout:getComputedStyle(e).display,
   gridRows:getComputedStyle(e).gridTemplateRows,
   gridColumns:getComputedStyle(e).gridTemplateColumns,
-  next:e.querySelector('.nhi-next-review')?.textContent||'',
+  next:e.querySelector('.nhi-next-review')?.getAttribute('aria-label')||'',
   hiddenDetails:!!e.querySelector('.pstatus,.nhi-compact-resume'),
   children:[...e.children].map(x=>({
     cls:x.className?.baseVal||x.className,
