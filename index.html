@@ -1086,7 +1086,7 @@ body.nhi-in-study #nhiV2TopNav,body.nhi-in-study .nhi-hide-while-flipping,body.n
    Red is softened, and pink matches the sample image. No black or white highlights. */
 :root{
   --nhi-pair-1:#f48f92;--nhi-pair-2:#fb99cb;--nhi-pair-3:#fefb6a;--nhi-pair-4:#febd69;
-  --nhi-pair-5:#89e394;--nhi-pair-6:#70d4fc;--nhi-pair-7:#c68ad0;
+  --nhi-pair-5:#a7f5ac;--nhi-pair-6:#70d4fc;--nhi-pair-7:#e1b5f4;
 }
 .ph.nhi-phrase-selected{
   /* Dark lettering stays readable over all seven approved color highlights. */
@@ -1241,7 +1241,6 @@ body.nhi-in-study #nhiV2TopNav,body.nhi-in-study .nhi-hide-while-flipping,body.n
         <div class="hl-list" id="cHl" hidden></div>
         <div class="card-bottom">
           <span class="hint" id="cHint"></span>
-          <button type="button" class="ghost nhi-transparent-btn" id="cClearCurrent" title="Bỏ tô cả cặp Việt–Hàn vừa chọn" hidden>Trong suốt · Bỏ tô</button>
           <button type="button" class="speak" id="cSpeak" aria-label="Nghe tiếng Hàn" title="Nghe tiếng Hàn">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 5 6 9H3v6h3l5 4V5Z" fill="currentColor" stroke="none"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M18.5 5.5a9 9 0 0 1 0 13"/></svg>
           </button>
@@ -1811,8 +1810,7 @@ body.nhi-in-study #nhiV2TopNav,body.nhi-in-study .nhi-hide-while-flipping,body.n
     var sp = document.createElement('button'); sp.type = 'button'; sp.className = 'speak'; sp.dataset.say = p[1];
     sp.setAttribute('aria-label', 'Nghe tiếng Hàn'); sp.title = 'Nghe tiếng Hàn'; sp.innerHTML = $('cSpeak').innerHTML; d.appendChild(sp);
     var rm=document.createElement('button');rm.type='button';rm.className='ghost nhi-clear-highlight';
-    rm.classList.add('nhi-transparent-btn');
-    rm.textContent='Trong suốt · Bỏ tô';rm.title='Bỏ màu cho cả cặp Việt–Hàn';
+    rm.textContent='Bỏ tô';rm.title='Bỏ màu cho cả cặp Việt–Hàn';
     rm.dataset.act='unhl';rm.dataset.id=cardId;rm.dataset.i=i;d.appendChild(rm);
     return d;
   }
@@ -2133,10 +2131,7 @@ body.nhi-in-study #nhiV2TopNav,body.nhi-in-study .nhi-hide-while-flipping,body.n
     if (koEl.nextElementSibling !== pe) koEl.insertAdjacentElement('afterend', pe);
     pe.textContent = c.pr;
     pe.hidden = !(state.pron && koShown && c.pr);
-    $('cHint').textContent = 'Chạm vào chữ để đổi màu · chọn Trong suốt để bỏ tô · chạm chỗ trống để ' + (state.flipped ? 'úp thẻ' : (vk ? 'xem tiếng Hàn' : 'xem tiếng Việt'));
-    var classicClear=$('cClearCurrent');
-    var match=classicLastHighlighted&&classicLastHighlighted.id===c.id?classicLastHighlighted:null;
-    classicClear.hidden=!match||phraseColorIndex((p.hc||{})[match.i],match.i)===PHRASE_COLOR_CLEAR;
+    $('cHint').textContent = 'Chạm vào chữ để đổi màu · chạm chỗ trống để ' + (state.flipped ? 'úp thẻ' : (vk ? 'xem tiếng Hàn' : 'xem tiếng Việt'));
     // Highlighted phrases of this card, listed for closer study
     var box = $('cHl'), hs = (p.h || []).slice().sort(function (a, b) { return a - b; });
     box.textContent = '';
@@ -2254,14 +2249,6 @@ body.nhi-in-study #nhiV2TopNav,body.nhi-in-study .nhi-hide-while-flipping,body.n
     var xb = document.createElement('button'); xb.type = 'button'; xb.className = 'xs'; xb.dataset.act = 'x'; xb.textContent = 'X';
     xb.setAttribute('aria-pressed', String(!!p.x)); xb.setAttribute('aria-label', 'Đánh dấu học lại'); xb.title = 'Đánh dấu học lại';
     ctrl.appendChild(xb);
-    if(classicLastHighlighted&&classicLastHighlighted.id===c.id&&
-       phraseColorIndex((p.hc||{})[classicLastHighlighted.i],classicLastHighlighted.i)!==PHRASE_COLOR_CLEAR){
-      var un=document.createElement('button');
-      un.type='button';un.className='ghost nhi-transparent-btn';
-      un.dataset.act='unhl-pair';un.dataset.i=classicLastHighlighted.i;
-      un.textContent='Trong suốt · Bỏ tô';un.title='Bỏ tô cặp Việt–Hàn vừa chạm';
-      ctrl.appendChild(un);
-    }
     var seg = document.createElement('div'); seg.className = 'seg'; seg.setAttribute('role', 'group'); seg.setAttribute('aria-label', 'Mức độ thuộc');
     [['h', 'Khó'], ['m', 'Vừa'], ['e', 'Dễ']].forEach(function (l) {
       var b = document.createElement('button'); b.type = 'button'; b.dataset.act = 'lv'; b.dataset.lv = l[0]; b.textContent = l[1];
@@ -2306,7 +2293,7 @@ body.nhi-in-study #nhiV2TopNav,body.nhi-in-study .nhi-hide-while-flipping,body.n
         var ctrl = document.createElement('div'); ctrl.className = 'ctrl';
         var sp = document.createElement('button'); sp.type = 'button'; sp.className = 'speak'; sp.dataset.say = p[1];
         sp.setAttribute('aria-label', 'Nghe tiếng Hàn'); sp.title = 'Nghe tiếng Hàn'; sp.innerHTML = $('cSpeak').innerHTML; ctrl.appendChild(sp);
-        var rm = document.createElement('button'); rm.type = 'button'; rm.className = 'ghost nhi-transparent-btn'; rm.dataset.act = 'unhl'; rm.textContent = 'Trong suốt · Bỏ tô'; ctrl.appendChild(rm);
+        var rm = document.createElement('button'); rm.type = 'button'; rm.className = 'ghost'; rm.dataset.act = 'unhl'; rm.textContent = 'Bỏ tô'; ctrl.appendChild(rm);
         li.appendChild(ctrl);
         box.appendChild(li);
       });
@@ -4350,9 +4337,6 @@ body.nhi-in-study #nhiV2TopNav,body.nhi-in-study .nhi-hide-while-flipping,body.n
       var right = el('span', 'prow');
       if (it.type === 'w' && it.n > 1) right.appendChild(el('span', 'ptag cnt', '×' + it.n));
       var rt = val('rate', it.id); if (rt && RATE_NAME[rt]) right.appendChild(el('span', 'ptag r-' + rt, RATE_NAME[rt]));
-      if (canClearHighlightedPair(it.id))right.appendChild(transparentButton(it.id,function(){
-        if(li.parentNode)li.parentNode.replaceChild(itemRow(it,withSrc),li);
-      }));
       if (canSpeak) right.appendChild(ibtn('picon', 'vol', function () { speak(it.ko, 'ko-KR'); }, 'Nghe tiếng Hàn'));
       right.appendChild(ibtn('picon del', 'trash', function () { del(it.id); render(); }, 'Xoá khỏi danh sách'));
       li.appendChild(right);
@@ -4430,7 +4414,7 @@ body.nhi-in-study #nhiV2TopNav,body.nhi-in-study .nhi-hide-while-flipping,body.n
     /* ---- study session (kept across reloads) ---- */
     function saveSess() {
       if (!sess) { lsSet(SKEY, ''); return; }
-      lsSet(SKEY, JSON.stringify({ kind: sess.kind, title: sess.title, lesson: sess.L ? sess.L.id : null, queue: sess.queue, pos: sess.pos, picked: sess.picked, again: sess.again, stats: sess.stats, recorded: !!sess.recorded, celebrated: !!sess.celebrated, batchStop:sess.batchStop, lastCheckpoint:sess.lastCheckpoint }));
+      lsSet(SKEY, JSON.stringify({ kind: sess.kind, title: sess.title, lesson: sess.L ? sess.L.id : null, queue: sess.queue, pos: sess.pos, picked: sess.picked, again: sess.again, stats: sess.stats, recorded: !!sess.recorded, celebrated: !!sess.celebrated }));
       ACTIVE_CARD.plan(sess);
     }
     var pendingCursor = null;
@@ -4477,7 +4461,7 @@ body.nhi-in-study #nhiV2TopNav,body.nhi-in-study .nhi-hide-while-flipping,body.n
         var o = JSON.parse(lsGet(SKEY) || 'null'); if (!o || !o.queue) return;
         // a session on one of the daily lessons can only come back once those lessons have arrived
         if (!extrasTried && ((o.lesson && !BY_LESSON[o.lesson]) || o.queue.some(function (id) { return !ITEMS[id]; }))) return;
-        sess = { kind: o.kind, title: o.title, L: o.lesson ? BY_LESSON[o.lesson] || null : null, queue: o.queue.filter(function (id) { return ITEMS[id]; }), pos: o.pos || 0, flipped: false, again: o.again || {}, picked: o.picked || {}, spoken: -1, stats: o.stats || { known: 0, hard: 0, mid: 0 }, recorded: !!o.recorded, celebrated: !!o.celebrated, batchStop:Number(o.batchStop)||Math.min(o.queue.length,Math.ceil(((o.pos||0)+1)/10)*10),lastCheckpoint:Number(o.lastCheckpoint)||0 };
+        sess = { kind: o.kind, title: o.title, L: o.lesson ? BY_LESSON[o.lesson] || null : null, queue: o.queue.filter(function (id) { return ITEMS[id]; }), pos: o.pos || 0, flipped: false, again: o.again || {}, picked: o.picked || {}, spoken: -1, stats: o.stats || { known: 0, hard: 0, mid: 0 }, recorded: !!o.recorded, celebrated: !!o.celebrated };
         // Do not hijack another learning mode while old lesson data is loading.
         // On a slow connection, the user may already have selected "Thẻ ghi nhớ".
         // Recover the deep-link only while the active mode is actually "Lịch học".
@@ -4498,7 +4482,7 @@ body.nhi-in-study #nhiV2TopNav,body.nhi-in-study .nhi-hide-while-flipping,body.n
       sess = { kind: kind, title: title, L: L || null, queue: ids.slice(), pos: pos,
         flipped: false, again: restored && restored.again || {}, picked: restored && restored.picked || {},
         spoken: -1, stats: restored && restored.stats || { known: 0, hard: 0, mid: 0 },
-        recorded: !!(restored && restored.recorded), batchStop:Math.min(ids.length,Math.max(pos+1,Number(restored&&restored.batchStop)||Math.ceil((pos+1)/10)*10)),lastCheckpoint:Number(restored&&restored.lastCheckpoint)||0 };
+        recorded: !!(restored && restored.recorded) };
       expireUndo(); stopSpeech();
       anim = 'next'; saveSess(); render(); window.scrollTo({ top: 0, behavior: 'smooth' });
     }
@@ -4516,7 +4500,7 @@ body.nhi-in-study #nhiV2TopNav,body.nhi-in-study .nhi-hide-while-flipping,body.n
         resumeFull[sess.L.id] = {
           kind: sess.kind, queue: sess.queue.slice(), pos: sess.pos, title: sess.title,
           picked: Object.assign({}, sess.picked), again: Object.assign({}, sess.again),
-          stats: Object.assign({}, sess.stats), recorded: !!sess.recorded,batchStop:sess.batchStop,lastCheckpoint:sess.lastCheckpoint
+          stats: Object.assign({}, sess.stats), recorded: !!sess.recorded
         };
         save();
       }
@@ -4650,7 +4634,6 @@ body.nhi-in-study #nhiV2TopNav,body.nhi-in-study .nhi-hide-while-flipping,body.n
       var s = sess;
       while (s.pos < s.queue.length && !alive(s.queue[s.pos])) s.queue.splice(s.pos, 1);
       if (s.pos >= s.queue.length) return renderDone(v);
-      if(s.batchStop&&s.pos>=s.batchStop)return renderBatchDone(v);
       var it = ITEMS[s.queue[s.pos]], focus = document.body.classList.contains('focus');
       var head = el('div', 'shead' + (fresh ? ' fx-in' : ''));
       head.appendChild(ibtn('iconbtn sm', 'pause', pause, 'Tạm dừng, về trang bài học'));
@@ -4757,11 +4740,6 @@ body.nhi-in-study #nhiV2TopNav,body.nhi-in-study .nhi-hide-while-flipping,body.n
         flip();
       });
       c.appendChild(f);
-      if(canClearHighlightedPair(it.id)){
-        var clearActions=el('div','nhi-transparent-actions');
-        clearActions.appendChild(transparentButton(it.id,function(){render();}));
-        c.appendChild(clearActions);
-      }
       // The unused background around the entire card should also flip it.
       c.addEventListener('click', function(e) {
         if(e.target.closest('.pfront,.pdel,.pundo,.legendpop,.nhi-card-dictionaries,.nhi-english-v5,figure,button,input,textarea,select,a,[contenteditable]'))return;
@@ -4868,23 +4846,6 @@ body.nhi-in-study #nhiV2TopNav,body.nhi-in-study .nhi-hide-while-flipping,body.n
       pendingRatingFinish=finish;
       if(animated)setTimeout(finish,430);else finish();
     }
-    function renderBatchDone(v){
-      var s=sess,n=s.pos,total=s.queue.length;
-      if(s.lastCheckpoint!==n){s.lastCheckpoint=n;
-        try{var key='nhi-v2-batches-v1',arr=JSON.parse(lsGet(key)||'[]');
-          if(!Array.isArray(arr))arr=[];arr.push({lesson:s.L&&s.L.id||'',date:today(),at:Date.now(),position:n,total:total});
-          lsSet(key,JSON.stringify(arr.slice(-400)));}catch(e){}
-        saveSess();
-      }
-      var box=el('section','quiz nhi-v2-mini-done');
-      box.appendChild(el('div','nhi-v2-mini-icon','🐱 🌸 ✨'));
-      box.appendChild(el('h2',null,'Hoàn thành '+n+'/'+total+' thẻ!'));
-      box.appendChild(el('p','listinfo','Đã lưu lượt nhỏ. Chỉ hoàn thành toàn bài mới được tính một lần ôn theo lịch.'));
-      var row=el('div','prow');
-      row.appendChild(btn('primary','Tiếp tục 10 thẻ',function(){s.batchStop=Math.min(total,s.pos+10);saveSess();render();}));
-      row.appendChild(btn('ghost','Dừng và học tiếp sau',function(){pause();}));
-      box.appendChild(row);v.appendChild(box);
-    }
     function renderDone(v) {
       var s = sess, p = el('div', 'quiz sdone');
       setFocus(false);
@@ -4896,7 +4857,18 @@ body.nhi-in-study #nhiV2TopNav,body.nhi-in-study .nhi-hide-while-flipping,body.n
       cat.src='nhi-cat-original-8frames-20261117.gif?v=1';
       cat.onerror=function(){cat.onerror=null;cat.src='nhi-kitten-lifelike-v2.svg?v=20261115-kitten-v2';};
       cat.alt='Mèo trắng vui vẻ tung tiền, những tờ tiền đang bay và rơi';
-      cat.loading='eager';m.appendChild(cat);
+      cat.loading='eager';
+      cat.addEventListener('load',function(){
+        // Blend the surrounding completion screen into the real GIF backdrop.
+        try{
+          var canvas=document.createElement('canvas');canvas.width=canvas.height=8;
+          var context=canvas.getContext('2d',{willReadFrequently:true});if(!context)return;
+          context.drawImage(cat,0,0,8,8);
+          var edge=context.getImageData(0,0,1,1).data;
+          if(edge[3]>200)p.style.setProperty('--nhi-victory-bg','rgb('+edge[0]+','+edge[1]+','+edge[2]+')');
+        }catch(_e){}
+      });
+      m.appendChild(cat);
       // A yellow thumbs-up emoji was distracting; the kitten paws do the celebrating.
       p.appendChild(m);
       if (window.NHI_VICTORY_CAT) window.NHI_VICTORY_CAT.attach(cat);
@@ -4942,9 +4914,26 @@ body.nhi-in-study #nhiV2TopNav,body.nhi-in-study .nhi-hide-while-flipping,body.n
         haptic([20, 60, 20, 60, 40]);
       }
     }
+    function formatChatExample(line){
+      var t=String(line||'').trim(),a,b,m;
+      if(!t)return '';
+      m=t.match(/^(.+?)\s*[:：]\s*(.+)$/);
+      if(m){
+        a=m[1].trim();b=m[2].trim();
+        if(/[가-힣]/.test(a)&&/[A-Za-zÀ-ỹ]/.test(b))return b+': '+a;
+        if(/[A-Za-zÀ-ỹ]/.test(a)&&/[가-힣]/.test(b))return a+': '+b;
+      }
+      m=t.match(/^(.+?)\s*[（(](.+)[）)]$/);
+      if(m){
+        a=m[1].trim();b=m[2].trim();
+        if(/[가-힣]/.test(a)&&/[A-Za-zÀ-ỹ]/.test(b))return b+': '+a;
+        if(/[A-Za-zÀ-ỹ]/.test(a)&&/[가-힣]/.test(b))return a+': '+b;
+      }
+      return t; // Never invent an absent translation.
+    }
     function appendChatExample(raw) {
       var it=curItem();if(!it || !alive(it.id))return false;
-      var lines=String(raw||'').replace(/\r/g,'').split(/\n+/).map(function(t){return t.trim();}).filter(Boolean);
+      var lines=String(raw||'').replace(/\r/g,'').split(/\n+/).map(formatChatExample).filter(Boolean);
       if(!lines.length)return false;
       var previous=val('note',it.id)||{text:it.note||'',color:'#fff1ce'};
       var next=(String(previous.text||'').trimEnd()?String(previous.text).trimEnd()+'\n':'')+lines.join('\n');
@@ -5198,12 +5187,6 @@ body.nhi-in-study #nhiV2TopNav,body.nhi-in-study .nhi-hide-while-flipping,body.n
     var rm=e.target.closest('[data-act="unhl"]');if(!rm)return;
     e.stopPropagation();clearHl(rm.dataset.id,+rm.dataset.i);classicLastHighlighted=null;renderCard();
   });
-  $('cClearCurrent').addEventListener('click',function(e){
-    e.preventDefault();e.stopPropagation();
-    var c=currentCard(),last=classicLastHighlighted;
-    if(!c||!last||last.id!==c.id)return;
-    clearHl(c.id,last.i);classicLastHighlighted=null;renderCard();
-  });
   $('cSpeak').addEventListener('click', function (e) { e.stopPropagation(); var c = currentCard(); if(c){var lang=(state.dir==='vk')===!state.flipped?'vi':'ko';toggleSpeech(c[lang],lang==='vi'?'vi-VN':'ko-KR');} });
   $('prev').addEventListener('click', function () { go(-1); });
   $('next').addEventListener('click', function () { go(1); });
@@ -5230,7 +5213,6 @@ body.nhi-in-study #nhiV2TopNav,body.nhi-in-study .nhi-hide-while-flipping,body.n
     var b = e.target.closest('[data-act]'); if (!b) return;
     var id = b.closest('.row').dataset.id, act = b.dataset.act;
     if (act === 'speak') { speak(BY_ID[id].ko); return; }
-    if (act === 'unhl-pair') {clearHl(id,+b.dataset.i);classicLastHighlighted=null;updateRow(id);return;}
     if (act === 'x') setP(id, { x: !getP(id).x });
     if (act === 'lv') { var p = getP(id); setP(id, { lv: p.lv === b.dataset.lv ? null : b.dataset.lv }); }
     updateRow(id);
@@ -5493,7 +5475,7 @@ body.nhi-in-study #nhiV2TopNav,body.nhi-in-study .nhi-hide-while-flipping,body.n
       $('menuDaily').addEventListener('click', function () { menu(false); PLAN.openDailyCreator(); });
       $('menuCover').addEventListener('click', function () { menu(false); location.hash='#/bia'; cover(true); });
       $('brandFaceBtn').addEventListener('click', function () { menu(false); location.hash='#/bia'; cover(true); });
-      $('brandBtn').addEventListener('click', function () { menu(false); location.hash='#/hom-nay'; window.scrollTo({top:0,behavior:'smooth'}); });
+      $('brandBtn').addEventListener('click', function () { menu(false); SHELL.cover(false); location.hash='#/lich-hoc'; window.scrollTo({top:0,behavior:'smooth'}); });
       window.NHI_COVER={open:function(){cover(true);},close:function(){cover(false);}};
       $('coverGo').addEventListener('click', function () { haptic(14); cover(false); location.hash='#/hom-nay'; });
       $('setBtn').addEventListener('click', function () { menu(false); sheet(true); });
