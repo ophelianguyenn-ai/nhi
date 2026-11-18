@@ -181,19 +181,72 @@ function initReader(){
   // Korean fragment and Vietnamese meaning could be spoken independently.
   const clean=window.NHI_SPEECH?.clean||((s)=>String(s));
   const lines=clean(text).split(/\n+/).filter(x=>x.trim()),out=[];for(const line of lines){const chunks=line.match(/[가-힣]+(?:[ \t]+[가-힣]+)*|[^가-힣]+/g)||[line];for(const t of chunks){if(!t.trim())continue;out.push({text:t,lang:language.value!=='auto'?language.value:/[가-힣]/.test(t)?'ko-KR':/[àáạảãăâđêôơưếệềễểấậầẩẫớờởỡợứừửữự]/i.test(t)?'vi-VN':'en-US'});}}return out;}
- function readFrom(b){if(active===b&&window.NHI_SPEECH.active()){stop();return;}stop();active=b;b.setAttribute('aria-pressed','true');const blocks=[...log.querySelectorAll('.nhi-ai-paragraph')],start=blocks.indexOf(b.parentElement),queue=blocks.slice(start).flatMap(p=>pieces(p.querySelector('.nhi-ai-paragraph-text').textContent)),mine=token;function next(){if(token!==mine)return;const item=queue.shift();if(!item){if(active)active.setAttribute('aria-pressed','false');active=null;return;}window.NHI_SPEECH.speak(item.text,item.lang,next,Number(speed.value));}next();}
- function mount(){for(const msg of log.querySelectorAll('.aimsg.ai:not(.wait)')){if(msg.dataset.readerMounted)continue;msg.dataset.readerMounted='true';const source=msg.cloneNode(true),links=[...source.querySelectorAll('a')].map(a=>{const link=a.cloneNode(true);a.remove();return link;}),paragraphs=source.innerHTML.split(/<br\s*\/?\s*>|\n+/i);msg.replaceChildren();for(const paragraph of paragraphs){const text=make('span','nhi-ai-paragraph-text');text.innerHTML=paragraph;if(!text.textContent.trim())continue;const p=make('div','nhi-ai-paragraph'),b=button('',()=>readFrom(b));
- b.innerHTML=icon('headphones');b.classList.add('nhi-read-message');b.setAttribute('aria-label','Đọc từ đoạn này trở xuống / dừng');b.setAttribute('aria-pressed','false');
- p.classList.add('nhi-ai-draggable-note');p.draggable=true;
- p.title='Kéo câu này thả vào thẻ để lưu vào ghi chú';
- const add=button('＋',()=>{
-   const saved=window.NLC_NOTES?.add(text.textContent);
-   if(saved){add.textContent='✓';setTimeout(()=>{if(add.isConnected)add.textContent='＋';},1100);}
- });
- add.classList.add('nhi-add-to-note');
- add.title='Thêm ví dụ này vào ghi chú trên thẻ đang học';
- add.setAttribute('aria-label','Thêm câu này vào ghi chú thẻ');
- p.append(b,text,add);msg.append(p);}for(const link of links)msg.append(link);}}
+ function readParagraph(p){
+  // Double-click/double-tap reads ONLY the chosen paragraph, not the whole answer.
+  stop();
+  if(!window.NHI_SPEECH?.speak)return;
+  const text=p.querySelector('.nhi-ai-paragraph-text')?.textContent||'';
+  const queue=pieces(text),mine=token;
+  if(!queue.length)return;
+  p.dataset.reading='true';
+  function next(){
+   if(token!==mine){delete p.dataset.reading;return;}
+   const item=queue.shift();
+   if(!item){delete p.dataset.reading;return;}
+   window.NHI_SPEECH.speak(item.text,item.lang,next,Number(speed.value));
+  }
+  next();
+ }
+ let tapAt=0,tapTarget=null;
+ function mount(){
+  for(const msg of log.querySelectorAll('.aimsg.ai:not(.wait)')){
+   if(msg.dataset.readerMounted)continue;
+   msg.dataset.readerMounted='true';
+   const source=msg.cloneNode(true);
+   const links=[...source.querySelectorAll('a')].map(a=>{const link=a.cloneNode(true);a.remove();return link;});
+   const paragraphs=source.innerHTML.split(/<br\s*\/?\s*>|\n+/i);
+   msg.replaceChildren();
+   for(const paragraph of paragraphs){
+    const text=make('span','nhi-ai-paragraph-text');
+    text.innerHTML=paragraph;
+    if(!text.textContent.trim())continue;
+    const p=make('div','nhi-ai-paragraph nhi-ai-draggable-note');
+    p.draggable=true;
+    p.title='Nhấn đúp vào đoạn để nghe · kéo vào thẻ để lưu ghi chú';
+    p.addEventListener('dblclick',e=>{
+      if(e.target.closest('button,a'))return;
+      e.preventDefault();e.stopPropagation();
+      // A mobile browser can dispatch dblclick after the touch handler.
+      if(p.dataset.lastTouchRead&&Date.now()-Number(p.dataset.lastTouchRead)<600)return;
+      readParagraph(p);
+    });
+    p.addEventListener('touchend',e=>{
+      if(e.target.closest('button,a'))return;
+      const now=Date.now();
+      if(tapTarget===p&&now-tapAt<380){
+        tapAt=0;tapTarget=null;
+        p.dataset.lastTouchRead=String(now);
+        readParagraph(p);
+      }else{tapAt=now;tapTarget=p;}
+    },{passive:true});
+    text.tabIndex=0;
+    text.setAttribute('role','button');
+    text.setAttribute('aria-label','Nhấn Enter hoặc nhấn đúp để nghe đoạn này');
+    text.addEventListener('keydown',e=>{
+      if(e.key==='Enter'||e.key===' '){e.preventDefault();readParagraph(p);}
+    });
+    const add=button('＋',()=>{
+      const saved=window.NLC_NOTES?.add(text.textContent);
+      if(saved){add.textContent='✓';setTimeout(()=>{if(add.isConnected)add.textContent='＋';},1100);}
+    });
+    add.classList.add('nhi-add-to-note');
+    add.title='Thêm ví dụ này vào ghi chú trên thẻ đang học';
+    add.setAttribute('aria-label','Thêm câu này vào ghi chú thẻ');
+    p.append(text,add);msg.append(p);
+   }
+   for(const link of links)msg.append(link);
+  }
+ }
 
  new MutationObserver(mount).observe(log,{childList:true});mount();document.getElementById('aiClose').addEventListener('click',stop);document.getElementById('aiNewBtn').addEventListener('click',stop);
 }
