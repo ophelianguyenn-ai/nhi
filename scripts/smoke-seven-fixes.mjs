@@ -153,7 +153,7 @@ try{
   const missed=await cal.evaluate(id=>{
    const card=document.querySelector('#planBox .nhi-plan-current [data-lesson-id="'+id+'"]');
    return {compact:!!card,hasDuplicateChips:!!card?.querySelector('.pchip'),
-     next:card?.querySelector('.nhi-next-review')?.textContent||'',
+     next:card?.querySelector('.nhi-next-review')?.getAttribute('aria-label')||'',
      extra:!!card?.querySelector('.pstatus')};
   },lesson.id);
   assert(missed.compact&&!missed.hasDuplicateChips&&!missed.extra,'Calendar must have one compact next-review footer');
