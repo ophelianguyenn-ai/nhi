@@ -785,6 +785,11 @@ body.nhi-in-study #nhiV2TopNav,body.nhi-in-study .nhi-hide-while-flipping,body.n
   border-radius:14px!important;white-space:nowrap;font-size:15px!important;font-weight:850;
   box-shadow:0 4px 0 color-mix(in srgb,var(--accent-d) 75%,#137b9b);
 }
+/* Use one full-width day per row; narrow multi-column days made lesson cards 220px tall. */
+#planBox .nhi-plan-current .days-grid,#planBox .nhi-plan-waiting .days-grid{
+  display:grid!important;grid-template-columns:minmax(0,1fr)!important;gap:12px;
+}
+#planBox .nhi-day-separated{min-width:0;width:100%;box-sizing:border-box}
 /* Make every white calendar lesson genuinely compact, regardless of old .quiz flex rules. */
 #planBox .nhi-day-separated .nhi-day-lessons{gap:8px}
 #planBox .nhi-day-separated .nhi-lesson-white{
@@ -804,7 +809,16 @@ body.nhi-in-study #nhiV2TopNav,body.nhi-in-study .nhi-hide-while-flipping,body.n
   min-width:0;margin:0!important;
 }
 #planBox .nhi-lesson-white>.nhi-compact-copy .ptitle{font-size:clamp(13px,1.6vw,15px);line-height:1.3}
-#planBox .nhi-lesson-white .ttags{gap:5px}
+#planBox .nhi-lesson-white .ttags{
+  gap:5px;display:flex;flex-wrap:nowrap!important;overflow-x:auto;
+  max-width:100%;white-space:nowrap;scrollbar-width:none;-webkit-overflow-scrolling:touch;
+}
+#planBox .nhi-lesson-white .ttags::-webkit-scrollbar{display:none}
+#planBox .nhi-lesson-white .ttags .ttag{flex:0 0 auto}
+#planBox .nhi-lesson-white .nhi-compact-copy .ptitle{
+  display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;
+  overflow:hidden;max-width:100%;
+}
 #planBox .nhi-lesson-white .ttag{padding:2px 8px;font-size:11px;line-height:1.35}
 #planBox .nhi-lesson-white>.primary{
   grid-area:button;align-self:center;min-width:76px!important;min-height:37px!important;
