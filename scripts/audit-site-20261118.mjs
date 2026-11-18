@@ -208,13 +208,16 @@ try{
       const selector=(i%2?'.pko':'.pvi')+' .ph.tap[data-hi="'+first.pair+'"]';
       const trigger=row.querySelector(selector);
       if(!trigger)throw Error('One language lost its clickable phrase');
-      trigger.click();
+      // Force a neon sample on the first tap; subsequent taps remain truly random.
+      if(i===0){const rng=Math.random;Math.random=()=>0.8;try{trigger.click();}finally{Math.random=rng;}}
+      else trigger.click();
       const updated=document.querySelector('#planBox .pitems li[data-item="'+first.id+'"]');
       const vi=updated.querySelector('.pvi .ph.tap[data-hi="'+first.pair+'"]');
       const ko=updated.querySelector('.pko .ph.tap[data-hi="'+first.pair+'"]');
       const v=getComputedStyle(vi),k=getComputedStyle(ko);
       results.push({color:v.color,koColor:k.color,
         viSelected:vi.classList.contains('nhi-phrase-selected'),koSelected:ko.classList.contains('nhi-phrase-selected'),
+        viNeon:vi.classList.contains('nhi-phrase-neon'),koNeon:ko.classList.contains('nhi-phrase-neon'),
         background:v.backgroundColor,koBackground:k.backgroundColor,gradient:v.backgroundImage,decoration:v.textDecorationLine,breakMode:v.boxDecorationBreak});
     }
     return {...first,results};
@@ -228,15 +231,22 @@ try{
    'Colored pairs must be filled and transparent pairs must be unpainted: '+JSON.stringify(result));
   const palette=await page.evaluate(()=>{
     const css=getComputedStyle(document.documentElement);
-    return Array.from({length:8},(_,i)=>css.getPropertyValue('--nhi-pair-'+(i+1)).trim());
+    return Array.from({length:22},(_,i)=>css.getPropertyValue('--nhi-pair-'+(i+1)).trim());
   });
-  assert(palette.slice(0,7).every(Boolean)&&!palette[7],
-   'Expected exactly seven pastel highlighter colors: '+JSON.stringify(palette));
+  assert(palette.slice(0,7).every(Boolean)&&palette.slice(7,16).every(c=>!c)&&palette.slice(16,22).every(Boolean),
+   'Expected seven pastels and six neon shades (preserving older stored indexes 7–15): '+JSON.stringify(palette));
   assert(palette.slice(0,7).every(c=>{
     const rgb=c.match(/^#([0-9a-f]{6})$/i);if(!rgb)return false;
     const channels=[0,2,4].map(i=>parseInt(rgb[1].slice(i,i+2),16));
     return Math.min(...channels)>=180;
   }),'All seven highlighter colors should be light pastels: '+JSON.stringify(palette));
+  assert(x[0].viNeon&&x[0].koNeon&&x.every(z=>z.viNeon===z.koNeon),
+   'Neon highlight must be supported and synchronized in both languages: '+JSON.stringify(result));
+  assert(palette.slice(16,22).every(c=>{
+    const match=c.match(/^#([0-9a-f]{6})$/i);if(!match)return false;
+    const channels=[0,2,4].map(i=>parseInt(match[1].slice(i,i+2),16));
+    return Math.max(...channels)>=235 && Math.min(...channels)>=75;
+  }),'The additional six shades should be vivid but readable: '+JSON.stringify(palette));
   assert(x.every(z=>z.gradient==='none'&&z.decoration==='none'&&z.breakMode==='clone'),
    'Highlight must cover the full phrase without gradient or underline: '+JSON.stringify(result));
   assert(x.every((z,i)=>!i||z.background!==x[i-1].background),'Consecutive taps reused the same background');
@@ -250,7 +260,7 @@ try{
     return {vi:vi?getComputedStyle(vi).backgroundColor:'',ko:ko?getComputedStyle(ko).backgroundColor:''};
   },result);
   assert(saved.vi===x.at(-1).background&&saved.ko===saved.vi,'Random pair highlight lost on reload: '+JSON.stringify(saved));
-  return 'Seven pastel colors plus transparent, no immediate repeats, VI–KO synchronized, persists after reload';
+  return 'Seven pastels + six neon shades + transparent; no repeats, VI–KO synchronized, saved after reload';
  });
  await check('Lesson merge settings',async()=>{
   await page.$eval('#planBox .ppage button',()=>{
