@@ -1082,14 +1082,17 @@ body.nhi-in-study #nhiV2TopNav,body.nhi-in-study .nhi-hide-while-flipping,body.n
 }
 
 
-/* Seven soft highlighter colors shared by corresponding Vietnamese and Korean phrases.
-   The eighth, transparent state removes highlighting entirely. */
+/* Paired Vietnamese/Korean highlighter: seven pastels + six brighter neon shades.
+   Numbers 8–16 remain reserved for older saved colors; neon starts at 17.
+   Transparent (-1) is an additional state that removes highlighting. */
 :root{
   --nhi-pair-1:#ffe0ea;--nhi-pair-2:#d9eeff;--nhi-pair-3:#fff1b8;--nhi-pair-4:#ddf7e5;
   --nhi-pair-5:#f0e2ff;--nhi-pair-6:#ffe8ce;--nhi-pair-7:#d8f5f3;
+  --nhi-pair-17:#ff5ecb;--nhi-pair-18:#8cff55;--nhi-pair-19:#50f8ff;
+  --nhi-pair-20:#f8ff4d;--nhi-pair-21:#ffb14c;--nhi-pair-22:#cc83ff;
 }
 .ph.nhi-phrase-selected{
-  /* Pastel background stays light and readable in both light and dark themes. */
+  /* Dark text remains readable on both pastel and neon highlights in either theme. */
   color:#1f3346!important;
   -webkit-text-fill-color:#1f3346!important;
   background:var(--nhi-phrase-current)!important;
@@ -1101,6 +1104,9 @@ body.nhi-in-study #nhiV2TopNav,body.nhi-in-study .nhi-hide-while-flipping,body.n
   border:0!important;border-bottom:0!important;box-shadow:none!important;
   padding:2px 4px!important;margin:0!important;
   font-weight:800;animation:none!important;
+}
+.ph.nhi-phrase-selected.nhi-phrase-neon{
+  box-shadow:0 0 0 1px var(--nhi-phrase-current),0 0 9px color-mix(in srgb,var(--nhi-phrase-current) 62%,transparent)!important;
 }
 .hl-item .nhi-clear-highlight{font-size:12px;padding:4px 9px;white-space:nowrap}
 .ph.nhi-phrase-selected::before,.ph.nhi-phrase-selected::after{content:none!important;display:none!important}
@@ -1717,13 +1723,15 @@ body.nhi-in-study #nhiV2TopNav,body.nhi-in-study .nhi-hide-while-flipping,body.n
     });
     return out.sort(function (a, b) { return a.s - b.s; });
   }
-  // Seven pastel colors + a transparent state (-1), never repeating the previous state.
-  // Old saved colors (0–15) are mapped to one of the seven pastel colors.
+  // Preserve all seven pastel indexes and older saved colors (7–15) without collisions.
+  // New neon colors use indexes 16–21; -1 is the transparent "bỏ tô" state.
   var PHRASE_COLOR_TOTAL=7, PHRASE_COLOR_CLEAR=-1, PHRASE_COLOR_LEGACY_TOTAL=16;
+  var PHRASE_COLOR_OPTIONS=[0,1,2,3,4,5,6,16,17,18,19,20,21];
   function phraseColorIndex(raw,i){
     var color=Number(raw);
     if(raw!==null&&raw!==undefined&&raw!==''&&Number.isInteger(color)){
       if(color===PHRASE_COLOR_CLEAR)return PHRASE_COLOR_CLEAR;
+      if(PHRASE_COLOR_OPTIONS.indexOf(color)>=0)return color;
       if(color>=0&&color<PHRASE_COLOR_LEGACY_TOTAL)return color%PHRASE_COLOR_TOTAL;
     }
     return (i*7+4)%PHRASE_COLOR_TOTAL;
@@ -1731,8 +1739,7 @@ body.nhi-in-study #nhiV2TopNav,body.nhi-in-study .nhi-hide-while-flipping,body.n
   function randomPhraseColor(previous){
     var hasPrevious=previous!==null&&previous!==undefined&&previous!=='';
     var prev=hasPrevious?phraseColorIndex(previous,0):null;
-    var choices=[];
-    for(var color=0;color<PHRASE_COLOR_TOTAL;color++)if(color!==prev)choices.push(color);
+    var choices=PHRASE_COLOR_OPTIONS.filter(function(color){return color!==prev;});
     // First tap always shows a color; later taps may choose "bỏ tô" (transparent).
     if(hasPrevious&&prev!==PHRASE_COLOR_CLEAR)choices.push(PHRASE_COLOR_CLEAR);
     return choices[Math.floor(Math.random()*choices.length)];
@@ -1756,6 +1763,7 @@ body.nhi-in-study #nhiV2TopNav,body.nhi-in-study .nhi-hide-while-flipping,body.n
       var color=phraseColorIndex(hasColor?colors[sg.i]:null,sg.i);
       if(color!==PHRASE_COLOR_CLEAR&&(selected.indexOf(sg.i)>=0||hasColor)){
         sp.classList.add('nhi-phrase-selected');
+        if(color>=16)sp.classList.add('nhi-phrase-neon');
         sp.style.setProperty('--nhi-phrase-current','var(--nhi-pair-'+(color+1)+')');
       }
       sp.dataset.i=sg.i;sp.textContent=text.slice(sg.s,sg.e);
@@ -2262,10 +2270,10 @@ body.nhi-in-study #nhiV2TopNav,body.nhi-in-study .nhi-hide-while-flipping,body.n
         var color=phraseColorIndex((getP(c.id).hc||{})[i],i);
         if(color===PHRASE_COLOR_CLEAR)return;
         var pairColor='var(--nhi-pair-'+(color+1)+')';
-        var st = document.createElement('span'); st.className = 'ph nhi-phrase-selected'; st.textContent = p[0];
+        var st = document.createElement('span'); st.className = 'ph nhi-phrase-selected'+(color>=16?' nhi-phrase-neon':''); st.textContent = p[0];
         st.style.setProperty('--nhi-phrase-current',pairColor);vi.appendChild(st);t.appendChild(vi);
         var ko = document.createElement('p'); ko.className = 'ko'; ko.lang = 'ko';
-        var kt=document.createElement('span');kt.className='ph nhi-phrase-selected';kt.textContent=p[1];
+        var kt=document.createElement('span');kt.className='ph nhi-phrase-selected'+(color>=16?' nhi-phrase-neon':'');kt.textContent=p[1];
         kt.style.setProperty('--nhi-phrase-current',pairColor);ko.appendChild(kt);t.appendChild(ko);
         if (state.pron && p[2]) { var pn = document.createElement('p'); pn.className = 'pron'; pn.textContent = p[2]; t.appendChild(pn); }
         var src = document.createElement('span'); src.className = 'src'; src.textContent = DECK_NAME[c.deck] + ' · ' + c.vi; t.appendChild(src);
@@ -2514,7 +2522,8 @@ body.nhi-in-study #nhiV2TopNav,body.nhi-in-study .nhi-hide-while-flipping,body.n
       Object.keys(v.hc).forEach(function(k){
         var i=Number(k),color=Number(v.hc[k]);
         if(Number.isInteger(i)&&i>=0&&i<count&&Number.isInteger(color)&&
-          (color===PHRASE_COLOR_CLEAR||(color>=0&&color<PHRASE_COLOR_LEGACY_TOTAL)))colorMap[i]=color;
+          (color===PHRASE_COLOR_CLEAR||(color>=0&&color<PHRASE_COLOR_LEGACY_TOTAL)||
+            PHRASE_COLOR_OPTIONS.indexOf(color)>=0))colorMap[i]=color;
       });
       if(Object.keys(colorMap).length)e.hc=colorMap;
     }
@@ -3819,6 +3828,7 @@ body.nhi-in-study #nhiV2TopNav,body.nhi-in-study .nhi-hide-while-flipping,body.n
         var color=phraseColorIndex(hasColor?colors[g.i]:null,g.i);
         if(color!==PHRASE_COLOR_CLEAR&&(selected.indexOf(g.i)>=0||hasColor)){
           sp.classList.add('nhi-phrase-selected');
+          if(color>=16)sp.classList.add('nhi-phrase-neon');
           sp.style.setProperty('--nhi-phrase-current','var(--nhi-pair-'+(color+1)+')');
         }
         sp.dataset.hi=g.i;sp.dataset.item=it.id;elm.appendChild(sp);pos=g.e;
