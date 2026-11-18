@@ -99,6 +99,27 @@ try{
    return 'rendered '+id;
   });
  }
+ // Test the actual requested screens at narrow widths, not only the flashcard screen.
+ for(const section of ['today','calendar']){
+  for(const width of [320,390,768,1360]){
+   await check('Responsive '+section+' '+width,async()=>{
+    await page.setViewport({width,height:830});
+    await page.$eval('#nhiV2TopNav [data-v2-nav="'+section+'"]',e=>e.click());
+    await page.waitForSelector(section==='today'?'#planBox .nhi-v2-hero':'#planBox .nhi-plan-current');
+    const measurements=await page.evaluate((which)=>{
+     const box=document.querySelector(which==='today'?'#planBox .nhi-v2-hero':'#planBox .nhi-day-separated');
+     const b=box?.getBoundingClientRect();
+     return {viewport:innerWidth,page:document.documentElement.scrollWidth,
+      blockWidth:b?.width,blockRight:b?.right};
+    },section);
+    assert(measurements.page<=measurements.viewport+18,'Horizontal overflow: '+JSON.stringify(measurements));
+    assert((measurements.blockRight||0)<=measurements.viewport+18,
+     'Content block extends outside viewport: '+JSON.stringify(measurements));
+    return JSON.stringify(measurements);
+   });
+  }
+ }
+ await page.setViewport({width:1360,height:880});
  await check('Study card hides 7-item navigation',async()=>{
   await page.$eval('#nhiV2TopNav [data-v2-nav="today"]',x=>x.click());
   const target=await page.evaluate(()=>window.NHI_PLAN_V2.snapshot().lessons.find(x=>x.status==='late'||x.status==='today')?.id);
