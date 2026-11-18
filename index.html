@@ -855,6 +855,59 @@ body.nhi-in-study #nhiV2TopNav,body.nhi-in-study .nhi-hide-while-flipping,body.n
   #planBox .nhi-lesson-white>.nhi-next-review{font-size:11px}
 }
 
+
+/* November 18: routes, responsive three-day calendar and accessible interaction polish. */
+#planBox .nhi-plan-current .days-grid,#planBox .nhi-plan-waiting .days-grid{
+  display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:13px!important;align-items:start;
+}
+#planBox .nhi-day-separated{margin:0!important;gap:7px!important;min-width:0}
+#planBox .nhi-day-separated .pday{gap:5px 8px;min-width:0;padding:10px!important}
+#planBox .nhi-day-separated .pday b{font-size:clamp(14px,1.4vw,18px)}
+#planBox .nhi-day-separated .pday span{font-size:11px}
+#planBox .nhi-day-separated .nhi-lesson-white{column-gap:7px!important;padding:9px!important;grid-template-columns:32px minmax(0,1fr) 65px!important}
+#planBox .nhi-lesson-white>.ring{width:32px!important;height:32px!important}
+#planBox .nhi-lesson-white>.ring b{font-size:9px!important}
+#planBox .nhi-lesson-white .nhi-compact-copy .ptitle{font-size:13px;line-height:1.3}
+#planBox .nhi-lesson-white .ttag{font-size:10px;padding:2px 6px}
+#planBox .nhi-lesson-white>.primary{min-width:62px!important;padding:0 8px!important}
+#planBox .nhi-lesson-white>.nhi-next-review{padding:5px 8px!important;min-height:22px!important;font-size:12px}
+#planBox .nhi-next-review .nhi-review-symbol{font-size:15px;display:inline-flex;gap:5px;align-items:center}
+#planBox .nhi-next-review time{font-weight:850;color:var(--ink);font-variant-numeric:tabular-nums}
+#planBox .nhi-due-name .ttags{gap:4px;margin-top:5px}
+#planBox .nhi-due-name .ttag{font-size:10px;padding:2px 7px}
+/* Navigation: strong visible active state and raised hover for touch-capable desktop. */
+#nhiV2TopNav [data-v2-nav],#nhiV2Back{
+  cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;justify-content:center;
+  border:1px solid transparent;background:transparent;color:var(--muted);
+  font:750 12px/1.3 var(--ui,system-ui);border-radius:13px;padding:9px 12px;min-height:37px;
+  transition:transform .18s ease,box-shadow .18s ease,background .18s ease,color .18s ease,border-color .18s ease;
+}
+#nhiV2TopNav [data-v2-nav][aria-current="page"]{
+  color:#16688b!important;background:#e0f4fb!important;border-color:#76c8e3!important;
+  box-shadow:0 0 0 3px #f5fcff,0 0 0 5px #80cbe8,0 3px 9px #2b769526!important;
+  transform:translateY(-1px);
+}
+#nhiV2TopNav [data-v2-nav]:hover,#nhiV2Back:hover{
+  transform:translateY(-4px)!important;box-shadow:0 6px 13px #2a61752a!important;
+  background:var(--accent-soft);border-color:var(--accent-d);color:var(--accent-t);
+}
+#nhiV2Back{margin-right:auto;gap:5px;white-space:nowrap;background:color-mix(in srgb,var(--accent-soft) 35%,var(--surface));border-color:var(--line)}
+#planBox .nhi-v2-priority,#planBox .nhi-lesson-white,#planBox .nhi-day-separated .pday,#planBox .nhi-due-row,#planBox .nhi-v2-priority button,#planBox .nhi-hero-start,
+#nhiV2Workspace .nhi-v2-surface,#nhiV2Workspace button{
+  transition:transform .19s ease,box-shadow .19s ease,filter .19s ease;
+}
+@media(hover:hover) and (prefers-reduced-motion:no-preference){
+  #planBox .nhi-v2-priority:hover,#planBox .nhi-lesson-white:hover,#planBox .nhi-day-separated .pday:hover,#planBox .nhi-due-row:hover,#nhiV2Workspace .nhi-v2-surface:hover{transform:translateY(-3px)!important;box-shadow:0 8px 17px #385a7024!important}
+  #planBox .nhi-v2-priority button:hover,#planBox .nhi-hero-start:hover,#nhiV2Workspace button:hover{transform:translateY(-3px)!important;filter:brightness(1.04)}
+}
+@media(max-width:1160px){#planBox .nhi-plan-current .days-grid,#planBox .nhi-plan-waiting .days-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important}}
+@media(max-width:730px){
+  #planBox .nhi-plan-current .days-grid,#planBox .nhi-plan-waiting .days-grid{grid-template-columns:minmax(0,1fr)!important}
+  #nhiV2Back{margin-right:5px;flex:0 0 auto}
+  #nhiV2TopNav [data-v2-nav]{flex:0 0 auto;min-width:90px;font-size:11px}
+}
+@media(prefers-reduced-motion:reduce){#nhiV2TopNav [data-v2-nav],#nhiV2Back{transition:none!important;transform:none!important}}
+
 </style>
 </head>
 <body>
@@ -1204,10 +1257,10 @@ body.nhi-in-study #nhiV2TopNav,body.nhi-in-study .nhi-hide-while-flipping,body.n
     <h1>Nhi’s<em>Learning Corner</em></h1>
     <p class="lead"><span lang="ko">오늘도 화이팅!</span></p>
     <!-- Removed permanently: cover lesson/card counters -->
-    <button type="button" class="primary white" id="coverGo">Vào học thôi!</button>
+    <button type="button" class="primary white" id="coverGo">Vào học ngay</button>
   </div>
 </div>
-<script>(function () { try { var forceCover = /(?:[?&])cover=1(?:&|$)/.test(location.search); if (!forceCover && (/^#\/bai\//.test(location.hash) || /^#lk=/.test(location.hash) || sessionStorage.getItem('nlc-cover-seen') || (localStorage.getItem('viko-plan-sess-v1') || '').length > 2)) document.getElementById('cover').hidden = true; else document.body.classList.add('cover-on'); } catch (e) { } })();</script>
+<script>(function () { try { var forceCover = /(?:[?&])cover=1(?:&|$)/.test(location.search); if (!forceCover && ((/^#\/(?:bai\/|hom-nay|lich-hoc|luyen-tap|so-tay|tien-do|tim-kiem|hoi-ai|den-han|cai-dat|lich-su)/.test(location.hash)) || /^#lk=/.test(location.hash))) document.getElementById('cover').hidden = true; else document.body.classList.add('cover-on'); } catch (e) { } })();</script>
 <canvas id="confetti" hidden></canvas>
 
 <script>
@@ -3492,8 +3545,15 @@ body.nhi-in-study #nhiV2TopNav,body.nhi-in-study .nhi-hide-while-flipping,body.n
 
     /* ---- routing: #/bai/<id> opens a lesson as its own page ---- */
     function route() {
-      var m = /^#\/bai\/([\w-]+)$/.exec(location.hash || '');
+      var hash=location.hash||'',m=/^#\/bai\/([\w-]+)$/.exec(hash);
       page = m && BY_LESSON[m[1]] ? (mergeDestination(m[1]) || m[1]) : null;
+      if(!m){
+        if(hash==='#/hom-nay')view='home';
+        else if(hash==='#/den-han')view='overdue';
+        else if(hash==='#/lich-hoc/chu-de')view='topics';
+        else if(hash==='#/lich-hoc/thang')view='months';
+        else if(hash==='#/lich-hoc')view='days';
+      }
       if (m && page && page !== m[1]) history.replaceState(null, '', location.pathname + location.search + '#/bai/' + page);
       document.body.classList.toggle('plan-page', !!page);
       // A saved lesson deep link must always have the visible "plan" section.
@@ -3509,7 +3569,12 @@ body.nhi-in-study #nhiV2TopNav,body.nhi-in-study .nhi-hide-while-flipping,body.n
     }
     window.addEventListener('hashchange', function () { if (sess && sess.L && sess.L.id !== (location.hash.split('/')[2] || '')) leave(); route(); window.scrollTo(0, 0); });
     function openLesson(id) { location.hash = '#/bai/' + id; }
-    function home() { if (sess) leave(); if (location.hash) { history.replaceState(null, '', location.pathname + location.search); } page = null; document.body.classList.remove('plan-page'); if (state.mode === 'plan') render(); }
+    function home(keepRoute) { if (sess) leave(); if (location.hash && !keepRoute) { history.replaceState(null, '', location.pathname + location.search); } page = null; document.body.classList.remove('plan-page'); if (state.mode === 'plan') render(); }
+    function navigatePlanView(name) {
+      var href={home:'#/hom-nay',days:'#/lich-hoc',topics:'#/lich-hoc/chu-de',months:'#/lich-hoc/thang',overdue:'#/den-han'}[name];
+      if(!href)return;view=name;
+      if(location.hash===href)home(true);else location.hash=href;
+    }
 
     /* ---- views ---- */
     function render() {
@@ -3738,10 +3803,10 @@ body.nhi-in-study #nhiV2TopNav,body.nhi-in-study .nhi-hide-while-flipping,body.n
         row.appendChild(copy);row.appendChild(btn('primary',r&&r.pos>0?'Tiếp tục':'Học',function(){startLesson(L);}));
         group.appendChild(row);
       });
-      group.appendChild(btn('ghost','Xem tất cả bài đến hạn ('+all.length+')',function(){view='overdue';render();}));v.appendChild(group);
+      group.appendChild(btn('ghost','Xem tất cả bài đến hạn ('+all.length+')',function(){navigatePlanView('overdue');}));v.appendChild(group);
       var browse=el('details','nhi-v2-browse');browse.appendChild(el('summary',null,'📚 Duyệt học phần và chủ đề'));
       var links=el('div','nhi-v2-browse-links');
-      [['days','Lịch học'],['topics','Chủ đề'],['months','Tháng']].forEach(function(x){links.appendChild(btn('ghost',x[1],function(){view=x[0];render();}));});
+      [['days','Lịch học'],['topics','Chủ đề'],['months','Tháng']].forEach(function(x){links.appendChild(btn('ghost',x[1],function(){navigatePlanView(x[0]);}));});
       browse.appendChild(links);v.appendChild(browse);
     }
     function renderDueList(v) {
@@ -3749,7 +3814,7 @@ body.nhi-in-study #nhiV2TopNav,body.nhi-in-study .nhi-hide-while-flipping,body.n
       var wrap = el('section', 'nhi-due-list');
       var header = el('div', 'nhi-due-list-head');
       header.appendChild(el('h2', null, 'Bài đến hạn (' + arr.length + ')'));
-      header.appendChild(btn('ghost', '← Hôm nay', function () { view='home'; render(); }));
+      header.appendChild(btn('ghost', '← Hôm nay', function () { navigatePlanView('home'); }));
       wrap.appendChild(header);
       if (!arr.length) wrap.appendChild(el('p', 'listinfo', 'Hiện không có bài đến hạn.'));
       arr.sort(function (a, b) { return current(a).due.localeCompare(current(b).due); });
@@ -3774,7 +3839,7 @@ body.nhi-in-study #nhiV2TopNav,body.nhi-in-study .nhi-hide-while-flipping,body.n
       headText.appendChild(el('h2',null,view==='days'?'🗓 Lịch học':view==='topics'?'📚 Chủ đề':'📅 Theo tháng'));
       headText.appendChild(el('p',null,'Bài học được sắp xếp theo ngày và lịch ôn.'));
       head.appendChild(headText);
-      head.appendChild(btn('ghost','← Hôm nay',function(){view='home';render();}));
+      head.appendChild(btn('ghost','← Hôm nay',function(){navigatePlanView('home');}));
       v.appendChild(head);
       var tools = el('div', 'ptools'), sb = el('div', 'psearch');
       sb.innerHTML = ic('search');
@@ -3792,7 +3857,7 @@ body.nhi-in-study #nhiV2TopNav,body.nhi-in-study .nhi-hide-while-flipping,body.n
       inp.addEventListener('input', function () { query = inp.value; clr.hidden = !query; paintResults(res, main); });
       v.appendChild(res);
       var tabs = el('div', 'tabs ptabs');
-      [['days', 'Theo ngày'], ['topics', 'Chủ đề'], ['months', 'Tháng']].forEach(function (x) { var b = btn('', x[1], function () { view = x[0]; render(); }); b.setAttribute('aria-selected', String(view === x[0])); tabs.appendChild(b); });
+      [['days', 'Theo ngày'], ['topics', 'Chủ đề'], ['months', 'Tháng']].forEach(function (x) { var b = btn('', x[1], function () { navigatePlanView(x[0]); }); b.setAttribute('aria-selected', String(view === x[0])); tabs.appendChild(b); });
       main.appendChild(tabs);
       if (view === 'days') { main.appendChild(legend()); renderDays(main); } else if (view === 'topics') renderTopics(main); else renderMonths(main);
       if (fresh) main.classList.add('stagger');
@@ -3917,7 +3982,7 @@ body.nhi-in-study #nhiV2TopNav,body.nhi-in-study .nhi-hide-while-flipping,body.n
       var wrap = el('div', 'ppage' + (fresh ? ' stagger' : '')); wrap.style.setProperty('--day', dayColor(L.date));
       if (sess && sess.L && sess.L.id === L.id) { renderSession(wrap, fresh); v.appendChild(wrap); return; }
       var hero = el('div', 'phero'), top = el('div', 'pnavtop');
-      var back = el('a', 'pback'); back.href = '#'; back.innerHTML = ic('left'); back.appendChild(document.createTextNode('Lịch học')); top.appendChild(back);
+      var back = el('a', 'pback'); back.href = '#/lich-hoc'; back.innerHTML = ic('left'); back.appendChild(document.createTextNode('Lịch học')); top.appendChild(back);
       top.appendChild(el('span', 'pdate', WEEKDAY[parse(L.date).getDay()] + ' · ' + vn(L.date, true)));
       hero.appendChild(top);
       var ht = el('div'), c = liveCount(L.ids);
@@ -4568,7 +4633,7 @@ body.nhi-in-study #nhiV2TopNav,body.nhi-in-study .nhi-hide-while-flipping,body.n
         active:!!sess,session:sess?{lesson:sess.L&&sess.L.id,kind:sess.kind,pos:sess.pos,total:sess.queue.length}:null,
         syncEnabled:!!SYNC.cfg()};
     }
-    function setViewV2(name){if(['home','days','topics','months'].indexOf(name)<0)return;view=name;home();}
+    function setViewV2(name){if(['home','days','topics','months','overdue'].indexOf(name)<0)return;view=name;home(true);}
     return {
       render: render, merge: merge, extras: applyExtras, follow: follow, active: function () { return !!sess; }, load: load, leave: function () { if (!page) leave(); }, route: route,
       home: home,setView:setViewV2,snapshot:snapshotV2,startLessonById:function(id){var L=BY_LESSON[id];if(L)startLesson(L);},startPractice:function(ids,title){start('free',ids,title||'Luyện tập');},openDailyCreator: openDailyCreator, summary: summary, onData: function (fn) { dataCb = fn; },
@@ -5010,15 +5075,15 @@ body.nhi-in-study #nhiV2TopNav,body.nhi-in-study .nhi-hide-while-flipping,body.n
       $('menuList').addEventListener('click', function (e) {
         var b = e.target.closest('[data-mode]'); if (!b) return;
         menu(false);
-        if (b.dataset.mode === 'plan') PLAN.home();
+        if (b.dataset.mode === 'plan') PLAN.home(/^#\/(?:hom-nay|lich-hoc|den-han)/.test(location.hash));
         else if (location.hash) history.replaceState(null, '', location.pathname + location.search);
         state.mode = b.dataset.mode; state.flipped = false; saveUi(); document.body.classList.remove('plan-page'); renderMode(); ACTIVE_CARD.cards(); window.scrollTo(0, 0);
       });
       $('menuDaily').addEventListener('click', function () { menu(false); PLAN.openDailyCreator(); });
-      $('menuCover').addEventListener('click', function () { menu(false); cover(true); });
-      $('brandFaceBtn').addEventListener('click', function () { menu(false); cover(true); });
-      $('brandBtn').addEventListener('click', function () { menu(false); PLAN.home(); if(state.mode !== 'plan'){state.mode='plan';saveUi();renderMode();} window.scrollTo({top:0,behavior:'smooth'}); });
-      $('coverGo').addEventListener('click', function () { haptic(14); cover(false); });
+      $('menuCover').addEventListener('click', function () { menu(false); location.hash='#/bia'; cover(true); });
+      $('brandFaceBtn').addEventListener('click', function () { menu(false); location.hash='#/bia'; cover(true); });
+      $('brandBtn').addEventListener('click', function () { menu(false); location.hash='#/hom-nay'; window.scrollTo({top:0,behavior:'smooth'}); });
+      $('coverGo').addEventListener('click', function () { haptic(14); cover(false); location.hash='#/hom-nay'; });
       $('setBtn').addEventListener('click', function () { menu(false); sheet(true); });
       $('setSheet').addEventListener('click', function (e) {
         if (e.target.closest('[data-close]')) { sheet(false); return; }
