@@ -3748,7 +3748,7 @@ body.nhi-in-study #nhiV2TopNav,body.nhi-in-study .nhi-hide-while-flipping,body.n
         footer.appendChild(el('span','nhi-review-symbol',symbols[round-1]));
         if(isProjected)footer.appendChild(el('span','nhi-review-symbol','⏳'));
         var time=el('time',null,vn(nextDate,true));time.dateTime=nextDate;footer.appendChild(time);
-        var description='Ôn lượt '+round+'/5'+(isProjected?' dự kiến':'')+' vào ngày '+vn(nextDate,true);
+        var description='Lượt '+round+'/5'+(isProjected?' dự kiến':'')+' · ngày ôn '+vn(nextDate,true);
         footer.setAttribute('aria-label',description);
         footer.title=description;
         if(!isProjected&&nextDate<today())footer.classList.add('late');
