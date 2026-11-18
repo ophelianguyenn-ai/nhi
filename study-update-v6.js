@@ -236,7 +236,8 @@ function initReader(){
       if(e.key==='Enter'||e.key===' '){e.preventDefault();readParagraph(p);}
     });
     const add=button('＋',()=>{
-      const saved=window.NLC_NOTES?.add(text.textContent);
+      const pair=p.dataset.v2Vi&&p.dataset.v2Ko?p.dataset.v2Vi+': '+p.dataset.v2Ko:text.textContent;
+      const saved=window.NLC_NOTES?.add(pair);
       if(saved){add.textContent='✓';setTimeout(()=>{if(add.isConnected)add.textContent='＋';},1100);}
     });
     add.classList.add('nhi-add-to-note');
