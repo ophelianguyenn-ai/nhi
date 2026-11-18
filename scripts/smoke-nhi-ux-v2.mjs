@@ -19,7 +19,7 @@ try{
  await page.waitForFunction(()=>window.NHI_PLAN_V2?.snapshot?.().lessons.length>10,{timeout:20000});
  const loaded=await page.evaluate(()=>{
   const d=window.NHI_PLAN_V2.snapshot();
-  return {lessons:d.lessons.length,items:d.items.length,nav:document.querySelectorAll('#nhiV2TopNav button').length,
+  return {lessons:d.lessons.length,items:d.items.length,nav:document.querySelectorAll('#nhiV2TopNav [data-v2-nav]').length,
    backup:!!localStorage.getItem('nhi-v2-rollback-progress-20261117')};
  });
  assert(loaded.lessons>10&&loaded.items>100&&loaded.nav>=7,'2.0 app did not load: '+JSON.stringify(loaded));
