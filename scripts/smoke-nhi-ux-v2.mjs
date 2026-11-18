@@ -38,7 +38,7 @@ try{
  assert(!!await page.$('#planBox .nhi-plan-waiting'),'Missing waiting panel');
  assert(!!await page.$('#planBox .nhi-day-separated .nhi-lesson-white'),'Missing separate white lesson cards');
  assert(!await page.$('#planBox .nhi-day-combined'),'Calendar still has combined day cards');
- assert(!await page.$('#planBox .nhi-v2-hero'),'Calendar should not repeat Today's hero');
+ assert(!await page.$('#planBox .nhi-v2-hero'),'Calendar should not repeat the Today hero');
  assert(!await page.$('#planBox .nhi-v2-review-details'),'Calendar still duplicates the five review dates');
  assert(!await page.$('#planBox .nhi-v2-intro'),'Redundant greeting panel remains');
  // Five review dates are visible in the lesson detail without an extra click.
