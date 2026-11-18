@@ -712,7 +712,7 @@ button,input,select,textarea{font-family:var(--ui)}
 .nhi-lesson-settings-content .field{width:100%;min-height:44px;padding:8px 12px;border:2px solid var(--line);background:var(--surface);color:var(--ink);border-radius:12px}
 .nhi-lesson-settings-content hr{width:100%;border:0;border-top:1px solid var(--line)}
 .nhi-merge-source-row{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:8px;border-radius:10px;background:var(--sunk);font-size:13px}
-body.nhi-in-study .nhi-hide-while-flipping,body.nhi-in-study .nhi-bottom-nav,body.nhi-in-study #nhi-bottom-nav,body.nhi-in-study .bottom-navigation,body.nhi-in-study .bottom-nav{display:none!important}
+body.nhi-in-study #nhiV2TopNav,body.nhi-in-study .nhi-hide-while-flipping,body.nhi-in-study .nhi-bottom-nav,body.nhi-in-study #nhi-bottom-nav,body.nhi-in-study .bottom-navigation,body.nhi-in-study .bottom-nav{display:none!important}
 @media(max-width:520px){#planBox .nhi-day-combined .pday{gap:5px 9px}#planBox .nhi-calendar-hero .tact>*{flex:1 1 140px;justify-content:center}#planBox .nhi-v2-priority{padding:12px}#planBox .nhi-due-row{align-items:flex-start}}
 </style>
 </head>
@@ -3465,7 +3465,7 @@ body.nhi-in-study .nhi-hide-while-flipping,body.nhi-in-study .nhi-bottom-nav,bod
     }
     function lessonRing(L, cls) { var r = ring(doneSteps(L) / OFFSETS.length, doneSteps(L) + '/5', cls); r.title = 'Đã học ' + doneSteps(L) + ' / 5 lần'; return r; }
     function lessonCard(L) {
-      var p = el('div', 'nhi-compact-lesson');
+      var p = el('div', 'nhi-compact-lesson'); p.dataset.lessonId = L.id;
       p.style.setProperty('--day', dayColor(L.date));
       var left = el('div', 'nhi-compact-copy');
       // The day banner already shows the date and total vocabulary/sentences.
@@ -3514,7 +3514,7 @@ body.nhi-in-study .nhi-hide-while-flipping,body.nhi-in-study .nhi-bottom-nav,bod
       box.appendChild(st);
       var act = el('div', 'tact');
       var first = s.late[0] || s.due[0];
-      if (first) act.appendChild(lbtn('primary white big', 'bolt', '▶ Bắt đầu học 10 phút', function () { startLesson(first); }));
+      if (first) act.appendChild(lbtn('primary white big nhi-v2-start', 'bolt', '▶ Bắt đầu học 10 phút', function () { startLesson(first); }));
       if (s.hard.length) act.appendChild(lbtn('ghostw', 'flip', 'Ôn lại các thẻ khó (' + s.hard.length + ')', function () { start('hard', s.hard, 'Ôn lại các thẻ khó'); }));
       act.appendChild(btn('ghostw', '🗓 Xem lịch học', function () { view = 'days'; render(); }));
       box.appendChild(act);
