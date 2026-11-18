@@ -167,7 +167,7 @@ function renderNotebook(){
  }else if(noteTab==='examples'){
    if(!saved.length)html+='<p class="nhi-v2-hint">Chưa lưu ví dụ. Bấm ＋ cạnh một cặp Hàn–Việt trong chat để lưu vào đây.</p>';
    saved.slice().reverse().slice(0,60).forEach((e,i)=>{
-     html+='<article class="nhi-v2-surface"><strong lang="ko">'+esc(e.ko)+'</strong><p>'+esc(e.vi)+'</p>'
+     html+='<article class="nhi-v2-surface"><p class="nhi-v2-example-pair"><strong>'+esc(e.vi)+':</strong> <span lang="ko">'+esc(e.ko)+'</span></p>'
        +button('make-card:'+esc(e.id),'＋ Tạo thẻ')+'</article>';
    });
  }else{
@@ -319,10 +319,26 @@ function hookSettings(){
 }
 function exampleFrom(text){
  const t=String(text||'').replace(/[＋✓🎧]/g,'').trim();
- const m=t.match(/([가-힣][^\n()（）]{1,130}[.?!。]?)\s*[\(（]([^()（）\n]{2,170})[\)）]/);
- if(!m||!/[a-zA-ZÀ-ỹ]/.test(m[2]))return null;
- let ko=m[1].replace(/^[0-9.\-*•\s]+/,'').trim(),vi=m[2].trim();
- if(ko.length>160||vi.length>175)return null;
+ // Accept Korean (Vietnamese), Vietnamese (Korean), and either colon order.
+ let m=t.match(/([가-힣][^\n()（）]{1,130}[.?!。]?)\s*[\(（]([^()（）\n]{2,170})[\)）]/);
+ let ko='',vi='';
+ if(m&&/[A-Za-zÀ-ỹ]/.test(m[2])){ko=m[1];vi=m[2];}
+ if(!ko){
+  m=t.match(/([^\n()（）]{2,170})\s*[（(]([가-힣][^\n()（）]{1,140})[）)]/);
+  if(m&&/[A-Za-zÀ-ỹ]/.test(m[1])){vi=m[1];ko=m[2];}
+ }
+ if(!ko){
+  m=t.match(/([^\n:：]{2,170})\s*[:：]\s*([^\n:：]{2,170})/);
+  if(m){
+   const a=m[1].trim(),b=m[2].trim();
+   if(/[가-힣]/.test(a)&&/[A-Za-zÀ-ỹ]/.test(b)){ko=a;vi=b;}
+   else if(/[A-Za-zÀ-ỹ]/.test(a)&&/[가-힣]/.test(b)){ko=b;vi=a;}
+  }
+ }
+ if(!ko||!vi)return null;
+ ko=ko.replace(/^[0-9.\-*•\s]+/,'').trim();
+ vi=vi.replace(/^[0-9.\-*•\s]+/,'').trim();
+ if(!ko||!vi||ko.length>160||vi.length>175)return null;
  return {ko,vi};
 }
 function attachExamples(){
@@ -346,7 +362,7 @@ function attachExamples(){
    const saved=read(EXAMPLE,[]);if(!saved.some(x=>x.ko===pair.ko&&x.vi===pair.vi)){
     saved.push({id:'ex-'+Date.now()+'-'+Math.random().toString(36).slice(2,5),ko:pair.ko,vi:pair.vi,at:Date.now()});write(EXAMPLE,saved.slice(-300));
    }
-   if(P()?.active?.()&&P()?.appendChatExample)P().appendChatExample(pair.ko+' ('+pair.vi+')');
+   if(P()?.active?.()&&P()?.appendChatExample)P().appendChatExample(pair.vi+': '+pair.ko);
    status('Đã lưu 1 câu Hàn + 1 câu Việt');
   };
  });
