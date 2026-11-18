@@ -95,7 +95,7 @@ try{
   const detail=await page.evaluate(async()=>{
     const r=await fetch('lessons.json',{cache:'no-store'});if(!r.ok)throw Error('Cannot fetch lessons.json');
     const j=await r.json();
-    const all=j.lessons.filter(x=>/^2026-10-25-p\\d{2}$/.test(x.id)).sort((a,b)=>a.id.localeCompare(b.id));
+    const all=j.lessons.filter(x=>/^2026-10-25-p\d{2}$/.test(x.id)).sort((a,b)=>a.id.localeCompare(b.id));
     const checked=all.map((x,i)=>({
       id:x.id,date:x.date,expected:new Date(Date.UTC(2026,9,25-i)).toISOString().slice(0,10),
       cards:x.items.length,plan:x.plan
@@ -133,7 +133,7 @@ try{
   }));
   assert(!/[🗓⏳]/u.test(test.text),'Disallowed calendar or hourglass in review footer: '+test.text);
   assert(/^[1-5]$/.test(test.number||''),'Color-coded round number missing: '+JSON.stringify(test));
-  assert(/Lượt [1-5]\\/5/.test(test.aria||''),'Accessible review round description missing');
+  assert(/Lượt [1-5]\/5/.test(test.aria||''),'Accessible review round description missing');
   return JSON.stringify(test);
  });
  await check('Desktop calendar shows three day columns',async()=>{
