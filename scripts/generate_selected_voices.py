@@ -48,8 +48,13 @@ def collect(scope):
                 if isinstance(row, list) and len(row) >= 2:
                     pairs.extend((lang, str(row[index]).strip())
                                  for lang, index in (('vi', 0), ('ko', 1)))
-        from generate_tts import collect as original_collect
-        pairs.extend(original_collect())
+        # Legacy hand-authored cards are embedded in index.html. Read using
+        # ROOT so unit tests and scheduled actions share the same sources.
+        import re
+        body = (ROOT / 'index.html').read_text(encoding='utf-8')
+        for match in re.finditer(r"\['[wsaq]',\s*'((?:[^'\\]|\\.)*)',\s*'((?:[^'\\]|\\.)*)'", body):
+            for lang, token in (('vi', match.group(1)), ('ko', match.group(2))):
+                pairs.append((lang, token.replace("\\'", "'").strip()))
     else:
         from generate_tts import collect as original_collect
         pairs = list(original_collect())
