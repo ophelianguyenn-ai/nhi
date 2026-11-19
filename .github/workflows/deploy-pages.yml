@@ -57,7 +57,7 @@ jobs:
             nhi-interface-v4.css nhi-interface-v4.js
             nhi-interface-v5.css nhi-interface-v5.js nhi-seasons-v1.css nhi-seasons-v1.js
             nhi-living-garden-v1.css nhi-living-garden-v1.js
-            refresh-app.html nhi-phrases-v5.js nhi-verified-pairs-20261117.js nhi-longpress-dictionary-v1.js nhi-money-cat-20261117.svg nhi-seven-fixes-20261117.css nhi-english-v5.js nhi-english-data-v6.js
+            refresh-app.html nhi-phrases-v5.js nhi-verified-pairs-20261117.js nhi-daily-pairs.js nhi-longpress-dictionary-v1.js nhi-money-cat-20261117.svg nhi-seven-fixes-20261117.css nhi-english-v5.js nhi-english-data-v6.js
             recorded-voices-v11.js backup-portable-v1.js
             refresh-v9.css study-enhancements-v13.css
             icon-192.png icon-512.png nhi-avatar.png
@@ -99,6 +99,8 @@ jobs:
           node --check _site/nhi-english-v5.js
           node --check _site/nhi-stage-move-v1.js
           node --check _site/nhi-late-2026.js
+          node --check _site/nhi-daily-pairs.js
+          node --check _site/nhi-phrases-v5.js
           test -s _site/nhi-cat-original-8frames-20261117.gif
           test -s _site/nhi-original-gif-review-v1.css
           test -s _site/nhi-corner-v2.js
