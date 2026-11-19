@@ -133,5 +133,69 @@ class VoiceMigrationTests(unittest.TestCase):
                     asyncio.run(audio.run(settings))
             self.assertEqual(path.read_text(), '{}')
 
+    def test_auto_prioritizes_missing_newest_lessons_before_legacy(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = pathlib.Path(tmp)
+            (root / 'scripts').mkdir()
+            (root / 'scripts/daily-audio-texts.json').write_text('[]', encoding='utf-8')
+            (root / 'index.html').write_text('', encoding='utf-8')
+            (root / 'lessons.json').write_text(json.dumps({'lessons': [
+                {'id': 'old', 'items': [['1', 'w', '', 'Câu cũ', '이전 문장']]},
+                {'id': 'latest', 'items': [['2', 'w', '', 'Bài mới nhất', '최신 문장']]}
+            ]}, ensure_ascii=False), encoding='utf-8')
+            path = root / 'audio-manifest.json'
+            path.write_text(json.dumps({
+                'vi|Câu cũ': {'src': 'audio/vi/legacy.mp3', 'start': 0, 'end': 1},
+                'ko|이전 문장': {'src': 'audio/ko/legacy.mp3', 'start': 0, 'end': 1}
+            }), encoding='utf-8')
+            opts = SimpleNamespace(scope='auto', language='both', offset=0, limit=0,
+                                   vi_limit=1, ko_limit=1, delay=0,
+                                   dry_run=False, allow_partial=False, max_failures=3)
+            calls = []
+            async def stub_generate(lang, phrase, dest, api_key):
+                calls.append((lang, phrase))
+                dest.parent.mkdir(parents=True, exist_ok=True)
+                dest.write_bytes(b'ID3' + b'x' * 600)
+                return 1.5
+            with patch.object(audio, 'ROOT', root), patch.object(audio, 'MANIFEST', path), \
+                 patch.object(audio, '_generate', side_effect=stub_generate), \
+                 patch.dict('os.environ', {'FPT_MARKETPLACE_API_KEY': 'test-key'}, clear=True):
+                asyncio.run(audio.run(opts))
+            result = json.loads(path.read_text(encoding='utf-8'))
+            self.assertEqual(calls, [('vi', 'Bài mới nhất'), ('ko', '최신 문장')])
+            self.assertEqual(result['vi|Bài mới nhất']['voice'], 'std_banmai')
+            self.assertEqual(result['ko|최신 문장']['voice'], 'ko-KR-InJoonNeural')
+            self.assertNotIn('voice', result['vi|Câu cũ'])
+
+    def test_auto_keeps_injoon_generation_when_fpt_key_is_missing(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = pathlib.Path(tmp)
+            (root / 'scripts').mkdir()
+            (root / 'scripts/daily-audio-texts.json').write_text('[]', encoding='utf-8')
+            (root / 'index.html').write_text('', encoding='utf-8')
+            (root / 'lessons.json').write_text(json.dumps({'lessons': [
+                {'items': [['1', 'w', '', 'Tiếng Việt', '한국어']]}
+            ]}, ensure_ascii=False), encoding='utf-8')
+            path = root / 'audio-manifest.json'
+            path.write_text('{}')
+            opts = SimpleNamespace(scope='auto', language='both', offset=0, limit=0,
+                                   vi_limit=1, ko_limit=1, delay=0,
+                                   dry_run=False, allow_partial=True, max_failures=3)
+            calls = []
+            async def stub_generate(lang, phrase, dest, api_key):
+                calls.append((lang, phrase))
+                dest.parent.mkdir(parents=True, exist_ok=True)
+                dest.write_bytes(b'ID3' + b'x' * 600)
+                return 1.4
+            with patch.object(audio, 'ROOT', root), patch.object(audio, 'MANIFEST', path), \
+                 patch.object(audio, '_generate', side_effect=stub_generate), \
+                 patch.dict('os.environ', {}, clear=True):
+                asyncio.run(audio.run(opts))
+            result = json.loads(path.read_text())
+            self.assertEqual(calls, [('ko', '한국어')])
+            self.assertNotIn('vi|Tiếng Việt', result)
+            self.assertIn('ko|한국어', result)
+
+
 if __name__ == '__main__':
     unittest.main()
