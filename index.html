@@ -1987,9 +1987,10 @@ html body #planBox .sdone .pstatus{
       if (request !== speechRequest) return;
       var hasChosenVoice=!!(VOICE_PREF[pre]&&voicesFor(pre).some(function(v){return v.voiceURI===VOICE_PREF[pre];}));
        var hasRegionalVoice=!!preferredRegionalVoice(pre);
-       // The learner selected Ban Mai for Vietnamese; never let an OS Vietnamese voice
-       // override an available offline FPT Ban Mai recording.
-       if ((pre==='vi'||(!hasChosenVoice&&!hasRegionalVoice)) &&
+       // Prefer downloaded, verified MP3s for both selected voices:
+       // Vietnamese Ban Mai and Korean InJoon, regardless of installed OS voices.
+       // When a phrase has no recording, the existing device voice stays as fallback.
+       if ((pre==='vi'||pre==='ko'||(!hasChosenVoice&&!hasRegionalVoice)) &&
            window.NHI_AUDIO.play(text, lang, speed || RATE[state.rate] || 1, complete)) return;
     }
     if (!canSpeak) { toast('Câu này chưa có MP3 Neural; trình duyệt chưa có giọng dự phòng.'); complete(); return; }
