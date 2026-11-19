@@ -417,7 +417,7 @@ try{
     const second=window.NLC_NOTES.add('저는 학교에 갑니다. (Tôi đi đến trường.)');
     const third=window.NLC_NOTES.add('Tôi đang làm việc.: 저는 일하고 있습니다.');
     const reject=window.NLC_NOTES.add('Chỉ có một câu tiếng Việt.');
-    const final=getText(),added=final.slice(original.length).trim().split('\\n');
+    const final=getText(),added=final.slice(original.length).trim().split('\n');
     return {first,second,third,reject,added,originalUnchanged:final.startsWith(original)};
   });
   assert(result.first&&result.second&&result.third&&!result.reject,
