@@ -175,7 +175,10 @@ async def run(args):
                 selected[lang] += 1
         print(f'Automated priorities: missing manifest={len(new)}, legacy/wrong voice={len(old)}; '
               f'daily target: Vietnamese={selected["vi"]}, Korean={selected["ko"]}', flush=True)
-        pending = batch
+        # Make InJoon progress independently if Marketplace rejects its API key.
+        # Relative priorities within each language are unchanged.
+        pending = [pair for pair in batch if pair[0] == 'ko'] + [
+            pair for pair in batch if pair[0] == 'vi']
     print(f'Scope: {args.scope}; selected: {len(entries)}; need voice replacement in this run: {len(pending)}', flush=True)
     print(f'Providers: Vietnamese FPT Marketplace TTS-pro Ban Mai; Korean Microsoft InJoon', flush=True)
     if args.dry_run:
