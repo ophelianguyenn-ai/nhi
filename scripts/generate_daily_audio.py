@@ -1,7 +1,7 @@
-"""Add selected-voice clips for the daily lesson (FPT Marketplace Ban Mai, Edge InJoon).
+"""Daily automatic coverage for new and legacy Korean/Vietnamese lesson MP3.
 
-Without a protected FPT_MARKETPLACE_API_KEY, only Korean InJoon may be produced; the
-existing Vietnamese recordings remain playable until a key is configured.
+Run after lesson changes and each morning. No secrets are published to the site.
+Keep each GitHub Actions job small to avoid FPT charges and stale manifests.
 """
 import argparse
 import asyncio
@@ -11,12 +11,19 @@ from generate_selected_voices import run
 
 
 async def main():
-    has_fpt = bool(os.environ.get('FPT_MARKETPLACE_API_KEY'))
-    if not has_fpt:
-        print('FPT_MARKETPLACE_API_KEY is not configured: preserving existing Vietnamese audio; generating InJoon only.', flush=True)
-    args = argparse.Namespace(scope='daily', language='both' if has_fpt else 'ko',
-                              offset=0, limit=10, delay=0.35, dry_run=False,
-                              allow_partial=True, max_failures=3)
+    def batch_limit(name, default):
+        value = int(os.environ.get(name, str(default)))
+        if value < 1 or value > 500:
+            raise SystemExit(f'{name} must be from 1 to 500')
+        return value
+
+    args = argparse.Namespace(
+        scope='auto', language='both', offset=0, limit=0,
+        vi_limit=batch_limit('NHI_VI_DAILY_LIMIT', 100),
+        ko_limit=batch_limit('NHI_KO_DAILY_LIMIT', 200),
+        delay=0.35, dry_run=os.environ.get('NHI_AUDIO_DRY_RUN') == 'true',
+        allow_partial=True, max_failures=3,
+    )
     await run(args)
 
 
