@@ -230,5 +230,27 @@ class VoiceMigrationTests(unittest.TestCase):
             self.assertNotIn('vi|Báo cáo tiến độ', result)
 
 
+    def test_scope_lesson_selects_only_requested_day_and_both_languages(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = pathlib.Path(tmp)
+            lesson_id = 'daily-2026-11-19-nhi-extracted'
+            (root / 'lessons.json').write_text(json.dumps({'lessons': [
+                {'id': 'older', 'items': [['1', 'w', '', 'Câu hôm trước', '전날 문장']]},
+                {'id': lesson_id, 'items': [
+                    ['2', 'w', '', 'Bồn chứa bùn', '슬러지 저장탱크'],
+                    ['3', 's', '', 'Hãy kiểm tra đường ống.', '배관을 확인해 주세요.']
+                ]}
+            ]}, ensure_ascii=False), encoding='utf-8')
+            with patch.object(audio, 'ROOT', root):
+                self.assertEqual(list(audio.collect('lesson', lesson_id)), [
+                    ('vi', 'Bồn chứa bùn'), ('ko', '슬러지 저장탱크'),
+                    ('vi', 'Hãy kiểm tra đường ống.'), ('ko', '배관을 확인해 주세요.')
+                ])
+                with self.assertRaisesRegex(ValueError, 'Unknown lesson ID'):
+                    list(audio.collect('lesson', 'wrong-lesson'))
+                with self.assertRaisesRegex(ValueError, 'lesson-id is required'):
+                    list(audio.collect('lesson'))
+
+
 if __name__ == '__main__':
     unittest.main()
