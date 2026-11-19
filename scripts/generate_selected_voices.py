@@ -26,8 +26,20 @@ PROVIDER = {'vi': 'fpt-marketplace', 'ko': 'microsoft-edge'}
 VOICE_DIR = {'vi': 'fpt-marketplace-banmai-v1', 'ko': 'edge-injoon-v1'}
 
 
-def collect(scope):
-    if scope == 'daily':
+def collect(scope, lesson_id=None):
+    if scope == 'lesson':
+        if not lesson_id:
+            raise ValueError('--lesson-id is required with --scope lesson')
+        lessons = json.loads((ROOT / 'lessons.json').read_text(encoding='utf-8'))
+        selected = next((lesson for lesson in lessons.get('lessons', [])
+                         if lesson.get('id') == lesson_id), None)
+        if selected is None:
+            raise ValueError(f'Unknown lesson ID: {lesson_id}')
+        pairs = [(lang, str(row[index]).strip())
+                 for row in selected.get('items', [])
+                 if isinstance(row, list) and len(row) >= 5
+                 for lang, index in (('vi', 3), ('ko', 4))]
+    elif scope == 'daily':
         rows = json.loads((ROOT / 'scripts/daily-audio-texts.json').read_text(encoding='utf-8'))
         pairs = [(lang, str(row[i]).strip()) for row in rows
                  if isinstance(row, list) and len(row) >= 2
@@ -151,7 +163,7 @@ async def _generate(lang, phrase, dest, api_key):
 
 async def run(args):
     manifest = json.loads(MANIFEST.read_text(encoding='utf-8'))
-    entries = [(l, t) for l, t in collect(args.scope) if args.language == 'both' or l == args.language]
+    entries = [(l, t) for l, t in collect(args.scope, getattr(args, 'lesson_id', None)) if args.language == 'both' or l == args.language]
     entries = entries[args.offset:args.offset+args.limit] if args.limit else entries[args.offset:]
     pending = [(lang, phrase) for lang, phrase in entries
                if not (current_entry(manifest.get(f'{lang}|{phrase}'), lang)
@@ -239,7 +251,8 @@ async def run(args):
 
 if __name__ == '__main__':
     p = argparse.ArgumentParser(description=__doc__)
-    p.add_argument('--scope', choices=('daily', 'all', 'auto'), default='daily')
+    p.add_argument('--scope', choices=('daily', 'all', 'auto', 'lesson'), default='daily')
+    p.add_argument('--lesson-id', default=None, help='Required with --scope lesson; reads only that lesson')
     p.add_argument('--language', choices=('both', 'vi', 'ko'), default='both')
     p.add_argument('--offset', type=int, default=0)
     p.add_argument('--limit', type=int, default=30, help='Global selection size; use 0 with --scope auto.')
