@@ -1174,15 +1174,19 @@ html body #planBox .pcard .pfront .nhi-card-details .nhi-card-note{
   text-align:left!important;
 }
 /* Completion-only layout. Never crop, fade, mask or alter original GIF pixels. */
-html body:has(#planBox .sdone),
-html body:has(#planBox .sdone) #view-plan,
-html body:has(#planBox .sdone) #planBox,
-html body:has(#planBox .sdone) #planBox>.quiz{
+html body:has(#planBox .sdone){
   background-color:var(--nhi-victory-bg,#fff8f5)!important;
-  background-image:none!important;
+  background-image:var(--nhi-victory-image,none)!important;
+  background-size:100% 100%!important;
+  background-position:0 0!important;
+  background-repeat:no-repeat!important;
+}
+html body:has(#planBox .sdone) #view-plan,
+html body:has(#planBox .sdone) #planBox{
+  background-color:transparent!important;background-image:none!important;
 }
 html body #planBox .sdone{
-  background-color:var(--nhi-victory-bg,#fff8f5)!important;
+  background-color:transparent!important;
   background-image:none!important;
   border:0!important;box-shadow:none!important;
   box-sizing:border-box!important;
@@ -1200,7 +1204,7 @@ html body #planBox .sdone .nhi-victory-cat-scene{
   display:flex!important;align-items:center!important;justify-content:center!important;
   margin:0 auto!important;padding:0!important;
   overflow:visible!important;
-  background-color:var(--nhi-victory-bg,#fff8f5)!important;
+  background-color:transparent!important;
   background-image:none!important;
   border:0!important;box-shadow:none!important;
 }
@@ -4958,31 +4962,78 @@ html body #planBox .sdone .pstatus{
       cat.alt='Mèo trắng vui vẻ tung tiền, những tờ tiền đang bay và rơi';
       cat.loading='eager';
       cat.addEventListener('load',function(){
-        // Sample the ORIGINAL first GIF frame at its pixel resolution.
-        // Choose the dominant OUTER-EDGE shade, rather than averaging content/text.
+        // The original GIF has an off-white center, pink outer edges and a
+        // subtly different bottom edge. One flat RGB fill exposes a rectangle.
+        // Extend its EXACT first-frame edge pixels outside the intact GIF:
+        // nothing is painted over, masked, cropped or edited inside the image.
         try{
           var w=cat.naturalWidth,h=cat.naturalHeight;
-          if(!w||!h)return;
-          var canvas=document.createElement('canvas');canvas.width=w;canvas.height=h;
-          var context=canvas.getContext('2d',{willReadFrequently:true});if(!context)return;
-          context.drawImage(cat,0,0,w,h);
-          var rgba=context.getImageData(0,0,w,h).data,buckets={},winner=null;
-          function consider(x,y){
-            var i=(y*w+x)*4;if(rgba[i+3]<235)return;
-            var q=[rgba[i],rgba[i+1],rgba[i+2]].map(function(c){return Math.round(c/6)*6;});
-            var key=q.join(','),b=buckets[key]||(buckets[key]={count:0,r:0,g:0,b:0});
-            b.count++;b.r+=rgba[i];b.g+=rgba[i+1];b.b+=rgba[i+2];
-            if(!winner||b.count>winner.count)winner=b;
+          if(w!==307||h!==623)return;
+          var source=document.createElement('canvas');source.width=w;source.height=h;
+          var cx=source.getContext('2d',{willReadFrequently:true});if(!cx)return;
+          cx.drawImage(cat,0,0,w,h);
+          var src=cx.getImageData(0,0,w,h).data;
+          function pixel(x,y){
+            var off=(y*w+x)*4;
+            return [src[off],src[off+1],src[off+2]];
           }
-          for(var x=0;x<w;x+=2){for(var d=0;d<3;d++){consider(x,d);consider(x,h-1-d);}}
-          for(var y=0;y<h;y+=3){for(var d=0;d<3;d++){consider(d,y);consider(w-1-d,y);}}
-          if(winner&&winner.count){
-            var color='rgb('+['r','g','b'].map(function(ch){return Math.round(winner[ch]/winner.count);}).join(',')+')';
-            p.style.setProperty('--nhi-victory-bg',color);
-            document.body.style.setProperty('--nhi-victory-bg',color);
-            document.documentElement.style.setProperty('--nhi-victory-bg',color);
+          var corner=pixel(0,0),color='rgb('+corner.join(',')+')';
+          document.documentElement.style.setProperty('--nhi-victory-bg',color);
+          document.body.style.setProperty('--nhi-victory-bg',color);
+          var repaintId=0,watcher=null;
+          function paint(){
+            repaintId=0;
+            if(!cat.isConnected){if(watcher)watcher.disconnect();return;}
+            var rect=cat.getBoundingClientRect(),W=Math.round(window.innerWidth);
+            var H=Math.max(Math.round(window.innerHeight),document.documentElement.scrollHeight);
+            if(!rect.width||!rect.height||W<1||H<1)return;
+            var left=rect.left,top=rect.top+window.scrollY,iw=rect.width,ih=rect.height;
+            var backing=document.createElement('canvas');backing.width=W;backing.height=H;
+            var bc=backing.getContext('2d',{willReadFrequently:true});if(!bc)return;
+            var out=bc.createImageData(W,H),dest=out.data;
+            var l=Math.max(0,Math.floor(left)),r=Math.min(W,Math.ceil(left+iw));
+            for(var y=0;y<H;y++){
+              var sy=Math.max(0,Math.min(h-1,Math.floor((y-top)*h/ih)));
+              var outsideY=y<top||y>=top+ih;
+              var li=(sy*w)*4,ri=(sy*w+w-1)*4;
+              for(var x=0;x<W;x++){
+                var srcIndex,di=(y*W+x)*4;
+                if(outsideY){
+                  // Replicate the exact top/bottom GIF edge row outward.
+                  var sx=Math.max(0,Math.min(w-1,Math.floor((x-left)*w/iw)));
+                  srcIndex=(sy*w+sx)*4;
+                }else if(x<l){srcIndex=li;
+                }else if(x>=r){srcIndex=ri;
+                }else{
+                  // Hidden beneath the fully opaque GIF; edge colors suffice.
+                  var q=(x-left)/iw,rl=src[li],gl=src[li+1],bl=src[li+2];
+                  var rr=src[ri],gr=src[ri+1],br=src[ri+2];
+                  dest[di]=Math.round(rl+(rr-rl)*q);
+                  dest[di+1]=Math.round(gl+(gr-gl)*q);
+                  dest[di+2]=Math.round(bl+(br-bl)*q);
+                  dest[di+3]=255;continue;
+                }
+                dest[di]=src[srcIndex];dest[di+1]=src[srcIndex+1];
+                dest[di+2]=src[srcIndex+2];dest[di+3]=255;
+              }
+            }
+            bc.putImageData(out,0,0);
+            document.body.style.setProperty('--nhi-victory-image','url("'+backing.toDataURL('image/png')+'")');
           }
-        }catch(_e){/* Keep the matching pastel fallback if sampling is unavailable. */}
+          function schedule(){
+            if(repaintId)cancelAnimationFrame(repaintId);
+            repaintId=requestAnimationFrame(paint);
+          }
+          if(window.NHI_REWARD_BG_CLEANUP)window.NHI_REWARD_BG_CLEANUP();
+          window.addEventListener('resize',schedule,{passive:true});
+          if('ResizeObserver' in window){watcher=new ResizeObserver(schedule);watcher.observe(cat);}
+          window.NHI_REWARD_BG_CLEANUP=function(){
+            window.removeEventListener('resize',schedule);
+            if(watcher)watcher.disconnect();
+            if(repaintId)cancelAnimationFrame(repaintId);
+          };
+          schedule();
+        }catch(_err){/* Solid GIF corner fallback when Canvas is unavailable. */}
       });
       m.appendChild(cat);
       // A yellow thumbs-up emoji was distracting; the kitten paws do the celebrating.
