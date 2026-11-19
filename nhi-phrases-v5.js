@@ -100,12 +100,16 @@ function expand(it,all){
  // Keep them as accurately linked whole sentences, not misleading partial pairs.
  if(it.id==='se57a6b5af5'||it.id==='saf0711f7c4')return [[vi,ko]];
  const authored=supplied.filter(valid);
- if(it.type==='w'){
-  // A vocabulary entry is one lexical unit, even when legacy data contain
-  // isolated Vietnamese and Korean fragments with no corresponding translation.
-  return authored.length>1?authored:[[vi,ko]];
- }
  if(authored.length>1)return authored.map(p=>p.slice());
+ // Daily GitHub-generated correspondences: teacher-reviewed first, then
+ // evidence-backed minimal lexical/grammatical units, all source-validated.
+ const daily=(window.NHI_DAILY_PAIRS||{})[it.id];
+ if(Array.isArray(daily)&&daily.length>1&&daily.every(valid))
+  return daily.map(p=>p.slice());
+ if(it.type==='w'){
+  // Keep opaque lexical units whole if we cannot verify multiple exact matches.
+  return [[vi,ko]];
+ }
  // Automatic matches are hints, never display disconnected one-language spans.
  const inferred=align(it,all).filter(valid);
  return inferred.length>1?inferred:[[vi,ko]];
