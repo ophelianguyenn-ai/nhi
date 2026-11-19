@@ -143,6 +143,7 @@ async def run(args):
         raise SystemExit('FPT_MARKETPLACE_API_KEY is required (Marketplace, not the discontinued Console key). No audio changed.')
     failures = []
     updates = 0
+    authentication_error = None
     for i, (lang, phrase) in enumerate(pending, 1):
         dest = target_path(lang, phrase)
         try:
@@ -160,14 +161,25 @@ async def run(args):
         except Exception as exc:
             failures.append((lang, phrase, str(exc)))
             print(f'FAILED {i}: {lang}: {phrase[:70]}: {exc}', flush=True)
+            # A revoked/expired/unauthorized key cannot recover on the next phrase.
+            # Never loop through paid requests after Marketplace rejects credentials.
+            if lang == 'vi' and getattr(exc, 'code', None) in (401, 403):
+                authentication_error = int(exc.code)
+                print('FPT Marketplace refused authentication. Stopping after the first rejected request; '
+                      'check FPT_MARKETPLACE_API_KEY and access to FPT.TTS-pro.', flush=True)
+                break
             if len(failures) >= args.max_failures:
                 print('Too many failures; stopping to prevent repeated synthesis charges.', flush=True)
                 break
     if updates:
         MANIFEST.write_text(json.dumps(manifest, ensure_ascii=False, separators=(',', ':')), encoding='utf-8')
     print(f'Updated: {updates}; failures: {len(failures)}; total: {len(manifest)}', flush=True)
-    if failures and not args.allow_partial:
-        raise SystemExit('Some voice replacements failed; no bad entries were written to the manifest.')
+    if authentication_error is not None:
+        raise SystemExit(f'FPT Marketplace HTTP {authentication_error}: renew the Marketplace key in '
+                         'GitHub Actions secret FPT_MARKETPLACE_API_KEY. No unverified audio was published.')
+    if failures and (not args.allow_partial or updates == 0):
+        raise SystemExit('Audio generation failed or created no new clips; '
+                         'no unverified audio was written into the manifest.')
 
 
 if __name__ == '__main__':
