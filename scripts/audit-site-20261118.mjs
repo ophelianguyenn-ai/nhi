@@ -498,7 +498,7 @@ try{
     const d=ctx.getImageData(0,0,c.width,c.height).data;
     function rgb(x,y){const i=(y*c.width+x)*4;return Array.from(d.slice(i,i+4));}
     const cssImage=getComputedStyle(document.body).backgroundImage;
-    const raw=cssImage.match(/data:image\\/png;base64,[a-zA-Z0-9+/=]+/);
+    const raw=cssImage.match(/data:image\/png;base64,[a-zA-Z0-9+/=]+/);
     if(!raw)throw Error('No original GIF edge-color backdrop generated');
     const backdrop=new Image();backdrop.src=raw[0];await backdrop.decode();
     const bc=document.createElement('canvas');bc.width=backdrop.naturalWidth;bc.height=backdrop.naturalHeight;
