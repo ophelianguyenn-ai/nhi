@@ -11,8 +11,12 @@ on:
       scope:
         description: 'Daily lesson or all built-in lessons'
         type: choice
-        options: [daily, all]
+        options: [daily, all, lesson]
         default: daily
+      lesson_id:
+        description: 'Only for scope=lesson. November 19 ID is prefilled'
+        type: string
+        default: 'daily-2026-11-19-nhi-extracted'
       language:
         description: 'Vietnamese FPT Marketplace Ban Mai / Korean InJoon / both'
         type: choice
@@ -58,6 +62,7 @@ jobs:
         env:
           FPT_MARKETPLACE_API_KEY: ${{ secrets.FPT_MARKETPLACE_API_KEY }}
           CHOSEN_SCOPE: ${{ inputs.scope || 'daily' }}
+          CHOSEN_LESSON_ID: ${{ inputs.lesson_id || 'daily-2026-11-19-nhi-extracted' }}
           CHOSEN_LANG: ${{ inputs.language || 'both' }}
           CHOSEN_OFFSET: ${{ inputs.offset || '0' }}
           CHOSEN_LIMIT: ${{ inputs.limit || '10' }}
@@ -65,7 +70,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          args=(--scope "$CHOSEN_SCOPE" --language "$CHOSEN_LANG" --offset "$CHOSEN_OFFSET" --limit "$CHOSEN_LIMIT" --max-failures 3)
+          args=(--scope "$CHOSEN_SCOPE" --language "$CHOSEN_LANG" --lesson-id "$CHOSEN_LESSON_ID" --offset "$CHOSEN_OFFSET" --limit "$CHOSEN_LIMIT" --max-failures 3)
           if [[ "$DRY_RUN" == 'true' ]]; then args+=(--dry-run); fi
           python scripts/generate_selected_voices.py "${args[@]}"
       - name: Commit only completed audio and updated manifest
