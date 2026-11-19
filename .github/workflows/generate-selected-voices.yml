@@ -6,7 +6,7 @@ name: Prepare FPT Marketplace Ban Mai and Korean InJoon audio batches
 # Run manually in small groups after adding a valid Marketplace API key.
 # Default dry run NEVER calls the billable FPT endpoint.
 on:
-  # One-time November 19 test/run after Marketplace key rotation.
+  # One-time approved November 19 remaining 65 Vietnamese voices after successful Marketplace pilot.
   # Only explicitly named pilot/rollout commits trigger a billable run.
   push:
     branches: [main]
