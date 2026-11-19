@@ -22,6 +22,21 @@ Không tiếp tục sửa secret FPT_API_KEY cũ.
 
 Trang tài liệu FPT Marketplace: https://marketplace.fptcloud.com/en/models/fpt-tts-pro
 
+## Tự động cập nhật hằng ngày (từ 19/11/2026)
+
+Workflow: .github/workflows/generate-daily-neural.yml
+
+- Lịch tự động: **05:00 mỗi ngày theo giờ Việt Nam (UTC+7)**, GitHub Actions cron 0 22 * * * (UTC).
+- Khi thêm nội dung vào lessons.json hoặc scripts/daily-audio-texts.json: một lượt nhỏ tự chạy ngay (tối đa 10 Việt + 20 Hàn).
+- Hằng ngày: ưu tiên câu chưa có file âm thanh trong các bài mới nhất, rồi đến những câu còn giọng cũ.
+- Giới hạn một lượt lịch: tối đa 100 câu tiếng Việt Ban Mai và 200 câu tiếng Hàn InJoon.
+- Đã có MP3 đúng giọng và file hợp lệ thì bỏ qua, không tính phí tạo lại. MP3 cũ được giữ nguyên dự phòng.
+- FPT Marketplace Ban Mai dùng secret FPT_MARKETPLACE_API_KEY. InJoon tiếng Hàn chạy độc lập, không cần FPT.
+- Nếu FPT trả HTTP 401/403, ngừng ngay yêu cầu FPT; vẫn lưu và Publish những MP3 InJoon đã xác thực.
+- Bài học chỉ lưu cục bộ trong trình duyệt, chưa đồng bộ về lessons.json, không nằm trong lịch tạo MP3.
+
+Xem lịch chạy và nhật ký: https://github.com/ophelianguyenn-ai/so-tay-hop-tieng-han/actions/workflows/generate-daily-neural.yml
+
 ## Tạo MP3 an toàn
 
 Actions → **Prepare FPT Marketplace Ban Mai and Korean InJoon audio batches** → Run workflow.
