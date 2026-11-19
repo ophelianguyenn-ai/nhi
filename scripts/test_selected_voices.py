@@ -162,7 +162,7 @@ class VoiceMigrationTests(unittest.TestCase):
                  patch.dict('os.environ', {'FPT_MARKETPLACE_API_KEY': 'test-key'}, clear=True):
                 asyncio.run(audio.run(opts))
             result = json.loads(path.read_text(encoding='utf-8'))
-            self.assertEqual(calls, [('vi', 'Bài mới nhất'), ('ko', '최신 문장')])
+            self.assertEqual(calls, [('ko', '최신 문장'), ('vi', 'Bài mới nhất')])
             self.assertEqual(result['vi|Bài mới nhất']['voice'], 'std_banmai')
             self.assertEqual(result['ko|최신 문장']['voice'], 'ko-KR-InJoonNeural')
             self.assertNotIn('voice', result['vi|Câu cũ'])
@@ -195,6 +195,39 @@ class VoiceMigrationTests(unittest.TestCase):
             self.assertEqual(calls, [('ko', '한국어')])
             self.assertNotIn('vi|Tiếng Việt', result)
             self.assertIn('ko|한국어', result)
+
+
+    def test_auto_preserves_ko_update_after_fpt_401(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = pathlib.Path(tmp)
+            (root / 'scripts').mkdir()
+            (root / 'scripts/daily-audio-texts.json').write_text('[]', encoding='utf-8')
+            (root / 'index.html').write_text('', encoding='utf-8')
+            (root / 'lessons.json').write_text(json.dumps({'lessons': [
+                {'items': [['1', 'w', '', 'Báo cáo tiến độ', '진행 보고']]}
+            ]}, ensure_ascii=False), encoding='utf-8')
+            path = root / 'audio-manifest.json'
+            path.write_text('{}')
+            opts = SimpleNamespace(scope='auto', language='both', offset=0, limit=0,
+                                   vi_limit=1, ko_limit=1, delay=0,
+                                   dry_run=False, allow_partial=True, max_failures=3)
+            calls = []
+            async def stub_generate(lang, phrase, dest, api_key):
+                calls.append(lang)
+                if lang == 'vi':
+                    raise HTTPError('https://mkp-api.fptcloud.com/v1/audio/speech',
+                                    401, 'Unauthorized', {}, None)
+                dest.parent.mkdir(parents=True, exist_ok=True)
+                dest.write_bytes(b'ID3' + b'x' * 600)
+                return 1.6
+            with patch.object(audio, 'ROOT', root), patch.object(audio, 'MANIFEST', path), \
+                 patch.object(audio, '_generate', side_effect=stub_generate), \
+                 patch.dict('os.environ', {'FPT_MARKETPLACE_API_KEY': 'bad-key'}, clear=True):
+                asyncio.run(audio.run(opts))
+            self.assertEqual(calls, ['ko', 'vi'])
+            result = json.loads(path.read_text())
+            self.assertIn('ko|진행 보고', result)
+            self.assertNotIn('vi|Báo cáo tiến độ', result)
 
 
 if __name__ == '__main__':
