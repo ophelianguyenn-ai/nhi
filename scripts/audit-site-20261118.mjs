@@ -446,6 +446,8 @@ try{
   for(const [width,height] of [[1366,768],[1440,900],[1920,1080],[390,844]]){
    await page.setViewport({width,height});
    await page.evaluate(()=>window.scrollTo(0,0));
+   await page.waitForFunction(()=>getComputedStyle(document.body).backgroundImage.includes('data:image/png'),{timeout:12000});
+   await new Promise(r=>setTimeout(r,150));
    const m=await page.evaluate(()=>{
     const img=document.querySelector('#planBox .sdone img.nhi-original-gif');
     const scene=document.querySelector('#planBox .sdone .nhi-victory-cat-scene');
@@ -468,6 +470,8 @@ try{
      catFocusable:img.getAttribute('role')==='button',gifSrc:img.getAttribute('src')};
    });
    measures.push(m);
+   fs.mkdirSync('/tmp/nhi-site-audit',{recursive:true});
+   if(width>=780)await page.screenshot({path:'/tmp/nhi-site-audit/reward-'+width+'x'+height+'.png'});
    assert(m.natural[0]===307&&m.natural[1]===623,'Original kitten GIF size changed: '+JSON.stringify(m));
    assert(m.objectFit==='contain'&&m.mask==='none'&&m.webkitMask==='none'&&m.clip==='none',
     'Original GIF caption is still masked or cropped: '+JSON.stringify(m));
@@ -484,6 +488,8 @@ try{
     assert(m.img.width<=width+1,'Mobile completion GIF overflows horizontally: '+JSON.stringify(m));
    }
   }
+  await page.setViewport({width:1366,height:768});
+  await new Promise(r=>setTimeout(r,220));
   const pixels=await page.evaluate(async()=>{
     const image=document.querySelector('#planBox .sdone .nhi-original-gif');
     await image.decode();
@@ -491,10 +497,24 @@ try{
     const ctx=c.getContext('2d',{willReadFrequently:true});ctx.drawImage(image,0,0);
     const d=ctx.getImageData(0,0,c.width,c.height).data;
     function rgb(x,y){const i=(y*c.width+x)*4;return Array.from(d.slice(i,i+4));}
+    const cssImage=getComputedStyle(document.body).backgroundImage;
+    const raw=cssImage.match(/data:image\\/png;base64,[a-zA-Z0-9+/=]+/);
+    if(!raw)throw Error('No original GIF edge-color backdrop generated');
+    const backdrop=new Image();backdrop.src=raw[0];await backdrop.decode();
+    const bc=document.createElement('canvas');bc.width=backdrop.naturalWidth;bc.height=backdrop.naturalHeight;
+    const bctx=bc.getContext('2d',{willReadFrequently:true});bctx.drawImage(backdrop,0,0);
+    const bounds=image.getBoundingClientRect(),midY=Math.round(bounds.top+bounds.height/2);
+    const sy=Math.max(0,Math.min(c.height-1,Math.floor((midY-bounds.top)*c.height/bounds.height)));
+    const outer=bctx.getImageData(Math.floor(bounds.left)-2,midY,1,1).data;
+    const sourceSide=ctx.getImageData(0,sy,1,1).data;
+    const difference=Math.max(...[0,1,2].map(i=>Math.abs(outer[i]-sourceSide[i])));
     return {size:[c.width,c.height],corners:[rgb(0,0),rgb(c.width-1,0),rgb(0,c.height-1),rgb(c.width-1,c.height-1)],
       middles:[rgb(Math.floor(c.width/2),0),rgb(Math.floor(c.width/2),c.height-1)],
-      background:getComputedStyle(document.querySelector('#planBox .sdone')).backgroundColor};
+      backdropSize:[bc.width,bc.height],sideDifference:difference,
+      outer:Array.from(outer),sourceSide:Array.from(sourceSide),
+      background:getComputedStyle(document.body).backgroundColor};
   });
+  assert(pixels.sideDifference<=4,'Visible GIF rectangle edge mismatch: '+JSON.stringify(pixels));
   console.log('NHI REWARD SCREEN METRICS',JSON.stringify({finish,measures,pixels}));
   return JSON.stringify({sizes:measures.map(x=>({viewport:x.viewport,img:x.img,documentHeight:x.documentHeight,
     backgrounds:x.bgColor})),pixelCorners:pixels.corners});
