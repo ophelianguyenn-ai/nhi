@@ -1,5 +1,8 @@
 name: Prepare FPT Marketplace Ban Mai and Korean InJoon audio batches
 
+# Rollout request 2026-11-19: generate ONLY missing Vietnamese phrases for all
+# 48 built-in lessons. Existing Ban Mai MP3s are detected by the manifest and
+# retained unchanged. Never expose the Marketplace API key in website assets.
 # Run manually in small groups after adding a valid Marketplace API key.
 # Default dry run NEVER calls the billable FPT endpoint.
 on:
