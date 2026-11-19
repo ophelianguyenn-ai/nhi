@@ -32,6 +32,24 @@ def collect(scope):
         pairs = [(lang, str(row[i]).strip()) for row in rows
                  if isinstance(row, list) and len(row) >= 2
                  for i, lang in enumerate(('vi', 'ko'))]
+    elif scope == 'auto':
+        # Latest built-in lessons first: new study content receives both voices
+        # before we spend quotas on replacing older legacy recordings.
+        data = json.loads((ROOT / 'lessons.json').read_text(encoding='utf-8'))
+        pairs = []
+        for lesson in reversed(data.get('lessons', [])):
+            for row in lesson.get('items', []):
+                if isinstance(row, list) and len(row) >= 5:
+                    pairs.extend((lang, str(row[index]).strip())
+                                 for lang, index in (('vi', 3), ('ko', 4)))
+        daily = ROOT / 'scripts/daily-audio-texts.json'
+        if daily.exists():
+            for row in json.loads(daily.read_text(encoding='utf-8')):
+                if isinstance(row, list) and len(row) >= 2:
+                    pairs.extend((lang, str(row[index]).strip())
+                                 for lang, index in (('vi', 0), ('ko', 1)))
+        from generate_tts import collect as original_collect
+        pairs.extend(original_collect())
     else:
         from generate_tts import collect as original_collect
         pairs = list(original_collect())
@@ -133,14 +151,39 @@ async def run(args):
     pending = [(lang, phrase) for lang, phrase in entries
                if not (current_entry(manifest.get(f'{lang}|{phrase}'), lang)
                        and (ROOT / manifest[f'{lang}|{phrase}']['src']).is_file())]
-    print(f'Scope: {args.scope}; selected: {len(entries)}; need voice replacement: {len(pending)}', flush=True)
+    if args.scope == 'auto':
+        # A phrase absent from the manifest cannot play its recorded voice at all:
+        # prioritize it before legacy SunHi/HoaiMy clips, in newest-lesson order.
+        new = [(lang, phrase) for lang, phrase in pending
+               if f'{lang}|{phrase}' not in manifest]
+        old = [(lang, phrase) for lang, phrase in pending
+               if f'{lang}|{phrase}' in manifest]
+        pending = new + old
+        vi_limit = getattr(args, 'vi_limit', 100)
+        ko_limit = getattr(args, 'ko_limit', 200)
+        quotas = {'vi': vi_limit, 'ko': ko_limit}
+        selected = {'vi': 0, 'ko': 0}
+        batch = []
+        for lang, phrase in pending:
+            if quotas[lang] == 0 or selected[lang] < quotas[lang]:
+                batch.append((lang, phrase))
+                selected[lang] += 1
+        print(f'Automated priorities: missing manifest={len(new)}, legacy/wrong voice={len(old)}; '
+              f'daily target: Vietnamese={selected["vi"]}, Korean={selected["ko"]}', flush=True)
+        pending = batch
+    print(f'Scope: {args.scope}; selected: {len(entries)}; need voice replacement in this run: {len(pending)}', flush=True)
     print(f'Providers: Vietnamese FPT Marketplace TTS-pro Ban Mai; Korean Microsoft InJoon', flush=True)
     if args.dry_run:
         for lang, phrase in pending[:20]:
             print(f'  {lang} -> {VOICE[lang]}: {phrase[:100]}')
         return
     if any(lang == 'vi' for lang, _ in pending) and not os.environ.get('FPT_MARKETPLACE_API_KEY'):
-        raise SystemExit('FPT_MARKETPLACE_API_KEY is required (Marketplace, not the discontinued Console key). No audio changed.')
+        if args.scope == 'auto':
+            print('::warning::FPT Marketplace secret is unavailable; skipping only Vietnamese. '
+                  'Korean InJoon will still be generated.', flush=True)
+            pending = [(lang, phrase) for lang, phrase in pending if lang != 'vi']
+        else:
+            raise SystemExit('FPT_MARKETPLACE_API_KEY is required (Marketplace, not the discontinued Console key). No audio changed.')
     failures = []
     updates = 0
     authentication_error = None
@@ -175,8 +218,12 @@ async def run(args):
         MANIFEST.write_text(json.dumps(manifest, ensure_ascii=False, separators=(',', ':')), encoding='utf-8')
     print(f'Updated: {updates}; failures: {len(failures)}; total: {len(manifest)}', flush=True)
     if authentication_error is not None:
-        raise SystemExit(f'FPT Marketplace HTTP {authentication_error}: renew the Marketplace key in '
-                         'GitHub Actions secret FPT_MARKETPLACE_API_KEY. No unverified audio was published.')
+        detail = (f'FPT Marketplace HTTP {authentication_error}: check Marketplace key/model permissions. '
+                  'Existing recordings are retained.')
+        if args.scope == 'auto' and updates:
+            print('::warning::' + detail + ' Valid Korean audio in this batch will still be saved.', flush=True)
+        else:
+            raise SystemExit(detail)
     if failures and (not args.allow_partial or updates == 0):
         raise SystemExit('Audio generation failed or created no new clips; '
                          'no unverified audio was written into the manifest.')
@@ -184,15 +231,17 @@ async def run(args):
 
 if __name__ == '__main__':
     p = argparse.ArgumentParser(description=__doc__)
-    p.add_argument('--scope', choices=('daily', 'all'), default='daily')
+    p.add_argument('--scope', choices=('daily', 'all', 'auto'), default='daily')
     p.add_argument('--language', choices=('both', 'vi', 'ko'), default='both')
     p.add_argument('--offset', type=int, default=0)
-    p.add_argument('--limit', type=int, default=30, help='Batch size; 0 selects all. Default 30.')
+    p.add_argument('--limit', type=int, default=30, help='Global selection size; use 0 with --scope auto.')
+    p.add_argument('--vi-limit', type=int, default=100, help='Max new/missing Vietnamese clips per automatic run.')
+    p.add_argument('--ko-limit', type=int, default=200, help='Max new/missing Korean clips per automatic run.')
     p.add_argument('--delay', type=float, default=0.35)
     p.add_argument('--dry-run', action='store_true')
     p.add_argument('--allow-partial', action='store_true')
     p.add_argument('--max-failures', type=int, default=3)
     cli = p.parse_args()
-    if cli.offset < 0 or cli.limit < 0 or cli.delay < 0 or cli.max_failures < 1:
+    if cli.offset < 0 or cli.limit < 0 or cli.vi_limit < 0 or cli.ko_limit < 0 or cli.delay < 0 or cli.max_failures < 1:
         p.error('Invalid negative argument or max-failures < 1')
     asyncio.run(run(cli))
