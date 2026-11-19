@@ -406,6 +406,30 @@ try{
   assert(await page.$eval('#nhiV2TopNav',el=>getComputedStyle(el).display==='none'),'Bottom nav visible during flashcards');
   return 'navigation hidden during card flip';
  });
+ await check('Chat examples save as Vietnamese without final full stop: Korean',async()=>{
+  const result=await page.evaluate(()=>{
+    const session=JSON.parse(localStorage.getItem('viko-plan-sess-v1')||'{}');
+    const cardId=session.queue?.[session.pos];
+    if(!cardId||!window.NLC_NOTES?.add)throw Error('Study card or chat-to-note helper unavailable');
+    const getText=()=>JSON.parse(localStorage.getItem('viko-plan-v1')||'{}').note?.[cardId]?.v?.text||'';
+    const original=getText();
+    const first=window.NLC_NOTES.add('Tôi học tiếng Hàn.: 저는 한국어를 공부해요.');
+    const second=window.NLC_NOTES.add('저는 학교에 갑니다. (Tôi đi đến trường.)');
+    const third=window.NLC_NOTES.add('Tôi đang làm việc.: 저는 일하고 있습니다.');
+    const reject=window.NLC_NOTES.add('Chỉ có một câu tiếng Việt.');
+    const final=getText(),added=final.slice(original.length).trim().split('\\n');
+    return {first,second,third,reject,added,originalUnchanged:final.startsWith(original)};
+  });
+  assert(result.first&&result.second&&result.third&&!result.reject,
+   'Notes must accept bilingual examples only: '+JSON.stringify(result));
+  assert(result.originalUnchanged,'Existing learner notes should not be modified');
+  assert(JSON.stringify(result.added)===JSON.stringify([
+    'Tôi học tiếng Hàn: 저는 한국어를 공부해요.',
+    'Tôi đi đến trường: 저는 학교에 갑니다.',
+    'Tôi đang làm việc: 저는 일하고 있습니다.'
+  ]),'Incorrect Vietnamese: Korean punctuation in chat note: '+JSON.stringify(result));
+  return 'No trailing Vietnamese dot, Korean punctuation unchanged, no unpaired line';
+ });
  for(const width of [320,390,768,1360]){
   await check('Responsive width '+width,async()=>{
    await page.setViewport({width,height:830});
