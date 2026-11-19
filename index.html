@@ -5085,19 +5085,26 @@ html body #planBox .sdone .pstatus{
     function formatChatExample(line){
       var t=String(line||'').trim(),a,b,m;
       if(!t)return '';
+      // Chat examples are always saved as "Tiếng Việt: tiếng Hàn".
+      // Only trim the FINAL Vietnamese full stop; do not modify Korean punctuation.
+      function cleanVietnamese(v){
+        return String(v||'').trim().replace(/[.．。]+\s*$/g,'').trim();
+      }
+      function pair(first,second){
+        first=String(first||'').trim();second=String(second||'').trim();
+        if(/[가-힣]/.test(first)&&/[A-Za-zÀ-ỹ]/.test(second))
+          return cleanVietnamese(second)+': '+first;
+        if(/[A-Za-zÀ-ỹ]/.test(first)&&/[가-힣]/.test(second))
+          return cleanVietnamese(first)+': '+second;
+        return '';
+      }
       m=t.match(/^(.+?)\s*[:：]\s*(.+)$/);
-      if(m){
-        a=m[1].trim();b=m[2].trim();
-        if(/[가-힣]/.test(a)&&/[A-Za-zÀ-ỹ]/.test(b))return b+': '+a;
-        if(/[A-Za-zÀ-ỹ]/.test(a)&&/[가-힣]/.test(b))return a+': '+b;
-      }
+      if(m){a=pair(m[1],m[2]);if(a)return a;}
       m=t.match(/^(.+?)\s*[（(](.+)[）)]$/);
-      if(m){
-        a=m[1].trim();b=m[2].trim();
-        if(/[가-힣]/.test(a)&&/[A-Za-zÀ-ỹ]/.test(b))return b+': '+a;
-        if(/[A-Za-zÀ-ỹ]/.test(a)&&/[가-힣]/.test(b))return a+': '+b;
-      }
-      return t; // Never invent an absent translation.
+      if(m){a=pair(m[1],m[2]);if(a)return a;}
+      // If the answer contains only one language, do not add an unmatched
+      // phrase or fabricate a translation in the learner's paired notes.
+      return '';
     }
     function appendChatExample(raw) {
       var it=curItem();if(!it || !alive(it.id))return false;
