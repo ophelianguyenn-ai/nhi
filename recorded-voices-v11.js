@@ -1,7 +1,9 @@
 (function(){
 'use strict';let manifest={},normalized={},player=null,timer=0,token=0,finishCurrent=null,segment=null;
-const key=(text,lang)=>lang.slice(0,2)+'|'+String(text).normalize('NFC').trim().replace(/\s+/g,' ').replace(/[.!?。？！]+$/,'');
-const ready=fetch('audio-manifest.json?v=20261114',{cache:'no-cache'}).then(r=>{if(!r.ok)throw Error('Audio manifest unavailable');return r.json();}).then(x=>{manifest=x||{};for(const [k,v]of Object.entries(manifest))normalized[key(k.slice(3),k.slice(0,2))]=v;document.dispatchEvent(new CustomEvent('nhi-audio-ready',{detail:{count:Object.keys(manifest).length}}));return manifest;}).catch(()=>manifest={});
+const clean=text=>String(text).normalize('NFC').trim().replace(/\([^()]*\)|（[^（）]*）|\[[^\[\]]*\]|【[^【】]*】|\{[^{}]*\}/g,' ').replace(/\s+/g,' ').replace(/[.!?。？！]+$/,'').trim();
+const key=(text,lang)=>lang.slice(0,2)+'|'+clean(text);
+const preferred=(row,lang)=>lang==='vi'?row?.voice==='std_banmai':lang==='ko'?row?.voice==='ko-KR-InJoonNeural':false;
+const ready=fetch('audio-manifest.json?v=20261114',{cache:'no-cache'}).then(r=>{if(!r.ok)throw Error('Audio manifest unavailable');return r.json();}).then(x=>{manifest=x||{};for(const [k,v]of Object.entries(manifest)){const lang=k.slice(0,2),lookup=key(k.slice(3),lang);if(!normalized[lookup]||(preferred(v,lang)&&!preferred(normalized[lookup],lang)))normalized[lookup]=v;}document.dispatchEvent(new CustomEvent('nhi-audio-ready',{detail:{count:Object.keys(manifest).length}}));return manifest;}).catch(()=>manifest={});
 function stop(){token++;clearTimeout(timer);if(player){player.pause();player.removeAttribute('src');player.load();player=null;}finishCurrent=null;segment=null;}
 function arm(){clearTimeout(timer);if(!player||!segment)return;timer=setTimeout(finishCurrent,Math.max(0,(segment.end+.06-player.currentTime)/player.playbackRate)*1000);}
 function play(text,lang,rate,done){const row=manifest[lang.slice(0,2)+'|'+text]||normalized[key(text,lang)];if(!row)return false;stop();const mine=token,a=player=new Audio(row.src);segment=row;let ended=false;
