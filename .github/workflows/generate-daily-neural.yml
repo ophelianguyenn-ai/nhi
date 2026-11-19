@@ -12,6 +12,7 @@ on:
       - scripts/daily-audio-texts.json
       - scripts/generate_selected_voices.py
       - scripts/generate_daily_audio.py
+      - scripts/test_selected_voices.py
       - .github/workflows/generate-daily-neural.yml
   workflow_dispatch:
     inputs:
