@@ -6,6 +6,7 @@ import pathlib
 import tempfile
 import unittest
 from types import SimpleNamespace
+from urllib.error import HTTPError
 from unittest.mock import patch
 
 module_path = pathlib.Path(__file__).with_name('generate_selected_voices.py')
@@ -89,6 +90,28 @@ class VoiceMigrationTests(unittest.TestCase):
                 self.assertIn('libmp3lame', args)
                 self.assertEqual(args[-1], str(target))
                 self.assertFalse(pathlib.Path(args[args.index('-i')+1]).exists())
+
+    def test_fpt_unauthorized_stops_first_call_even_if_partial_is_allowed(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = pathlib.Path(tmp)
+            (root / 'scripts').mkdir()
+            (root / 'scripts/daily-audio-texts.json').write_text(
+                json.dumps([['giải nhiệt bằng không khí', '공랭 방식'],
+                            ['giải nhiệt bằng nước', '수랭 방식']], ensure_ascii=False))
+            manifest = root / 'audio-manifest.json'
+            manifest.write_text('{}')
+            opts = SimpleNamespace(scope='daily', language='vi', offset=0,
+                                   limit=0, delay=0, dry_run=False,
+                                   allow_partial=True, max_failures=3)
+            denied = HTTPError('https://mkp-api.fptcloud.com/v1/audio/speech',
+                               401, 'Unauthorized', {}, None)
+            with patch.object(audio, 'ROOT', root), patch.object(audio, 'MANIFEST', manifest), \
+                 patch.object(audio, '_generate', side_effect=denied) as generate, \
+                 patch.dict('os.environ', {'FPT_MARKETPLACE_API_KEY': 'fake-key'}, clear=True):
+                with self.assertRaisesRegex(SystemExit, 'HTTP 401'):
+                    asyncio.run(audio.run(opts))
+                self.assertEqual(generate.call_count, 1)
+            self.assertEqual(manifest.read_text(), '{}')
 
     def test_dry_run_and_missing_marketplace_key_never_edit_manifest(self):
         with tempfile.TemporaryDirectory() as tmp:
