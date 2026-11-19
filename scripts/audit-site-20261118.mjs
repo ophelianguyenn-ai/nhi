@@ -423,6 +423,102 @@ try{
   assert(m.lessons.length>10&&m.items.length>100,'Lesson catalog missing after refresh');
   return m.lessons.length+' lessons; '+m.items.length+' items loaded';
  });
+ // Verify original GIF and caption are never clipped or masked on the exact laptop sizes.
+ await check('Original kitten GIF, entire embedded caption, seamless background and laptop heights',async()=>{
+  const finish=await page.evaluate(()=>{
+   const ids=window.NHI_PLAN_V2?.snapshot?.().lessons||[];
+   const small=ids.filter(x=>x.ids?.length>=1&&x.ids?.length<=18).sort((a,b)=>a.ids.length-b.ids.length)[0];
+   if(!small)throw Error('No short lesson for finish-screen regression');
+   window.NHI_PLAN_V2.startLessonById(small.id);
+   let stepped=0;
+   while(stepped<250&&!document.querySelector('#planBox .sdone')){
+    const next=document.querySelector('#planBox .prate .nhi-next-v3');
+    if(!next)break;
+    next.click();stepped++;
+   }
+   return {lesson:small.id,steps:stepped,completed:!!document.querySelector('#planBox .sdone')};
+  });
+  assert(finish.completed,'Unable to reach the completion screen: '+JSON.stringify(finish));
+  await page.waitForSelector('#planBox .sdone .nhi-original-gif',{timeout:9000});
+  await page.waitForFunction(()=>document.querySelector('#planBox .sdone .nhi-original-gif')?.complete,
+   {timeout:8000});
+  const measures=[];
+  for(const [width,height] of [[1366,768],[1440,900],[1920,1080],[390,844]]){
+   await page.setViewport({width,height});
+   await page.evaluate(()=>window.scrollTo(0,0));
+   await page.waitForFunction(()=>getComputedStyle(document.body).backgroundImage.includes('data:image/png'),{timeout:12000});
+   await new Promise(r=>setTimeout(r,150));
+   const m=await page.evaluate(()=>{
+    const img=document.querySelector('#planBox .sdone img.nhi-original-gif');
+    const scene=document.querySelector('#planBox .sdone .nhi-victory-cat-scene');
+    const container=document.querySelector('#planBox .sdone');
+    const imgCss=getComputedStyle(img),sceneCss=getComputedStyle(scene);
+    const bounds=r=>({top:Math.round(r.top),bottom:Math.round(r.bottom),
+       left:Math.round(r.left),right:Math.round(r.right),width:Math.round(r.width),height:Math.round(r.height)});
+    const ib=bounds(img.getBoundingClientRect()),sb=bounds(scene.getBoundingClientRect());
+    const topbar=document.querySelector('#topbar');
+    return {viewport:{width:innerWidth,height:innerHeight},
+     documentHeight:document.documentElement.scrollHeight, bodyHeight:document.body.scrollHeight,
+     img:ib,scene:sb,card:bounds(container.getBoundingClientRect()),
+     topbarBottom:Math.round(topbar.getBoundingClientRect().bottom),
+     natural:[img.naturalWidth,img.naturalHeight],
+     objectFit:imgCss.objectFit,mask:imgCss.maskImage,webkitMask:imgCss.webkitMaskImage,
+     clip:imgCss.clipPath,opacity:imgCss.opacity,overflow:sceneCss.overflow,
+     bgColor:getComputedStyle(container).backgroundColor,
+     buttons:[...container.querySelectorAll('button')].filter(b=>!b.hidden&&getComputedStyle(b).display!=='none')
+      .map(b=>({label:b.textContent.trim(),...bounds(b.getBoundingClientRect())})),
+     catFocusable:img.getAttribute('role')==='button',gifSrc:img.getAttribute('src')};
+   });
+   measures.push(m);
+   fs.mkdirSync('/tmp/nhi-site-audit',{recursive:true});
+   if(width>=780)await page.screenshot({path:'/tmp/nhi-site-audit/reward-'+width+'x'+height+'.png'});
+   assert(m.natural[0]===307&&m.natural[1]===623,'Original kitten GIF size changed: '+JSON.stringify(m));
+   assert(m.objectFit==='contain'&&m.mask==='none'&&m.webkitMask==='none'&&m.clip==='none',
+    'Original GIF caption is still masked or cropped: '+JSON.stringify(m));
+   assert(m.opacity==='1'&&m.scene.top<=m.img.top&&m.scene.bottom>=m.img.bottom,
+    'GIF bounds are clipped by scene: '+JSON.stringify(m));
+   assert(m.catFocusable&&m.buttons.some(b=>b.label.includes('Học lại'))&&m.buttons.some(b=>b.label.includes('Xong')),
+    'Cat click or completion buttons missing: '+JSON.stringify(m));
+   if(width>=780){
+    assert(m.documentHeight<=height+10&&m.bodyHeight<=height+10,
+     'Desktop completion screen requires scrolling: '+JSON.stringify(m));
+    assert(m.buttons.every(b=>b.bottom<=height+2)&&m.img.bottom<=height+2,
+     'Caption/buttons are below laptop viewport: '+JSON.stringify(m));
+   }else{
+    assert(m.img.width<=width+1,'Mobile completion GIF overflows horizontally: '+JSON.stringify(m));
+   }
+  }
+  await page.setViewport({width:1366,height:768});
+  await new Promise(r=>setTimeout(r,220));
+  const pixels=await page.evaluate(async()=>{
+    const image=document.querySelector('#planBox .sdone .nhi-original-gif');
+    await image.decode();
+    const c=document.createElement('canvas');c.width=image.naturalWidth;c.height=image.naturalHeight;
+    const ctx=c.getContext('2d',{willReadFrequently:true});ctx.drawImage(image,0,0);
+    const d=ctx.getImageData(0,0,c.width,c.height).data;
+    function rgb(x,y){const i=(y*c.width+x)*4;return Array.from(d.slice(i,i+4));}
+    const cssImage=getComputedStyle(document.body).backgroundImage;
+    const raw=cssImage.match(/data:image\/png;base64,[a-zA-Z0-9+/=]+/);
+    if(!raw)throw Error('No original GIF edge-color backdrop generated');
+    const backdrop=new Image();backdrop.src=raw[0];await backdrop.decode();
+    const bc=document.createElement('canvas');bc.width=backdrop.naturalWidth;bc.height=backdrop.naturalHeight;
+    const bctx=bc.getContext('2d',{willReadFrequently:true});bctx.drawImage(backdrop,0,0);
+    const bounds=image.getBoundingClientRect(),midY=Math.round(bounds.top+bounds.height/2);
+    const sy=Math.max(0,Math.min(c.height-1,Math.floor((midY-bounds.top)*c.height/bounds.height)));
+    const outer=bctx.getImageData(Math.floor(bounds.left)-2,midY,1,1).data;
+    const sourceSide=ctx.getImageData(0,sy,1,1).data;
+    const difference=Math.max(...[0,1,2].map(i=>Math.abs(outer[i]-sourceSide[i])));
+    return {size:[c.width,c.height],corners:[rgb(0,0),rgb(c.width-1,0),rgb(0,c.height-1),rgb(c.width-1,c.height-1)],
+      middles:[rgb(Math.floor(c.width/2),0),rgb(Math.floor(c.width/2),c.height-1)],
+      backdropSize:[bc.width,bc.height],sideDifference:difference,
+      outer:Array.from(outer),sourceSide:Array.from(sourceSide),
+      background:getComputedStyle(document.body).backgroundColor};
+  });
+  assert(pixels.sideDifference<=4,'Visible GIF rectangle edge mismatch: '+JSON.stringify(pixels));
+  console.log('NHI REWARD SCREEN METRICS',JSON.stringify({finish,measures,pixels}));
+  return JSON.stringify({sizes:measures.map(x=>({viewport:x.viewport,img:x.img,documentHeight:x.documentHeight,
+    backgrounds:x.bgColor})),pixelCorners:pixels.corners});
+ });
  // Basic CSS integrity and resource requests.
  await check('JavaScript runtime errors',async()=>{
   assert(pageErrors.length===0,JSON.stringify(pageErrors.slice(0,20)));

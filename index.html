@@ -1173,55 +1173,93 @@ html body #planBox .pcard .pfront .nhi-card-details .nhi-card-note{
   white-space:pre-wrap!important;overflow-wrap:anywhere!important;word-break:break-word!important;
   text-align:left!important;
 }
-html body:has(#planBox .sdone),
+/* Completion-only layout. Never crop, fade, mask or alter original GIF pixels. */
+html body:has(#planBox .sdone){
+  background-color:var(--nhi-victory-bg,#fff8f5)!important;
+  background-image:var(--nhi-victory-image,none)!important;
+  background-size:100% 100%!important;
+  background-position:0 0!important;
+  background-repeat:no-repeat!important;
+}
 html body:has(#planBox .sdone) #view-plan,
 html body:has(#planBox .sdone) #planBox{
-  background:var(--nhi-victory-bg,#fff8f5)!important;
+  background-color:transparent!important;background-image:none!important;
 }
 html body #planBox .sdone{
-  --nhi-victory-bg:var(--nhi-victory-bg,#fff8f5);
-  background:var(--nhi-victory-bg)!important;
+  background-color:transparent!important;
   background-image:none!important;
   border:0!important;box-shadow:none!important;
   box-sizing:border-box!important;
   display:flex!important;flex-direction:column!important;
   justify-content:center!important;align-items:center!important;
-  gap:clamp(4px,.8vh,9px)!important;
-  padding:clamp(9px,1.2vh,15px) clamp(10px,2vw,22px)!important;
-  margin-inline:auto!important;
+  gap:clamp(3px,.55dvh,7px)!important;
+  padding:clamp(5px,.9dvh,12px) 12px!important;
+  margin:0 auto!important;
   min-height:0!important;
+  overflow:visible!important;
 }
 html body #planBox .sdone .nhi-victory-cat-scene{
-  width:auto!important;max-width:100%!important;
-  height:clamp(210px,48dvh,430px)!important;
-  max-height:48dvh!important;
-  min-height:0!important;
-  margin:0 auto!important;
-  display:grid!important;place-items:center!important;
-  overflow:hidden!important;
-  background:var(--nhi-victory-bg)!important;
+  width:100%!important;max-width:100%!important;
+  height:auto!important;max-height:none!important;min-height:0!important;
+  display:flex!important;align-items:center!important;justify-content:center!important;
+  margin:0 auto!important;padding:0!important;
+  overflow:visible!important;
+  background-color:transparent!important;
+  background-image:none!important;
+  border:0!important;box-shadow:none!important;
 }
 html body #planBox .sdone img.nhi-victory-cat.nhi-original-gif{
-  display:block!important;width:auto!important;height:100%!important;
-  max-width:100%!important;max-height:100%!important;
-  aspect-ratio:307/623!important;object-fit:contain!important;
-  animation:none!important;
-  -webkit-mask-image:radial-gradient(ellipse farthest-side at center,#000 94%,transparent 100%);
-  mask-image:radial-gradient(ellipse farthest-side at center,#000 94%,transparent 100%);
+  display:block!important;
+  width:auto!important;
+  height:clamp(210px,calc(100dvh - 355px),560px)!important;
+  max-height:calc(100dvh - 355px)!important;
+  max-width:min(307px,100%)!important;
+  min-width:0!important;min-height:0!important;
+  aspect-ratio:307/623!important;
+  object-fit:contain!important;object-position:50% 50%!important;
+  overflow:visible!important;
+  -webkit-mask-image:none!important;mask-image:none!important;
+  -webkit-clip-path:none!important;clip-path:none!important;
+  filter:none!important;opacity:1!important;
+  animation:none!important;transform:none!important;
+  padding:0!important;margin:0 auto!important;
 }
-html body #planBox .sdone .tiles{width:min(100%,350px)!important;margin:1px auto!important;gap:7px!important}
+html body #planBox .sdone .tiles{
+  width:min(100%,350px)!important;
+  display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;
+  margin:2px auto!important;gap:7px!important;
+}
 html body #planBox .sdone .tile2{padding:5px 8px!important}
-html body #planBox .sdone .tile2 b{font-size:clamp(18px,2.6vh,24px)!important}
-html body #planBox .sdone .prow{gap:7px!important;margin:2px 0!important}
-html body #planBox .sdone .nhi-replay-button{min-height:38px!important;padding:7px 12px!important}
-html body #planBox .sdone .listinfo,html body #planBox .sdone .pstatus{margin:2px 0!important}
-@media(min-width:780px){
-  html body #planBox .sdone{max-height:calc(100dvh - var(--topbar,60px) - 26px)!important}
+html body #planBox .sdone .tile2 b{font-size:clamp(18px,2.5dvh,24px)!important}
+html body #planBox .sdone .prow{
+  justify-content:center!important;flex-wrap:wrap!important;
+  margin:2px 0!important;gap:7px!important;
 }
-@media(min-width:780px) and (max-height:720px){
-  html body #planBox .sdone .nhi-victory-cat-scene{height:40dvh!important;max-height:40dvh!important}
-  html body #planBox .sdone{gap:4px!important;padding:6px 12px!important}
-  html body #planBox .sdone .prow button{min-height:34px!important}
+html body #planBox .sdone .prow button{
+  min-height:36px!important;padding:7px 12px!important;
+}
+html body #planBox .sdone .nhi-replay-button{
+  min-height:38px!important;padding:8px 12px!important;
+}
+html body #planBox .sdone .listinfo,
+html body #planBox .sdone .pstatus{
+  margin:1px 0!important;line-height:1.3!important;
+}
+@media(min-width:780px){
+ html body:has(#planBox .sdone) #planBox{margin-top:0!important;margin-bottom:0!important}
+ html body #planBox .sdone{max-height:calc(100dvh - var(--topbar,60px) - 18px)!important}
+}
+@media(max-height:700px){
+ html body #planBox .sdone img.nhi-victory-cat.nhi-original-gif{
+  height:min(42dvh,307px)!important;max-height:42dvh!important;
+ }
+ html body #planBox .sdone{gap:3px!important;padding:4px 8px!important}
+}
+@media(max-width:700px){
+ html body #planBox .sdone img.nhi-victory-cat.nhi-original-gif{
+  height:auto!important;max-height:65dvh!important;width:auto!important;
+ }
+ html body #planBox .sdone{max-height:none!important}
 }
 
 </style>
@@ -1949,7 +1987,10 @@ html body #planBox .sdone .listinfo,html body #planBox .sdone .pstatus{margin:2p
       if (request !== speechRequest) return;
       var hasChosenVoice=!!(VOICE_PREF[pre]&&voicesFor(pre).some(function(v){return v.voiceURI===VOICE_PREF[pre];}));
        var hasRegionalVoice=!!preferredRegionalVoice(pre);
-       if (!hasChosenVoice && !hasRegionalVoice && window.NHI_AUDIO.play(text, lang, speed || RATE[state.rate] || 1, complete)) return;
+       // The learner selected Ban Mai for Vietnamese; never let an OS Vietnamese voice
+       // override an available offline FPT Ban Mai recording.
+       if ((pre==='vi'||(!hasChosenVoice&&!hasRegionalVoice)) &&
+           window.NHI_AUDIO.play(text, lang, speed || RATE[state.rate] || 1, complete)) return;
     }
     if (!canSpeak) { toast('Câu này chưa có MP3 Neural; trình duyệt chưa có giọng dự phòng.'); complete(); return; }
     try {
@@ -4921,18 +4962,78 @@ html body #planBox .sdone .listinfo,html body #planBox .sdone .pstatus{margin:2p
       cat.alt='Mèo trắng vui vẻ tung tiền, những tờ tiền đang bay và rơi';
       cat.loading='eager';
       cat.addEventListener('load',function(){
-        // Blend the surrounding completion screen into the real GIF backdrop.
+        // The original GIF has an off-white center, pink outer edges and a
+        // subtly different bottom edge. One flat RGB fill exposes a rectangle.
+        // Extend its EXACT first-frame edge pixels outside the intact GIF:
+        // nothing is painted over, masked, cropped or edited inside the image.
         try{
-          var canvas=document.createElement('canvas');canvas.width=canvas.height=8;
-          var context=canvas.getContext('2d',{willReadFrequently:true});if(!context)return;
-          context.drawImage(cat,0,0,8,8);
-          var edge=context.getImageData(0,0,1,1).data;
-          if(edge[3]>200){
-            var color='rgb('+edge[0]+','+edge[1]+','+edge[2]+')';
-            p.style.setProperty('--nhi-victory-bg',color);
-            document.body.style.setProperty('--nhi-victory-bg',color);
+          var w=cat.naturalWidth,h=cat.naturalHeight;
+          if(w!==307||h!==623)return;
+          var source=document.createElement('canvas');source.width=w;source.height=h;
+          var cx=source.getContext('2d',{willReadFrequently:true});if(!cx)return;
+          cx.drawImage(cat,0,0,w,h);
+          var src=cx.getImageData(0,0,w,h).data;
+          function pixel(x,y){
+            var off=(y*w+x)*4;
+            return [src[off],src[off+1],src[off+2]];
           }
-        }catch(_e){}
+          var corner=pixel(0,0),color='rgb('+corner.join(',')+')';
+          document.documentElement.style.setProperty('--nhi-victory-bg',color);
+          document.body.style.setProperty('--nhi-victory-bg',color);
+          var repaintId=0,watcher=null;
+          function paint(){
+            repaintId=0;
+            if(!cat.isConnected){if(watcher)watcher.disconnect();return;}
+            var rect=cat.getBoundingClientRect(),W=Math.round(window.innerWidth);
+            var H=Math.max(Math.round(window.innerHeight),document.documentElement.scrollHeight);
+            if(!rect.width||!rect.height||W<1||H<1)return;
+            var left=rect.left,top=rect.top+window.scrollY,iw=rect.width,ih=rect.height;
+            var backing=document.createElement('canvas');backing.width=W;backing.height=H;
+            var bc=backing.getContext('2d',{willReadFrequently:true});if(!bc)return;
+            var out=bc.createImageData(W,H),dest=out.data;
+            var l=Math.max(0,Math.floor(left)),r=Math.min(W,Math.ceil(left+iw));
+            for(var y=0;y<H;y++){
+              var sy=Math.max(0,Math.min(h-1,Math.floor((y-top)*h/ih)));
+              var outsideY=y<top||y>=top+ih;
+              var li=(sy*w)*4,ri=(sy*w+w-1)*4;
+              for(var x=0;x<W;x++){
+                var srcIndex,di=(y*W+x)*4;
+                if(outsideY){
+                  // Replicate the exact top/bottom GIF edge row outward.
+                  var sx=Math.max(0,Math.min(w-1,Math.floor((x-left)*w/iw)));
+                  srcIndex=(sy*w+sx)*4;
+                }else if(x<l){srcIndex=li;
+                }else if(x>=r){srcIndex=ri;
+                }else{
+                  // Hidden beneath the fully opaque GIF; edge colors suffice.
+                  var q=(x-left)/iw,rl=src[li],gl=src[li+1],bl=src[li+2];
+                  var rr=src[ri],gr=src[ri+1],br=src[ri+2];
+                  dest[di]=Math.round(rl+(rr-rl)*q);
+                  dest[di+1]=Math.round(gl+(gr-gl)*q);
+                  dest[di+2]=Math.round(bl+(br-bl)*q);
+                  dest[di+3]=255;continue;
+                }
+                dest[di]=src[srcIndex];dest[di+1]=src[srcIndex+1];
+                dest[di+2]=src[srcIndex+2];dest[di+3]=255;
+              }
+            }
+            bc.putImageData(out,0,0);
+            document.body.style.setProperty('--nhi-victory-image','url("'+backing.toDataURL('image/png')+'")');
+          }
+          function schedule(){
+            if(repaintId)cancelAnimationFrame(repaintId);
+            repaintId=requestAnimationFrame(paint);
+          }
+          if(window.NHI_REWARD_BG_CLEANUP)window.NHI_REWARD_BG_CLEANUP();
+          window.addEventListener('resize',schedule,{passive:true});
+          if('ResizeObserver' in window){watcher=new ResizeObserver(schedule);watcher.observe(cat);}
+          window.NHI_REWARD_BG_CLEANUP=function(){
+            window.removeEventListener('resize',schedule);
+            if(watcher)watcher.disconnect();
+            if(repaintId)cancelAnimationFrame(repaintId);
+          };
+          schedule();
+        }catch(_err){/* Solid GIF corner fallback when Canvas is unavailable. */}
       });
       m.appendChild(cat);
       // A yellow thumbs-up emoji was distracting; the kitten paws do the celebrating.
