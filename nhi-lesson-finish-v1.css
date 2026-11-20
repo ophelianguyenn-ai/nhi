@@ -189,8 +189,8 @@ html body #planBox .sdone .nhi-victory-cat-scene{
 }
 html body #planBox .sdone img.nhi-victory-cat.nhi-original-gif{
  width:auto!important;max-width:100%!important;
- height:clamp(310px,61dvh,480px)!important;
- max-height:61dvh!important;min-height:0!important;
+ height:clamp(300px,56dvh,470px)!important;
+ max-height:56dvh!important;min-height:0!important;
  object-fit:contain!important;
 }
 html body #planBox .sdone .nhi-victory-actions{

@@ -12,6 +12,9 @@ on:
     branches: [main]
     paths:
       - 'index.html'
+      - 'nhi-lesson-finish-v1.css'
+      - 'nhi-card-image-compact-v1.css'
+      - 'card-images-v11.js'
       - 'scripts/audit-site-20261118.mjs'
   workflow_dispatch:
 permissions:
