@@ -87,10 +87,10 @@ try{
    speed:!!e.querySelector('.nhi-ai-reader-speed')
  }));
  console.log('AI_CONTEXT_DIAGNOSTIC',JSON.stringify(ctx));
- assert(!ctx.text.includes('Đang hỏi về thẻ')&&ctx.row==='row'&&ctx.speed,
-   'AI context was not merged into a single row: '+JSON.stringify(ctx));
- assert(await page.$eval('#aiSetup',e=>!!e.querySelector('#nhiReaderLanguage')),
-   'Reader auto-detect language not moved into chat settings');
+ assert(!ctx.text.includes('Đang hỏi về thẻ')&&ctx.row==='row'&&!ctx.speed,
+   'AI context has obsolete paragraph speech controls or wrong layout: '+JSON.stringify(ctx));
+ assert(!await page.$eval('#aiSetup',e=>!!e.querySelector('#nhiReaderLanguage')),
+   'Reader settings must be removed with double-tap reading');
  const gear=await page.$eval('#aiCfgBtn',e=>({radius:getComputedStyle(e).borderRadius,width:e.getBoundingClientRect().width,height:e.getBoundingClientRect().height}));
  console.log('AI_GEAR',JSON.stringify(gear));
  assert(parseFloat(gear.radius)<=9 && Math.abs(gear.width-gear.height)<=2,
@@ -112,8 +112,8 @@ try{
  });
  assert(anchor.text==='Tôi muốn học tiếng Hàn'&&anchor.top>=0&&anchor.top<48,'Enter did not anchor last sent message: '+JSON.stringify(anchor));
 
- // The reader creates draggable, individual paragraphs; their drop target is
- // the current flashcard note. Mobile users can tap the + control instead.
+ // Paragraphs must be normally selectable, not draggable and not read aloud
+ // when tapped twice. The separate + control still saves a line to notes.
  console.log('SMOKE_STEP 12 line96');
  await page.evaluate(()=>{
    const m=document.createElement('div');m.className='aimsg ai';
@@ -121,31 +121,49 @@ try{
    document.getElementById('aiLog').appendChild(m);
  });
  console.log('SMOKE_STEP 13 line101');
- await page.waitForFunction(()=>document.querySelectorAll('#aiLog .nhi-ai-draggable-note').length>=2,{timeout:6000});
+ await page.waitForFunction(()=>document.querySelectorAll('#aiLog .nhi-ai-paragraph').length>=2,{timeout:6000});
+ const selection=await page.evaluate(()=>{
+   const paragraphs=[...document.querySelectorAll('#aiLog .nhi-ai-paragraph')];
+   const first=paragraphs.find(e=>e.textContent.includes('Ví dụ một'));
+   const second=paragraphs.find(e=>e.textContent.includes('Ví dụ hai'));
+   if(!first||!second)throw Error('Answer was not rendered in separate paragraphs');
+   const text=first.querySelector('.nhi-ai-paragraph-text');
+   const textNode=[...text.childNodes].find(n=>n.nodeType===Node.TEXT_NODE);
+   if(!textNode)throw Error('No selectable text node');
+   const range=document.createRange();
+   range.setStart(textNode,0);range.setEnd(textNode,Math.min(5,textNode.length));
+   const sel=window.getSelection();sel.removeAllRanges();sel.addRange(range);
+   let speechCalls=0;
+   const original=window.NHI_SPEECH?.speak;
+   if(window.NHI_SPEECH)window.NHI_SPEECH.speak=()=>{speechCalls++};
+   first.dispatchEvent(new MouseEvent('dblclick',{bubbles:true,cancelable:true}));
+   if(window.NHI_SPEECH)window.NHI_SPEECH.speak=original;
+   return {
+     copiedSelection:sel.toString(),draggable:first.draggable,
+     userSelect:getComputedStyle(text).userSelect,
+     speechCalls,copyButtons:document.querySelectorAll('#aiLog .nhi-copy-chat').length,
+     noteButtons:paragraphs.filter(p=>p.querySelector('.nhi-add-to-note')).length
+   };
+ });
+ assert(selection.copiedSelection.length>0&&selection.userSelect==='text'&&!selection.draggable&&selection.speechCalls===0&&selection.copyButtons===0&&selection.noteButtons>=2,
+   'AI paragraph was not normal selectable text: '+JSON.stringify(selection));
  console.log('SMOKE_STEP 14 line102');
  await page.evaluate(()=>{
-   const source=[...document.querySelectorAll('#aiLog .nhi-ai-draggable-note')]
+   const first=[...document.querySelectorAll('#aiLog .nhi-ai-paragraph')]
      .find(e=>e.textContent.includes('Ví dụ một'));
-   if(!source)throw Error('Example 1 not rendered as draggable');
-   const data=new DataTransfer();
-   source.dispatchEvent(new DragEvent('dragstart',{bubbles:true,cancelable:true,dataTransfer:data}));
-   console.log('DRAG_SOURCE',source.textContent,'DRAG_TEXT',data.getData('application/x-nhi-example'));
-   const target=document.querySelector('#planBox .pcard');
-   target.dispatchEvent(new DragEvent('dragover',{bubbles:true,cancelable:true,dataTransfer:data}));
-   target.dispatchEvent(new DragEvent('drop',{bubbles:true,cancelable:true,dataTransfer:data}));
+   first.querySelector('.nhi-add-to-note').click();
  });
  console.log('SMOKE_STEP 15 line110');
  await page.waitForFunction(id=>JSON.parse(localStorage.getItem('viko-plan-v1')).note?.[id]?.v?.text.includes('Ví dụ một'),{},cardID);
- await page.$eval('#aiLog .nhi-ai-draggable-note',_=>true);
  await page.evaluate(()=>{
-   const second=[...document.querySelectorAll('#aiLog .nhi-ai-draggable-note')]
+   const second=[...document.querySelectorAll('#aiLog .nhi-ai-paragraph')]
      .find(e=>e.textContent.includes('Ví dụ hai'));
    if(!second)throw Error('Example 2 not rendered');
    second.querySelector('.nhi-add-to-note').click();
  });
  const added=await page.evaluate(id=>JSON.parse(localStorage.getItem('viko-plan-v1')).note?.[id]?.v?.text,cardID);
  assert(added.includes('Ví dụ một')&&added.includes('Ví dụ hai')&&added.indexOf('Ví dụ hai')>added.indexOf('Ví dụ một'),
-   'Dragging and tapping examples did not append separate note lines: '+added);
+   'Note buttons did not append separate text lines: '+added);
  // Accidental card deletion can be undone until a NEW card is visited.
  await page.$eval('#aiClose',e=>e.click());
  const deletedId=await page.$eval('#planBox .pcard',e=>e.dataset.item);
@@ -165,7 +183,7 @@ try{
  const saved=await page.evaluate(id=>JSON.parse(localStorage.getItem('viko-plan-v1')).img[id].v,cardID);
  assert(saved.width===350&&saved.height===280,'Image dimensions did not survive reload');
  assert(errors.length===0,'Page errors: '+errors.join('; '));
- console.log('FOUR UI IMPROVEMENTS PASS',JSON.stringify({note,grid:[before,after],height,voice:true,anchor}));
+ console.log('SELECTABLE CHAT AND NOTES UX PASS',JSON.stringify({note,grid:[before,after],height,voice:true,anchor}));
 }catch(err){
  console.error('ORIGINAL_SMOKE_ERROR',err&&err.stack||String(err));throw err;
 }finally{try{await browser.close();}catch(e){console.error('SMOKE_CLOSE_ERROR',String(e));}}
