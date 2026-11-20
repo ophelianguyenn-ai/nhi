@@ -25,7 +25,7 @@ html body #planBox .pcard .nhi-editor-window-v5,html body .nhi-picture-picker{po
 #nhi-hard-mascot img{width:100%!important;max-width:100%!important;height:auto!important;display:block!important;filter:drop-shadow(0 7px 8px #0002)}
 #nhi-hard-mascot .nhi-hard-caption{font:500 11px/1.4 var(--ui)!important;text-align:center;background:var(--surface);border-radius:9px;padding:5px;white-space:normal}
 #nhi-hard-mascot.nhi-mascot-leave{animation:nhi-mascot-exit .65s ease both!important}
-#planBox .pcard.nhi-mascot-active .pfront{padding-left:clamp(95px,20cqi,155px)!important;padding-right:12px!important}
+/* Mascot overlays the card; the front never changes its padding. */
 @keyframes nhi-mascot-enter{from{opacity:0;translate:-12px 8px}to{opacity:1;translate:0 0}}
 @keyframes nhi-mascot-exit{from{opacity:1;translate:0 0}to{opacity:0;translate:-12px 8px}}
 @media(min-width:900px){body.ai-open .app{width:calc(100% - var(--nhi-ai-width) - 32px)!important;max-width:1000px!important;margin-left:16px!important;margin-right:calc(var(--nhi-ai-width) + 16px)!important}body.ai-open .topbar{padding-right:calc(var(--nhi-ai-width) + 16px)!important}body.ai-open .menu{right:calc(var(--nhi-ai-width) + 12px)!important}}
@@ -108,7 +108,7 @@ html body .nhi-read-message{flex:0 0 24px;width:24px;height:27px;display:inline-
 html body #nhi-hard-mascot{width:min(var(--nhi-companion-size,180px),40%)!important;pointer-events:auto!important;background:transparent!important;border:0!important;box-shadow:none!important;overflow:visible}
 html body #nhi-hard-mascot img{pointer-events:auto!important;touch-action:none!important;cursor:nwse-resize!important;filter:none!important;user-select:none}
 html body #nhi-hard-mascot .nhi-hard-caption{background:transparent!important;border:0!important;box-shadow:none!important}
-html body #planBox .pcard.nhi-mascot-active .pfront{padding-left:var(--nhi-companion-space,190px)!important}
+/* Mascot overlays the card; the front never changes its padding. */
 @media(max-width:699px){html body.nhi-docked .topbar{padding-right:8px!important;width:calc(100% - var(--nhi-dock-width))}.nhi-dictionary-dock .nhi-dialog-head{font-size:12px}.nhi-card-dictionaries{gap:3px}html body .nhi-dict-button{width:30px!important;min-width:30px!important;height:30px!important}#planBox .pfront.nhi-with-image{grid-template-columns:minmax(0,1fr) auto minmax(65px,27%)}#planBox .pcard{padding-inline:10px!important}.nhi-format-tools{top:-48px}.nhi-en-head{flex-wrap:wrap}html body.ai-open .aihead{flex-wrap:wrap!important}.nhi-format-active{min-width:35px}}
 #cPrompt:not(.ko),#cAnswer:not(.ko){font-size:var(--nhi-card-vi)!important}#cPrompt.ko,#cAnswer.ko{font-size:var(--nhi-card-ko)!important}
 html body .nhi-picture-picker .nhi-picture-head>button{font-size:24px!important}
@@ -117,3 +117,19 @@ html body .nhi-picture-picker .nhi-picture-head>button{font-size:24px!important}
 .nhi-card-details{grid-column:1/-1;display:grid;grid-template-columns:minmax(0,1fr);grid-auto-rows:1fr;gap:10px;width:100%;min-width:0}
 #planBox .pfront.nhi-with-image>.nhi-card-details{grid-column:1/3}
 .nhi-card-details>.nhi-card-note,.nhi-card-details>.nhi-english-v5{height:100%;min-width:0}
+
+/* Hard-feedback girl: compact corner overlay that never changes text layout. */
+html body #planBox .pcard #nhi-hard-mascot{
+  position:absolute!important;left:8px!important;top:auto!important;bottom:60px!important;
+  transform:none!important;translate:none!important;
+  width:min(var(--nhi-companion-size,104px),26%)!important;
+  max-width:136px!important;min-width:65px!important;
+  z-index:5!important;pointer-events:auto!important;
+}
+html body #planBox .pcard.nhi-mascot-active .pfront{
+  padding-left:inherit!important;padding-right:inherit!important;
+}
+html body #planBox .pcard #nhi-hard-mascot .nhi-hard-caption{
+  font-size:10px!important;line-height:1.25!important;max-width:100%!important;
+  padding:3px 2px!important;
+}
