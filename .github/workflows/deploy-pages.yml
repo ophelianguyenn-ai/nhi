@@ -52,7 +52,7 @@ jobs:
             hanja-v9.js hanja-extra-v12.js
             card-images-v11.js technical-visuals-v12.js
             nhi-google-images-v1.js nhi-hard-minimal-v1.js
-            nhi-updates-v1.css nhi-ai-resize-v2.js nhi-ai-resize-v2.css nhi-lesson-finish-v1.css
+            nhi-updates-v1.css nhi-ai-resize-v2.js nhi-ai-resize-v2.css nhi-lesson-finish-v1.css nhi-card-image-compact-v1.css
             nhi-study-motion-v3.css nhi-fireworks-v3.js
             nhi-interface-v4.css nhi-interface-v4.js
             nhi-interface-v5.css nhi-interface-v5.js nhi-seasons-v1.css nhi-seasons-v1.js
@@ -104,6 +104,7 @@ jobs:
           test -s _site/nhi-cat-original-8frames-20261117.gif
           test -s _site/nhi-original-gif-review-v1.css
           test -s _site/nhi-lesson-finish-v1.css
+          test -s _site/nhi-card-image-compact-v1.css
           test -s _site/audio/ui/kitten-meow.mp3
           test -s _site/audio/ui/lesson-finish.mp3
           test -s _site/nhi-corner-v2.js
