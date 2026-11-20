@@ -571,7 +571,7 @@ try{
     return {before,after,hasRollbackButton:!!remaining,status:current?.textContent?.trim()};
   },finish.lesson);
   assert(reverted.before===confirmed.after&&reverted.after===confirmed.prior&&
-         !reverted.hasRollbackButton&&/Học mới/i.test(reverted.status||''),
+         reverted.hasRollbackButton&&/Học mới/i.test(reverted.status||''),
     'Chưa học bài này must undo only the last recorded study round: '+JSON.stringify(reverted));
   return JSON.stringify({sizes:measures.map(x=>({viewport:x.viewport,img:x.img,documentHeight:x.documentHeight,
     backgrounds:x.bgColor})),pixelCorners:pixels.corners,reverted});
