@@ -9,7 +9,8 @@ function figure(it,value,onResize){
   var stage=node('div');stage.className='nhi-image-stage';
   var im=node('img');im.src=v.url;im.alt=v.caption||it.vi;im.loading='lazy';
   im.referrerPolicy='no-referrer';im.draggable=false;
-  im.onerror=function(){im.hidden=true;};stage.appendChild(im);f.appendChild(stage);
+  im.onerror=function(){im.hidden=true;};
+  stage.appendChild(im);f.appendChild(stage);
   var cap=node('figcaption',v.caption||it.vi);
   if(v.source&&/^https:\/\//.test(v.source)){
     cap.appendChild(node('br'));
@@ -18,106 +19,132 @@ function figure(it,value,onResize){
   }
   f.appendChild(cap);
   if(typeof onResize!=='function')return f;
-  var width=Math.max(110,Math.min(680,Number(v.width)||220));
+  var width=Math.max(100,Math.min(680,Number(v.width)||220));
   var height=Math.max(0,Math.min(520,Number(v.height)||0));
   var offsetX=Math.max(-140,Math.min(140,Number(v.offsetX)||0));
   var offsetY=Math.max(-140,Math.min(140,Number(v.offsetY)||0));
-  var moveMode=true;
+  var clamp=function(n,min,max){return Math.max(min,Math.min(max,n));};
   f.dataset.resizable='true';
-  f.setAttribute('aria-label','Nhấn ảnh để chỉnh riêng chiều ngang, chiều cao và kéo ảnh sang vị trí khác');
-  im.title='Nhấn để mở điều chỉnh; kéo ảnh để đổi vị trí';
+  f.setAttribute('aria-label','Ảnh minh họa. Chạm ảnh rồi kéo cạnh để đổi kích thước, kéo góc để giữ tỷ lệ.');
+  im.title='Kéo ảnh để đổi vị trí; chạm ảnh để hiện tay nắm điều chỉnh';
   im.style.touchAction='none';
-  var controls=node('div');controls.className='nhi-image-adjust';
-  controls.setAttribute('role','group');
-  controls.setAttribute('aria-label','Điều chỉnh ảnh, không đổi chiều cao thẻ');
-  var title=node('div','Kích thước và vị trí ảnh');
-  title.className='nhi-image-adjust-title';controls.appendChild(title);
-  function slider(label,min,max,current,change){
-    var row=node('label');var name=node('span',label);row.appendChild(name);
-    var input=node('input');input.type='range';input.min=min;input.max=max;input.step=5;
-    input.value=String(current);input.setAttribute('aria-label',label+' hình');
-    var display=node('output',String(current)+' px');
-    row.append(input,display);controls.appendChild(row);
-    input.addEventListener('input',function(e){change(Number(input.value));paint();e.stopPropagation();});
-    input.addEventListener('change',function(e){commit();e.stopPropagation();});
-    ['click','pointerdown','pointerup','keydown'].forEach(function(name){
-      input.addEventListener(name,function(e){e.stopPropagation();});
-    });
-    return {input:input,output:display};
-  }
-  var w=slider('Ngang',110,680,width,function(value){width=value;});
-  var h=slider('Cao',80,520,height||240,function(value){height=value;});
-  var x=slider('Vị trí ngang',-140,140,offsetX,function(value){offsetX=value;});
-  var y=slider('Vị trí dọc',-140,140,offsetY,function(value){offsetY=value;});
-  var actions=node('div');actions.className='nhi-image-actions';
-  var move=node('button','✥ Kéo vị trí ảnh');move.type='button';move.className='nhi-image-move-mode';
-  move.setAttribute('aria-pressed','true');
-  move.title='Kéo trên ảnh để di chuyển ảnh trong khung, không thay đổi chiều dài của thẻ';
-  move.addEventListener('click',function(e){
-    moveMode=!moveMode;move.setAttribute('aria-pressed',String(moveMode));
-    move.textContent=moveMode?'✥ Kéo vị trí ảnh':'✥ Khóa vị trí ảnh';e.stopPropagation();
-  });
-  var reset=node('button','Đặt lại vị trí');reset.type='button';
-  reset.addEventListener('click',function(e){
-    offsetX=0;offsetY=0;paint();commit();e.stopPropagation();
-  });
-  var close=node('button','✕');close.type='button';close.title='Đóng bảng chỉnh hình';
-  close.setAttribute('aria-label','Đóng điều chỉnh hình');
-  close.addEventListener('click',function(e){
-    f.classList.remove('nhi-image-selected');e.stopPropagation();
-  });
-  actions.append(move,reset,close);controls.appendChild(actions);
-  controls.addEventListener('click',function(e){e.stopPropagation();});
-  controls.addEventListener('pointerdown',function(e){e.stopPropagation();});
-  controls.addEventListener('keydown',function(e){e.stopPropagation();});
-  f.appendChild(controls);
+
   function paint(){
-    f.style.setProperty('--nhi-image-width',width+'px');
+    f.style.setProperty('--nhi-image-width',Math.round(width)+'px');
     var parent=f.closest('.pfront');
-    if(parent)parent.style.setProperty('--nhi-image-width',width+'px');
-    f.style.setProperty('--nhi-image-height',height?height+'px':'auto');
-    f.style.setProperty('--nhi-image-x',offsetX+'px');
-    f.style.setProperty('--nhi-image-y',offsetY+'px');
-    w.input.value=width;h.input.value=height||240;
-    x.input.value=offsetX;y.input.value=offsetY;
-    w.output.textContent=width+' px';
-    h.output.textContent=height?height+' px':'Tự động';
-    x.output.textContent=offsetX+' px';y.output.textContent=offsetY+' px';
+    if(parent)parent.style.setProperty('--nhi-image-width',Math.round(width)+'px');
+    f.style.setProperty('--nhi-image-height',height?Math.round(height)+'px':'auto');
+    f.style.setProperty('--nhi-image-x',Math.round(offsetX)+'px');
+    f.style.setProperty('--nhi-image-y',Math.round(offsetY)+'px');
   }
   function commit(){
     onResize(Object.assign({},v,{width:Math.round(width),height:Math.round(height),
       offsetX:Math.round(offsetX),offsetY:Math.round(offsetY)}));
   }
-  f.addEventListener('click',function(e){
-    if(!e.target.closest('.nhi-image-adjust'))f.classList.add('nhi-image-selected');
+  f.addEventListener('click',function(e){f.classList.add('nhi-image-selected');e.stopPropagation();});
+  f.addEventListener('focusout',function(e){
+    if(!f.contains(e.relatedTarget))f.classList.remove('nhi-image-selected');
   });
+
+  // Dragging the photo itself still moves its position within the frame.
   var drag=null;
   im.addEventListener('pointerdown',function(e){
     if(e.pointerType==='mouse'&&e.button!==0)return;
     e.preventDefault();e.stopPropagation();
     f.classList.add('nhi-image-selected');
-    if(!moveMode)return;
-    drag={id:e.pointerId,x:e.clientX,y:e.clientY,
-      offsetX:offsetX,offsetY:offsetY,moved:false};
+    drag={id:e.pointerId,x:e.clientX,y:e.clientY,ox:offsetX,oy:offsetY,changed:false};
     try{im.setPointerCapture(e.pointerId);}catch(_e){}
   });
   im.addEventListener('pointermove',function(e){
-    if(!drag||e.pointerId!==drag.id)return;
+    if(!drag||drag.id!==e.pointerId)return;
     var dx=e.clientX-drag.x,dy=e.clientY-drag.y;
-    if(Math.abs(dx)+Math.abs(dy)<=4&&!drag.moved)return;
-    drag.moved=true;f.classList.add('nhi-image-dragging');
-    offsetX=Math.max(-140,Math.min(140,drag.offsetX+dx));
-    offsetY=Math.max(-140,Math.min(140,drag.offsetY+dy));
+    if(Math.abs(dx)+Math.abs(dy)<4&&!drag.changed)return;
+    drag.changed=true;f.classList.add('nhi-image-dragging');
+    offsetX=clamp(drag.ox+dx,-140,140);
+    offsetY=clamp(drag.oy+dy,-140,140);
     paint();e.stopPropagation();
   });
-  function finish(e){
-    if(!drag||e.pointerId!==drag.id)return;
-    var changed=drag.moved;drag=null;
+  function endMove(e){
+    if(!drag||drag.id!==e.pointerId)return;
+    var changed=drag.changed;drag=null;
     f.classList.remove('nhi-image-dragging');f.classList.add('nhi-image-selected');
     if(changed)commit();
     e.stopPropagation();
   }
-  im.addEventListener('pointerup',finish);im.addEventListener('pointercancel',finish);
+  im.addEventListener('pointerup',endMove);
+  im.addEventListener('pointercancel',endMove);
+
+  // Eight edge/corner handles replace ALL old range sliders and panels.
+  // Corners always keep the image's current width:height ratio.
+  var labels={n:'cạnh trên',s:'cạnh dưới',e:'cạnh phải',w:'cạnh trái',
+    ne:'góc trên phải',nw:'góc trên trái',se:'góc dưới phải',sw:'góc dưới trái'};
+  Object.keys(labels).forEach(function(edge){
+    var handle=node('button');
+    handle.type='button';
+    handle.className='nhi-image-handle nhi-image-handle-'+edge;
+    handle.dataset.edge=edge;
+    handle.setAttribute('aria-label','Kéo '+labels[edge]+' để thay đổi kích thước ảnh'+(edge.length===2?' đồng tỷ lệ':''));
+    handle.title=handle.getAttribute('aria-label');
+    stage.appendChild(handle);
+    var sizing=null;
+    function bounds(){
+      var rect=stage.getBoundingClientRect();
+      return {width:Math.max(1,rect.width),height:Math.max(1,rect.height)};
+    }
+    function maxWidth(){
+      var area=f.closest('.pfront');
+      return clamp(area?area.clientWidth*.56:680,115,680);
+    }
+    function calculate(dx,dy,base){
+      var signX=edge.includes('e')?1:edge.includes('w')?-1:0;
+      var signY=edge.includes('s')?1:edge.includes('n')?-1:0;
+      if(edge.length===2){
+        var xFraction=signX*dx/base.width;
+        var yFraction=signY*dy/base.height;
+        var factor=1+(Math.abs(xFraction)>Math.abs(yFraction)?xFraction:yFraction);
+        var minFactor=Math.max(90/base.width,80/base.height);
+        var maxFactor=Math.min(maxWidth()/base.width,520/base.height);
+        factor=clamp(factor,minFactor,Math.max(minFactor,maxFactor));
+        width=clamp(base.width*factor,90,maxWidth());
+        height=clamp(base.height*(width/base.width),80,520);
+      }else if(signX){
+        width=clamp(base.width+signX*dx,90,maxWidth());
+        height=clamp(base.height,80,520);
+      }else if(signY){
+        width=clamp(base.width,90,maxWidth());
+        height=clamp(base.height+signY*dy,80,520);
+      }
+      paint();
+    }
+    handle.addEventListener('pointerdown',function(e){
+      if(e.pointerType==='mouse'&&e.button!==0)return;
+      e.preventDefault();e.stopPropagation();
+      f.classList.add('nhi-image-selected','nhi-image-resizing');
+      sizing={id:e.pointerId,x:e.clientX,y:e.clientY,...bounds()};
+      try{handle.setPointerCapture(e.pointerId);}catch(_e){}
+    });
+    handle.addEventListener('pointermove',function(e){
+      if(!sizing||sizing.id!==e.pointerId)return;
+      calculate(e.clientX-sizing.x,e.clientY-sizing.y,sizing);
+      e.preventDefault();e.stopPropagation();
+    });
+    function finishResize(e){
+      if(!sizing||sizing.id!==e.pointerId)return;
+      sizing=null;f.classList.remove('nhi-image-resizing');
+      commit();e.preventDefault();e.stopPropagation();
+    }
+    handle.addEventListener('pointerup',finishResize);
+    handle.addEventListener('pointercancel',finishResize);
+    handle.addEventListener('click',function(e){e.preventDefault();e.stopPropagation();});
+    handle.addEventListener('keydown',function(e){
+      if(!['ArrowUp','ArrowDown','ArrowLeft','ArrowRight'].includes(e.key))return;
+      e.preventDefault();e.stopPropagation();
+      var base=bounds();
+      var dx=e.key==='ArrowRight'?10:e.key==='ArrowLeft'?-10:0;
+      var dy=e.key==='ArrowDown'?10:e.key==='ArrowUp'?-10:0;
+      calculate(dx,dy,base);commit();
+    });
+  });
   requestAnimationFrame(paint);
   return f;
 }
