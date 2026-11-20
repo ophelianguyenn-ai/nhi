@@ -197,6 +197,37 @@ function initReader(){
   }
   next();
  }
+ async function copyAiText(text,button){
+  const content=String(text||'').trim();
+  if(!content)return false;
+  let copied=false;
+  try{
+    if(navigator.clipboard?.writeText){
+      await navigator.clipboard.writeText(content);
+      copied=true;
+    }
+  }catch(_e){}
+  if(!copied){
+    // Clipboard API may be blocked on locally served HTTP or older browsers.
+    const field=document.createElement('textarea');
+    field.value=content;field.setAttribute('readonly','');
+    field.style.cssText='position:fixed;top:-10000px;left:-10000px;opacity:0';
+    document.body.appendChild(field);
+    field.select();
+    try{copied=document.execCommand('copy');}catch(_e){}
+    field.remove();
+  }
+  if(copied&&button){
+    const previous=button.textContent;
+    button.textContent='✓ Đã sao chép';
+    setTimeout(()=>{if(button.isConnected)button.textContent=previous;},1300);
+  }else if(!copied){
+    // Preserve a selectable fallback rather than claiming an unsuccessful copy.
+    const selection=window.getSelection();
+    if(selection)selection.removeAllRanges();
+  }
+  return copied;
+ }
  let tapAt=0,tapTarget=null;
  function mount(){
   for(const msg of log.querySelectorAll('.aimsg.ai:not(.wait)')){
@@ -243,8 +274,19 @@ function initReader(){
     add.classList.add('nhi-add-to-note');
     add.title='Thêm ví dụ này vào ghi chú trên thẻ đang học';
     add.setAttribute('aria-label','Thêm câu này vào ghi chú thẻ');
-    p.append(text,add);msg.append(p);
+    const copy=button('Sao chép',()=>copyAiText(text.textContent,copy));
+    copy.classList.add('nhi-copy-chat-text');
+    copy.type='button';
+    copy.title='Sao chép riêng đoạn này';
+    copy.setAttribute('aria-label','Sao chép nội dung đoạn chat AI');
+    p.append(text,copy,add);msg.append(p);
    }
+   // Copy the entire AI answer, including multiline explanations and examples.
+   const copyAll=button('Sao chép toàn bộ',()=>copyAiText(source.textContent,copyAll));
+   copyAll.classList.add('nhi-copy-chat-all');
+   copyAll.type='button';
+   copyAll.setAttribute('aria-label','Sao chép toàn bộ câu trả lời của AI');
+   msg.append(copyAll);
    for(const link of links)msg.append(link);
   }
  }
