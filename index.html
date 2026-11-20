@@ -1264,8 +1264,8 @@ html body #planBox .sdone .pstatus{
 }
 
 </style>
-<link rel="stylesheet" href="nhi-card-image-compact-v1.css?v=20261120-left-tools-tall-photo-v3">
-<link rel="stylesheet" href="nhi-lesson-finish-v1.css?v=20261120-seamless-right-v4">
+<link rel="stylesheet" href="nhi-card-image-compact-v1.css?v=20261120-controls-lane-v4">
+<link rel="stylesheet" href="nhi-lesson-finish-v1.css?v=20261120-compact-cancel-v5">
 </head>
 <body>
 <header class="topbar" id="topbar">
@@ -4167,7 +4167,7 @@ html body #planBox .sdone .pstatus{
         var round=completed+1,nextDate=schedule(L)[completed].due;
         footer.appendChild(el('span','nhi-review-round nhi-review-round-'+round,String(round)));
         var time=el('time',null,vn(nextDate,true));time.dateTime=nextDate;footer.appendChild(time);
-        var description=(completed?STEP[completed]:'Học mới')+' · lượt '+round+'/5 · '+vn(nextDate,true);
+        var description='Lượt '+round+'/5 · '+(completed?STEP[completed]:'Học mới')+' · '+vn(nextDate,true);
         footer.setAttribute('aria-label',description);
         footer.title=description;
         if(nextDate<today())footer.classList.add('late');

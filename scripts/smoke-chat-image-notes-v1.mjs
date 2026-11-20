@@ -56,17 +56,23 @@ try{
    const picture=bounds('#planBox .card-illustration');
    const korean=bounds('#planBox .nhi-ko-line');
    const tools=bounds('#planBox .card-top .cicons');
-   const prev=bounds('#planBox .prate .nhi-prev-v3');
-   const hard=bounds('#planBox .prate .hard');
-   const next=bounds('#planBox .prate .nhi-next-v3');
+   const row=bounds('#planBox .pcard>.prate');
+   const prev=bounds('#planBox .pcard>.prate>.nhi-prev-v3');
+   const hard=bounds('#planBox .pcard>.prate>.hard');
+   const next=bounds('#planBox .pcard>.prate>.nhi-next-v3');
    const center=r=>r?(r.left+r.right)/2:null;
    return {photoLeft:picture?.left,koreanCenter:center(korean),toolsCenter:center(tools),
-     prevCenter:center(prev),hardCenter:center(hard),nextCenter:center(next)};
+     rowLeft:row?.left,rowRight:row?.right,rowCenter:center(row),
+     prevCenter:center(prev),hardCenter:center(hard),nextCenter:center(next),
+     hardPosition:hard?getComputedStyle(document.querySelector('#planBox .pcard>.prate>.hard')).position:null};
  });
  console.log('IMAGE_LEFT_CONTROLS',JSON.stringify(placement));
- assert([placement.toolsCenter,placement.prevCenter,placement.hardCenter,placement.nextCenter]
-   .every(x=>x<placement.photoLeft&&Math.abs(x-placement.koreanCenter)<135),
-   'Image mode must keep actions in the centered left half: '+JSON.stringify(placement));
+ assert(placement.rowRight<=placement.photoLeft+12 &&
+   Math.abs(placement.rowCenter-placement.koreanCenter)<35 &&
+   Math.abs(placement.toolsCenter-placement.koreanCenter)<35 &&
+   Math.abs(placement.hardCenter-placement.rowCenter)<55 &&
+   placement.prevCenter<placement.hardCenter&&placement.hardCenter<placement.nextCenter,
+   'Image mode must center controls within its left half: '+JSON.stringify(placement));
  const before=await page.$eval('#planBox .pfront',e=>getComputedStyle(e).gridTemplateColumns);
  async function drag(selector,dx,dy,id){
    await page.$eval(selector,(e,dx,dy,id)=>{
