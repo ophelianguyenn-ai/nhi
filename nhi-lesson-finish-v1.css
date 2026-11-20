@@ -1,6 +1,6 @@
 /* Completion audio is active only at the end of a lesson.
    One kawaii speaker, illustrated in SVG, without an audio-player strip. */
-html body #planBox .sdone .nhi-victory-speaker{
+html body:has(#planBox .sdone) > .nhi-victory-speaker{
  position:fixed!important;
  top:max(68px,calc(env(safe-area-inset-top,0px) + 66px))!important;
  right:max(14px,env(safe-area-inset-right,0px))!important;
@@ -15,31 +15,31 @@ html body #planBox .sdone .nhi-victory-speaker{
  cursor:pointer!important;transform:rotate(-5deg);
  transition:transform .2s ease,box-shadow .2s ease!important;
 }
-html body #planBox .sdone .nhi-victory-speaker:hover{
+html body:has(#planBox .sdone) > .nhi-victory-speaker:hover{
  transform:rotate(3deg) scale(1.07)!important;
  box-shadow:0 0 0 2px #f9a8d3,0 7px 0 #eba4c7,0 14px 21px #bc709444!important;
 }
-html body #planBox .sdone .nhi-victory-speaker:active{
+html body:has(#planBox .sdone) > .nhi-victory-speaker:active{
  transform:rotate(0deg) translateY(3px) scale(.96)!important;
  box-shadow:0 0 0 2px #f9a8d3,0 2px 0 #eba4c7,0 6px 12px #bc709422!important;
 }
-html body #planBox .sdone .nhi-victory-speaker:focus-visible{
+html body:has(#planBox .sdone) > .nhi-victory-speaker:focus-visible{
  outline:3px solid #3287c3!important;outline-offset:6px!important;
 }
-html body #planBox .sdone .nhi-victory-speaker .nhi-cute-speaker-art{
+html body:has(#planBox .sdone) > .nhi-victory-speaker .nhi-cute-speaker-art{
  width:54px!important;height:54px!important;display:block!important;overflow:visible!important;
  filter:drop-shadow(0 2px 1px #ffffff99);
 }
-html body #planBox .sdone .nhi-victory-speaker[data-playing="true"]{
+html body:has(#planBox .sdone) > .nhi-victory-speaker[data-playing="true"]{
  background:linear-gradient(150deg,#fdf4ff,#ffd5f1 60%,#bde7fc)!important;
 }
-html body #planBox .sdone .nhi-victory-speaker .nhi-speaker-waves{
+html body:has(#planBox .sdone) > .nhi-victory-speaker .nhi-speaker-waves{
  opacity:.24;transform-origin:48px 36px;transition:opacity .18s ease;
 }
-html body #planBox .sdone .nhi-victory-speaker[data-playing="true"] .nhi-speaker-waves{
+html body:has(#planBox .sdone) > .nhi-victory-speaker[data-playing="true"] .nhi-speaker-waves{
  opacity:1;animation:nhi-cartoon-sound .85s ease-in-out infinite alternate;
 }
-html body #planBox .sdone .nhi-victory-speaker .nhi-speaker-heart{
+html body:has(#planBox .sdone) > .nhi-victory-speaker .nhi-speaker-heart{
  transform-origin:center;animation:nhi-cartoon-heart 2.8s ease-in-out infinite;
 }
 @keyframes nhi-cartoon-sound{
@@ -51,7 +51,7 @@ html body #planBox .sdone .nhi-victory-speaker .nhi-speaker-heart{
  88%{transform:scale(1.12)}
 }
 @media(prefers-reduced-motion:reduce){
- html body #planBox .sdone .nhi-victory-speaker *{animation:none!important}
+ html body:has(#planBox .sdone) > .nhi-victory-speaker *{animation:none!important}
 }
 
 /* Always-visible action row; completion contents can scroll when short screens. */

@@ -659,7 +659,7 @@ button,input,select,textarea{font-family:var(--ui)}
 <link rel="stylesheet" href="nhi-cover-palette-v12.css?v=20261115-no-girl-frame-v13">
 <link rel="stylesheet" href="nhi-chat-image-notes-v1.css?v=20261117"><link rel="stylesheet" href="nhi-chat-note-card-v2.css?v=20261117"><link rel="stylesheet" href="nhi-original-gif-review-v1.css?v=20261117-r3">
 <link rel="stylesheet" href="nhi-corner-v2.css?v=20261117-ux2">
-<link rel="stylesheet" href="nhi-lesson-finish-v1.css?v=20261120-cute-speaker-review">
+
 <script>
 /* Pick exactly one of three cover colors when the document loads.
    Navigate/flip cards without changing it; no animation or interval. */
@@ -1265,6 +1265,7 @@ html body #planBox .sdone .pstatus{
 
 </style>
 <link rel="stylesheet" href="nhi-card-image-compact-v1.css?v=20261120-left-small-v1">
+<link rel="stylesheet" href="nhi-lesson-finish-v1.css?v=20261120-cute-speaker-review-r2">
 </head>
 <body>
 <header class="topbar" id="topbar">
@@ -4961,7 +4962,11 @@ html body #planBox .sdone .pstatus{
       if(animated)setTimeout(finish,430);else finish();
     }
     var victoryTrack=null;
-    function stopVictoryTrack(){if(victoryTrack){victoryTrack.pause();victoryTrack.currentTime=0;}}
+    function stopVictoryTrack(){
+      if(victoryTrack){victoryTrack.pause();victoryTrack.currentTime=0;}
+      var orphan=document.querySelector('body>.nhi-victory-speaker');
+      if(orphan)orphan.remove();
+    }
     function renderDone(v) {
       var s = sess, p = el('div', 'quiz sdone');
       setFocus(false);
@@ -5103,7 +5108,9 @@ html body #planBox .sdone .pstatus{
         victoryTrack.onended=reflectSpeaker;
       }
       reflectSpeaker();
-      p.appendChild(speaker);
+      var oldSpeaker=document.querySelector('body>.nhi-victory-speaker');
+      if(oldSpeaker)oldSpeaker.remove();
+      document.body.appendChild(speaker);
       if(undoHistory.length)p.appendChild(btn('pundo','↶ Hoàn tác',undoDelete,'Khôi phục thẻ vừa xóa (Ctrl+Z)'));
       if (s.kind === 'lesson' && s.L && !s.recorded) {
         var pendingRound = current(s.L);
