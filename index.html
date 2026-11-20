@@ -1264,8 +1264,8 @@ html body #planBox .sdone .pstatus{
 }
 
 </style>
-<link rel="stylesheet" href="nhi-card-image-compact-v1.css?v=20261120-half-center-resize-v2">
-<link rel="stylesheet" href="nhi-lesson-finish-v1.css?v=20261120-small-speaker-large-cat-v3">
+<link rel="stylesheet" href="nhi-card-image-compact-v1.css?v=20261120-left-tools-tall-photo-v3">
+<link rel="stylesheet" href="nhi-lesson-finish-v1.css?v=20261120-seamless-right-v4">
 </head>
 <body>
 <header class="topbar" id="topbar">
@@ -3824,6 +3824,21 @@ html body #planBox .sdone .pstatus{
     }
     function current(L) { var s = schedule(L); for (var i = 0; i < s.length; i++) if (s[i].st !== 'done') return s[i]; return null; }
     function doneSteps(L) { return Math.min(OFFSETS.length, (val('done', L.id) || []).length); }
+    function markLessonNotStudied(L){
+      if(!L)return;
+      var before=(val('done',L.id)||[]).slice();
+      if(!before.length){toast('Bài này vẫn chưa được tính là đã học.');return;}
+      var undone=before.length-1,previous=before.slice(0,-1);
+      put('done',L.id,previous);
+      delete resume[L.id];delete resumeFull[L.id];save();
+      if(sess&&sess.L&&sess.L.id===L.id){
+        stopVictoryTrack();sess=null;saveSess();
+      }
+      render();
+      toast('Đã trở lại mốc '+STEP[undone]+'; giữ nguyên '+previous.length+' lượt trước.',function(){
+        put('done',L.id,before);render();
+      });
+    }
     function grouped(ids) {
       var out = { w: {}, s: {} };
       ids.forEach(function (id) { if (!alive(id)) return; var it = ITEMS[id]; (out[it.type][it.topic] = out[it.type][it.topic] || []).push(it); });
@@ -4147,20 +4162,15 @@ html body #planBox .sdone .pstatus{
         footer.title='Đã hoàn thành cả 5 lượt học và ôn';
         footer.classList.add('completed');
       }else{
-        var nextDate,round=completed+1,isProjected=completed===0;
-        if(isProjected){
-          // Keep the true SRS schedule unchanged; no fictitious completed first round.
-          var projectedBase=L.plan>today()?L.plan:today();
-          nextDate=addDays(projectedBase,OFFSETS[1]);
-          round=2;
-        }else nextDate=schedule(L)[completed].due;
-        // Color carries the round visually; full review information stays accessible.
+        // Show the NEXT REQUIRED stage, not a hypothetical later stage.
+        // A rollback from Ôn 2 returns to Ôn 2; no completions returns to Học mới.
+        var round=completed+1,nextDate=schedule(L)[completed].due;
         footer.appendChild(el('span','nhi-review-round nhi-review-round-'+round,String(round)));
         var time=el('time',null,vn(nextDate,true));time.dateTime=nextDate;footer.appendChild(time);
-        var description='Lượt '+round+'/5'+(isProjected?' dự kiến':'')+' · ngày ôn '+vn(nextDate,true);
+        var description=(completed?STEP[completed]:'Học mới')+' · lượt '+round+'/5 · '+vn(nextDate,true);
         footer.setAttribute('aria-label',description);
         footer.title=description;
-        if(!isProjected&&nextDate<today())footer.classList.add('late');
+        if(nextDate<today())footer.classList.add('late');
       }
       p.appendChild(footer);
       return p;
@@ -4497,6 +4507,12 @@ html body #planBox .sdone .pstatus{
       if(notDue&&!alreadyStudied&&!rs.length&&!hasPending){launch.disabled=true;launch.title='Bài mới sẽ mở học vào đúng ngày đến hạn';}
       row2.appendChild(launch);
       row2.appendChild(lbtn('ghost', 'edit', '⚙ Cài đặt bài', function () { openLessonSettings(L); }));
+      if(doneSteps(L)>0){
+        var lastStage=STEP[doneSteps(L)-1];
+        row2.appendChild(btn('ghost nhi-mark-unlearned','↶ Chưa học bài này',function(){
+          markLessonNotStudied(L);
+        },'Hoàn tác lượt '+lastStage+' gần nhất; giữ các lượt đã học trước đó'));
+      }
       var hd2 = hardIds(L.ids);
       if (hd2.length) row2.appendChild(lbtn('ghost', 'flip', 'Ôn lại thẻ khó (' + hd2.length + ')', function () { start('hard', hd2, L.title + ' · thẻ khó', L); }));
       var enids=L.ids.filter(function(id){return alive(id)&&val('enHard',id);});if(enids.length)row2.appendChild(btn('ghost','Ôn chưa nhớ tiếng Anh ('+enids.length+')',function(){start('english',enids,L.title+' · chưa nhớ tiếng Anh',L);}));
@@ -5024,7 +5040,7 @@ html body #planBox .sdone .pstatus{
             var off=(y*w+x)*4;
             return [src[off],src[off+1],src[off+2]];
           }
-          var corner=pixel(0,0),color='rgb('+corner.join(',')+')';
+          var corner=pixel(0,0),rightFlat=pixel(w-1,0),color='rgb('+corner.join(',')+')';
           document.documentElement.style.setProperty('--nhi-victory-bg',color);
           document.body.style.setProperty('--nhi-victory-bg',color);
           var repaintId=0,watcher=null;
@@ -5062,6 +5078,16 @@ html body #planBox .sdone .pstatus{
                 }
                 dest[di]=src[srcIndex];dest[di+1]=src[srcIndex+1];
                 dest[di+2]=src[srcIndex+2];dest[di+3]=255;
+                if(x>=r+4){
+                  // Fade the GIF's rightmost row toward a single pastel edge
+                  // color: do not extend narrow horizontal bands across the
+                  // entire RIGHT SIDE of the finish-screen background.
+                  var t=Math.min(1,(x-r-4)/75);
+                  t=t*t*(3-2*t);
+                  dest[di]=Math.round(dest[di]*(1-t)+rightFlat[0]*t);
+                  dest[di+1]=Math.round(dest[di+1]*(1-t)+rightFlat[1]*t);
+                  dest[di+2]=Math.round(dest[di+2]*(1-t)+rightFlat[2]*t);
+                }
               }
             }
             bc.putImageData(out,0,0);
@@ -5192,6 +5218,15 @@ html body #planBox .sdone .pstatus{
       row.appendChild(hardReview);
       row.appendChild(btn('primary nhi-done-confirm','✓ Xong',confirmCompletion));
       p.appendChild(row);
+      if(s.recordOnDone && !s.recorded){
+        p.appendChild(btn('ghost nhi-not-studied-exit','↶ Chưa học bài này',function(){
+          // The pending round was never counted. Cancel without undoing past
+          // completed reviews and restart this same stage next time.
+          if(s.L){delete resume[s.L.id];delete resumeFull[s.L.id];save();}
+          stopVictoryTrack();sess=null;saveSess();render();
+          toast('Chưa tính lượt học này; vẫn ở '+(s.L&&current(s.L)?STEP[current(s.L).step]:'mốc học hiện tại')+'.');
+        },'Không ghi nhận lượt hiện tại; trở lại mốc học đang chờ'));
+      }
       var enids=(s.L?s.L.ids:s.queue).filter(function(id,i,a){return a.indexOf(id)===i&&alive(id)&&val('enHard',id);});
       if(enids.length)p.appendChild(btn('ghost nhi-victory-english','Ôn chưa nhớ tiếng Anh ('+enids.length+')',function(){
         start('english',enids,s.title,s.L,{recordOnDone:!!s.recordOnDone});

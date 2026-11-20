@@ -219,3 +219,91 @@ html body #planBox .pcard .pfront .card-illustration .nhi-image-adjust{
   width:min(100%,var(--nhi-image-width,220px))!important;
  }
 }
+
+
+/* Photo layout v3: taller flashcard, left-centered controls and tools.
+   Image stays in the right lane, without moving other card contents. */
+html body #planBox .pcard:has(.pfront.nhi-with-image):not(:has(.nhi-editor-window-v5,.nhi-picture-picker)){
+  height:clamp(570px,78dvh,830px)!important;
+  min-height:min(570px,calc(100dvh - 110px))!important;
+  max-height:none!important;
+  overflow:hidden!important;
+}
+html body #planBox .pcard:has(.pfront.nhi-with-image)>.pfront{
+  flex:1 1 auto!important;
+  min-height:0!important;
+  height:auto!important;
+  overflow-y:auto!important;
+  overflow-x:hidden!important;
+}
+/* The left content lane is shared by the text, top image/AI tools,
+   and the previous / Khó / next rating controls. */
+html body #planBox .pcard:has(.pfront.nhi-with-image){
+  --nhi-left-controls-width:calc(100% - min(56%,var(--nhi-image-width,220px)) - clamp(12px,2.2vw,22px));
+  --nhi-left-controls-inset:clamp(7px,1.6vw,14px);
+}
+html body #planBox .pcard:has(.pfront.nhi-with-image)>.card-top{
+  display:flex!important;
+  flex-direction:column!important;
+  justify-content:flex-start!important;
+  align-items:flex-start!important;
+  gap:6px!important;
+}
+html body #planBox .pcard:has(.pfront.nhi-with-image)>.card-top>.kind{
+  display:block!important;
+  width:var(--nhi-left-controls-width)!important;
+  max-width:100%!important;
+  padding-left:var(--nhi-left-controls-inset)!important;
+  box-sizing:border-box!important;
+  margin:0!important;
+  text-align:center!important;
+}
+html body #planBox .pcard:has(.pfront.nhi-with-image)>.card-top>.cicons{
+  width:var(--nhi-left-controls-width)!important;
+  max-width:100%!important;
+  padding-left:var(--nhi-left-controls-inset)!important;
+  box-sizing:border-box!important;
+  display:flex!important;
+  justify-content:center!important;
+  align-items:center!important;
+  flex-wrap:wrap!important;
+  gap:clamp(3px,.7vw,6px)!important;
+  margin:0!important;
+}
+html body #planBox .pcard:has(.pfront.nhi-with-image)>.cmeta{
+  width:var(--nhi-left-controls-width)!important;
+  margin:0!important;
+  padding-left:var(--nhi-left-controls-inset)!important;
+  box-sizing:border-box!important;
+  justify-content:center!important;
+}
+html body #planBox .pcard:has(.pfront.nhi-with-image)>.prate{
+  box-sizing:border-box!important;
+  display:grid!important;
+  grid-template-columns:repeat(3,minmax(0,1fr))!important;
+  gap:clamp(3px,.7vw,6px)!important;
+  width:var(--nhi-left-controls-width)!important;
+  max-width:100%!important;
+  margin:4px auto 4px var(--nhi-left-controls-inset)!important;
+  align-self:flex-start!important;
+  justify-items:stretch!important;
+}
+html body #planBox .pcard:has(.pfront.nhi-with-image)>.prate .parrow,
+html body #planBox .pcard:has(.pfront.nhi-with-image)>.prate .hard{
+  width:100%!important;min-width:0!important;
+  min-height:43px!important;
+  height:45px!important;
+  padding:3px!important;
+  box-sizing:border-box!important;
+  font-size:clamp(12px,1.7vw,15px)!important;
+}
+html body #planBox .pcard:has(.pfront.nhi-with-image)>.prate .pundo{
+  grid-column:1/-1!important;
+  justify-self:center!important;
+}
+@media(max-width:359px){
+  /* On very narrow screens the photo stacks below all study controls. */
+  html body #planBox .pcard:has(.pfront.nhi-with-image){
+    --nhi-left-controls-width:calc(100% - 18px);
+  }
+}
