@@ -21,7 +21,7 @@ try{
   localStorage.setItem('viko-plan-v1',JSON.stringify(store));
  },lesson.id,lesson.plan);
  await page.goto('http://127.0.0.1:8765/#/bai/'+lesson.id,{waitUntil:'domcontentloaded'});
- await page.waitForSelector('#planBox .ppage .nhi-review-stage-row .nhi-mark-unlearned',{timeout:25000});
+ await page.waitForSelector('#planBox .ppage .nhi-lesson-settings-group .nhi-mark-unlearned',{timeout:25000});
  const context=await page.evaluate(()=>{
   const b=document.querySelector('#planBox .nhi-mark-unlearned');
   const row=b.closest('.nhi-review-stage-row');
@@ -39,10 +39,10 @@ try{
  const section=await page.$('#planBox .ppage>.quiz');
  if(!section)throw Error('Review section missing');
  await section.screenshot({path:output+'/chua-hoc-bai-nay-vi-tri-desktop.png'});
- await page.$eval('#planBox .nhi-review-stage-row',el=>el.scrollIntoView({block:'center'}));
+ await page.$eval('#planBox .nhi-lesson-settings-group',el=>el.scrollIntoView({block:'center'}));
  await page.screenshot({path:output+'/trang-bai-hoc-desktop.png'});
  await page.setViewport({width:390,height:844,deviceScaleFactor:1});
- await page.$eval('#planBox .nhi-review-stage-row',el=>el.scrollIntoView({block:'center'}));
+ await page.$eval('#planBox .nhi-lesson-settings-group',el=>el.scrollIntoView({block:'center'}));
  await page.screenshot({path:output+'/chua-hoc-bai-nay-mobile.png'});
  fs.writeFileSync(output+'/location.json',JSON.stringify({lesson:lesson.id,...context},null,2));
 }finally{await browser.close();}

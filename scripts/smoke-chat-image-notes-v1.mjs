@@ -96,12 +96,12 @@ try{
      hardPosition:hard?getComputedStyle(document.querySelector('#planBox .pcard>.prate>.hard')).position:null};
  });
  console.log('IMAGE_LEFT_CONTROLS',JSON.stringify(placement));
- assert(placement.rowRight<=placement.photoLeft+12 &&
-   Math.abs(placement.rowCenter-placement.koreanCenter)<35 &&
-   Math.abs(placement.toolsCenter-placement.koreanCenter)<35 &&
-   Math.abs(placement.hardCenter-placement.rowCenter)<55 &&
+ assert(placement.rowRight<=placement.photoLeft-100 &&
+   placement.rowCenter<placement.koreanCenter-100 &&
+   placement.hardCenter===placement.hardCenter &&
+   Math.abs(placement.hardCenter-placement.rowCenter)<10 &&
    placement.prevCenter<placement.hardCenter&&placement.hardCenter<placement.nextCenter,
-   'Image mode must center controls within its left half: '+JSON.stringify(placement));
+   'Photo-side controls must visibly shift into left half with unchanged sizes: '+JSON.stringify(placement));
  const before=await page.$eval('#planBox .pfront',e=>getComputedStyle(e).gridTemplateColumns);
  async function drag(selector,dx,dy,id){
    await page.$eval(selector,(e,dx,dy,id)=>{
@@ -140,18 +140,37 @@ try{
  // Dragging inside the image moves it without creating any sliders.
  await drag('#planBox .card-illustration .nhi-image-stage img',25,15,64);
  const offsets=await page.evaluate(id=>JSON.parse(localStorage.getItem('viko-plan-v1')).img?.[id]?.v,cardID);
+ const priorFrame=await page.$eval('#planBox .card-illustration .nhi-image-stage',e=>({
+   top:e.getBoundingClientRect().top,height:e.getBoundingClientRect().height,
+   imageTop:e.querySelector('img').getBoundingClientRect().top,
+   parentOverflow:getComputedStyle(e.closest('.pfront')).overflowY,
+   figureTransform:getComputedStyle(e.closest('figure')).transform
+ }));
  console.log('IMAGE_DIRECT_HANDLES',JSON.stringify({
    width:offsets?.width,height:offsets?.height,x:offsets?.offsetX,y:offsets?.offsetY,
    ratioBefore,ratioAfter
  }));
  assert(offsets&&offsets.offsetX>=20,
    'Image X position was not saved by dragging: '+JSON.stringify(offsets));
- await drag('#planBox .nhi-image-move-y',0,34,65);
+ await drag('#planBox .nhi-image-move-y',0,-92,65);
  const moved=await page.evaluate(id=>JSON.parse(localStorage.getItem('viko-plan-v1')).img?.[id]?.v,cardID);
- assert(moved&&moved.offsetY>=offsets.offsetY+30 &&
+ const afterFrame=await page.$eval('#planBox .card-illustration .nhi-image-stage',e=>({
+   top:e.getBoundingClientRect().top,height:e.getBoundingClientRect().height,
+   imageTop:e.querySelector('img').getBoundingClientRect().top,
+   parentOverflow:getComputedStyle(e.closest('.pfront')).overflowY,
+   figureTransform:getComputedStyle(e.closest('figure')).transform
+ }));
+ assert(moved&&moved.offsetY<=offsets.offsetY-90 &&
    moved.width===offsets.width && moved.height===offsets.height,
-   'Up/down photo grip must move the picture without resizing it: '+JSON.stringify({offsets,moved}));
- console.log('PHOTO_MOVED_VERTICALLY',JSON.stringify({from:offsets.offsetY,to:moved.offsetY}));
+   'Up/down grip should move the whole frame without resizing: '+JSON.stringify({offsets,moved}));
+ assert(Math.abs((afterFrame.top-priorFrame.top)-(moved.offsetY-offsets.offsetY))<3 &&
+   Math.abs((afterFrame.imageTop-priorFrame.imageTop)-(moved.offsetY-offsets.offsetY))<3 &&
+   afterFrame.parentOverflow==='visible' &&
+   Math.abs(afterFrame.height-priorFrame.height)<2,
+   'Frame must move with image, not clip image inside fixed viewport: '+JSON.stringify({priorFrame,afterFrame}));
+ console.log('PHOTO_FRAME_MOVES_INTACT',JSON.stringify({from:offsets.offsetY,to:moved.offsetY,before:priorFrame,after:afterFrame}));
+ assert(!(await page.$('#planBox .card-illustration figcaption')),
+   'No meaning or image-source caption may remain below an attached photo');
  const leftLayout=await page.evaluate(()=>{
    const korean=document.querySelector('#planBox .nhi-ko-line');
    const photo=document.querySelector('#planBox .card-illustration');
@@ -269,6 +288,21 @@ try{
    saved.offsetX===moved.offsetX&&saved.offsetY===moved.offsetY,
    'Resized image dimensions and vertical position did not survive reload: '+JSON.stringify({saved,moved}));
  assert(errors.length===0,'Page errors: '+errors.join('; '));
+ // On the same Korean word, pressing Khó twice must remove it from hard review.
+ await page.$eval('#planBox .pcard>.prate>.hard',e=>e.click());
+ await page.waitForFunction(id=>!!JSON.parse(localStorage.getItem('viko-plan-v1')).hard?.[id]?.v,{},cardID);
+ const activeHard=await page.evaluate(id=>{
+  const state=JSON.parse(localStorage.getItem('viko-plan-v1'));
+  return {hard:state.hard?.[id]?.v,rate:state.rate?.[id]?.v};
+ },cardID);
+ await page.$eval('#planBox .pcard>.prate>.hard',e=>e.click());
+ const offHard=await page.evaluate(id=>{
+  const state=JSON.parse(localStorage.getItem('viko-plan-v1'));
+  return {hard:state.hard?.[id]?.v,rate:state.rate?.[id]?.v};
+ },cardID);
+ assert(activeHard.hard&&!offHard.hard&&offHard.rate!=='hard',
+  'Second Khó click must remove the same word from difficult cards: '+JSON.stringify({activeHard,offHard}));
+ console.log('HARD_TWO_TAPS_TOGGLE',JSON.stringify({activeHard,offHard}));
  console.log('SELECTABLE CHAT AND NOTES UX PASS',JSON.stringify({note,grid:[before,after],height:afterCorner.height,voice:true,anchor}));
 }catch(err){
  console.error('ORIGINAL_SMOKE_ERROR',err&&err.stack||String(err));throw err;
