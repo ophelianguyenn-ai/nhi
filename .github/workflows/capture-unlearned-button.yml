@@ -1,0 +1,43 @@
+name: Screenshot Visible Unlearned Lesson Button
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'index.html'
+      - 'card-images-v11.js'
+      - 'nhi-card-image-compact-v1.css'
+      - 'scripts/capture-unlearned-button.mjs'
+      - '.github/workflows/capture-unlearned-button.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  screenshot:
+    runs-on: ubuntu-latest
+    timeout-minutes: 7
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install browser automation
+        run: npm install --no-save --no-package-lock puppeteer-core@24
+      - name: Start local site
+        run: |
+          python3 -m http.server 8765 --bind 127.0.0.1 >/tmp/nhi-button-http.log 2>&1 &
+          for i in $(seq 1 30); do
+            if curl -sf http://127.0.0.1:8765/index.html >/dev/null; then exit 0; fi
+            sleep 1
+          done
+          cat /tmp/nhi-button-http.log
+          exit 1
+      - name: Capture desktop and mobile lesson button
+        run: node scripts/capture-unlearned-button.mjs
+      - name: Upload screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: visible-chua-hoc-bai-nay
+          path: /tmp/nhi-button-screenshot/
+          if-no-files-found: ignore
+          retention-days: 7
