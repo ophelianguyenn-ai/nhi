@@ -232,7 +232,7 @@ try{
     const css=getComputedStyle(document.documentElement);
     return Array.from({length:22},(_,i)=>css.getPropertyValue('--nhi-pair-'+(i+1)).trim().toLowerCase());
   });
-  const approved=['#f48f92','#fb99cb','#fefb6a','#febd69','#a7f5ac','#70d4fc','#e1b5f4'];
+  const approved=['#f7a5a8','#fcadd5','#fefb6a','#febd69','#a7f5ac','#91e1fd','#e1b5f4'];
   assert(palette.slice(0,7).every((c,i)=>c===approved[i])&&palette.slice(7).every(c=>!c),
    'Only the seven approved reference colors may remain: '+JSON.stringify(palette));
   assert(x[1].viSelected===false&&x[1].koSelected===false&&x[1].background==='rgba(0, 0, 0, 0)',
@@ -430,6 +430,65 @@ try{
   ]),'Incorrect Vietnamese: Korean punctuation in chat note: '+JSON.stringify(result));
   return 'No trailing Vietnamese dot, Korean punctuation unchanged, no unpaired line';
  });
+ await check('AI chat can copy a paragraph and complete answer',async()=>{
+  await page.evaluate(()=>{
+    const log=document.querySelector('#aiLog'),msg=document.createElement('div');
+    msg.className='aimsg ai';msg.id='nhi-audit-copy-msg';
+    msg.textContent='Tôi đang học tiếng Hàn: 저는 한국어를 공부해요.\nTôi đi làm: 저는 출근해요.';
+    Object.defineProperty(navigator,'clipboard',{configurable:true,
+      value:{writeText:async text=>{window.__nhiCopied=String(text);}}});
+    log.appendChild(msg);
+  });
+  await page.waitForSelector('#nhi-audit-copy-msg .nhi-copy-chat-text',{timeout:6000});
+  await page.$eval('#nhi-audit-copy-msg .nhi-copy-chat-text',b=>b.click());
+  await page.waitForFunction(()=>typeof window.__nhiCopied==='string',{timeout:4000});
+  const single=await page.evaluate(()=>window.__nhiCopied);
+  assert(single.includes('Tôi đang học tiếng Hàn')&&!single.includes('Tôi đi làm'),
+   'Single paragraph should only copy the selected paragraph: '+single);
+  await page.$eval('#nhi-audit-copy-msg .nhi-copy-chat-all',b=>b.click());
+  await page.waitForFunction(()=>window.__nhiCopied?.includes('Tôi đi làm'),{timeout:4000});
+  const entire=await page.evaluate(()=>window.__nhiCopied);
+  assert(entire.includes('저는 한국어를 공부해요.')&&entire.includes('저는 출근해요.'),
+   'Copy whole answer omitted text: '+entire);
+  return 'Copy one paragraph or entire AI reply without affecting speech buttons';
+ });
+ await check('Hard-grade girl overlay does not shift language blocks',async()=>{
+  const result=await page.evaluate(()=>{
+    const c=document.querySelector('#planBox .pcard');
+    const initial=c?.querySelector('.pfront > .prompt,.pfront > .nhi-ko-line .answer');
+    if(!c||!initial)throw Error('No learning card or prompt');
+    const px=el=>{const r=el.getBoundingClientRect();return r.left+r.width/2;};
+    const before=px(initial),cardCenter=px(c);
+    window.NHI_HARD_MASCOT.show(c);
+    const after=px(initial),girl=c.querySelector('#nhi-hard-mascot');
+    const width=girl?.getBoundingClientRect().width||0;
+    const stage=c.querySelector('.pfront');
+    const centeredStage=px(stage);
+    window.NHI_HARD_MASCOT.clear();
+    return {before,after,cardCenter,centeredStage,width};
+  });
+  assert(Math.abs(result.after-result.before)<=1.5&&result.width>=60&&result.width<=137,
+   'Mascot must be smaller without moving card content: '+JSON.stringify(result));
+  assert(Math.abs(result.centeredStage-result.cardCenter)<=2,
+   'Text center must remain aligned to card: '+JSON.stringify(result));
+  return JSON.stringify(result);
+ });
+ await check('Hard cards return later without infinite repeats',async()=>{
+  const result=await page.evaluate(()=>{
+    const current=JSON.parse(localStorage.getItem('viko-plan-sess-v1')||'{}'),
+      id=current.queue?.[current.pos],before=current.queue?.length||0;
+    if(!id||!document.querySelector('#planBox .prate .hard'))throw Error('No hard-grade action');
+    document.querySelector('#planBox .prate .hard').click();
+    const next=JSON.parse(localStorage.getItem('viko-plan-sess-v1')||'{}');
+    const repeatPos=next.queue.findIndex((x,i)=>i>current.pos&&x===id);
+    return {before,after:next.queue?.length||0,id,repeatPos,currentPos:current.pos,
+      flag:next.hardSpaced?.[id],hardCount:next.stats?.hard};
+  });
+  assert(result.after===result.before+1&&result.flag===1&&
+   result.repeatPos>result.currentPos&&result.repeatPos<=result.currentPos+4,
+   'Hard card did not get a spaced repeat: '+JSON.stringify(result));
+  return JSON.stringify(result);
+ });
  for(const width of [320,390,768,1360]){
   await check('Responsive width '+width,async()=>{
    await page.setViewport({width,height:830});
@@ -454,6 +513,13 @@ try{
    const small=ids.filter(x=>x.ids?.length>=1&&x.ids?.length<=18).sort((a,b)=>a.ids.length-b.ids.length)[0];
    if(!small)throw Error('No short lesson for finish-screen regression');
    window.NHI_PLAN_V2.startLessonById(small.id);
+   window.__nhiMeowOnDone=0;
+   const originalMeow=window.NHI_VICTORY_CAT?.meow;
+   if(originalMeow)window.NHI_VICTORY_CAT.meow=function(){
+     window.__nhiMeowOnDone++;return originalMeow.apply(this,arguments);
+   };
+   const hardButton=document.querySelector('#planBox .prate .hard');
+   if(hardButton)hardButton.click();
    let stepped=0;
    while(stepped<250&&!document.querySelector('#planBox .sdone')){
     const next=document.querySelector('#planBox .prate .nhi-next-v3');
@@ -463,6 +529,12 @@ try{
    return {lesson:small.id,steps:stepped,completed:!!document.querySelector('#planBox .sdone')};
   });
   assert(finish.completed,'Unable to reach the completion screen: '+JSON.stringify(finish));
+  const completion=await page.evaluate(()=>({
+    meowCalls:window.__nhiMeowOnDone||0,
+    reviewBtn:document.querySelector('#planBox .sdone .nhi-review-hard-button')?.textContent||''
+  }));
+  assert(completion.meowCalls===1&&completion.reviewBtn.includes('Ôn lại thẻ khó'),
+   'Completion must auto-trigger cat sound once and offer review of hard cards: '+JSON.stringify(completion));
   await page.waitForSelector('#planBox .sdone .nhi-original-gif',{timeout:9000});
   await page.waitForFunction(()=>document.querySelector('#planBox .sdone .nhi-original-gif')?.complete,
    {timeout:8000});
