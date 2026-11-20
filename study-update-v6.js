@@ -150,54 +150,10 @@ function editor(form,fields,saved,options={}){
 let audioContext;
 function feedback(kind){try{audioContext=audioContext||new(window.AudioContext||window.webkitAudioContext)();audioContext.resume().catch(()=>{});const now=audioContext.currentTime;(kind==='hard'?[330,261,196]:[392,440]).forEach((f,i)=>{const o=audioContext.createOscillator(),g=audioContext.createGain(),t=now+i*.13;o.type='sine';o.frequency.setValueAtTime(f,t);g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(.07,t+.015);g.gain.exponentialRampToValueAtTime(.001,t+.2);o.connect(g);g.connect(audioContext.destination);o.start(t);o.stop(t+.22);});}catch(e){}}
 function initReader(){
- const log=document.getElementById('aiLog');if(!log)return;
- const language=make('select'),speed=make('select');
- language.id='nhiReaderLanguage';
- language.setAttribute('aria-label','Ngôn ngữ đọc AI');
- for(const [value,label] of [['auto','Tự nhận diện'],['vi-VN','Tiếng Việt'],['ko-KR','Tiếng Hàn'],['en-US','Tiếng Anh']]){
-   const o=make('option',null,label);o.value=value;language.append(o);
- }
- speed.setAttribute('aria-label','Tốc độ đọc AI');
- for(const r of [.5,.75,1,1.25,1.5,2]){const o=make('option',null,r+'×');o.value=r;speed.append(o);}
- const languageRow=make('label','flabel nhi-ai-reader-setting');
- languageRow.append(make('span',null,'Ngôn ngữ đọc (tự nhận diện)'));
- languageRow.append(language);
- document.getElementById('aiSetup')?.append(languageRow);
- const speedRow=make('label','nhi-ai-reader-speed');
- speedRow.title='Điều chỉnh tốc độ nghe';speedRow.append(make('span',null,'Tốc độ'));
- speedRow.append(speed);window.NHI_READER_SPEED=speedRow;
- const readerPrefsKey='nhi-ai-reader-prefs-v2';
- try{
-  const prefs=JSON.parse(localStorage.getItem(readerPrefsKey)||'{}');
-  if(prefs.language && [...language.options].some(o=>o.value===prefs.language))language.value=prefs.language;
-  if(prefs.speed && [...speed.options].some(o=>o.value===String(prefs.speed)))speed.value=String(prefs.speed);
- }catch(_e){}
- function saveReaderPrefs(){try{localStorage.setItem(readerPrefsKey,JSON.stringify({language:language.value,speed:speed.value}));}catch(_e){}}
- language.addEventListener('change',saveReaderPrefs);speed.addEventListener('change',saveReaderPrefs);
- let token=0,active=null;
- function stop(){token++;window.NHI_SPEECH.stop();if(active){active.setAttribute('aria-pressed','false');active=null;}}
- function pieces(text){
-  // Strip explanatory text in brackets before language detection, otherwise a
-  // Korean fragment and Vietnamese meaning could be spoken independently.
-  const clean=window.NHI_SPEECH?.clean||((s)=>String(s));
-  const lines=clean(text).split(/\n+/).filter(x=>x.trim()),out=[];for(const line of lines){const chunks=line.match(/[가-힣]+(?:[ \t]+[가-힣]+)*|[^가-힣]+/g)||[line];for(const t of chunks){if(!t.trim())continue;out.push({text:t,lang:language.value!=='auto'?language.value:/[가-힣]/.test(t)?'ko-KR':/[àáạảãăâđêôơưếệềễểấậầẩẫớờởỡợứừửữự]/i.test(t)?'vi-VN':'en-US'});}}return out;}
- function readParagraph(p){
-  // Double-click/double-tap reads ONLY the chosen paragraph, not the whole answer.
-  stop();
-  if(!window.NHI_SPEECH?.speak)return;
-  const text=p.querySelector('.nhi-ai-paragraph-text')?.textContent||'';
-  const queue=pieces(text),mine=token;
-  if(!queue.length)return;
-  p.dataset.reading='true';
-  function next(){
-   if(token!==mine){delete p.dataset.reading;return;}
-   const item=queue.shift();
-   if(!item){delete p.dataset.reading;return;}
-   window.NHI_SPEECH.speak(item.text,item.lang,next,Number(speed.value));
-  }
-  next();
- }
- let tapAt=0,tapTarget=null;
+ // Keep readable, selectable AI paragraphs and their optional note shortcut.
+ // No voice activation on a double click, double tap, or keyboard press.
+ const log=document.getElementById('aiLog');
+ if(!log)return;
  function mount(){
   for(const msg of log.querySelectorAll('.aimsg.ai:not(.wait)')){
    if(msg.dataset.readerMounted)continue;
@@ -210,31 +166,7 @@ function initReader(){
     const text=make('span','nhi-ai-paragraph-text');
     text.innerHTML=paragraph;
     if(!text.textContent.trim())continue;
-    const p=make('div','nhi-ai-paragraph nhi-ai-draggable-note');
-    p.draggable=true;
-    p.title='Nhấn đúp vào đoạn để nghe · kéo vào thẻ để lưu ghi chú';
-    p.addEventListener('dblclick',e=>{
-      if(e.target.closest('button,a'))return;
-      e.preventDefault();e.stopPropagation();
-      // A mobile browser can dispatch dblclick after the touch handler.
-      if(p.dataset.lastTouchRead&&Date.now()-Number(p.dataset.lastTouchRead)<600)return;
-      readParagraph(p);
-    });
-    p.addEventListener('touchend',e=>{
-      if(e.target.closest('button,a'))return;
-      const now=Date.now();
-      if(tapTarget===p&&now-tapAt<380){
-        tapAt=0;tapTarget=null;
-        p.dataset.lastTouchRead=String(now);
-        readParagraph(p);
-      }else{tapAt=now;tapTarget=p;}
-    },{passive:true});
-    text.tabIndex=0;
-    text.setAttribute('role','button');
-    text.setAttribute('aria-label','Nhấn Enter hoặc nhấn đúp để nghe đoạn này');
-    text.addEventListener('keydown',e=>{
-      if(e.key==='Enter'||e.key===' '){e.preventDefault();readParagraph(p);}
-    });
+    const p=make('div','nhi-ai-paragraph');
     const add=button('＋',()=>{
       const pair=p.dataset.v2Vi&&p.dataset.v2Ko?p.dataset.v2Vi+': '+p.dataset.v2Ko:text.textContent;
       const saved=window.NLC_NOTES?.add(pair);
@@ -243,13 +175,14 @@ function initReader(){
     add.classList.add('nhi-add-to-note');
     add.title='Thêm ví dụ này vào ghi chú trên thẻ đang học';
     add.setAttribute('aria-label','Thêm câu này vào ghi chú thẻ');
-    p.append(text,add);msg.append(p);
+    p.append(text,add);
+    msg.append(p);
    }
    for(const link of links)msg.append(link);
   }
  }
-
- new MutationObserver(mount).observe(log,{childList:true});mount();document.getElementById('aiClose').addEventListener('click',stop);document.getElementById('aiNewBtn').addEventListener('click',stop);
+ new MutationObserver(mount).observe(log,{childList:true});
+ mount();
 }
 function init(){
  initReader();

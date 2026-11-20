@@ -1,40 +1,75 @@
-/* The hard-card companion floats outside the card's layout. */
-html body #nhi-hard-mascot {
-  position:fixed!important;
-  left:max(12px,env(safe-area-inset-left,0px))!important;
-  right:auto!important;
-  top:auto!important;
-  bottom:max(84px,env(safe-area-inset-bottom,0px))!important;
-  transform:none!important;
-  width:min(var(--nhi-companion-size,202px),33vw)!important;
-  max-height:58vh!important;
-  z-index:95!important;
-  pointer-events:none!important;
+/* One unobtrusive speaker for voluntary completion music; never autoplay. */
+html body #planBox .sdone .nhi-victory-speaker{
+ position:fixed!important;
+ top:max(72px,calc(env(safe-area-inset-top,0px) + 70px))!important;
+ right:max(16px,env(safe-area-inset-right,0px))!important;
+ z-index:105!important;
+ display:grid!important;place-items:center!important;
+ width:44px!important;height:44px!important;min-width:44px!important;min-height:44px!important;
+ padding:0!important;margin:0!important;
+ background:var(--surface)!important;color:var(--ink)!important;
+ border:1px solid var(--line)!important;border-radius:50%!important;
+ box-shadow:0 3px 13px #0002!important;cursor:pointer;
+ font-size:23px!important;line-height:1!important;
 }
-html body #nhi-hard-mascot img { pointer-events:auto!important; cursor:nwse-resize!important; }
-@media(max-width:700px){
-  html body #nhi-hard-mascot {
-    left:8px!important;
-    bottom:max(72px,env(safe-area-inset-bottom,0px))!important;
-    width:min(var(--nhi-companion-size,202px),38vw)!important;
-  }
+html body #planBox .sdone .nhi-victory-speaker[aria-pressed="true"]{
+ background:var(--accent-soft)!important;border-color:var(--accent-t)!important;
+}
+html body #planBox .sdone .nhi-victory-speaker:focus-visible{
+ outline:3px solid var(--accent-t)!important;outline-offset:3px!important;
 }
 
-/* Copy the full bubble with one tap, while keeping normal text selection. */
-#aiPanel .aimsg { position:relative; padding-right:46px; user-select:text!important; -webkit-user-select:text!important; }
-#aiPanel .aimsg .nhi-copy-chat {
-  position:absolute;right:7px;top:7px;display:grid;place-items:center;
-  width:30px;height:30px;padding:0;border:1px solid currentColor;border-radius:8px;
-  background:var(--surface);color:var(--ink);font-size:15px;cursor:pointer;
-  user-select:none;-webkit-user-select:none;
+/* "Khó": the mascot is an absolute overlay INSIDE the white card.
+   No side padding or grid columns are changed when she appears. */
+html body #planBox .pcard > #nhi-hard-mascot{
+ position:absolute!important;
+ left:var(--nhi-companion-x,24px)!important;
+ top:var(--nhi-companion-y,82px)!important;
+ right:auto!important;bottom:auto!important;transform:none!important;
+ width:var(--nhi-companion-size,232px)!important;
+ max-width:calc(100% - 36px)!important;max-height:none!important;
+ height:auto!important;
+ z-index:26!important;
+ display:flex!important;flex-direction:column!important;align-items:center!important;
+ gap:3px!important;padding:0!important;margin:0!important;
+ border:0!important;box-shadow:none!important;background:transparent!important;
+ pointer-events:none!important;
+ animation:nhi-mascot-enter .4s ease both!important;
 }
-#aiPanel .aimsg .nhi-copy-chat:focus-visible{outline:2px solid var(--accent-t);outline-offset:2px}
-#aiPanel .aimsg .nhi-copy-chat:hover{background:var(--accent-soft)}
-#aiPanel .aimsg .nhi-copy-chat::before{content:'⧉'}
-#aiPanel .aimsg .nhi-copy-chat.copied::before{content:'✓'}
+html body #planBox .pcard > #nhi-hard-mascot img{
+ display:block!important;width:100%!important;max-width:100%!important;height:auto!important;
+ border:0!important;background:transparent!important;object-fit:contain!important;
+ pointer-events:auto!important;touch-action:none!important;cursor:nwse-resize!important;
+ user-select:none!important;-webkit-user-select:none!important;
+}
+html body #planBox .pcard > #nhi-hard-mascot .nhi-hard-caption{
+ margin:0!important;padding:2px 4px!important;
+ background:transparent!important;border:0!important;box-shadow:none!important;
+ max-width:100%!important;text-align:center!important;
+ font:700 clamp(11px,1.2vw,14px)/1.3 var(--ui,system-ui)!important;
+ text-shadow:0 1px 2px var(--surface)!important;
+ pointer-events:none!important;
+}
+html body #planBox .pcard > #nhi-hard-mascot.nhi-mascot-leave{
+ animation:nhi-mascot-exit .5s ease forwards!important;
+}
+@media(max-width:600px){
+ html body #planBox .pcard > #nhi-hard-mascot .nhi-hard-caption{
+  font-size:11px!important;line-height:1.2!important;
+ }
+}
 
-#planBox .sdone audio {display:none;}
-html body #planBox .sdone .nhi-victory-audio {
-  position:absolute;top:8px;right:8px;z-index:3;
-  min-height:34px;padding:5px 9px;font-size:13px;
+/* AI messages are normal selectable text, without a copy affordance. */
+#aiPanel .aimsg{
+ position:relative;
+ padding-right:14px!important;
+ user-select:text!important;-webkit-user-select:text!important;
+ -webkit-touch-callout:default!important;
+}
+#aiPanel .nhi-ai-paragraph,#aiPanel .nhi-ai-paragraph-text{
+ user-select:text!important;-webkit-user-select:text!important;
+ cursor:text!important;-webkit-touch-callout:default!important;
+}
+#aiPanel .nhi-ai-paragraph .nhi-add-to-note{
+ cursor:pointer!important;user-select:none!important;-webkit-user-select:none!important;
 }

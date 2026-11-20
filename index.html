@@ -596,7 +596,7 @@ section:not([hidden]) > .quiz, section:not([hidden]) > #cardWrap, .list > .row:n
 }
 </style>
 
-<script src="nhi-chat-voice-v1.js?v=20261117"></script><script src="hanja-v9.js?v=12"></script><script src="hanja-extra-v12.js"></script><script src="card-images-v11.js"></script><script src="nhi-google-images-v1.js?v=20261114-study-v7"></script><script src="nhi-hard-minimal-v1.js?v=20261114-study-v7"></script><script src="nhi-verified-pairs-20261117.js?v=1"></script><script src="nhi-daily-pairs.js?v=20261119-micro-v1"></script><script src="nhi-phrases-v5.js?v=20261119-daily-micro-v1"></script><script src="nhi-english-data-v6.js?v=20261113-reviewed-173"></script><script src="nhi-english-v5.js?v=20261115-v10-ipa-five"></script><script src="recorded-voices-v11.js?v=20261119-banmai-injoon-daily"></script>
+<script src="nhi-chat-voice-v1.js?v=20261117"></script><script src="hanja-v9.js?v=12"></script><script src="hanja-extra-v12.js"></script><script src="card-images-v11.js"></script><script src="nhi-google-images-v1.js?v=20261114-study-v7"></script><script src="nhi-hard-minimal-v1.js?v=20261120-in-card-v2"></script><script src="nhi-verified-pairs-20261117.js?v=1"></script><script src="nhi-daily-pairs.js?v=20261119-micro-v1"></script><script src="nhi-phrases-v5.js?v=20261119-daily-micro-v1"></script><script src="nhi-english-data-v6.js?v=20261113-reviewed-173"></script><script src="nhi-english-v5.js?v=20261115-v10-ipa-five"></script><script src="recorded-voices-v11.js?v=20261119-banmai-injoon-daily"></script>
 <script src="qrcode.js" defer></script>
 <link rel="stylesheet" href="nhi-seven-fixes-20261117.css?v=1"><link rel="stylesheet" href="refresh-v9.css?v=13"><link rel="stylesheet" href="study-enhancements-v13.css?v=14"><link rel="stylesheet" href="nhi-updates-v1.css?v=1"><link rel="stylesheet" href="nhi-ai-resize-v2.css?v=1"><link rel="stylesheet" href="nhi-study-motion-v3.css?v=3"><link rel="stylesheet" href="nhi-interface-v4.css?v=4"><link rel="stylesheet" href="nhi-interface-v5.css?v=20261113-rollback-stable-v1"><link rel="stylesheet" href="nhi-seasons-v1.css?v=20261113-cartoon-soft-1">
 <link rel="stylesheet" href="nhi-living-garden-v1.css?v=20261113-cartoon-butterflies-v1">
@@ -659,7 +659,7 @@ button,input,select,textarea{font-family:var(--ui)}
 <link rel="stylesheet" href="nhi-cover-palette-v12.css?v=20261115-no-girl-frame-v13">
 <link rel="stylesheet" href="nhi-chat-image-notes-v1.css?v=20261117"><link rel="stylesheet" href="nhi-chat-note-card-v2.css?v=20261117"><link rel="stylesheet" href="nhi-original-gif-review-v1.css?v=20261117-r3">
 <link rel="stylesheet" href="nhi-corner-v2.css?v=20261117-ux2">
-<link rel="stylesheet" href="nhi-lesson-finish-v1.css?v=1">
+<link rel="stylesheet" href="nhi-lesson-finish-v1.css?v=20261120-speaker-v2">
 <script>
 /* Pick exactly one of three cover colors when the document loads.
    Navigate/flip cards without changing it; no animation or interval. */
@@ -5057,14 +5057,36 @@ html body #planBox .sdone .pstatus{
       var tiles = el('div', 'tiles');
       [['h', 'hard', 'Khó'], ['m', 'mid', 'Bình thường']].forEach(function (x) { var t = el('div', 'tile2 ' + x[0]); t.appendChild(el('b', null, s.stats[x[1]] || 0)); t.appendChild(document.createTextNode(x[2])); tiles.appendChild(t); });
       p.appendChild(tiles);
-      if(!victoryTrack){victoryTrack=document.createElement('audio');victoryTrack.src='audio/ui/lesson-finish.mp3';victoryTrack.preload='auto';victoryTrack.controls=true;victoryTrack.setAttribute('aria-label','Nhạc chúc mừng kết thúc bài');}
-      p.appendChild(victoryTrack);
-      var musicButton=btn('ghost nhi-victory-audio','🔊 Nhạc',function(){
-        if(victoryTrack.paused)victoryTrack.play().catch(function(){toast('Hãy nhấn nút nhạc lần nữa để phát.');});
-        else victoryTrack.pause();
+      // The only music control is a compact speaker at the top-right corner.
+      // Neither completion music nor the cat sound starts automatically.
+      var speaker=btn('nhi-victory-speaker','🔈',function(){
+        if(!victoryTrack){
+          victoryTrack=new Audio('audio/ui/lesson-finish.mp3');
+          victoryTrack.preload='none';
+          victoryTrack.loop=false;
+          victoryTrack.onplay=reflectSpeaker;
+          victoryTrack.onpause=reflectSpeaker;
+          victoryTrack.onended=reflectSpeaker;
+        }
+        if(victoryTrack.paused){
+          victoryTrack.play().catch(function(){toast('Chạm biểu tượng loa để thử phát nhạc lại.');reflectSpeaker();});
+        }else victoryTrack.pause();
       });
-      function musicLabel(){musicButton.textContent=victoryTrack.paused?'🔊 Bật nhạc':'🔇 Tắt nhạc';}
-      victoryTrack.onplay=musicLabel;victoryTrack.onpause=musicLabel;musicLabel();p.appendChild(musicButton);
+      speaker.type='button';
+      speaker.title='Phát hoặc tạm dừng nhạc kết thúc bài';
+      function reflectSpeaker(){
+        var playing=!!(victoryTrack&&!victoryTrack.paused);
+        speaker.textContent=playing?'🔊':'🔈';
+        speaker.setAttribute('aria-label',playing?'Tạm dừng nhạc kết thúc bài':'Phát nhạc kết thúc bài');
+        speaker.setAttribute('aria-pressed',String(playing));
+      }
+      if(victoryTrack){
+        victoryTrack.onplay=reflectSpeaker;
+        victoryTrack.onpause=reflectSpeaker;
+        victoryTrack.onended=reflectSpeaker;
+      }
+      reflectSpeaker();
+      p.appendChild(speaker);
       if(undoHistory.length)p.appendChild(btn('pundo','↶ Hoàn tác',undoDelete,'Khôi phục thẻ vừa xóa (Ctrl+Z)'));
       if (s.kind === 'lesson' && s.L && !s.recorded) {
         var pendingRound = current(s.L);
@@ -5095,9 +5117,6 @@ html body #planBox .sdone .pstatus{
       p.appendChild(row); v.appendChild(p);
       if (!s.celebrated) {
         s.celebrated = true; saveSess();
-        if(window.NHI_VICTORY_CAT)window.NHI_VICTORY_CAT.meow();
-        victoryTrack.currentTime=0;
-        victoryTrack.play().catch(function(){/* Audio controls remain available when autoplay is blocked. */});
         if (prefs.fx && !reduceMotion()) {
           if (window.NHI_FIREWORKS && window.NHI_FIREWORKS.launch) window.NHI_FIREWORKS.launch();
           else confetti();
@@ -5819,15 +5838,6 @@ html body #planBox .sdone .pstatus{
         if (m.r === 'me') { d.textContent = m.t; lastSent = d; }
         else d.innerHTML = fmt(m.t);
         if (m.link) { var a = mk('a', 'ghost', 'Tạo khóa Gemini tại Google AI Studio'); a.href = m.link; a.target = '_blank'; a.rel = 'noopener'; a.style.marginTop = '8px'; d.appendChild(document.createElement('br')); d.appendChild(a); }
-        var copy=mkBtn('nhi-copy-chat','');copy.type='button';copy.title='Sao chép tin nhắn';copy.setAttribute('aria-label','Sao chép tin nhắn');
-        copy.addEventListener('click',function(){
-          var selected=String(window.getSelection()||'').trim();
-          var chosen=selected && d.contains(window.getSelection().anchorNode)?selected:m.t;
-          function success(){copy.classList.add('copied');copy.setAttribute('aria-label','Đã sao chép');setTimeout(function(){if(copy.isConnected){copy.classList.remove('copied');copy.setAttribute('aria-label','Sao chép tin nhắn');}},1800);}
-          function fallback(){var field=document.createElement('textarea');field.value=chosen;field.style.position='fixed';field.style.opacity='0';document.body.appendChild(field);field.select();try{if(document.execCommand('copy'))success();}finally{field.remove();}}
-          if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(chosen).then(success,fallback);
-          else fallback();
-        });d.appendChild(copy);
         box.appendChild(d);
       });
       if (busy) box.appendChild(mk('div', 'aimsg ai wait'));
@@ -6013,7 +6023,7 @@ html body #planBox .sdone .pstatus{
 <script src="backup-portable-v1.js"></script>
 <script src="nhi-ai-resize-v2.js?v=20261114-study-v7"></script>
 <script src="nhi-fireworks-v3.js?v=3"></script>
-<script src="study-update-v6.js?v=20261118-doubletap-vi-ko-note"></script>
+<script src="study-update-v6.js?v=20261120-selectable-chat-v1"></script>
 <script src="nhi-longpress-dictionary-v1.js?v=20261117"></script>
 <script src="nhi-interface-v5.js?v=20261114"></script>
 <script src="nhi-november-v15.js?v=20261114-ux-v17"></script>
