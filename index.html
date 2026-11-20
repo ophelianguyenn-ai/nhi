@@ -596,7 +596,7 @@ section:not([hidden]) > .quiz, section:not([hidden]) > #cardWrap, .list > .row:n
 }
 </style>
 
-<script src="nhi-chat-voice-v1.js?v=20261117"></script><script src="hanja-v9.js?v=12"></script><script src="hanja-extra-v12.js"></script><script src="card-images-v11.js?v=20261120-vertical-drag-grip-v2"></script><script src="nhi-google-images-v1.js?v=20261114-study-v7"></script><script src="nhi-hard-minimal-v1.js?v=20261120-in-card-v2"></script><script src="nhi-verified-pairs-20261117.js?v=1"></script><script src="nhi-daily-pairs.js?v=20261119-micro-v1"></script><script src="nhi-phrases-v5.js?v=20261119-daily-micro-v1"></script><script src="nhi-english-data-v6.js?v=20261113-reviewed-173"></script><script src="nhi-english-v5.js?v=20261115-v10-ipa-five"></script><script src="recorded-voices-v11.js?v=20261119-banmai-injoon-daily"></script>
+<script src="nhi-chat-voice-v1.js?v=20261117"></script><script src="hanja-v9.js?v=12"></script><script src="hanja-extra-v12.js"></script><script src="card-images-v11.js?v=20261120-move-whole-frame-v3"></script><script src="nhi-google-images-v1.js?v=20261114-study-v7"></script><script src="nhi-hard-minimal-v1.js?v=20261120-in-card-v2"></script><script src="nhi-verified-pairs-20261117.js?v=1"></script><script src="nhi-daily-pairs.js?v=20261119-micro-v1"></script><script src="nhi-phrases-v5.js?v=20261119-daily-micro-v1"></script><script src="nhi-english-data-v6.js?v=20261113-reviewed-173"></script><script src="nhi-english-v5.js?v=20261115-v10-ipa-five"></script><script src="recorded-voices-v11.js?v=20261119-banmai-injoon-daily"></script>
 <script src="qrcode.js" defer></script>
 <link rel="stylesheet" href="nhi-seven-fixes-20261117.css?v=1"><link rel="stylesheet" href="refresh-v9.css?v=13"><link rel="stylesheet" href="study-enhancements-v13.css?v=14"><link rel="stylesheet" href="nhi-updates-v1.css?v=1"><link rel="stylesheet" href="nhi-ai-resize-v2.css?v=1"><link rel="stylesheet" href="nhi-study-motion-v3.css?v=3"><link rel="stylesheet" href="nhi-interface-v4.css?v=4"><link rel="stylesheet" href="nhi-interface-v5.css?v=20261113-rollback-stable-v1"><link rel="stylesheet" href="nhi-seasons-v1.css?v=20261113-cartoon-soft-1">
 <link rel="stylesheet" href="nhi-living-garden-v1.css?v=20261113-cartoon-butterflies-v1">
@@ -1264,7 +1264,7 @@ html body #planBox .sdone .pstatus{
 }
 
 </style>
-<link rel="stylesheet" href="nhi-card-image-compact-v1.css?v=20261120-preserve-control-note-size-v6">
+<link rel="stylesheet" href="nhi-card-image-compact-v1.css?v=20261120-frame-move-half-controls-v7">
 <link rel="stylesheet" href="nhi-lesson-finish-v1.css?v=20261120-compact-cancel-v5">
 </head>
 <body>
@@ -4490,14 +4490,6 @@ html body #planBox .sdone .pstatus{
       hd.appendChild(chips(L));
       var row = el('div', 'prow nhi-review-stage-row'), cur = current(L);
       row.appendChild(statusLine(L));
-      // Keep this action visible even when no round has been completed.
-      // The no-op state explains why nothing can be rolled back yet.
-      var roundsCompleted=doneSteps(L);
-      var rollbackText=roundsCompleted ? 'Hoàn tác '+STEP[roundsCompleted-1]+' gần nhất' :
-        'Chưa có lượt học nào để hoàn tác';
-      row.appendChild(btn('ghost nhi-mark-unlearned','↶ Chưa học bài này',function(){
-        markLessonNotStudied(L);
-      },rollbackText));
       hd.appendChild(row);
       var rs = (resume[L.id] || []).filter(alive);
       var pendingSaved=resumeFull[L.id];
@@ -4515,7 +4507,15 @@ html body #planBox .sdone .pstatus{
       });
       if(notDue&&!alreadyStudied&&!rs.length&&!hasPending){launch.disabled=true;launch.title='Bài mới sẽ mở học vào đúng ngày đến hạn';}
       row2.appendChild(launch);
-      row2.appendChild(lbtn('ghost', 'edit', '⚙ Cài đặt bài', function () { openLessonSettings(L); }));
+      // Keep settings and the reversible study-round action beside one another.
+      // This action remains visible even when the lesson has zero completions.
+      var settingsGroup=el('div','nhi-lesson-settings-group');
+      settingsGroup.appendChild(lbtn('ghost','edit','⚙ Cài đặt bài',function(){openLessonSettings(L);}));
+      var completedRounds=doneSteps(L);
+      settingsGroup.appendChild(btn('ghost nhi-mark-unlearned','↶ Chưa học bài này',function(){
+        markLessonNotStudied(L);
+      },completedRounds?'Hoàn tác '+STEP[completedRounds-1]+' gần nhất':'Chưa có lượt nào để hoàn tác'));
+      row2.appendChild(settingsGroup);
       var hd2 = hardIds(L.ids);
       if (hd2.length) row2.appendChild(lbtn('ghost', 'flip', 'Ôn lại thẻ khó (' + hd2.length + ')', function () { start('hard', hd2, L.title + ' · thẻ khó', L); }));
       var enids=L.ids.filter(function(id){return alive(id)&&val('enHard',id);});if(enids.length)row2.appendChild(btn('ghost','Ôn chưa nhớ tiếng Anh ('+enids.length+')',function(){start('english',enids,L.title+' · chưa nhớ tiếng Anh',L);}));
@@ -4954,17 +4954,41 @@ html body #planBox .sdone .pstatus{
       var s=sess,pos=s.pos,id=s.queue[pos],card=document.querySelector('#planBox .pcard');
       if(!id)return;
       stopSpeech();if(window.NHI_STUDY)window.NHI_STUDY.feedback(k);
-      // KHÓ records the grade, but stays on THIS card until the learner clicks Next.
-      // Do not insert a duplicate card in the current session.
+      // Khó is a toggle, including cards previously marked difficult.
+      // A second tap unmarks the card without moving to the next one.
       if(k==='hard'){
-        if(s.picked[pos]==='hard')return;
+        if(s.picked[pos]==='hard'||val('hard',id)){
+          ++ratingToken;ratingPending=false;pendingRatingFinish=null;
+          if(s.picked[pos]==='hard')s.stats.hard=Math.max(0,(s.stats.hard||0)-1);
+          delete s.picked[pos];
+          if(s.again[id]){
+            var repeatIndex=s.queue.indexOf(id,pos+1);
+            if(repeatIndex!==-1){
+              s.queue.splice(repeatIndex,1);
+              // Picked flags follow their queue positions after removing a revisit.
+              var shifted={};Object.keys(s.picked).forEach(function(key){
+                var n=Number(key);shifted[n>repeatIndex?n-1:n]=s.picked[key];
+              });s.picked=shifted;
+            }
+            delete s.again[id];
+          }
+          put('hard',id,null);
+          if(val('rate',id)==='hard')put('rate',id,null);
+          if(window.NHI_HARD_MASCOT)window.NHI_HARD_MASCOT.clear();
+          haptic(6);saveSess();render();toast('Đã bỏ từ khỏi danh sách Khó.');
+          return;
+        }
         ++ratingToken;ratingPending=false;pendingRatingFinish=null;
         s.stats.hard=(s.stats.hard||0)+1;s.picked[pos]='hard';
         // One short revisit per difficult card, spaced after three other cards.
         // Persist the inserted queue and marker so a resumed lesson keeps its order.
         if((s.kind==='lesson'||s.kind==='free') && !s.again[id]){
           s.again[id]=1;
-          s.queue.splice(Math.min(s.queue.length,pos+4),0,id);
+          var insertionIndex=Math.min(s.queue.length,pos+4);
+          s.queue.splice(insertionIndex,0,id);
+          var shifted={};Object.keys(s.picked).forEach(function(key){
+            var n=Number(key);shifted[n>=insertionIndex?n+1:n]=s.picked[key];
+          });s.picked=shifted;
         }
         put('rate',id,'hard');put('hard',id,addDays(today(),1));window.dispatchEvent(new CustomEvent('nhi:review',{detail:{id:id,grade:'hard',lesson:s.L&&s.L.id,practice:s.kind!=='lesson'}}));
         haptic([14,40,14]);saveSess();render();

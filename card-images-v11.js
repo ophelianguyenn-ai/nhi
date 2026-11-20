@@ -11,13 +11,8 @@ function figure(it,value,onResize){
   im.referrerPolicy='no-referrer';im.draggable=false;
   im.onerror=function(){im.hidden=true;};
   stage.appendChild(im);f.appendChild(stage);
-  var cap=node('figcaption',v.caption||it.vi);
-  if(v.source&&/^https:\/\//.test(v.source)){
-    cap.appendChild(node('br'));
-    var link=node('a',v.credit||'Nguồn ảnh');link.href=v.source;
-    link.target='_blank';link.rel='noopener noreferrer';cap.appendChild(link);
-  }
-  f.appendChild(cap);
+  // Keep original caption/credit in saved metadata and editor, but do not
+  // display either the word meaning or image source under the picture.
   if(typeof onResize!=='function')return f;
   var width=Math.max(100,Math.min(680,Number(v.width)||220));
   var height=Math.max(0,Math.min(520,Number(v.height)||0));
@@ -25,8 +20,8 @@ function figure(it,value,onResize){
   var offsetY=Math.max(-220,Math.min(220,Number(v.offsetY)||0));
   var clamp=function(n,min,max){return Math.max(min,Math.min(max,n));};
   f.dataset.resizable='true';
-  f.setAttribute('aria-label','Ảnh minh họa. Chạm ảnh rồi kéo cạnh để đổi kích thước, kéo góc để giữ tỷ lệ.');
-  im.title='Kéo ảnh để đổi vị trí; chạm ảnh để hiện tay nắm điều chỉnh';
+  f.setAttribute('aria-label','Ảnh minh họa. Kéo để di chuyển cả khung; kéo cạnh hoặc góc để đổi kích thước.');
+  im.title='Kéo ảnh để di chuyển cả khung lên hoặc xuống; kéo cạnh để chỉnh kích thước';
   im.style.touchAction='none';
 
   function paint(){
@@ -35,7 +30,10 @@ function figure(it,value,onResize){
     if(parent)parent.style.setProperty('--nhi-image-width',Math.round(width)+'px');
     f.style.setProperty('--nhi-image-height',height?Math.round(height)+'px':'auto');
     f.style.setProperty('--nhi-image-x',Math.round(offsetX)+'px');
-    f.style.setProperty('--nhi-image-y',Math.round(offsetY)+'px');
+    // Move the entire figure (frame, resize grips and photograph), NOT the
+    // image within a fixed, clipped stage.
+    f.style.setProperty('--nhi-frame-y',Math.round(offsetY)+'px');
+    f.style.setProperty('--nhi-image-y','0px');
   }
   function commit(){
     onResize(Object.assign({},v,{width:Math.round(width),height:Math.round(height),
@@ -46,7 +44,7 @@ function figure(it,value,onResize){
     if(!f.contains(e.relatedTarget))f.classList.remove('nhi-image-selected');
   });
 
-  // Dragging the photo itself still moves its position within the frame.
+  // Dragging the photo itself moves the complete figure vertically.
   var drag=null;
   im.addEventListener('pointerdown',function(e){
     if(e.pointerType==='mouse'&&e.button!==0)return;
@@ -74,8 +72,8 @@ function figure(it,value,onResize){
   im.addEventListener('pointerup',endMove);
   im.addEventListener('pointercancel',endMove);
 
-  // Dedicated ↕ handle makes up/down movement discoverable on touch screens.
-  // It does not change image dimensions or replace edge/corner resizing.
+  // Dedicated ↕ handle moves the ENTIRE picture frame on touch screens;
+  // it does not change dimensions or replace edge/corner resizing.
   var moveY=node('button','↕');
   moveY.type='button';
   moveY.className='nhi-image-move-y';

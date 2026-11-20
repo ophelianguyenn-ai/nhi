@@ -458,3 +458,105 @@ html body #planBox .pcard .card-illustration.nhi-image-selected .nhi-image-move-
 html body #planBox .pcard .card-illustration:focus-within .nhi-image-move-y{
  display:grid!important;place-items:center!important;
 }
+
+
+/* Photo-card v7: move the WHOLE image frame, including its controls.
+   Never translate only the img into an overflow:hidden stage. */
+html body #planBox .pcard:has(.pfront.nhi-with-image){
+ overflow:visible!important;
+}
+html body #planBox .pcard:has(.pfront.nhi-with-image)>.pfront.nhi-with-image{
+ overflow:visible!important;
+ overflow-x:visible!important;overflow-y:visible!important;
+}
+html body #planBox .pcardwrap:has(.pfront.nhi-with-image){
+ overflow:visible!important;
+}
+html body #planBox .pcard .pfront.nhi-with-image>.card-illustration{
+ position:relative!important;
+ transform:translate3d(0,var(--nhi-frame-y,0px),0)!important;
+ overflow:visible!important;
+ transition:none!important;
+ will-change:transform;
+}
+html body #planBox .pcard .pfront.nhi-with-image>.card-illustration .nhi-image-stage{
+ overflow:hidden!important; /* image stays fully inside its MOVING frame */
+}
+html body #planBox .pcard .pfront.nhi-with-image>.card-illustration .nhi-image-stage img{
+ transform:translateX(var(--nhi-image-x,0px))!important;
+}
+html body #planBox .pcard .pfront.nhi-with-image>.card-illustration figcaption{
+ display:none!important;
+}
+
+/* Center the untouched 63/145/63 px group within the literal LEFT HALF
+   of the card, rather than across a wide auto-sized remaining space. */
+@media(min-width:681px){
+ html body #planBox .pcard:has(.pfront.nhi-with-image)>.prate.nhi-rating-v3{
+   width:50%!important;
+   max-width:50%!important;
+   min-width:280px!important;
+   box-sizing:border-box!important;
+   margin-left:8px!important;
+   margin-right:auto!important;
+   transform:none!important;
+   justify-content:center!important;
+ }
+}
+@media(max-width:680px){
+ html body #planBox .pcard:has(.pfront.nhi-with-image)>.prate.nhi-rating-v3{
+   width:calc(100% - 16px)!important;
+   max-width:calc(100% - 16px)!important;
+   margin-left:8px!important;
+   margin-right:8px!important;
+ }
+}
+
+/* Content-proportional English panel; preserve text size and explicit user
+   width if set, but no forced 255px minimum for short words. */
+html body #planBox .pcard .pfront.nhi-with-image .nhi-card-details>.nhi-english-v5,
+html body #planBox .pcard .pfront.nhi-with-image>.nhi-english-v5{
+ width:var(--nhi-en-width,max-content)!important;
+ min-width:0!important;
+ max-width:min(100%,460px)!important;
+ margin-left:auto!important;margin-right:auto!important;
+ padding:12px 16px!important;
+ box-sizing:border-box!important;
+}
+html body #planBox .pcard .pfront.nhi-with-image .nhi-card-details{
+ min-width:0!important;
+}
+html body #planBox .pcard .pfront.nhi-with-image .nhi-english-v5>.nhi-en-head{
+ width:100%!important;
+}
+html body #planBox .nhi-lesson-settings-group{
+ display:inline-flex!important;align-items:center!important;
+ justify-content:center!important;flex-wrap:nowrap!important;
+ gap:8px!important;max-width:100%!important;
+}
+html body #planBox .nhi-lesson-settings-group>.ghost{
+ min-height:40px!important;
+ height:auto!important;
+ width:auto!important;
+ min-width:0!important;
+ padding:8px 11px!important;
+ margin:0!important;
+ white-space:nowrap!important;
+ border-radius:12px!important;
+}
+html body #planBox .nhi-lesson-settings-group>.nhi-mark-unlearned{
+ border:1.5px solid var(--line)!important;
+ color:var(--ink)!important;background:var(--surface)!important;
+ font-size:13px!important;font-weight:750!important;
+ box-shadow:0 2px 0 var(--edge)!important;
+}
+html body #planBox .nhi-lesson-settings-group>.nhi-mark-unlearned:hover{
+ background:var(--accent-soft)!important;
+ border-color:var(--accent-d)!important;
+}
+@media(max-width:410px){
+ html body #planBox .nhi-lesson-settings-group{gap:5px!important}
+ html body #planBox .nhi-lesson-settings-group>.ghost{
+  padding:8px 6px!important;font-size:12px!important;
+ }
+}
