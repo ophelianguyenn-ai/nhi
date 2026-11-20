@@ -30,5 +30,11 @@ html body #nhi-hard-mascot img { pointer-events:auto!important; cursor:nwse-resi
 }
 #aiPanel .aimsg .nhi-copy-chat:focus-visible{outline:2px solid var(--accent-t);outline-offset:2px}
 #aiPanel .aimsg .nhi-copy-chat:hover{background:var(--accent-soft)}
+#aiPanel .aimsg .nhi-copy-chat::before{content:'⧉'}
+#aiPanel .aimsg .nhi-copy-chat.copied::before{content:'✓'}
 
-#planBox .sdone audio {display:block;width:min(100%,440px);margin:12px auto;}
+#planBox .sdone audio {display:none;}
+html body #planBox .sdone .nhi-victory-audio {
+  position:absolute;top:8px;right:8px;z-index:3;
+  min-height:34px;padding:5px 9px;font-size:13px;
+}

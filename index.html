@@ -5059,6 +5059,12 @@ html body #planBox .sdone .pstatus{
       p.appendChild(tiles);
       if(!victoryTrack){victoryTrack=document.createElement('audio');victoryTrack.src='audio/ui/lesson-finish.mp3';victoryTrack.preload='auto';victoryTrack.controls=true;victoryTrack.setAttribute('aria-label','Nhạc chúc mừng kết thúc bài');}
       p.appendChild(victoryTrack);
+      var musicButton=btn('ghost nhi-victory-audio','🔊 Nhạc',function(){
+        if(victoryTrack.paused)victoryTrack.play().catch(function(){toast('Hãy nhấn nút nhạc lần nữa để phát.');});
+        else victoryTrack.pause();
+      });
+      function musicLabel(){musicButton.textContent=victoryTrack.paused?'🔊 Bật nhạc':'🔇 Tắt nhạc';}
+      victoryTrack.onplay=musicLabel;victoryTrack.onpause=musicLabel;musicLabel();p.appendChild(musicButton);
       if(undoHistory.length)p.appendChild(btn('pundo','↶ Hoàn tác',undoDelete,'Khôi phục thẻ vừa xóa (Ctrl+Z)'));
       if (s.kind === 'lesson' && s.L && !s.recorded) {
         var pendingRound = current(s.L);
@@ -5813,11 +5819,11 @@ html body #planBox .sdone .pstatus{
         if (m.r === 'me') { d.textContent = m.t; lastSent = d; }
         else d.innerHTML = fmt(m.t);
         if (m.link) { var a = mk('a', 'ghost', 'Tạo khóa Gemini tại Google AI Studio'); a.href = m.link; a.target = '_blank'; a.rel = 'noopener'; a.style.marginTop = '8px'; d.appendChild(document.createElement('br')); d.appendChild(a); }
-        var copy=mkBtn('nhi-copy-chat','⧉');copy.type='button';copy.title='Sao chép tin nhắn';copy.setAttribute('aria-label','Sao chép tin nhắn');
+        var copy=mkBtn('nhi-copy-chat','');copy.type='button';copy.title='Sao chép tin nhắn';copy.setAttribute('aria-label','Sao chép tin nhắn');
         copy.addEventListener('click',function(){
           var selected=String(window.getSelection()||'').trim();
           var chosen=selected && d.contains(window.getSelection().anchorNode)?selected:m.t;
-          function success(){copy.textContent='✓';copy.setAttribute('aria-label','Đã sao chép');setTimeout(function(){if(copy.isConnected){copy.textContent='⧉';copy.setAttribute('aria-label','Sao chép tin nhắn');}},1800);}
+          function success(){copy.classList.add('copied');copy.setAttribute('aria-label','Đã sao chép');setTimeout(function(){if(copy.isConnected){copy.classList.remove('copied');copy.setAttribute('aria-label','Sao chép tin nhắn');}},1800);}
           function fallback(){var field=document.createElement('textarea');field.value=chosen;field.style.position='fixed';field.style.opacity='0';document.body.appendChild(field);field.select();try{if(document.execCommand('copy'))success();}finally{field.remove();}}
           if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(chosen).then(success,fallback);
           else fallback();
