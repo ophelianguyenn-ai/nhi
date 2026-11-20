@@ -1,0 +1,34 @@
+/* The hard-card companion floats outside the card's layout. */
+html body #nhi-hard-mascot {
+  position:fixed!important;
+  left:max(12px,env(safe-area-inset-left,0px))!important;
+  right:auto!important;
+  top:auto!important;
+  bottom:max(84px,env(safe-area-inset-bottom,0px))!important;
+  transform:none!important;
+  width:min(var(--nhi-companion-size,202px),33vw)!important;
+  max-height:58vh!important;
+  z-index:95!important;
+  pointer-events:none!important;
+}
+html body #nhi-hard-mascot img { pointer-events:auto!important; cursor:nwse-resize!important; }
+@media(max-width:700px){
+  html body #nhi-hard-mascot {
+    left:8px!important;
+    bottom:max(72px,env(safe-area-inset-bottom,0px))!important;
+    width:min(var(--nhi-companion-size,202px),38vw)!important;
+  }
+}
+
+/* Copy the full bubble with one tap, while keeping normal text selection. */
+#aiPanel .aimsg { position:relative; padding-right:46px; user-select:text!important; -webkit-user-select:text!important; }
+#aiPanel .aimsg .nhi-copy-chat {
+  position:absolute;right:7px;top:7px;display:grid;place-items:center;
+  width:30px;height:30px;padding:0;border:1px solid currentColor;border-radius:8px;
+  background:var(--surface);color:var(--ink);font-size:15px;cursor:pointer;
+  user-select:none;-webkit-user-select:none;
+}
+#aiPanel .aimsg .nhi-copy-chat:focus-visible{outline:2px solid var(--accent-t);outline-offset:2px}
+#aiPanel .aimsg .nhi-copy-chat:hover{background:var(--accent-soft)}
+
+#planBox .sdone audio {display:block;width:min(100%,440px);margin:12px auto;}

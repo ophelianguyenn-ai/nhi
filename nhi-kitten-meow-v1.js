@@ -1,6 +1,5 @@
-/* Original, gentle synthesized two-note kitten mew.
- * Audio starts only after a learner gesture, and can be replayed by tapping the cat.
- * No external recording, streaming, music or paid API. */
+/* Local recording of a young cat, with a synthesized fallback for rare playback errors.
+ * Audio starts after a learner gesture and can be replayed by tapping the cat. */
 (function(){
 'use strict';
 let audio=null,hasUnlocked=false;
@@ -44,10 +43,9 @@ function note(at,length,base,volume){
  for(const v of [osc,harm,vib])v.start(at);
  for(const v of [osc,harm,vib])v.stop(at+length+.04);
 }
-// Real 1.2-second meow recorded from a young female cat, CC0 (George Miquilena).
+// Real 1.2-second meow recorded by George Miquilena, CC0.
 // Source: https://commons.wikimedia.org/wiki/File:Maullido_de_gata_hembra_joven.ogg
-// Keep the offline oscillator as fallback when Wikimedia is inaccessible/unsupported.
-const MEOW_URL='https://upload.wikimedia.org/wikipedia/commons/c/c0/Maullido_de_gata_hembra_joven.ogg';
+const MEOW_URL='audio/ui/kitten-meow.mp3';
 let recording=null,last=0;
 function fallbackMeow(){
  if(!Ctx)return;
@@ -65,9 +63,9 @@ function playRealMeow(){
    recording=new Audio(MEOW_URL);
    recording.preload='auto';
    recording.volume=.8;
-   recording.playbackRate=1.08; // Just a little higher and sweeter, still the real recording.
+   recording.playbackRate=1.12; // Slightly brighter while keeping the original cat's voice.
   }
-  if(recording.canPlayType && !recording.canPlayType('audio/ogg; codecs="vorbis"'))return false;
+  if(recording.canPlayType && !recording.canPlayType('audio/mpeg'))return false;
   recording.pause();
   recording.currentTime=0;
   const promise=recording.play();

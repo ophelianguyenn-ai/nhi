@@ -659,6 +659,7 @@ button,input,select,textarea{font-family:var(--ui)}
 <link rel="stylesheet" href="nhi-cover-palette-v12.css?v=20261115-no-girl-frame-v13">
 <link rel="stylesheet" href="nhi-chat-image-notes-v1.css?v=20261117"><link rel="stylesheet" href="nhi-chat-note-card-v2.css?v=20261117"><link rel="stylesheet" href="nhi-original-gif-review-v1.css?v=20261117-r3">
 <link rel="stylesheet" href="nhi-corner-v2.css?v=20261117-ux2">
+<link rel="stylesheet" href="nhi-lesson-finish-v1.css?v=1">
 <script>
 /* Pick exactly one of three cover colors when the document loads.
    Navigate/flip cards without changing it; no animation or interval. */
@@ -4575,6 +4576,7 @@ html body #planBox .sdone .pstatus{
       } catch (e) { sess = null; }
     }
     function start(kind, ids, title, L, restored) {
+      stopVictoryTrack();
       ++ratingToken;ratingPending=false;pendingRatingFinish=null;
       var beforeFilter = ids.slice(); ids = ids.filter(alive);
       if (!ids.length) { toast('Không còn thẻ nào cần học.'); return; }
@@ -4592,6 +4594,7 @@ html body #planBox .sdone .pstatus{
     }
     function leave() {
       if (!sess) return;
+      stopVictoryTrack();
       if(ratingPending&&pendingRatingFinish)pendingRatingFinish();
       ++ratingToken;ratingPending=false;pendingRatingFinish=null;
       stopSpeech(); expireUndo();
@@ -4928,6 +4931,12 @@ html body #planBox .sdone .pstatus{
         if(s.picked[pos]==='hard')return;
         ++ratingToken;ratingPending=false;pendingRatingFinish=null;
         s.stats.hard=(s.stats.hard||0)+1;s.picked[pos]='hard';
+        // One short revisit per difficult card, spaced after three other cards.
+        // Persist the inserted queue and marker so a resumed lesson keeps its order.
+        if((s.kind==='lesson'||s.kind==='free') && !s.again[id]){
+          s.again[id]=1;
+          s.queue.splice(Math.min(s.queue.length,pos+4),0,id);
+        }
         put('rate',id,'hard');put('hard',id,addDays(today(),1));window.dispatchEvent(new CustomEvent('nhi:review',{detail:{id:id,grade:'hard',lesson:s.L&&s.L.id,practice:s.kind!=='lesson'}}));
         haptic([14,40,14]);saveSess();render();
         react('hard',document.querySelector('#planBox .pcard'));
@@ -4950,6 +4959,8 @@ html body #planBox .sdone .pstatus{
       pendingRatingFinish=finish;
       if(animated)setTimeout(finish,430);else finish();
     }
+    var victoryTrack=null;
+    function stopVictoryTrack(){if(victoryTrack){victoryTrack.pause();victoryTrack.currentTime=0;}}
     function renderDone(v) {
       var s = sess, p = el('div', 'quiz sdone');
       setFocus(false);
@@ -5046,6 +5057,8 @@ html body #planBox .sdone .pstatus{
       var tiles = el('div', 'tiles');
       [['h', 'hard', 'Khó'], ['m', 'mid', 'Bình thường']].forEach(function (x) { var t = el('div', 'tile2 ' + x[0]); t.appendChild(el('b', null, s.stats[x[1]] || 0)); t.appendChild(document.createTextNode(x[2])); tiles.appendChild(t); });
       p.appendChild(tiles);
+      if(!victoryTrack){victoryTrack=document.createElement('audio');victoryTrack.src='audio/ui/lesson-finish.mp3';victoryTrack.preload='auto';victoryTrack.controls=true;victoryTrack.setAttribute('aria-label','Nhạc chúc mừng kết thúc bài');}
+      p.appendChild(victoryTrack);
       if(undoHistory.length)p.appendChild(btn('pundo','↶ Hoàn tác',undoDelete,'Khôi phục thẻ vừa xóa (Ctrl+Z)'));
       if (s.kind === 'lesson' && s.L && !s.recorded) {
         var pendingRound = current(s.L);
@@ -5061,6 +5074,8 @@ html body #planBox .sdone .pstatus{
         }
       }
       if (s.kind === 'lesson' && s.L) { var nx = current(s.L); p.appendChild(el('p', 'pstatus done', nx ? '✓ ' + STEP[nx.step] + ' · ' + vn(nx.due, true) : '✓ Đã hoàn thành cả 5 lần.')); }
+      var difficult=hardIds(s.L?s.L.ids:s.queue);
+      if(difficult.length)p.appendChild(btn('primary','Ôn lại thẻ khó ('+difficult.length+')',function(){start('hard',difficult,s.title+' · Ôn thẻ khó',s.L);}));
       var enids=(s.L?s.L.ids:s.queue).filter(function(id,i,a){return a.indexOf(id)===i&&alive(id)&&val('enHard',id);});if(enids.length)p.appendChild(btn('primary','Ôn chưa nhớ tiếng Anh ('+enids.length+')',function(){start('english',enids,s.title+' · chưa nhớ tiếng Anh',s.L);}));
       var row = el('div', 'prow');
       var replayButton=btn('primary nhi-replay-button', '↻ Học lại tất cả thẻ', function () {
@@ -5070,11 +5085,13 @@ html body #planBox .sdone .pstatus{
         start('free',again,s.title.replace(/ · Học lại$/,'')+' · Học lại',s.L);
       });row.appendChild(replayButton);
       row.appendChild(lbtn('ghost', 'left', 'Xem lại thẻ cuối', function () { s.pos = Math.max(0, s.queue.length - 1); anim = 'prev'; saveSess(); render(); }));
-      row.appendChild(btn('ghost', 'Xong', function () { sess = null; saveSess(); render(); }));
+      row.appendChild(btn('ghost', 'Xong', function () { stopVictoryTrack();sess = null; saveSess(); render(); }));
       p.appendChild(row); v.appendChild(p);
       if (!s.celebrated) {
         s.celebrated = true; saveSess();
         if(window.NHI_VICTORY_CAT)window.NHI_VICTORY_CAT.meow();
+        victoryTrack.currentTime=0;
+        victoryTrack.play().catch(function(){/* Audio controls remain available when autoplay is blocked. */});
         if (prefs.fx && !reduceMotion()) {
           if (window.NHI_FIREWORKS && window.NHI_FIREWORKS.launch) window.NHI_FIREWORKS.launch();
           else confetti();
@@ -5796,6 +5813,15 @@ html body #planBox .sdone .pstatus{
         if (m.r === 'me') { d.textContent = m.t; lastSent = d; }
         else d.innerHTML = fmt(m.t);
         if (m.link) { var a = mk('a', 'ghost', 'Tạo khóa Gemini tại Google AI Studio'); a.href = m.link; a.target = '_blank'; a.rel = 'noopener'; a.style.marginTop = '8px'; d.appendChild(document.createElement('br')); d.appendChild(a); }
+        var copy=mkBtn('nhi-copy-chat','⧉');copy.type='button';copy.title='Sao chép tin nhắn';copy.setAttribute('aria-label','Sao chép tin nhắn');
+        copy.addEventListener('click',function(){
+          var selected=String(window.getSelection()||'').trim();
+          var chosen=selected && d.contains(window.getSelection().anchorNode)?selected:m.t;
+          function success(){copy.textContent='✓';copy.setAttribute('aria-label','Đã sao chép');setTimeout(function(){if(copy.isConnected){copy.textContent='⧉';copy.setAttribute('aria-label','Sao chép tin nhắn');}},1800);}
+          function fallback(){var field=document.createElement('textarea');field.value=chosen;field.style.position='fixed';field.style.opacity='0';document.body.appendChild(field);field.select();try{if(document.execCommand('copy'))success();}finally{field.remove();}}
+          if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(chosen).then(success,fallback);
+          else fallback();
+        });d.appendChild(copy);
         box.appendChild(d);
       });
       if (busy) box.appendChild(mk('div', 'aimsg ai wait'));
@@ -5990,7 +6016,7 @@ html body #planBox .sdone .pstatus{
 <script src="nhi-late-2026.js?v=20261115-v9-compact-pairs"></script>
 <script src="nhi-stage-move-v1.js?v=20261116-desktop-paired-highlight-v1"></script>
 <script src="nhi-card-controls-v8.js?v=20261115-v8"></script>
-<script src="nhi-kitten-meow-v1.js?v=20261118-real-cat-cc0"></script>
+<script src="nhi-kitten-meow-v1.js?v=20261120-local-recording"></script>
 <script src="nhi-card-no-overlap-v1.js?v=20261115-safe-v1"></script>
 <script src="nhi-corner-v2.js?v=20261118-notes-vi-ko"></script>
 
