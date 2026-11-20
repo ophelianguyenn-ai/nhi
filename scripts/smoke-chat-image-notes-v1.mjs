@@ -288,18 +288,20 @@ try{
    saved.offsetX===moved.offsetX&&saved.offsetY===moved.offsetY,
    'Resized image dimensions and vertical position did not survive reload: '+JSON.stringify({saved,moved}));
  assert(errors.length===0,'Page errors: '+errors.join('; '));
- // On the same Korean word, pressing Khó twice must remove it from hard review.
+ // The previous deletion exercise advanced to another flashcard.
+ // Toggle the CURRENT id twice, not the original image-fixture id.
+ const toggleId=await page.$eval('#planBox .pcard',e=>e.dataset.item);
  await page.$eval('#planBox .pcard>.prate>.hard',e=>e.click());
- await page.waitForFunction(id=>!!JSON.parse(localStorage.getItem('viko-plan-v1')).hard?.[id]?.v,{},cardID);
+ await page.waitForFunction(id=>!!JSON.parse(localStorage.getItem('viko-plan-v1')).hard?.[id]?.v,{},toggleId);
  const activeHard=await page.evaluate(id=>{
   const state=JSON.parse(localStorage.getItem('viko-plan-v1'));
   return {hard:state.hard?.[id]?.v,rate:state.rate?.[id]?.v};
- },cardID);
+ },toggleId);
  await page.$eval('#planBox .pcard>.prate>.hard',e=>e.click());
  const offHard=await page.evaluate(id=>{
   const state=JSON.parse(localStorage.getItem('viko-plan-v1'));
   return {hard:state.hard?.[id]?.v,rate:state.rate?.[id]?.v};
- },cardID);
+ },toggleId);
  assert(activeHard.hard&&!offHard.hard&&offHard.rate!=='hard',
   'Second Khó click must remove the same word from difficult cards: '+JSON.stringify({activeHard,offHard}));
  console.log('HARD_TWO_TAPS_TOGGLE',JSON.stringify({activeHard,offHard}));
