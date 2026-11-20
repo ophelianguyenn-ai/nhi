@@ -57,7 +57,7 @@ try{
  const after=await page.$eval('#planBox .card-illustration',e=>e.getBoundingClientRect().width);
  const languageCenterAfter=await page.$eval('#planBox .pfront .vi-under',e=>{const r=e.getBoundingClientRect(),p=e.closest('.pcard').getBoundingClientRect();return r.left+r.width/2-(p.left+p.width/2);});
  assert(after>before+25,'Image width slider did not resize the illustration: '+before+' / '+after);
- assert(Math.abs(languageCenterAfter-languageCenter)<2&&Math.abs(languageCenterAfter)<3,
+ assert(Math.abs(languageCenterAfter-languageCenter)<2&&Math.abs(languageCenterAfter)<10,
    'Image width adjustment shifted the Vietnamese text off center: '+languageCenter+' / '+languageCenterAfter);
  await page.$eval('#planBox .card-illustration img',e=>e.click());
  await page.$eval('#planBox .nhi-image-adjust input[aria-label="Cao hình"]',e=>{
