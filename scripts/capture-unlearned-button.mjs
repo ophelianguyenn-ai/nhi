@@ -24,7 +24,7 @@ try{
  await page.waitForSelector('#planBox .ppage .nhi-lesson-settings-group .nhi-mark-unlearned',{timeout:25000});
  const context=await page.evaluate(()=>{
   const b=document.querySelector('#planBox .nhi-mark-unlearned');
-  const row=b.closest('.nhi-review-stage-row');
+  const row=document.querySelector('#planBox .nhi-review-stage-row');
   return {label:b.textContent.trim(),heading:document.querySelector('#planBox .nhi-v2-review-heading')?.textContent.trim(),
    status:row.querySelector('.pstatus')?.textContent.trim(),
    button:{x:b.getBoundingClientRect().x,y:b.getBoundingClientRect().y,
