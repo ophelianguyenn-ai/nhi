@@ -1330,15 +1330,33 @@ html body #planBox .pcard .pfront .nhi-english-v5 .nhi-en-head .nhi-en-head-acti
 html body #planBox .pcard .pfront .nhi-english-v5 :is(.nhi-en-translation,.nhi-en-ipa,.nhi-en-status){
   text-align:center!important;
 }
+html body #planBox .pcard .pfront.nhi-with-image{
+  position:relative!important;
+}
 html body #planBox .pcard .pfront.nhi-with-image > .card-illustration{
-  position:relative!important;grid-column:1/-1!important;grid-row:auto!important;
-  width:min(80%,var(--nhi-image-width,220px))!important;
-  max-width:300px!important;min-width:0!important;
-  margin:8px auto 0!important;justify-self:center!important;
-  align-self:center!important;
+  position:absolute!important;right:4px!important;top:54px!important;
+  grid-column:auto!important;grid-row:auto!important;
+  width:min(28%,var(--nhi-image-width,220px))!important;
+  max-width:300px!important;min-width:70px!important;
+  margin:0!important;justify-self:auto!important;align-self:auto!important;
+  z-index:2!important;
+}
+html body #planBox .pcard .pfront.nhi-with-image > .nhi-card-details{
+  width:55%!important;max-width:55%!important;
 }
 html body #planBox .sdone .nhi-review-hard-button{
   min-height:38px!important;padding:8px 12px!important;
+}
+@media(max-width:699px){
+ html body #planBox .pcard .pfront.nhi-with-image > .card-illustration{
+   position:relative!important;grid-column:1/-1!important;grid-row:auto!important;
+   width:min(70%,var(--nhi-image-width,220px))!important;
+   right:auto!important;top:auto!important;
+   margin:10px auto!important;justify-self:center!important;
+ }
+ html body #planBox .pcard .pfront.nhi-with-image > .nhi-card-details{
+   width:100%!important;max-width:100%!important;
+ }
 }
 @media(max-width:520px){
  html body #planBox .pcard .pfront .nhi-english-v5 .nhi-en-head .nhi-en-main{
