@@ -596,7 +596,7 @@ section:not([hidden]) > .quiz, section:not([hidden]) > #cardWrap, .list > .row:n
 }
 </style>
 
-<script src="nhi-chat-voice-v1.js?v=20261117"></script><script src="hanja-v9.js?v=12"></script><script src="hanja-extra-v12.js"></script><script src="card-images-v11.js"></script><script src="nhi-google-images-v1.js?v=20261114-study-v7"></script><script src="nhi-hard-minimal-v1.js?v=20261120-in-card-v2"></script><script src="nhi-verified-pairs-20261117.js?v=1"></script><script src="nhi-daily-pairs.js?v=20261119-micro-v1"></script><script src="nhi-phrases-v5.js?v=20261119-daily-micro-v1"></script><script src="nhi-english-data-v6.js?v=20261113-reviewed-173"></script><script src="nhi-english-v5.js?v=20261115-v10-ipa-five"></script><script src="recorded-voices-v11.js?v=20261119-banmai-injoon-daily"></script>
+<script src="nhi-chat-voice-v1.js?v=20261117"></script><script src="hanja-v9.js?v=12"></script><script src="hanja-extra-v12.js"></script><script src="card-images-v11.js?v=20261120-edge-corner-resize"></script><script src="nhi-google-images-v1.js?v=20261114-study-v7"></script><script src="nhi-hard-minimal-v1.js?v=20261120-in-card-v2"></script><script src="nhi-verified-pairs-20261117.js?v=1"></script><script src="nhi-daily-pairs.js?v=20261119-micro-v1"></script><script src="nhi-phrases-v5.js?v=20261119-daily-micro-v1"></script><script src="nhi-english-data-v6.js?v=20261113-reviewed-173"></script><script src="nhi-english-v5.js?v=20261115-v10-ipa-five"></script><script src="recorded-voices-v11.js?v=20261119-banmai-injoon-daily"></script>
 <script src="qrcode.js" defer></script>
 <link rel="stylesheet" href="nhi-seven-fixes-20261117.css?v=1"><link rel="stylesheet" href="refresh-v9.css?v=13"><link rel="stylesheet" href="study-enhancements-v13.css?v=14"><link rel="stylesheet" href="nhi-updates-v1.css?v=1"><link rel="stylesheet" href="nhi-ai-resize-v2.css?v=1"><link rel="stylesheet" href="nhi-study-motion-v3.css?v=3"><link rel="stylesheet" href="nhi-interface-v4.css?v=4"><link rel="stylesheet" href="nhi-interface-v5.css?v=20261113-rollback-stable-v1"><link rel="stylesheet" href="nhi-seasons-v1.css?v=20261113-cartoon-soft-1">
 <link rel="stylesheet" href="nhi-living-garden-v1.css?v=20261113-cartoon-butterflies-v1">
@@ -1264,8 +1264,8 @@ html body #planBox .sdone .pstatus{
 }
 
 </style>
-<link rel="stylesheet" href="nhi-card-image-compact-v1.css?v=20261120-left-small-v1">
-<link rel="stylesheet" href="nhi-lesson-finish-v1.css?v=20261120-cute-speaker-review-r2">
+<link rel="stylesheet" href="nhi-card-image-compact-v1.css?v=20261120-half-center-resize-v2">
+<link rel="stylesheet" href="nhi-lesson-finish-v1.css?v=20261120-small-speaker-large-cat-v3">
 </head>
 <body>
 <header class="topbar" id="topbar">
@@ -4481,18 +4481,20 @@ html body #planBox .sdone .pstatus{
       var row = el('div', 'prow'), cur = current(L); row.appendChild(statusLine(L));
       hd.appendChild(row);
       var rs = (resume[L.id] || []).filter(alive);
+      var pendingSaved=resumeFull[L.id];
+      var hasPending=!!(pendingSaved&&pendingSaved.recordOnDone&&!pendingSaved.recorded);
       var alreadyStudied=(val('done',L.id)||[]).length>0;
       var notDue=!!cur && (cur.st==='next'||cur.st==='future');
-      var label = rs.length ? 'Tiếp tục (còn ' + rs.length + ' thẻ)' :
+      var label = hasPending ? 'Tiếp tục (chưa bấm Xong)' : rs.length ? 'Tiếp tục (còn ' + rs.length + ' thẻ)' :
         !cur ? 'Học lại' : notDue ? (alreadyStudied ? 'Học lại' : 'Chờ đến ngày học') :
         (cur.step ? 'Học ' + STEP[cur.step].toLowerCase() : 'Học ngay');
       var row2 = el('div', 'prow');
       var launch=lbtn('primary big', 'bolt', label, function () {
-        if(rs.length)return startLesson(L);
+        if(rs.length||hasPending)return startLesson(L);
         if(!cur||notDue)return start('free',ordered(L.ids),titleMain(L)+' · Học lại',L);
         return startLesson(L);
       });
-      if(notDue&&!alreadyStudied&&!rs.length){launch.disabled=true;launch.title='Bài mới sẽ mở học vào đúng ngày đến hạn';}
+      if(notDue&&!alreadyStudied&&!rs.length&&!hasPending){launch.disabled=true;launch.title='Bài mới sẽ mở học vào đúng ngày đến hạn';}
       row2.appendChild(launch);
       row2.appendChild(lbtn('ghost', 'edit', '⚙ Cài đặt bài', function () { openLessonSettings(L); }));
       var hd2 = hardIds(L.ids);
@@ -4502,7 +4504,7 @@ html body #planBox .sdone .pstatus{
       var modes=el('div','nhi-v2-lesson-modes');
       modes.appendChild(el('p','nhi-v2-source-label','Nguồn: '+titleMain(L)+' · '+L.ids.filter(alive).length+' thẻ'));
       var actions=el('div','nhi-v2-lesson-mode-buttons');
-      var early=!!cur&&(cur.st==='next'||cur.st==='future')&&!alreadyStudied&&!rs.length;
+      var early=!!cur&&(cur.st==='next'||cur.st==='future')&&!alreadyStudied&&!rs.length&&!hasPending;
       var flash=btn('primary','📇 Học flashcard',function(){startLesson(L);});
       if(early){flash.disabled=true;flash.title='Bài mới chỉ mở đúng ngày học, không tự học trước';}
       actions.appendChild(flash);
@@ -4521,7 +4523,8 @@ html body #planBox .sdone .pstatus{
     /* ---- study session (kept across reloads) ---- */
     function saveSess() {
       if (!sess) { lsSet(SKEY, ''); return; }
-      lsSet(SKEY, JSON.stringify({ kind: sess.kind, title: sess.title, lesson: sess.L ? sess.L.id : null, queue: sess.queue, pos: sess.pos, picked: sess.picked, again: sess.again, stats: sess.stats, recorded: !!sess.recorded, celebrated: !!sess.celebrated }));
+      lsSet(SKEY, JSON.stringify({ kind: sess.kind, title: sess.title, lesson: sess.L ? sess.L.id : null, queue: sess.queue, pos: sess.pos, picked: sess.picked, again: sess.again, stats: sess.stats, recorded: !!sess.recorded, celebrated: !!sess.celebrated,
+        recordOnDone: !!sess.recordOnDone }));
       ACTIVE_CARD.plan(sess);
     }
     var pendingCursor = null;
@@ -4559,7 +4562,7 @@ html body #planBox .sdone .pstatus{
         saveUi();
         renderMode();
         var kind = ['lesson', 'free', 'hard', 'english'].indexOf(nav.kind) >= 0 ? nav.kind : 'lesson';
-        start(kind, ids, titleMain(L), L, { pos: pos, recorded: pos >= ids.length });
+        start(kind, ids, titleMain(L), L, { pos: pos, recorded: false, recordOnDone: kind === 'lesson' });
         SHELL.cover(false);
       });
     }
@@ -4568,7 +4571,8 @@ html body #planBox .sdone .pstatus{
         var o = JSON.parse(lsGet(SKEY) || 'null'); if (!o || !o.queue) return;
         // a session on one of the daily lessons can only come back once those lessons have arrived
         if (!extrasTried && ((o.lesson && !BY_LESSON[o.lesson]) || o.queue.some(function (id) { return !ITEMS[id]; }))) return;
-        sess = { kind: o.kind, title: o.title, L: o.lesson ? BY_LESSON[o.lesson] || null : null, queue: o.queue.filter(function (id) { return ITEMS[id]; }), pos: o.pos || 0, flipped: false, again: o.again || {}, picked: o.picked || {}, spoken: -1, stats: o.stats || { known: 0, hard: 0, mid: 0 }, recorded: !!o.recorded, celebrated: !!o.celebrated };
+        sess = { kind: o.kind, title: o.title, L: o.lesson ? BY_LESSON[o.lesson] || null : null, queue: o.queue.filter(function (id) { return ITEMS[id]; }), pos: o.pos || 0, flipped: false, again: o.again || {}, picked: o.picked || {}, spoken: -1, stats: o.stats || { known: 0, hard: 0, mid: 0 }, recorded: !!o.recorded, celebrated: !!o.celebrated,
+          recordOnDone: !!o.recordOnDone || (o.kind === 'lesson' && !o.recorded) };
         // Do not hijack another learning mode while old lesson data is loading.
         // On a slow connection, the user may already have selected "Thẻ ghi nhớ".
         // Recover the deep-link only while the active mode is actually "Lịch học".
@@ -4590,7 +4594,9 @@ html body #planBox .sdone .pstatus{
       sess = { kind: kind, title: title, L: L || null, queue: ids.slice(), pos: pos,
         flipped: false, again: restored && restored.again || {}, picked: restored && restored.picked || {},
         spoken: -1, stats: restored && restored.stats || { known: 0, hard: 0, mid: 0 },
-        recorded: !!(restored && restored.recorded) };
+        recorded: !!(restored && restored.recorded),
+        celebrated: !!(restored && restored.celebrated),
+        recordOnDone: !!(restored && restored.recordOnDone) || kind === 'lesson' };
       expireUndo(); stopSpeech();
       anim = 'next'; saveSess(); render(); window.scrollTo({ top: 0, behavior: 'smooth' });
     }
@@ -4604,12 +4610,13 @@ html body #planBox .sdone .pstatus{
       // Optional replay must not become the saved *scheduled* lesson session.
       // Otherwise a later due-day study could resume a free run and fail to
       // record its scheduled review when completed.
-      if (sess.pos < sess.queue.length && sess.L && sess.kind !== 'free') {
+      if (sess.L && !sess.recorded && (sess.recordOnDone || (sess.pos < sess.queue.length && sess.kind !== 'free'))) {
         resume[sess.L.id] = sess.queue.slice(sess.pos);
         resumeFull[sess.L.id] = {
           kind: sess.kind, queue: sess.queue.slice(), pos: sess.pos, title: sess.title,
           picked: Object.assign({}, sess.picked), again: Object.assign({}, sess.again),
-          stats: Object.assign({}, sess.stats), recorded: !!sess.recorded
+          stats: Object.assign({}, sess.stats), recorded: !!sess.recorded,
+          celebrated: !!sess.celebrated, recordOnDone: !!sess.recordOnDone
         };
         save();
       }
@@ -4916,6 +4923,7 @@ html body #planBox .sdone .pstatus{
       if(ratingPending&&pendingRatingFinish){pendingRatingFinish();if(d<0)go(-2);return;}
       var n = sess.pos + d; if (n < 0) return;
       expireUndo(); stopSpeech();
+      if(n >= sess.queue.length && d>0 && !sess.celebrated)playVictoryFromGesture();
       ++ratingToken;
       if(window.NHI_HARD_MASCOT)window.NHI_HARD_MASCOT.clear();
       sess.selectedKo=''; sess.pos = n; sess.spoken=-1; sess.flipped = false; sess.hanja = false; sess.editing = false; sess.imagePicker = false;
@@ -4944,6 +4952,9 @@ html body #planBox .sdone .pstatus{
         react('hard',document.querySelector('#planBox .pcard'));
         return;
       }
+      // Start the reward track inside the final rating's trusted tap/key press,
+      // before the 430 ms transition loses browser audio permission.
+      if(pos===s.queue.length-1 && !s.celebrated)playVictoryFromGesture();
       var token=++ratingToken,animated=!!(card&&card.isConnected&&prefs.fx&&!reduceMotion());
       ratingPending=animated;
       if(animated){card.classList.add('nhi-rating-busy','nhi-rate-'+k);var button=card.querySelector('.prate .'+k);if(button)button.setAttribute('aria-pressed','true');}
@@ -4961,8 +4972,26 @@ html body #planBox .sdone .pstatus{
       pendingRatingFinish=finish;
       if(animated)setTimeout(finish,430);else finish();
     }
-    var victoryTrack=null;
+    var victoryTrack=null, victoryMusicRequested=false;
+    function playVictoryFromGesture(){
+      if(victoryMusicRequested)return;
+      victoryMusicRequested=true;
+      try{
+        if(!victoryTrack){
+          victoryTrack=new Audio('audio/ui/lesson-finish.mp3');
+          victoryTrack.preload='auto';
+        }
+        if(victoryTrack.ended)victoryTrack.currentTime=0;
+        var started=victoryTrack.play();
+        if(started&&typeof started.catch==='function')started.catch(function(){
+          victoryMusicRequested=false;
+          if(document.querySelector('#planBox .sdone'))
+            toast('Trình duyệt yêu cầu chạm loa để phát nhạc.');
+        });
+      }catch(e){victoryMusicRequested=false;}
+    }
     function stopVictoryTrack(){
+      victoryMusicRequested=false;
       if(victoryTrack){victoryTrack.pause();victoryTrack.currentTime=0;}
       var orphan=document.querySelector('body>.nhi-victory-speaker');
       if(orphan)orphan.remove();
@@ -5059,7 +5088,8 @@ html body #planBox .sdone .pstatus{
       if (window.NHI_VICTORY_CAT) window.NHI_VICTORY_CAT.attach(cat);
       p.appendChild(el('h2', null, 'Yeahhh đã học xong, Nhi sắp trở thành phú bà rồi ^^'));
       p.appendChild(el('p', 'nhi-victory-message', 'Tiền rơi, kiến thức tăng! ✨💸'));
-      p.appendChild(el('p', 'listinfo', s.title));
+      // Lesson title is omitted from the reward screen; the GIF already
+      // contains the celebration and no redundant "Bài ngày … Học mới/Học lại".
       var tiles = el('div', 'tiles');
       [['h', 'hard', 'Khó'], ['m', 'mid', 'Bình thường']].forEach(function (x) { var t = el('div', 'tile2 ' + x[0]); t.appendChild(el('b', null, s.stats[x[1]] || 0)); t.appendChild(document.createTextNode(x[2])); tiles.appendChild(t); });
       p.appendChild(tiles);
@@ -5112,20 +5142,26 @@ html body #planBox .sdone .pstatus{
       if(oldSpeaker)oldSpeaker.remove();
       document.body.appendChild(speaker);
       if(undoHistory.length)p.appendChild(btn('pundo','↶ Hoàn tác',undoDelete,'Khôi phục thẻ vừa xóa (Ctrl+Z)'));
-      if (s.kind === 'lesson' && s.L && !s.recorded) {
-        var pendingRound = current(s.L);
-        // Viewing the lesson, entering a session or reviewing ahead of its
-        // scheduled date does not earn a completed study round.
-        if (pendingRound && pendingRound.due <= today()) {
-          var dn = (val('done', s.L.id) || []).slice();
-          if (dn.length < OFFSETS.length) {
-            dn.push(today()); put('done', s.L.id, dn);
-          }
-          s.recorded = true; delete resume[s.L.id]; delete resumeFull[s.L.id];
-          save(); saveSess();
-        }
+      // Merely arriving at the reward scene does NOT mark a lesson as studied.
+      // Only the explicit "Xong" button commits the due review round.
+      if(s.recordOnDone && s.L && !s.recorded){
+        p.appendChild(el('p','nhi-await-confirm','Bấm “Xong” để lưu hoàn thành bài học'));
       }
-      if (s.kind === 'lesson' && s.L) { var nx = current(s.L); p.appendChild(el('p', 'pstatus done', nx ? '✓ ' + STEP[nx.step] + ' · ' + vn(nx.due, true) : '✓ Đã hoàn thành cả 5 lần.')); }
+      function confirmCompletion(){
+        if(s.recordOnDone && s.L && !s.recorded){
+          var pendingRound=current(s.L);
+          if(pendingRound && pendingRound.due <= today()){
+            var dates=(val('done',s.L.id)||[]).slice();
+            if(dates.length<OFFSETS.length){
+              dates.push(today());put('done',s.L.id,dates);
+            }
+            s.recorded=true;
+          }
+          delete resume[s.L.id];delete resumeFull[s.L.id];
+          save();
+        }
+        stopVictoryTrack();sess=null;saveSess();render();
+      }
       // Always render a dedicated review action; include grades from this
       // session even when the persistent "hard" list has not been restored.
       var candidates=(s.L&&s.L.ids?s.L.ids:s.queue).concat(s.queue);
@@ -5140,35 +5176,32 @@ html body #planBox .sdone .pstatus{
           if(s.picked[i]==='hard'&&alive(id)&&!val('known',id)&&difficult.indexOf(id)<0)difficult.push(id);
         });
       }
-      var hardReviewLine=el('div','nhi-hard-review-line');
+      var row = el('div', 'prow nhi-victory-actions');
+      var replayButton=btn('primary nhi-replay-button','↻ Học lại tất cả',function(){
+        var again=s.queue.filter(alive);
+        if(!again.length){toast('Học phần không còn thẻ để học lại.');return;}
+        start('free',again,s.title,s.L,{recordOnDone:!!s.recordOnDone});
+      });
+      row.appendChild(replayButton);
       var hardReview=btn('primary nhi-review-hard-button','↻ Ôn lại thẻ khó ('+difficult.length+')',function(){
         if(!difficult.length)return;
-        stopVictoryTrack();
-        start('hard',difficult,s.title+' · Ôn thẻ khó',s.L);
+        start('hard',difficult,s.title,s.L,{recordOnDone:!!s.recordOnDone});
       });
       hardReview.disabled=!difficult.length;
-      hardReview.title=difficult.length?'Ôn ngay các thẻ đã chọn Khó':'Chưa có thẻ Khó trong bài này';
-      hardReviewLine.appendChild(hardReview);
-      p.appendChild(hardReviewLine);
-      var enids=(s.L?s.L.ids:s.queue).filter(function(id,i,a){return a.indexOf(id)===i&&alive(id)&&val('enHard',id);});if(enids.length)p.appendChild(btn('primary','Ôn chưa nhớ tiếng Anh ('+enids.length+')',function(){start('english',enids,s.title+' · chưa nhớ tiếng Anh',s.L);}));
-      var row = el('div', 'prow');
-      var replayButton=btn('primary nhi-replay-button', '↻ Học lại tất cả thẻ', function () {
-        var again=s.queue.filter(alive);
-        if(!again.length){toast('Học phần hiện không có thẻ để học lại.');return;}
-        // This is voluntary practice, not an extra scheduled review round.
-        start('free',again,s.title.replace(/ · Học lại$/,'')+' · Học lại',s.L);
-      });row.appendChild(replayButton);
-      row.appendChild(lbtn('ghost', 'left', 'Xem lại thẻ cuối', function () { stopVictoryTrack();s.pos = Math.max(0, s.queue.length - 1); anim = 'prev'; saveSess(); render(); }));
-      row.appendChild(btn('ghost', 'Xong', function () { stopVictoryTrack();sess = null; saveSess(); render(); }));
-      p.appendChild(row); v.appendChild(p);
+      hardReview.title=difficult.length?'Ôn lại thẻ đã chọn Khó':'Bài này chưa có thẻ Khó';
+      row.appendChild(hardReview);
+      row.appendChild(btn('primary nhi-done-confirm','✓ Xong',confirmCompletion));
+      p.appendChild(row);
+      var enids=(s.L?s.L.ids:s.queue).filter(function(id,i,a){return a.indexOf(id)===i&&alive(id)&&val('enHard',id);});
+      if(enids.length)p.appendChild(btn('ghost nhi-victory-english','Ôn chưa nhớ tiếng Anh ('+enids.length+')',function(){
+        start('english',enids,s.title,s.L,{recordOnDone:!!s.recordOnDone});
+      }));
+      v.appendChild(p);
       if (!s.celebrated) {
         s.celebrated = true; saveSess();
-        // Auto-play the completion MUSIC only. Browser autoplay policy may
-        // require a deliberate tap on the speaker after this attempt.
-        prepareVictoryTrack().play().catch(function(){
-          reflectSpeaker();
-          toast('Trình duyệt chặn tự phát nhạc; chạm loa dễ thương để nghe.');
-        });
+        // Already started from the final card's gesture when possible.
+        // Fallback for a restored/automatic transition; cat stays silent.
+        if(!victoryMusicRequested)playVictoryFromGesture();
         if (prefs.fx && !reduceMotion()) {
           if (window.NHI_FIREWORKS && window.NHI_FIREWORKS.launch) window.NHI_FIREWORKS.launch();
           else confetti();
