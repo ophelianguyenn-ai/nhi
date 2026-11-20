@@ -453,6 +453,7 @@ try{
    const ids=window.NHI_PLAN_V2?.snapshot?.().lessons||[];
    const small=ids.filter(x=>x.ids?.length>=1&&x.ids?.length<=18).sort((a,b)=>a.ids.length-b.ids.length)[0];
    if(!small)throw Error('No short lesson for finish-screen regression');
+   const doneBefore=(JSON.parse(localStorage.getItem('viko-plan-v1')||'{}').done?.[small.id]?.v||[]).length;
    window.NHI_PLAN_V2.startLessonById(small.id);
    let stepped=0;
    while(stepped<250&&!document.querySelector('#planBox .sdone')){
@@ -460,9 +461,14 @@ try{
     if(!next)break;
     next.click();stepped++;
    }
-   return {lesson:small.id,steps:stepped,completed:!!document.querySelector('#planBox .sdone')};
+   const doneOnArrival=(JSON.parse(localStorage.getItem('viko-plan-v1')||'{}').done?.[small.id]?.v||[]).length;
+   return {lesson:small.id,steps:stepped,completed:!!document.querySelector('#planBox .sdone'),
+     doneBefore,doneOnArrival,confirmationPending:!!document.querySelector('#planBox .nhi-await-confirm')};
   });
   assert(finish.completed,'Unable to reach the completion screen: '+JSON.stringify(finish));
+  assert(finish.doneOnArrival===finish.doneBefore,
+   'A lesson must NOT count as completed before pressing Xong: '+JSON.stringify(finish));
+  assert(finish.confirmationPending,'Unconfirmed lesson must show Xong reminder');
   await page.waitForSelector('#planBox .sdone .nhi-original-gif',{timeout:9000});
   await page.waitForFunction(()=>document.querySelector('#planBox .sdone .nhi-original-gif')?.complete,
    {timeout:8000});
@@ -491,7 +497,10 @@ try{
      bgColor:getComputedStyle(container).backgroundColor,
      buttons:[...container.querySelectorAll('button')].filter(b=>!b.hidden&&getComputedStyle(b).display!=='none')
       .map(b=>({label:b.textContent.trim(),...bounds(b.getBoundingClientRect())})),
-     catFocusable:img.getAttribute('role')==='button',gifSrc:img.getAttribute('src')};
+     catFocusable:img.getAttribute('role')==='button',gifSrc:img.getAttribute('src'),
+     speakerWidth:Math.round(document.querySelector('body>.nhi-victory-speaker')?.getBoundingClientRect().width||0),
+     hardReviewInRow:!!container.querySelector('.nhi-victory-actions .nhi-review-hard-button'),
+     lastCardReviewButton:!![...container.querySelectorAll('button')].find(b=>b.textContent.includes('Xem lại thẻ cuối'))};
    });
    measures.push(m);
    fs.mkdirSync('/tmp/nhi-site-audit',{recursive:true});
@@ -503,6 +512,8 @@ try{
     'GIF bounds are clipped by scene: '+JSON.stringify(m));
    assert(m.catFocusable&&m.buttons.some(b=>b.label.includes('Học lại'))&&m.buttons.some(b=>b.label.includes('Xong')),
     'Cat click or completion buttons missing: '+JSON.stringify(m));
+   assert(!m.lastCardReviewButton&&m.hardReviewInRow&&m.speakerWidth>=40&&m.speakerWidth<=50,
+    'Finish actions or speaker dimensions incorrect: '+JSON.stringify(m));
    if(width>=780){
     assert(m.documentHeight<=height+10&&m.bodyHeight<=height+10,
      'Desktop completion screen requires scrolling: '+JSON.stringify(m));
@@ -540,6 +551,14 @@ try{
   });
   assert(pixels.sideDifference<=4,'Visible GIF rectangle edge mismatch: '+JSON.stringify(pixels));
   console.log('NHI REWARD SCREEN METRICS',JSON.stringify({finish,measures,pixels}));
+  const confirmed=await page.evaluate(lessonId=>{
+    const read=()=>((JSON.parse(localStorage.getItem('viko-plan-v1')||'{}').done||{})[lessonId]?.v||[]).length;
+    const prior=read();
+    document.querySelector('#planBox .nhi-done-confirm').click();
+    return {prior,after:read(),stillAtEnd:!!document.querySelector('#planBox .sdone')};
+  },finish.lesson);
+  assert(confirmed.prior===finish.doneBefore&&confirmed.after===finish.doneBefore+1&&!confirmed.stillAtEnd,
+    'Only clicking Xong should complete the due study round: '+JSON.stringify({finish,confirmed}));
   return JSON.stringify({sizes:measures.map(x=>({viewport:x.viewport,img:x.img,documentHeight:x.documentHeight,
     backgrounds:x.bgColor})),pixelCorners:pixels.corners});
  });
