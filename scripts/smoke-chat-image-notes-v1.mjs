@@ -117,7 +117,7 @@ try{
  console.log('SMOKE_STEP 12 line96');
  await page.evaluate(()=>{
    const m=document.createElement('div');m.className='aimsg ai';
-   m.textContent='예문 첫째 (Ví dụ một)\\n예문 둘째 (Ví dụ hai)';
+   m.textContent='예문 첫째 (Ví dụ một)\n예문 둘째 (Ví dụ hai)';
    document.getElementById('aiLog').appendChild(m);
  });
  console.log('SMOKE_STEP 13 line101');
