@@ -49,6 +49,35 @@ try{
    'Click did not show direct edge resize handles');
  assert(!(await page.$('#planBox .nhi-image-adjust')),
    'Legacy image size slider panel should not exist');
+ assert(await page.$eval('#planBox .nhi-image-move-y',e=>getComputedStyle(e).display)!=='none',
+   'Image vertical move grip must be visible after selecting the photo');
+ const preserved=await page.evaluate(()=>{
+   const front=document.querySelector('#planBox .pfront');
+   const box=document.querySelector('#planBox .nhi-english-v5');
+   const note=document.querySelector('#planBox .nhi-card-note');
+   const selectors=['#planBox .pcard>.prate>.hard','#planBox .pcard>.prate>.nhi-prev-v3',
+     '#planBox .pcard>.prate>.nhi-next-v3'];
+   const measure=()=>({
+     buttons:selectors.map(q=>document.querySelector(q).getBoundingClientRect().width),
+     english:box?.getBoundingClientRect().width||0,
+     note:note?.getBoundingClientRect().width||0,
+     englishSize:box?getComputedStyle(box.querySelector('.nhi-en-translation')).fontSize:'',
+     noteSize:note?getComputedStyle(note).fontSize:''
+   });
+   const withPhoto=measure();
+   front.classList.remove('nhi-with-image');
+   const normal=measure();
+   front.classList.add('nhi-with-image');
+   return {withPhoto,normal};
+ });
+ console.log('PRESERVED_PHOTO_SIZES',JSON.stringify(preserved));
+ assert(preserved.withPhoto.buttons.every((v,i)=>Math.abs(v-preserved.normal.buttons[i])<2),
+   'Lùi, Khó, Tiến changed dimensions with photo: '+JSON.stringify(preserved));
+ assert(preserved.withPhoto.englishSize===preserved.normal.englishSize &&
+   preserved.withPhoto.noteSize===preserved.normal.noteSize,
+   'Bilingual note fonts shrank when a photo appeared: '+JSON.stringify(preserved));
+ assert(Math.abs(preserved.withPhoto.english-preserved.normal.english)<10,
+   'English note panel width shrank when a photo appeared: '+JSON.stringify(preserved));
  const fixedCardHeight=await page.$eval('#planBox .pcard',e=>e.getBoundingClientRect().height);
  assert(fixedCardHeight>520,'Flashcard with right image must be taller: '+fixedCardHeight);
  const placement=await page.evaluate(()=>{
@@ -117,6 +146,12 @@ try{
  }));
  assert(offsets&&offsets.offsetX>=20,
    'Image X position was not saved by dragging: '+JSON.stringify(offsets));
+ await drag('#planBox .nhi-image-move-y',0,34,65);
+ const moved=await page.evaluate(id=>JSON.parse(localStorage.getItem('viko-plan-v1')).img?.[id]?.v,cardID);
+ assert(moved&&moved.offsetY>=offsets.offsetY+30 &&
+   moved.width===offsets.width && moved.height===offsets.height,
+   'Up/down photo grip must move the picture without resizing it: '+JSON.stringify({offsets,moved}));
+ console.log('PHOTO_MOVED_VERTICALLY',JSON.stringify({from:offsets.offsetY,to:moved.offsetY}));
  const leftLayout=await page.evaluate(()=>{
    const korean=document.querySelector('#planBox .nhi-ko-line');
    const photo=document.querySelector('#planBox .card-illustration');
@@ -230,9 +265,9 @@ try{
  console.log('SMOKE_STEP 17 line130');
  await page.waitForSelector('#planBox .pcard',{timeout:15000});
  const saved=await page.evaluate(id=>JSON.parse(localStorage.getItem('viko-plan-v1')).img[id].v,cardID);
- assert(saved.width===offsets.width&&saved.height===offsets.height&&
-   saved.offsetX===offsets.offsetX&&saved.offsetY===offsets.offsetY,
-   'Resized image dimensions and position did not survive reload: '+JSON.stringify({saved,offsets}));
+ assert(saved.width===moved.width&&saved.height===moved.height&&
+   saved.offsetX===moved.offsetX&&saved.offsetY===moved.offsetY,
+   'Resized image dimensions and vertical position did not survive reload: '+JSON.stringify({saved,moved}));
  assert(errors.length===0,'Page errors: '+errors.join('; '));
  console.log('SELECTABLE CHAT AND NOTES UX PASS',JSON.stringify({note,grid:[before,after],height:afterCorner.height,voice:true,anchor}));
 }catch(err){
