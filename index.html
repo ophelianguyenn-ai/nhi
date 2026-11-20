@@ -1085,8 +1085,8 @@ body.nhi-in-study #nhiV2TopNav,body.nhi-in-study .nhi-hide-while-flipping,body.n
 /* Approved VI–KO highlights: seven reference colors + a transparent no-fill state.
    Red is softened, and pink matches the sample image. No black or white highlights. */
 :root{
-  --nhi-pair-1:#f48f92;--nhi-pair-2:#fb99cb;--nhi-pair-3:#fefb6a;--nhi-pair-4:#febd69;
-  --nhi-pair-5:#a7f5ac;--nhi-pair-6:#70d4fc;--nhi-pair-7:#e1b5f4;
+  --nhi-pair-1:#f7a5a8;--nhi-pair-2:#fcadd5;--nhi-pair-3:#fefb6a;--nhi-pair-4:#febd69;
+  --nhi-pair-5:#a7f5ac;--nhi-pair-6:#91e1fd;--nhi-pair-7:#e1b5f4;
 }
 .ph.nhi-phrase-selected{
   /* Dark lettering stays readable over all seven approved color highlights. */
@@ -1260,6 +1260,97 @@ html body #planBox .sdone .pstatus{
   height:auto!important;max-height:65dvh!important;width:auto!important;
  }
  html body #planBox .sdone{max-height:none!important}
+}
+
+
+/* 2026-11-20: Keep core study languages geometrically centered regardless of
+   dictionaries, side buttons, saved notes or optional illustration. */
+html body #planBox .pcard .pfront,
+html body #planBox .pcard .pfront.nhi-with-image{
+  display:grid!important;grid-template-columns:minmax(0,1fr)!important;
+  justify-items:center!important;align-items:start!important;
+  min-width:0!important;width:100%!important;
+}
+html body #planBox .pcard .pfront > :is(.nhi-ko-line,.vi-under,.prompt,.nhi-card-details,.nhi-card-note,.nhi-english-v5,.hanja,.card-illustration){
+  grid-column:1 / -1!important;min-width:0!important;
+  justify-self:center!important;margin-inline:auto!important;
+}
+html body #planBox .pcard .pfront .nhi-ko-line{
+  display:grid!important;grid-template-columns:minmax(0,1fr)!important;
+  grid-row:auto!important;grid-column:1/-1!important;
+  width:100%!important;max-width:100%!important;
+  justify-items:center!important;align-items:center!important;
+}
+html body #planBox .pcard .pfront .nhi-ko-line .answer{
+  grid-column:1/-1!important;grid-row:1!important;
+  min-width:0!important;width:100%!important;max-width:100%!important;
+  margin-inline:auto!important;text-align:center!important;
+}
+html body #planBox .pcard .pfront .nhi-ko-line .nhi-card-dictionaries{
+  position:static!important;transform:none!important;
+  grid-column:1/-1!important;grid-row:2!important;
+  justify-self:center!important;display:flex!important;
+  margin:3px auto 0!important;
+}
+html body #planBox .pcard .pfront > .vi-under,
+html body #planBox .pcard .pfront > .prompt,
+html body #planBox .pcard .pfront > .hanja{
+  width:100%!important;max-width:100%!important;
+  margin-inline:auto!important;text-align:center!important;
+}
+html body #planBox .pcard .pfront > .nhi-card-details{
+  display:flex!important;flex-direction:column!important;align-items:center!important;
+  justify-items:center!important;width:100%!important;max-width:100%!important;
+  margin-inline:auto!important;
+}
+html body #planBox .pcard .pfront .nhi-card-note{
+  width:max-content!important;max-width:min(100%,72ch)!important;
+  min-width:0!important;align-self:center!important;justify-self:center!important;
+  margin-inline:auto!important;text-align:center!important;
+}
+html body #planBox .pcard .pfront .nhi-english-v5{
+  box-sizing:border-box!important;grid-column:1/-1!important;
+  width:min(100%,74ch)!important;max-width:100%!important;
+  min-width:0!important;margin-inline:auto!important;
+  align-self:center!important;justify-self:center!important;text-align:center!important;
+}
+html body #planBox .pcard .pfront .nhi-english-v5 .nhi-en-head{
+  position:relative!important;display:block!important;
+  width:100%!important;max-width:100%!important;text-align:center!important;
+}
+html body #planBox .pcard .pfront .nhi-english-v5 .nhi-en-head .nhi-en-main{
+  display:block!important;grid-area:auto!important;
+  width:100%!important;max-width:100%!important;padding:0 46px!important;
+  margin-inline:auto!important;text-align:center!important;box-sizing:border-box!important;
+}
+html body #planBox .pcard .pfront .nhi-english-v5 .nhi-en-head .nhi-en-head-actions{
+  position:absolute!important;right:0!important;top:0!important;
+  margin:0!important;grid-area:auto!important;
+}
+html body #planBox .pcard .pfront .nhi-english-v5 :is(.nhi-en-translation,.nhi-en-ipa,.nhi-en-status){
+  text-align:center!important;
+}
+html body #planBox .pcard .pfront.nhi-with-image > .card-illustration{
+  position:relative!important;grid-column:1/-1!important;grid-row:auto!important;
+  width:min(80%,var(--nhi-image-width,220px))!important;
+  max-width:300px!important;min-width:0!important;
+  margin:8px auto 0!important;justify-self:center!important;
+  align-self:center!important;
+}
+html body #planBox .pcard.nhi-mascot-active .pfront{
+  padding-inline:var(--nhi-stage-horizontal-padding,inherit)!important;
+}
+html body #planBox .sdone .nhi-review-hard-button{
+  min-height:38px!important;padding:8px 12px!important;
+}
+@media(max-width:520px){
+ html body #planBox .pcard .pfront .nhi-english-v5 .nhi-en-head .nhi-en-main{
+   padding:0 32px!important;
+ }
+ html body #planBox .pcard .pfront .nhi-english-v5 .nhi-en-head .nhi-en-head-actions{
+   position:static!important;display:flex!important;justify-content:center!important;
+   margin:3px auto!important;
+ }
 }
 
 </style>
@@ -4518,7 +4609,7 @@ html body #planBox .sdone .pstatus{
     /* ---- study session (kept across reloads) ---- */
     function saveSess() {
       if (!sess) { lsSet(SKEY, ''); return; }
-      lsSet(SKEY, JSON.stringify({ kind: sess.kind, title: sess.title, lesson: sess.L ? sess.L.id : null, queue: sess.queue, pos: sess.pos, picked: sess.picked, again: sess.again, stats: sess.stats, recorded: !!sess.recorded, celebrated: !!sess.celebrated }));
+      lsSet(SKEY, JSON.stringify({ kind: sess.kind, title: sess.title, lesson: sess.L ? sess.L.id : null, queue: sess.queue, pos: sess.pos, picked: sess.picked, again: sess.again, stats: sess.stats, hardSpaced: sess.hardSpaced || {}, recorded: !!sess.recorded, celebrated: !!sess.celebrated }));
       ACTIVE_CARD.plan(sess);
     }
     var pendingCursor = null;
@@ -4565,7 +4656,7 @@ html body #planBox .sdone .pstatus{
         var o = JSON.parse(lsGet(SKEY) || 'null'); if (!o || !o.queue) return;
         // a session on one of the daily lessons can only come back once those lessons have arrived
         if (!extrasTried && ((o.lesson && !BY_LESSON[o.lesson]) || o.queue.some(function (id) { return !ITEMS[id]; }))) return;
-        sess = { kind: o.kind, title: o.title, L: o.lesson ? BY_LESSON[o.lesson] || null : null, queue: o.queue.filter(function (id) { return ITEMS[id]; }), pos: o.pos || 0, flipped: false, again: o.again || {}, picked: o.picked || {}, spoken: -1, stats: o.stats || { known: 0, hard: 0, mid: 0 }, recorded: !!o.recorded, celebrated: !!o.celebrated };
+        sess = { kind: o.kind, title: o.title, L: o.lesson ? BY_LESSON[o.lesson] || null : null, queue: o.queue.filter(function (id) { return ITEMS[id]; }), pos: o.pos || 0, flipped: false, again: o.again || {}, picked: o.picked || {}, spoken: -1, stats: o.stats || { known: 0, hard: 0, mid: 0 }, hardSpaced: o.hardSpaced || {}, recorded: !!o.recorded, celebrated: !!o.celebrated };
         // Do not hijack another learning mode while old lesson data is loading.
         // On a slow connection, the user may already have selected "Thẻ ghi nhớ".
         // Recover the deep-link only while the active mode is actually "Lịch học".
@@ -4586,6 +4677,7 @@ html body #planBox .sdone .pstatus{
       sess = { kind: kind, title: title, L: L || null, queue: ids.slice(), pos: pos,
         flipped: false, again: restored && restored.again || {}, picked: restored && restored.picked || {},
         spoken: -1, stats: restored && restored.stats || { known: 0, hard: 0, mid: 0 },
+        hardSpaced: restored && restored.hardSpaced || {},
         recorded: !!(restored && restored.recorded) };
       expireUndo(); stopSpeech();
       anim = 'next'; saveSess(); render(); window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -4604,7 +4696,7 @@ html body #planBox .sdone .pstatus{
         resumeFull[sess.L.id] = {
           kind: sess.kind, queue: sess.queue.slice(), pos: sess.pos, title: sess.title,
           picked: Object.assign({}, sess.picked), again: Object.assign({}, sess.again),
-          stats: Object.assign({}, sess.stats), recorded: !!sess.recorded
+          stats: Object.assign({}, sess.stats), hardSpaced: Object.assign({}, sess.hardSpaced || {}), recorded: !!sess.recorded
         };
         save();
       }
@@ -4929,6 +5021,13 @@ html body #planBox .sdone .pstatus{
         ++ratingToken;ratingPending=false;pendingRatingFinish=null;
         s.stats.hard=(s.stats.hard||0)+1;s.picked[pos]='hard';
         put('rate',id,'hard');put('hard',id,addDays(today(),1));window.dispatchEvent(new CustomEvent('nhi:review',{detail:{id:id,grade:'hard',lesson:s.L&&s.L.id,practice:s.kind!=='lesson'}}));
+        // Spaced reinforcement: one later repeat per hard card in this run,
+        // with up to three different cards in between. No forced checkpoint.
+        if((s.kind==='lesson'||s.kind==='free')&&!(s.hardSpaced||{})[id]){
+          s.hardSpaced=s.hardSpaced||{};
+          s.hardSpaced[id]=1;
+          s.queue.splice(Math.min(s.queue.length,pos+4),0,id);
+        }
         haptic([14,40,14]);saveSess();render();
         react('hard',document.querySelector('#planBox .pcard'));
         return;
@@ -5063,6 +5162,15 @@ html body #planBox .sdone .pstatus{
       if (s.kind === 'lesson' && s.L) { var nx = current(s.L); p.appendChild(el('p', 'pstatus done', nx ? '✓ ' + STEP[nx.step] + ' · ' + vn(nx.due, true) : '✓ Đã hoàn thành cả 5 lần.')); }
       var enids=(s.L?s.L.ids:s.queue).filter(function(id,i,a){return a.indexOf(id)===i&&alive(id)&&val('enHard',id);});if(enids.length)p.appendChild(btn('primary','Ôn chưa nhớ tiếng Anh ('+enids.length+')',function(){start('english',enids,s.title+' · chưa nhớ tiếng Anh',s.L);}));
       var row = el('div', 'prow');
+      var hardReviewIds=(s.L?s.L.ids:s.queue).filter(function(id,i,a){
+        return a.indexOf(id)===i&&alive(id)&&!!val('hard',id);
+      });
+      if(hardReviewIds.length){
+        row.appendChild(btn('primary nhi-review-hard-button','Ôn lại thẻ khó ('+hardReviewIds.length+')',function(){
+          // A voluntary hard-only run never counts as another scheduled round.
+          start('hard',hardReviewIds,s.title.replace(/ · Ôn thẻ khó$/,'')+' · Ôn thẻ khó',s.L);
+        },'Ôn riêng các thẻ vẫn được đánh dấu Khó'));
+      }
       var replayButton=btn('primary nhi-replay-button', '↻ Học lại tất cả thẻ', function () {
         var again=s.queue.filter(alive);
         if(!again.length){toast('Học phần hiện không có thẻ để học lại.');return;}
