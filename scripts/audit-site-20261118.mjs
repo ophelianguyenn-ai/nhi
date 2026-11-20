@@ -567,11 +567,11 @@ try{
     btn.click();
     const after=read();
     const remaining=document.querySelector('#planBox .nhi-mark-unlearned');
-    const round=document.querySelector('#planBox .nhi-review-round');
-    return {before,after,hasRollbackButton:!!remaining,round:round?.textContent?.trim()};
+    const current=document.querySelector('#planBox .ppage .pstatus');
+    return {before,after,hasRollbackButton:!!remaining,status:current?.textContent?.trim()};
   },finish.lesson);
   assert(reverted.before===confirmed.after&&reverted.after===confirmed.prior&&
-         !reverted.hasRollbackButton&&reverted.round==='1',
+         !reverted.hasRollbackButton&&/Học mới/i.test(reverted.status||''),
     'Chưa học bài này must undo only the last recorded study round: '+JSON.stringify(reverted));
   return JSON.stringify({sizes:measures.map(x=>({viewport:x.viewport,img:x.img,documentHeight:x.documentHeight,
     backgrounds:x.bgColor})),pixelCorners:pixels.corners,reverted});

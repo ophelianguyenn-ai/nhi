@@ -313,6 +313,8 @@ html body #planBox .pcard:has(.pfront.nhi-with-image)>.prate .pundo{
    previous, Khó, next must have equal grid slots in the left lane. */
 html body #planBox .pcard:has(.pfront.nhi-with-image)>.prate.nhi-rating-v3{
  display:grid!important;
+ /* Override the legacy .nhi-side-art horizontal translation. */
+ transform:none!important;translate:none!important;
  grid-template-columns:repeat(3,minmax(0,1fr))!important;
  align-content:center!important;align-items:center!important;justify-content:center!important;
 }
