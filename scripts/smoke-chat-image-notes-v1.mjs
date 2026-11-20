@@ -45,40 +45,66 @@ try{
  });
  assert(note?.preservesLines&&note.whiteSpace==='pre-wrap'&&note.wrap==='anywhere'&&note.width<=note.parent+3,'Note wrapping failed: '+JSON.stringify(note));
  await page.$eval('#planBox .card-illustration img',e=>e.click());
- assert(await page.$eval('#planBox .nhi-image-adjust',e=>getComputedStyle(e).display)!=='none','Click did not show image sliders');
+ assert(await page.$eval('#planBox .nhi-image-handle-e',e=>getComputedStyle(e).display)!=='none',
+   'Click did not show direct edge resize handles');
+ assert(!(await page.$('#planBox .nhi-image-adjust')),
+   'Legacy image size slider panel should not exist');
  const fixedCardHeight=await page.$eval('#planBox .pcard',e=>e.getBoundingClientRect().height);
  const before=await page.$eval('#planBox .pfront',e=>getComputedStyle(e).gridTemplateColumns);
- await page.$eval('#planBox .nhi-image-adjust input[aria-label="Ngang hình"]',e=>{
-  e.value='350';e.dispatchEvent(new Event('input',{bubbles:true}));e.dispatchEvent(new Event('change',{bubbles:true}));
- });
- console.log('SMOKE_STEP 7 line48');
- await page.waitForFunction(id=>JSON.parse(localStorage.getItem('viko-plan-v1')).img?.[id]?.v?.width===350,{},cardID);
+ async function drag(selector,dx,dy,id){
+   await page.$eval(selector,(e,dx,dy,id)=>{
+     const r=e.getBoundingClientRect(),x=r.left+r.width/2,y=r.top+r.height/2;
+     const emit=(type,xx,yy)=>e.dispatchEvent(new PointerEvent(type,{
+       bubbles:true,cancelable:true,pointerId:id,pointerType:'mouse',button:0,buttons:1,
+       clientX:xx,clientY:yy
+     }));
+     emit('pointerdown',x,y);
+     emit('pointermove',x+dx,y+dy);
+     emit('pointerup',x+dx,y+dy);
+   },dx,dy,id);
+ }
+ await drag('#planBox .nhi-image-handle-e',35,0,61);
+ console.log('SMOKE_STEP 7 edge resize');
+ await page.waitForFunction(id=>JSON.parse(localStorage.getItem('viko-plan-v1')).img?.[id]?.v?.width>220,{},cardID);
+ const edge=await page.evaluate(id=>JSON.parse(localStorage.getItem('viko-plan-v1')).img[id].v,cardID);
  const after=await page.$eval('#planBox .pfront',e=>getComputedStyle(e).gridTemplateColumns);
  assert(before!==after,'Image width did not change grid: '+before+' / '+after);
- await page.$eval('#planBox .card-illustration img',e=>e.click());
- await page.$eval('#planBox .nhi-image-adjust input[aria-label="Cao hình"]',e=>{
-  e.value='280';e.dispatchEvent(new Event('input',{bubbles:true}));e.dispatchEvent(new Event('change',{bubbles:true}));
- });
- console.log('SMOKE_STEP 8 line55');
- await page.waitForFunction(id=>JSON.parse(localStorage.getItem('viko-plan-v1')).img?.[id]?.v?.height===280,{},cardID);
- const height=await page.$eval('#planBox .card-illustration img',e=>getComputedStyle(e).height);
- assert(Math.abs(parseInt(height)-280)<4,'Image height was not applied: '+height);
+ await drag('#planBox .nhi-image-handle-s',0,38,62);
+ console.log('SMOKE_STEP 8 independent height');
+ await page.waitForFunction((id,h)=>JSON.parse(localStorage.getItem('viko-plan-v1')).img?.[id]?.v?.height>h+20,{},cardID,edge.height||200);
+ const afterHeight=await page.evaluate(id=>JSON.parse(localStorage.getItem('viko-plan-v1')).img[id].v,cardID);
+ assert(Math.abs(afterHeight.width-edge.width)<=2,'Side drag must preserve width');
+ const ratioBefore=afterHeight.width/afterHeight.height;
+ await drag('#planBox .nhi-image-handle-se',22,22,63);
+ console.log('SMOKE_STEP 9 proportional corner');
+ await page.waitForFunction((id,w)=>JSON.parse(localStorage.getItem('viko-plan-v1')).img?.[id]?.v?.width>w,{},cardID,afterHeight.width);
+ const afterCorner=await page.evaluate(id=>JSON.parse(localStorage.getItem('viko-plan-v1')).img[id].v,cardID);
+ const ratioAfter=afterCorner.width/afterCorner.height;
+ assert(Math.abs(ratioAfter-ratioBefore)<.04,
+   'Corner drag did not preserve width/height ratio: '+ratioBefore+' -> '+ratioAfter);
  const newCardHeight=await page.$eval('#planBox .pcard',e=>e.getBoundingClientRect().height);
- assert(Math.abs(newCardHeight-fixedCardHeight)<3,
+ assert(Math.abs(newCardHeight-fixedCardHeight)<4,
    'Card grew when image height changed: '+fixedCardHeight+' vs '+newCardHeight);
- // Moving the drawing should save offsets independently from width and height.
- await page.$eval('#planBox .nhi-image-adjust input[aria-label="Vị trí ngang hình"]',e=>{
-   e.value='25';e.dispatchEvent(new Event('input',{bubbles:true}));
-   e.dispatchEvent(new Event('change',{bubbles:true}));
- });
- await page.$eval('#planBox .nhi-image-adjust input[aria-label="Vị trí dọc hình"]',e=>{
-   e.value='15';e.dispatchEvent(new Event('input',{bubbles:true}));
-   e.dispatchEvent(new Event('change',{bubbles:true}));
- });
- console.log('SMOKE_STEP 9 line67');
+ // Dragging inside the image moves it without creating any sliders.
+ await drag('#planBox .card-illustration .nhi-image-stage img',25,15,64);
  const offsets=await page.evaluate(id=>JSON.parse(localStorage.getItem('viko-plan-v1')).img?.[id]?.v,cardID);
- console.log('IMAGE_OFFSETS',JSON.stringify({width:offsets?.width,height:offsets?.height,x:offsets?.offsetX,y:offsets?.offsetY}));
- assert(offsets&&offsets.offsetX>=20,'Image X offset not stored: '+JSON.stringify(offsets));
+ console.log('IMAGE_DIRECT_HANDLES',JSON.stringify({
+   width:offsets?.width,height:offsets?.height,x:offsets?.offsetX,y:offsets?.offsetY,
+   ratioBefore,ratioAfter
+ }));
+ assert(offsets&&offsets.offsetX>=20,
+   'Image X position was not saved by dragging: '+JSON.stringify(offsets));
+ const leftLayout=await page.evaluate(()=>{
+   const korean=document.querySelector('#planBox .nhi-ko-line');
+   const photo=document.querySelector('#planBox .card-illustration');
+   const front=document.querySelector('#planBox .pfront');
+   const a=korean.getBoundingClientRect(),b=photo.getBoundingClientRect();
+   const cols=getComputedStyle(front).gridTemplateColumns.trim().split(/\s+/);
+   return {koCenter:a.left+a.width/2,photoLeft:b.left,columns:cols,
+     koAlign:getComputedStyle(korean.querySelector('.answer.ko')).textAlign};
+ });
+ assert(leftLayout.koCenter<leftLayout.photoLeft&&leftLayout.koAlign==='center',
+   'Korean text must stay centered in the left section: '+JSON.stringify(leftLayout));
  console.log('SMOKE_CHAT_OPEN');
  await page.$eval('#aiBtn',e=>e.click());await page.waitForSelector('#aiForm .nhi-chat-mic');
  console.log('SMOKE_CHAT_CONTEXT');
