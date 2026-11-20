@@ -85,34 +85,5 @@ function align(it,all){
  }
  return output.length?output:[[vi,ko]];
 }
-function expand(it,all){
- const vi=String(it.vi||''),ko=String(it.ko||'');
- const supplied=Array.isArray(it.pairs)?it.pairs:[];
- function valid(p){
-  return Array.isArray(p)&&p.length===2&&typeof p[0]==='string'&&typeof p[1]==='string'
-   &&p[0].trim()&&p[1].trim()&&has(vi,p[0])&&ko.includes(p[1]);
- }
- // A learner's own corrections always take priority over built-in segmentation.
- if(it.edited){const fixed=supplied.filter(valid);return fixed.length?fixed:[[vi,ko]];}
- const reviewed=(window.NHI_VERIFIED_PAIRS||{})[it.id];
- if(Array.isArray(reviewed)&&reviewed.length>1&&reviewed.every(valid))return reviewed.map(p=>p.slice());
- // Two historical sentence cards contain an orphan one-language fragment.
- // Keep them as accurately linked whole sentences, not misleading partial pairs.
- if(it.id==='se57a6b5af5'||it.id==='saf0711f7c4')return [[vi,ko]];
- const authored=supplied.filter(valid);
- if(authored.length>1)return authored.map(p=>p.slice());
- // Daily GitHub-generated correspondences: teacher-reviewed first, then
- // evidence-backed minimal lexical/grammatical units, all source-validated.
- const daily=(window.NHI_DAILY_PAIRS||{})[it.id];
- if(Array.isArray(daily)&&daily.length>1&&daily.every(valid))
-  return daily.map(p=>p.slice());
- if(it.type==='w'){
-  // Keep opaque lexical units whole if we cannot verify multiple exact matches.
-  return [[vi,ko]];
- }
- // Automatic matches are hints, never display disconnected one-language spans.
- const inferred=align(it,all).filter(valid);
- return inferred.length>1?inferred:[[vi,ko]];
-}
-window.NHI_PHRASES_V5={align,expand};
+window.NHI_PHRASES_V5={align};
 })();
