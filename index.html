@@ -659,7 +659,7 @@ button,input,select,textarea{font-family:var(--ui)}
 <link rel="stylesheet" href="nhi-cover-palette-v12.css?v=20261115-no-girl-frame-v13">
 <link rel="stylesheet" href="nhi-chat-image-notes-v1.css?v=20261117"><link rel="stylesheet" href="nhi-chat-note-card-v2.css?v=20261117"><link rel="stylesheet" href="nhi-original-gif-review-v1.css?v=20261117-r3">
 <link rel="stylesheet" href="nhi-corner-v2.css?v=20261117-ux2">
-<link rel="stylesheet" href="nhi-lesson-finish-v1.css?v=20261120-speaker-v2">
+<link rel="stylesheet" href="nhi-lesson-finish-v1.css?v=20261120-cute-speaker-review">
 <script>
 /* Pick exactly one of three cover colors when the document loads.
    Navigate/flip cards without changing it; no animation or interval. */
@@ -1264,6 +1264,7 @@ html body #planBox .sdone .pstatus{
 }
 
 </style>
+<link rel="stylesheet" href="nhi-card-image-compact-v1.css?v=20261120-left-small-v1">
 </head>
 <body>
 <header class="topbar" id="topbar">
@@ -5057,27 +5058,43 @@ html body #planBox .sdone .pstatus{
       var tiles = el('div', 'tiles');
       [['h', 'hard', 'Khó'], ['m', 'mid', 'Bình thường']].forEach(function (x) { var t = el('div', 'tile2 ' + x[0]); t.appendChild(el('b', null, s.stats[x[1]] || 0)); t.appendChild(document.createTextNode(x[2])); tiles.appendChild(t); });
       p.appendChild(tiles);
-      // The only music control is a compact speaker at the top-right corner.
-      // Neither completion music nor the cat sound starts automatically.
-      var speaker=btn('nhi-victory-speaker','🔈',function(){
+      // The cheerful speaker is the ONLY completion-music control.
+      // Its track starts once when the learner finishes; cat audio is separate.
+      function prepareVictoryTrack(){
         if(!victoryTrack){
           victoryTrack=new Audio('audio/ui/lesson-finish.mp3');
-          victoryTrack.preload='none';
+          victoryTrack.preload='auto';
           victoryTrack.loop=false;
-          victoryTrack.onplay=reflectSpeaker;
-          victoryTrack.onpause=reflectSpeaker;
-          victoryTrack.onended=reflectSpeaker;
         }
-        if(victoryTrack.paused){
-          victoryTrack.play().catch(function(){toast('Chạm biểu tượng loa để thử phát nhạc lại.');reflectSpeaker();});
-        }else victoryTrack.pause();
+        victoryTrack.onplay=reflectSpeaker;
+        victoryTrack.onpause=reflectSpeaker;
+        victoryTrack.onended=reflectSpeaker;
+        return victoryTrack;
+      }
+      var speaker=btn('nhi-victory-speaker','',function(){
+        var track=prepareVictoryTrack();
+        if(track.paused){
+          if(track.ended)track.currentTime=0;
+          track.play().catch(function(){reflectSpeaker();toast('Chạm lại loa để bật nhạc.');});
+        }else track.pause();
       });
       speaker.type='button';
-      speaker.title='Phát hoặc tạm dừng nhạc kết thúc bài';
+      speaker.title='Nhạc chúc mừng – chạm để bật hoặc tạm dừng';
+      speaker.innerHTML='<svg class="nhi-cute-speaker-art" viewBox="0 0 72 72" aria-hidden="true" focusable="false">'+
+       '<path class="nhi-cute-ear" d="M16 18 12 8 27 14M39 14 54 8 50 19" fill="#ffc1d8" stroke="#ad6b9a" stroke-width="2.5" stroke-linejoin="round"/>'+
+       '<path d="M12 32 Q12 23 22 23H33L46 13V59L33 49H22Q12 49 12 39Z" fill="#a4e7ff" stroke="#4384a8" stroke-width="3.5" stroke-linejoin="round"/>'+
+       '<path d="M20 30H29V43H20Q18 43 18 40V33Q18 30 20 30" fill="#f6fbff" opacity=".77"/>'+
+       '<circle cx="27" cy="33" r="1.9" fill="#344c79"/><circle cx="36" cy="33" r="1.9" fill="#344c79"/>'+
+       '<path d="M28 39Q32 43 36 39" fill="none" stroke="#d36891" stroke-width="2.2" stroke-linecap="round"/>'+
+       '<circle cx="22" cy="38" r="2.3" fill="#ffb6d0"/><circle cx="40" cy="38" r="2.3" fill="#ffb6d0"/>'+
+       '<g class="nhi-speaker-waves" fill="none" stroke="#e77fb7" stroke-width="3.4" stroke-linecap="round">'+
+        '<path d="M51 27Q58 36 51 45"/><path d="M57 21Q70 36 57 51"/>'+
+       '</g><path class="nhi-speaker-heart" d="M49 8Q53 3 57 9Q62 2 66 9Q68 15 57 21Q46 15 49 8Z" fill="#ff91b7"/>'+
+       '</svg>';
       function reflectSpeaker(){
-        var playing=!!(victoryTrack&&!victoryTrack.paused);
-        speaker.textContent=playing?'🔊':'🔈';
-        speaker.setAttribute('aria-label',playing?'Tạm dừng nhạc kết thúc bài':'Phát nhạc kết thúc bài');
+        var playing=!!(victoryTrack&&!victoryTrack.paused&&!victoryTrack.ended);
+        speaker.dataset.playing=String(playing);
+        speaker.setAttribute('aria-label',playing?'Tạm dừng nhạc chúc mừng':'Phát nhạc chúc mừng');
         speaker.setAttribute('aria-pressed',String(playing));
       }
       if(victoryTrack){
@@ -5102,8 +5119,30 @@ html body #planBox .sdone .pstatus{
         }
       }
       if (s.kind === 'lesson' && s.L) { var nx = current(s.L); p.appendChild(el('p', 'pstatus done', nx ? '✓ ' + STEP[nx.step] + ' · ' + vn(nx.due, true) : '✓ Đã hoàn thành cả 5 lần.')); }
-      var difficult=hardIds(s.L?s.L.ids:s.queue);
-      if(difficult.length)p.appendChild(btn('primary','Ôn lại thẻ khó ('+difficult.length+')',function(){start('hard',difficult,s.title+' · Ôn thẻ khó',s.L);}));
+      // Always render a dedicated review action; include grades from this
+      // session even when the persistent "hard" list has not been restored.
+      var candidates=(s.L&&s.L.ids?s.L.ids:s.queue).concat(s.queue);
+      var reviewedSeen={},difficult=[];
+      candidates.forEach(function(id){
+        if(reviewedSeen[id]||!alive(id)||val('known',id))return;
+        reviewedSeen[id]=1;
+        if(val('hard',id)||val('rate',id)==='hard')difficult.push(id);
+      });
+      if(!difficult.length && s.stats.hard){
+        s.queue.forEach(function(id,i){
+          if(s.picked[i]==='hard'&&alive(id)&&!val('known',id)&&difficult.indexOf(id)<0)difficult.push(id);
+        });
+      }
+      var hardReviewLine=el('div','nhi-hard-review-line');
+      var hardReview=btn('primary nhi-review-hard-button','↻ Ôn lại thẻ khó ('+difficult.length+')',function(){
+        if(!difficult.length)return;
+        stopVictoryTrack();
+        start('hard',difficult,s.title+' · Ôn thẻ khó',s.L);
+      });
+      hardReview.disabled=!difficult.length;
+      hardReview.title=difficult.length?'Ôn ngay các thẻ đã chọn Khó':'Chưa có thẻ Khó trong bài này';
+      hardReviewLine.appendChild(hardReview);
+      p.appendChild(hardReviewLine);
       var enids=(s.L?s.L.ids:s.queue).filter(function(id,i,a){return a.indexOf(id)===i&&alive(id)&&val('enHard',id);});if(enids.length)p.appendChild(btn('primary','Ôn chưa nhớ tiếng Anh ('+enids.length+')',function(){start('english',enids,s.title+' · chưa nhớ tiếng Anh',s.L);}));
       var row = el('div', 'prow');
       var replayButton=btn('primary nhi-replay-button', '↻ Học lại tất cả thẻ', function () {
@@ -5112,11 +5151,17 @@ html body #planBox .sdone .pstatus{
         // This is voluntary practice, not an extra scheduled review round.
         start('free',again,s.title.replace(/ · Học lại$/,'')+' · Học lại',s.L);
       });row.appendChild(replayButton);
-      row.appendChild(lbtn('ghost', 'left', 'Xem lại thẻ cuối', function () { s.pos = Math.max(0, s.queue.length - 1); anim = 'prev'; saveSess(); render(); }));
+      row.appendChild(lbtn('ghost', 'left', 'Xem lại thẻ cuối', function () { stopVictoryTrack();s.pos = Math.max(0, s.queue.length - 1); anim = 'prev'; saveSess(); render(); }));
       row.appendChild(btn('ghost', 'Xong', function () { stopVictoryTrack();sess = null; saveSess(); render(); }));
       p.appendChild(row); v.appendChild(p);
       if (!s.celebrated) {
         s.celebrated = true; saveSess();
+        // Auto-play the completion MUSIC only. Browser autoplay policy may
+        // require a deliberate tap on the speaker after this attempt.
+        prepareVictoryTrack().play().catch(function(){
+          reflectSpeaker();
+          toast('Trình duyệt chặn tự phát nhạc; chạm loa dễ thương để nghe.');
+        });
         if (prefs.fx && !reduceMotion()) {
           if (window.NHI_FIREWORKS && window.NHI_FIREWORKS.launch) window.NHI_FIREWORKS.launch();
           else confetti();
@@ -6032,7 +6077,7 @@ html body #planBox .sdone .pstatus{
 <script src="nhi-late-2026.js?v=20261115-v9-compact-pairs"></script>
 <script src="nhi-stage-move-v1.js?v=20261116-desktop-paired-highlight-v1"></script>
 <script src="nhi-card-controls-v8.js?v=20261115-v8"></script>
-<script src="nhi-kitten-meow-v1.js?v=20261120-local-recording"></script>
+<script src="nhi-kitten-meow-v1.js?v=20261120-user-meow"></script>
 <script src="nhi-card-no-overlap-v1.js?v=20261115-safe-v1"></script>
 <script src="nhi-corner-v2.js?v=20261118-notes-vi-ko"></script>
 

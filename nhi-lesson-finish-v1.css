@@ -1,26 +1,105 @@
-/* One unobtrusive speaker for voluntary completion music; never autoplay. */
+/* Completion audio is active only at the end of a lesson.
+   One kawaii speaker, illustrated in SVG, without an audio-player strip. */
 html body #planBox .sdone .nhi-victory-speaker{
  position:fixed!important;
- top:max(72px,calc(env(safe-area-inset-top,0px) + 70px))!important;
- right:max(16px,env(safe-area-inset-right,0px))!important;
- z-index:105!important;
+ top:max(68px,calc(env(safe-area-inset-top,0px) + 66px))!important;
+ right:max(14px,env(safe-area-inset-right,0px))!important;
+ z-index:105!important;overflow:visible!important;
  display:grid!important;place-items:center!important;
- width:44px!important;height:44px!important;min-width:44px!important;min-height:44px!important;
- padding:0!important;margin:0!important;
- background:var(--surface)!important;color:var(--ink)!important;
- border:1px solid var(--line)!important;border-radius:50%!important;
- box-shadow:0 3px 13px #0002!important;cursor:pointer;
- font-size:23px!important;line-height:1!important;
+ width:64px!important;height:64px!important;min-width:64px!important;min-height:64px!important;
+ padding:6px!important;margin:0!important;
+ color:#365977!important;
+ background:linear-gradient(145deg,#fff5fc 0%,#ffd7ed 56%,#ffbada 100%)!important;
+ border:3px solid #fff!important;border-radius:23px 26px 24px 27px!important;
+ box-shadow:0 0 0 2px #f9a8d3,0 6px 0 #eba4c7,0 11px 19px #bc709444!important;
+ cursor:pointer!important;transform:rotate(-5deg);
+ transition:transform .2s ease,box-shadow .2s ease!important;
 }
-html body #planBox .sdone .nhi-victory-speaker[aria-pressed="true"]{
- background:var(--accent-soft)!important;border-color:var(--accent-t)!important;
+html body #planBox .sdone .nhi-victory-speaker:hover{
+ transform:rotate(3deg) scale(1.07)!important;
+ box-shadow:0 0 0 2px #f9a8d3,0 7px 0 #eba4c7,0 14px 21px #bc709444!important;
+}
+html body #planBox .sdone .nhi-victory-speaker:active{
+ transform:rotate(0deg) translateY(3px) scale(.96)!important;
+ box-shadow:0 0 0 2px #f9a8d3,0 2px 0 #eba4c7,0 6px 12px #bc709422!important;
 }
 html body #planBox .sdone .nhi-victory-speaker:focus-visible{
- outline:3px solid var(--accent-t)!important;outline-offset:3px!important;
+ outline:3px solid #3287c3!important;outline-offset:6px!important;
+}
+html body #planBox .sdone .nhi-victory-speaker .nhi-cute-speaker-art{
+ width:54px!important;height:54px!important;display:block!important;overflow:visible!important;
+ filter:drop-shadow(0 2px 1px #ffffff99);
+}
+html body #planBox .sdone .nhi-victory-speaker[data-playing="true"]{
+ background:linear-gradient(150deg,#fdf4ff,#ffd5f1 60%,#bde7fc)!important;
+}
+html body #planBox .sdone .nhi-victory-speaker .nhi-speaker-waves{
+ opacity:.24;transform-origin:48px 36px;transition:opacity .18s ease;
+}
+html body #planBox .sdone .nhi-victory-speaker[data-playing="true"] .nhi-speaker-waves{
+ opacity:1;animation:nhi-cartoon-sound .85s ease-in-out infinite alternate;
+}
+html body #planBox .sdone .nhi-victory-speaker .nhi-speaker-heart{
+ transform-origin:center;animation:nhi-cartoon-heart 2.8s ease-in-out infinite;
+}
+@keyframes nhi-cartoon-sound{
+ from{opacity:.55;transform:scale(.96)}
+ to{opacity:1;transform:scale(1.06)}
+}
+@keyframes nhi-cartoon-heart{
+ 0%,80%,100%{transform:scale(1)}
+ 88%{transform:scale(1.12)}
+}
+@media(prefers-reduced-motion:reduce){
+ html body #planBox .sdone .nhi-victory-speaker *{animation:none!important}
 }
 
-/* "Khó": the mascot is an absolute overlay INSIDE the white card.
-   No side padding or grid columns are changed when she appears. */
+/* Always-visible action row; completion contents can scroll when short screens. */
+html body #planBox .sdone{
+ max-height:none!important;
+ overflow:visible!important;
+ padding-bottom:clamp(12px,2dvh,24px)!important;
+}
+html body #planBox .sdone .nhi-hard-review-line{
+ display:flex!important;align-items:center!important;justify-content:center!important;
+ width:100%!important;max-width:430px!important;
+ flex:0 0 auto!important;min-height:46px!important;
+ margin:4px auto 3px!important;
+ position:relative!important;z-index:3!important;
+}
+html body #planBox .sdone .nhi-review-hard-button{
+ display:inline-flex!important;align-items:center!important;justify-content:center!important;
+ width:min(100%,350px)!important;min-height:44px!important;
+ padding:9px 16px!important;
+ font-weight:800!important;line-height:1.3!important;
+ color:#285676!important;
+ background:linear-gradient(180deg,#f0fbff,#b5e7ff)!important;
+ border:2px solid #8bccef!important;border-radius:18px!important;
+ box-shadow:0 4px 0 #7dbadf!important;opacity:1;
+}
+html body #planBox .sdone .nhi-review-hard-button:disabled{
+ opacity:.65!important;cursor:not-allowed!important;
+}
+html body #planBox .sdone .nhi-victory-cat-scene{
+ flex:0 1 auto!important;min-height:0!important;
+}
+html body #planBox .sdone img.nhi-victory-cat.nhi-original-gif{
+ height:clamp(195px,43dvh,400px)!important;
+ max-height:46dvh!important;width:auto!important;max-width:100%!important;
+ object-fit:contain!important;
+}
+@media(max-width:700px){
+ html body #planBox .sdone img.nhi-victory-cat.nhi-original-gif{
+  height:clamp(180px,38dvh,360px)!important;max-height:42dvh!important;
+ }
+}
+@media(max-height:600px){
+ html body #planBox .sdone img.nhi-victory-cat.nhi-original-gif{
+  height:32dvh!important;max-height:32dvh!important;min-height:130px!important;
+ }
+}
+
+/* "Khó" character stays as a larger floating illustration inside the flashcard. */
 html body #planBox .pcard > #nhi-hard-mascot{
  position:absolute!important;
  left:var(--nhi-companion-x,24px)!important;
@@ -28,13 +107,11 @@ html body #planBox .pcard > #nhi-hard-mascot{
  right:auto!important;bottom:auto!important;transform:none!important;
  width:var(--nhi-companion-size,232px)!important;
  max-width:calc(100% - 36px)!important;max-height:none!important;
- height:auto!important;
- z-index:26!important;
+ height:auto!important;z-index:26!important;
  display:flex!important;flex-direction:column!important;align-items:center!important;
  gap:3px!important;padding:0!important;margin:0!important;
  border:0!important;box-shadow:none!important;background:transparent!important;
- pointer-events:none!important;
- animation:nhi-mascot-enter .4s ease both!important;
+ pointer-events:none!important;animation:nhi-mascot-enter .4s ease both!important;
 }
 html body #planBox .pcard > #nhi-hard-mascot img{
  display:block!important;width:100%!important;max-width:100%!important;height:auto!important;
@@ -47,8 +124,7 @@ html body #planBox .pcard > #nhi-hard-mascot .nhi-hard-caption{
  background:transparent!important;border:0!important;box-shadow:none!important;
  max-width:100%!important;text-align:center!important;
  font:700 clamp(11px,1.2vw,14px)/1.3 var(--ui,system-ui)!important;
- text-shadow:0 1px 2px var(--surface)!important;
- pointer-events:none!important;
+ text-shadow:0 1px 2px var(--surface)!important;pointer-events:none!important;
 }
 html body #planBox .pcard > #nhi-hard-mascot.nhi-mascot-leave{
  animation:nhi-mascot-exit .5s ease forwards!important;
@@ -59,10 +135,9 @@ html body #planBox .pcard > #nhi-hard-mascot.nhi-mascot-leave{
  }
 }
 
-/* AI messages are normal selectable text, without a copy affordance. */
+/* AI messages remain directly selectable; no chat copy button. */
 #aiPanel .aimsg{
- position:relative;
- padding-right:14px!important;
+ position:relative;padding-right:14px!important;
  user-select:text!important;-webkit-user-select:text!important;
  -webkit-touch-callout:default!important;
 }

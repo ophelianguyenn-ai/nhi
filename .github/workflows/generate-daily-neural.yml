@@ -1,7 +1,7 @@
 name: Daily Ban Mai Vietnamese and InJoon Korean for Nhi Learning Corner
 
 # 22:00 UTC = 05:00 in Vietnam (UTC+07) the following morning.
-# New lesson pushes use small pilot-sized batches; nightly batches clear backlog.
+# New lesson pushes prioritize Ban Mai coverage (up to 45 verified clips); nightly batches clear backlog.
 on:
   schedule:
     - cron: '0 22 * * *'
@@ -57,7 +57,7 @@ jobs:
       - name: Fill new lessons first, then replace non-selected voices
         env:
           FPT_MARKETPLACE_API_KEY: ${{ secrets.FPT_MARKETPLACE_API_KEY }}
-          NHI_VI_DAILY_LIMIT: ${{ github.event_name == 'push' && '10' || github.event_name == 'workflow_dispatch' && inputs.vi_limit || '100' }}
+          NHI_VI_DAILY_LIMIT: ${{ github.event_name == 'push' && '45' || github.event_name == 'workflow_dispatch' && inputs.vi_limit || '100' }}
           NHI_KO_DAILY_LIMIT: ${{ github.event_name == 'push' && '20' || github.event_name == 'workflow_dispatch' && inputs.ko_limit || '200' }}
           NHI_AUDIO_DRY_RUN: ${{ github.event_name == 'workflow_dispatch' && inputs.dry_run && 'true' || 'false' }}
         run: python scripts/generate_daily_audio.py

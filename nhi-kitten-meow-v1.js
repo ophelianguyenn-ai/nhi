@@ -1,95 +1,36 @@
-/* Local recording of a young cat, with a synthesized fallback for rare playback errors.
- * Audio starts after a learner gesture and can be replayed by tapping the cat. */
+/* User-supplied meo(1).mp3 is played unchanged, and only on cat click. */
 (function(){
 'use strict';
-let audio=null,hasUnlocked=false;
-const Ctx=window.AudioContext||window.webkitAudioContext;
-function unlock(){
- if(!Ctx)return;
- try{
-  if(!audio)audio=new Ctx();
-  if(audio.state==='suspended')audio.resume().catch(()=>{});
-  hasUnlocked=true;
- }catch(e){}
-}
-document.addEventListener('pointerdown',function(e){
- if(e.target.closest('#planBox,.sdone'))unlock();
-}, {passive:true,capture:true});
-document.addEventListener('keydown',function(e){
- if(e.target.closest('#planBox')&&['Enter',' ','1','2','ArrowRight','ArrowLeft'].includes(e.key))unlock();
-}, {passive:true,capture:true});
-function note(at,length,base,volume){
- if(!audio)return;
- const osc=audio.createOscillator(),harm=audio.createOscillator();
- const filter=audio.createBiquadFilter(),gain=audio.createGain(),vib=audio.createOscillator(),wiggle=audio.createGain();
- osc.type='triangle';harm.type='sine';
- // High, small first vowel, then a descending, breathy 'meow' tail.
- osc.frequency.setValueAtTime(base*.85,at);
- osc.frequency.exponentialRampToValueAtTime(base*1.18,at+length*.22);
- osc.frequency.exponentialRampToValueAtTime(base*.56,at+length*.94);
- harm.frequency.setValueAtTime(base*1.9,at);
- harm.frequency.exponentialRampToValueAtTime(base*2.2,at+length*.22);
- harm.frequency.exponentialRampToValueAtTime(base*1.08,at+length*.94);
- vib.type='sine';vib.frequency.value=7;wiggle.gain.value=4.5;
- vib.connect(wiggle);wiggle.connect(osc.frequency);
- filter.type='lowpass';filter.frequency.setValueAtTime(2500,at);
- filter.frequency.exponentialRampToValueAtTime(850,at+length);
- gain.gain.setValueAtTime(.0001,at);
- gain.gain.linearRampToValueAtTime(volume,at+.075);
- gain.gain.setValueAtTime(volume*.82,at+length*.36);
- gain.gain.exponentialRampToValueAtTime(.0001,at+length);
- const sub=audio.createGain();sub.gain.value=.22;
- harm.connect(sub);osc.connect(filter);sub.connect(filter);filter.connect(gain);gain.connect(audio.destination);
- for(const v of [osc,harm,vib])v.start(at);
- for(const v of [osc,harm,vib])v.stop(at+length+.04);
-}
-// Real 1.2-second meow recorded by George Miquilena, CC0.
-// Source: https://commons.wikimedia.org/wiki/File:Maullido_de_gata_hembra_joven.ogg
-const MEOW_URL='audio/ui/kitten-meow.mp3';
-let recording=null,last=0;
-function fallbackMeow(){
- if(!Ctx)return;
- unlock();
- if(!audio)return;
- try{
-  const when=audio.currentTime+.04;
-  note(when,.52,630,.068);
-  note(when+.57,.44,740,.046);
- }catch(e){}
-}
-function playRealMeow(){
+var recording=null;
+var src='audio/ui/kitten-meow.mp3?v=20261120-user-meo';
+function meow(){
  try{
   if(!recording){
-   recording=new Audio(MEOW_URL);
+   recording=new Audio(src);
    recording.preload='auto';
-   recording.volume=.8;
-   recording.playbackRate=1.12; // Slightly brighter while keeping the original cat's voice.
+   recording.volume=1;
+   recording.playbackRate=1;
   }
-  if(recording.canPlayType && !recording.canPlayType('audio/mpeg'))return false;
   recording.pause();
   recording.currentTime=0;
-  const promise=recording.play();
-  if(promise && typeof promise.catch==='function')promise.catch(fallbackMeow);
-  return true;
- }catch(e){return false;}
-}
-function meow(){
- const t=performance.now();
- if(t-last<950)return;
- last=t;
- if(!playRealMeow())fallbackMeow();
+  var playing=recording.play();
+  if(playing&&typeof playing.catch==='function'){
+   playing.catch(function(err){console.warn('Cat sound needs a user gesture',err);});
+  }
+ }catch(err){console.warn('Unable to play cat recording',err);}
 }
 function attach(img){
  if(!img||img.dataset.kittenMeowAttached)return;
  img.dataset.kittenMeowAttached='true';
- img.tabIndex=0;img.setAttribute('role','button');
- img.setAttribute('aria-label','Mèo chúc mừng! Nhấn để nghe meo meo');
- img.title='Nhấn mèo để nghe meo meo!';
- img.addEventListener('click',e=>{e.stopPropagation();meow();});
- img.addEventListener('keydown',e=>{
+ img.tabIndex=0;
+ img.setAttribute('role','button');
+ img.setAttribute('aria-label','Chạm mèo để nghe tiếng kêu');
+ img.title='Bấm vào mèo để nghe tiếng meo!';
+ img.addEventListener('click',function(e){e.stopPropagation();meow();});
+ img.addEventListener('keydown',function(e){
   if(e.key==='Enter'||e.key===' '){e.preventDefault();e.stopPropagation();meow();}
  });
 }
-window.NHI_VICTORY_CAT={meow,attach};
-window.addEventListener('pagehide',()=>{if(audio)audio.close().catch(()=>{});audio=null;});
+window.NHI_VICTORY_CAT={meow:meow,attach:attach};
+window.addEventListener('pagehide',function(){if(recording){recording.pause();recording=null;}});
 })();
