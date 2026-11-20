@@ -211,7 +211,7 @@ try{
    saved.offsetX===offsets.offsetX&&saved.offsetY===offsets.offsetY,
    'Resized image dimensions and position did not survive reload: '+JSON.stringify({saved,offsets}));
  assert(errors.length===0,'Page errors: '+errors.join('; '));
- console.log('SELECTABLE CHAT AND NOTES UX PASS',JSON.stringify({note,grid:[before,after],height,voice:true,anchor}));
+ console.log('SELECTABLE CHAT AND NOTES UX PASS',JSON.stringify({note,grid:[before,after],height:afterCorner.height,voice:true,anchor}));
 }catch(err){
  console.error('ORIGINAL_SMOKE_ERROR',err&&err.stack||String(err));throw err;
 }finally{try{await browser.close();}catch(e){console.error('SMOKE_CLOSE_ERROR',String(e));}}
