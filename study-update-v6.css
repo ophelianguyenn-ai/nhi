@@ -126,10 +126,40 @@ html body #planBox .pcard #nhi-hard-mascot{
   max-width:136px!important;min-width:65px!important;
   z-index:5!important;pointer-events:auto!important;
 }
-html body #planBox .pcard.nhi-mascot-active .pfront{
-  padding-left:inherit!important;padding-right:inherit!important;
-}
 html body #planBox .pcard #nhi-hard-mascot .nhi-hard-caption{
   font-size:10px!important;line-height:1.25!important;max-width:100%!important;
   padding:3px 2px!important;
 }
+
+/* Chat AI: explicit text copying with selection available on desktop/mobile. */
+html body #aiLog .aimsg.ai,
+html body #aiLog .nhi-ai-paragraph,
+html body #aiLog .nhi-ai-paragraph-text{
+  -webkit-user-select:text!important;user-select:text!important;
+}
+html body #aiLog .nhi-ai-paragraph{
+  position:relative!important;min-width:0!important;
+  display:flex!important;flex-wrap:wrap!important;
+  align-items:center!important;gap:4px 7px!important;
+}
+html body #aiLog .nhi-ai-paragraph-text{
+  min-width:0;flex:1 1 100%;
+  overflow-wrap:anywhere;
+}
+html body #aiLog .nhi-copy-chat-text,
+html body #aiLog .nhi-copy-chat-all{
+  display:inline-flex!important;align-items:center!important;
+  justify-content:center!important;flex:0 0 auto!important;
+  width:auto!important;min-width:0!important;min-height:27px!important;
+  border-radius:9px!important;padding:4px 9px!important;
+  border:1px solid var(--line,#d8dbe5)!important;
+  background:var(--surface,#fff)!important;
+  color:var(--ink,#263141)!important;
+  font:600 11px/1.25 var(--ui,system-ui)!important;
+  cursor:pointer!important;white-space:normal!important;
+}
+html body #aiLog .nhi-copy-chat-text:hover,
+html body #aiLog .nhi-copy-chat-all:hover{
+  border-color:var(--accent-t,#7c3aed)!important;
+}
+html body #aiLog .nhi-copy-chat-all{margin:9px 0 4px!important;max-width:100%!important}
