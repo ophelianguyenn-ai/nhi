@@ -22,7 +22,7 @@ function figure(it,value,onResize){
   var width=Math.max(100,Math.min(680,Number(v.width)||220));
   var height=Math.max(0,Math.min(520,Number(v.height)||0));
   var offsetX=Math.max(-140,Math.min(140,Number(v.offsetX)||0));
-  var offsetY=Math.max(-140,Math.min(140,Number(v.offsetY)||0));
+  var offsetY=Math.max(-220,Math.min(220,Number(v.offsetY)||0));
   var clamp=function(n,min,max){return Math.max(min,Math.min(max,n));};
   f.dataset.resizable='true';
   f.setAttribute('aria-label','Ảnh minh họa. Chạm ảnh rồi kéo cạnh để đổi kích thước, kéo góc để giữ tỷ lệ.');
@@ -61,7 +61,7 @@ function figure(it,value,onResize){
     if(Math.abs(dx)+Math.abs(dy)<4&&!drag.changed)return;
     drag.changed=true;f.classList.add('nhi-image-dragging');
     offsetX=clamp(drag.ox+dx,-140,140);
-    offsetY=clamp(drag.oy+dy,-140,140);
+    offsetY=clamp(drag.oy+dy,-220,220);
     paint();e.stopPropagation();
   });
   function endMove(e){
@@ -73,6 +73,42 @@ function figure(it,value,onResize){
   }
   im.addEventListener('pointerup',endMove);
   im.addEventListener('pointercancel',endMove);
+
+  // Dedicated ↕ handle makes up/down movement discoverable on touch screens.
+  // It does not change image dimensions or replace edge/corner resizing.
+  var moveY=node('button','↕');
+  moveY.type='button';
+  moveY.className='nhi-image-move-y';
+  moveY.setAttribute('aria-label','Kéo lên hoặc xuống để di chuyển ảnh theo chiều dọc');
+  moveY.title='Kéo lên/xuống để di chuyển ảnh; phím ↑ ↓ mỗi lần 12 px';
+  stage.appendChild(moveY);
+  var yDrag=null;
+  moveY.addEventListener('pointerdown',function(e){
+    if(e.pointerType==='mouse'&&e.button!==0)return;
+    e.preventDefault();e.stopPropagation();
+    f.classList.add('nhi-image-selected','nhi-image-dragging');
+    yDrag={id:e.pointerId,clientY:e.clientY,original:offsetY};
+    try{moveY.setPointerCapture(e.pointerId);}catch(_e){}
+  });
+  moveY.addEventListener('pointermove',function(e){
+    if(!yDrag||yDrag.id!==e.pointerId)return;
+    offsetY=clamp(yDrag.original+e.clientY-yDrag.clientY,-220,220);
+    paint();e.preventDefault();e.stopPropagation();
+  });
+  function finishY(e){
+    if(!yDrag||yDrag.id!==e.pointerId)return;
+    yDrag=null;f.classList.remove('nhi-image-dragging');
+    commit();e.preventDefault();e.stopPropagation();
+  }
+  moveY.addEventListener('pointerup',finishY);
+  moveY.addEventListener('pointercancel',finishY);
+  moveY.addEventListener('click',function(e){e.preventDefault();e.stopPropagation();});
+  moveY.addEventListener('keydown',function(e){
+    if(e.key!=='ArrowUp'&&e.key!=='ArrowDown')return;
+    e.preventDefault();e.stopPropagation();
+    offsetY=clamp(offsetY+(e.key==='ArrowUp'?-12:12),-220,220);
+    paint();commit();
+  });
 
   // Eight edge/corner handles replace ALL old range sliders and panels.
   // Corners always keep the image's current width:height ratio.
