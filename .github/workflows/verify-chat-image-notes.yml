@@ -18,6 +18,11 @@ on:
       - 'card-images-v11.js'
       - 'nhi-chat-voice-v1.js'
       - 'nhi-chat-image-notes-v1.css'
+      - 'study-update-v6.js'
+      - 'nhi-chat-note-card-v2.css'
+      - 'nhi-lesson-finish-v1.css'
+      - 'scripts/smoke-chat-image-notes-v1.mjs'
+      - '.github/workflows/verify-chat-image-notes.yml'
   workflow_dispatch:
 permissions:
   contents: read
