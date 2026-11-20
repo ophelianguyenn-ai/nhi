@@ -39,7 +39,7 @@ try{
  await page.waitForSelector('.nhi-en-edit',{timeout:5000});
  await page.$eval('.nhi-en-edit',b=>b.click());
  await page.waitForSelector('.nhi-en-edit-form',{timeout:5000});
- await page.$eval('.nhi-en-edit-form textarea',x=>{x.value='Reviewed English sample';x.dispatchEvent(new Event('input',{bubbles:true}));});
+ await page.$eval('.nhi-en-edit-form [data-language=en]',x=>{x.textContent='Reviewed English sample';x.dispatchEvent(new Event('input',{bubbles:true}));});
  await page.$eval('.nhi-en-edit-form input',x=>{x.value='rɪˈvjuːd ˈɪŋɡlɪʃ ˈsæmpəl';x.dispatchEvent(new Event('input',{bubbles:true}));});
  await page.$eval('.nhi-en-edit-form button[type="submit"]',b=>b.click());
  const revised=await page.evaluate(()=>({
@@ -59,7 +59,7 @@ try{
  await page.waitForSelector('#planBox .editbox',{timeout:5000});
  const beforeOutside=await page.evaluate(()=>{
    var e=document.querySelector('#planBox .editbox'),r=e?.getBoundingClientRect(),target=document.elementFromPoint(4,430);
-   return {diag:window.NHI_V5_CHECK?.context(),events:window.NHI_V5_CHECK?.events?.slice(-6),rect:r?{x:r.x,y:r.y,w:r.width,h:r.height}:null,
+   return {position:e&&getComputedStyle(e).position,css:[...document.styleSheets].map(x=>x.href),ancestors:e&&[e.parentElement,e.parentElement.parentElement,e.parentElement.parentElement.parentElement].map(x=>({class:x.className,transform:getComputedStyle(x).transform,perspective:getComputedStyle(x).perspective,container:getComputedStyle(x).containerType})),diag:window.NHI_V5_CHECK?.context(),events:window.NHI_V5_CHECK?.events?.slice(-6),rect:r?{x:r.x,y:r.y,w:r.width,h:r.height}:null,
     target:target?.tagName+'#'+target?.id+'.'+target?.className,contains:e?.contains(target)};
  });
  console.log('V5 OUTSIDE BEFORE',JSON.stringify(beforeOutside));

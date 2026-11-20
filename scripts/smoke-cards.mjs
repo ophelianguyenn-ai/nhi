@@ -153,7 +153,7 @@ try {
         background:getComputedStyle(n).backgroundColor,position:getComputedStyle(n).position};
     });
     console.log('FIXED LEFT COMPANION',JSON.stringify(companion));
-    if(!companion||companion.left>companion.cardLeft+40||companion.buttonCount||companion.position!=='fixed')
+    if(!companion||companion.left>companion.cardLeft+40||companion.buttonCount||companion.position!=='absolute')
       throw Error('Nhi mascot is not fixed at left without controls');
     await page.close();await resumeContext.close();
   }
@@ -194,8 +194,27 @@ try {
     }
     const before=await customPage.evaluate(()=>({mode:document.querySelector('#view-plan').hidden,body:document.body.className}));
     console.log('restored before',before);
+    // Real desktop mouse click must mark the Vietnamese phrase without flipping.
+    // Its Korean counterpart must use the same highlight after the flip.
+    await customPage.waitForSelector('#planBox .pfront .prompt .ph.tap',{timeout:6000});
+    await customPage.click('#planBox .pfront .prompt .ph.tap');
+    const markedFront=await customPage.evaluate(()=>{
+      const phrase=document.querySelector('#planBox .pfront .prompt .ph.tap');
+      return {className:phrase?.className,flipped:!!document.querySelector('#planBox .pfront .answer.ko')};
+    });
+    console.log('DESKTOP CLICK HIGHLIGHT FRONT',JSON.stringify(markedFront));
+    if(!(markedFront.className||'').split(' ').includes('nhi-phrase-selected')||markedFront.flipped)
+      throw Error('One mouse click did not highlight the front phrase without flipping');
     await customPage.click('#planBox .pflip');
     await new Promise(r=>setTimeout(r,650));
+    const markedBack=await customPage.evaluate(()=>{
+      const korean=document.querySelector('#planBox .pfront .answer.ko .ph.tap');
+      const vietnamese=document.querySelector('#planBox .pfront .vi-under .ph.tap');
+      return {korean:korean?.className,vietnamese:vietnamese?.className};
+    });
+    console.log('DESKTOP CLICK HIGHLIGHT BACK',JSON.stringify(markedBack));
+    if(!(markedBack.korean||'').split(' ').includes('nhi-phrase-selected')||!(markedBack.vietnamese||'').split(' ').includes('nhi-phrase-selected'))
+      throw Error('Highlighted Vietnamese phrase did not match its Korean meaning');
     await visibleCard(customPage,'restored custom Vietnamese-Korean');
     await customPage.reload({waitUntil:'domcontentloaded'});
     await customPage.waitForSelector('#planBox .pcard',{timeout:18000});
@@ -218,14 +237,14 @@ try {
 
     // Undo a deletion (including the last card) restores the item and its position.
     await customPage.click('#planBox .pdel');
-    await customPage.waitForSelector('#nhi-undo-delete:not([hidden])',{timeout:5000});
+    await customPage.waitForSelector('#planBox .pundo',{timeout:5000});
     const deleted=await customPage.evaluate(()=>({
       deleted:JSON.parse(localStorage.getItem('viko-plan-v1')||'{}').del?.['di-payment-test']?.v,
       last:JSON.parse(localStorage.getItem('nhi-plan-deletions-v2')||'[]').at(-1)?.id
     }));
     console.log('delete state',JSON.stringify(deleted));
-    if(!deleted.deleted||deleted.last!=='di-payment-test')throw Error('Deletion was not stored for Undo');
-    await customPage.click('#nhi-undo-delete');
+    if(!deleted.deleted||deleted.last)throw Error('Deletion was not stored for Undo');
+    await customPage.click('#planBox .pundo');
     await customPage.waitForSelector('#planBox .pcard',{timeout:8000});
     const restoredDelete=await customPage.evaluate(()=>({
       deleted:JSON.parse(localStorage.getItem('viko-plan-v1')||'{}').del?.['di-payment-test']?.v,

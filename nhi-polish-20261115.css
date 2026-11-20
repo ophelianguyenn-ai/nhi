@@ -1,0 +1,164 @@
+/* Nov 15: dense learning toolbar, movable bilingual fields, clean comparison selection. */
+body.nhi-in-study #topbar {
+  display:flex!important; flex-wrap:wrap!important;
+  align-items:center!important;
+  min-height:var(--topbar)!important; height:auto!important;
+  row-gap:3px!important;padding-block:5px!important;
+}
+#topbar .nhi-study-topbar{
+  flex:1 1 230px!important;min-width:175px!important;
+  max-width:min(740px,62vw)!important;
+  display:grid!important;grid-template-columns:32px minmax(50px,1fr) auto 32px!important;
+  gap:clamp(5px,1vw,12px)!important;align-items:center!important;
+  margin:0 clamp(6px,2vw,22px)!important;padding:0!important;
+  border:0!important;background:transparent!important;
+  order:0!important;
+}
+#topbar .nhi-study-topbar>.sbar{
+  height:12px!important;width:100%!important;min-width:0!important;
+  margin:0!important;border-radius:999px!important;background:#e8edef!important;
+}
+#topbar .nhi-study-topbar>.sbar>span{
+  min-width:5px!important;border-radius:999px!important;
+  background:linear-gradient(90deg,#7aceb6,#82b7ef,#a78fe9)!important;
+  box-shadow:0 0 0 1px #78b7d428 inset!important;
+}
+#topbar .nhi-study-topbar>.counter{
+  font:800 12px/1.2 system-ui,sans-serif!important;
+  letter-spacing:.01em!important;white-space:nowrap!important;
+  color:var(--ink)!important;min-width:45px!important;text-align:center!important;
+}
+#topbar .nhi-study-topbar>.iconbtn{
+  height:30px!important;width:30px!important;min-height:30px!important;
+  border-radius:9px!important;box-shadow:none!important;
+}
+body.nhi-in-study #planBox>.shead,
+body.nhi-in-study #planBox .ppage>.shead{display:none!important}
+@media(max-width:800px){
+  #topbar .nhi-study-topbar{
+    order:3!important;flex:1 0 100%!important;max-width:100%!important;
+    margin:2px 0 3px!important;
+    grid-template-columns:30px minmax(65px,1fr) auto 30px!important;
+  }
+  #topbar .nhi-study-topbar>.sbar{height:9px!important}
+}
+@media(max-width:405px){
+  body.nhi-in-study #topbar{padding-inline:10px!important}
+  #topbar .nhi-study-topbar{gap:5px!important}
+}
+/* Movable content is persisted globally so subsequent cards keep the same arrangement. */
+#planBox .pcard .pfront [data-nhi-movable]{
+  position:relative!important;
+  translate:var(--nhi-move-x,0px) var(--nhi-move-y,0px)!important;
+  cursor:grab!important;touch-action:none!important;
+  outline-offset:4px!important;
+  transition:color .18s ease!important;
+}
+#planBox .pcard .pfront [data-nhi-movable].nhi-is-moving{
+  cursor:grabbing!important;outline:2px dashed #8cb9dc!important;
+  user-select:none!important;z-index:5!important;transition:none!important;
+}
+#planBox .pcard .pfront .hanja.nhi-hanja-lookup{
+  display:inline-flex!important;flex-wrap:wrap!important;
+  align-items:baseline!important;justify-content:center!important;
+  column-gap:6px!important;row-gap:0!important;
+  white-space:normal!important;max-width:min(100%,95%)!important;
+  width:fit-content!important;
+  margin:3px auto 7px!important;line-height:1.35!important;
+}
+#planBox .pcard .nhi-hanja-lookup .nhi-hanja-reading{
+  font-family:"Times New Roman",Times,serif!important;
+  font-weight:500!important;font-size:clamp(15px,2vw,19px)!important;
+  margin:0!important;color:var(--muted)!important;
+  white-space:normal!important;
+}
+#planBox .pcard .nhi-hanja-lookup .nhi-hanja-dash{
+  font-size:19px!important;color:var(--muted)!important;
+}
+#planBox .pcard .nhi-hanja-lookup .nhi-hanja-characters{
+  font-family:var(--ko),sans-serif!important;font-weight:800!important;
+}
+#planBox .pcard .pfront .nhi-ko-line>.answer.ko,
+#planBox .pcard .pfront>.vi-under{
+  width:fit-content!important;max-width:100%!important;
+  margin-left:auto!important;margin-right:auto!important;
+}
+/* The primary translation and IPA share one row; controls sit to the right. */
+html body #planBox .pcard .nhi-english-v5>.nhi-en-head{
+  display:flex!important;flex-wrap:nowrap!important;
+  gap:8px!important;align-items:flex-start!important;justify-content:space-between!important;
+  padding:0!important; min-height:35px!important;
+}
+html body #planBox .pcard .nhi-english-v5 .nhi-en-main{
+  display:flex!important;flex:1 1 auto!important;flex-wrap:wrap!important;
+  align-items:baseline!important;justify-content:flex-start!important;
+  min-width:0!important;column-gap:10px!important;row-gap:1px!important;
+}
+html body #planBox .pcard .nhi-english-v5 .nhi-en-main .nhi-en-translation{
+  display:inline!important;font:800 var(--nhi-card-en,21px)/1.28 "Times New Roman",Times,serif!important;
+  color:var(--ink)!important;margin:0!important;overflow-wrap:anywhere!important;
+}
+html body #planBox .pcard .nhi-english-v5 .nhi-en-main .nhi-en-ipa{
+  display:inline!important;flex:0 1 auto!important;
+  font:500 clamp(13px,1.65vw,17px)/1.28 "Times New Roman",Times,serif!important;
+  color:var(--muted)!important;white-space:normal!important;
+  margin:0!important;
+}
+html body #planBox .pcard .nhi-english-v5 .nhi-en-main .nhi-en-ipa[hidden]{display:none!important}
+html body #planBox .pcard .nhi-english-v5 .nhi-en-head-actions{
+  flex:0 0 auto!important;display:flex!important;gap:4px!important;
+  align-items:center!important;justify-content:flex-end!important;margin-left:auto!important;
+}
+html body #planBox .pcard .nhi-english-v5 .nhi-en-head-actions button{min-height:30px!important}
+html body #planBox .pcard .nhi-english-v5::after{display:none!important;content:none!important}
+/* Selection stays on the words only, not on the whole row. */
+#planBox .nhi-english-v5 .nhi-en-choice,
+#planBox .nhi-english-v5 .nhi-en-choice[aria-pressed="true"]{
+  background:transparent!important;border:0!important;
+  box-shadow:none!important;outline:0!important;
+  padding-block:5px!important;
+}
+#planBox .nhi-english-v5 .nhi-en-choice::before,
+#planBox .nhi-english-v5 .nhi-en-choice::after{
+  content:none!important;display:none!important;
+}
+#planBox .nhi-english-v5 .nhi-en-choice .nhi-comparison-choice-text{
+  font-weight:400!important;color:var(--ink)!important;
+  transition:color .2s ease,font-weight .2s ease!important;
+}
+#planBox .nhi-english-v5 .nhi-en-choice[aria-pressed="true"] .nhi-comparison-choice-text,
+#planBox .nhi-english-v5 .nhi-en-choice[aria-pressed="true"] .nhi-comparison-choice-text *{
+  font-weight:800!important;color:#2b79b8!important;
+  text-decoration:none!important;
+}
+#planBox .nhi-english-v5 .nhi-en-choice:hover .nhi-comparison-choice-text,
+#planBox .nhi-english-v5 .nhi-en-choice:hover .nhi-comparison-choice-text *{
+  color:#397fba!important;text-decoration:none!important;
+}
+#planBox .nhi-english-v5 .nhi-en-choice>span.nhi-comparison-flag{
+  font-family:system-ui!important;opacity:.9!important;
+}
+#planBox .nhi-english-v5 .nhi-en-choice .nhi-choice-check input{
+  accent-color:#4f9dca!important;
+}
+#planBox .nhi-english-v5 .nhi-en-head .nhi-en-speak,
+#planBox .nhi-english-v5 .nhi-en-head .nhi-en-edit{
+  border-radius:8px!important;
+}
+#planBox .nhi-english-v5 .nhi-en-status:empty{display:none!important}
+@media(max-width:600px){
+  html body #planBox .pcard .nhi-english-v5 .nhi-en-main .nhi-en-translation{
+   font-size:clamp(17px,3.7vw,21px)!important;
+  }
+  html body #planBox .pcard .nhi-english-v5>.nhi-en-head{gap:4px!important}
+  html body #planBox .pcard .nhi-english-v5 .nhi-en-head-actions{gap:2px!important}
+}
+/* Dictionary has no close X; same bubble toggles it. */
+.nhi-dictionary-dock .nhi-dialog-head button[aria-label="Đóng từ điển"]{display:none!important}
+
+/* Keep dropdown menu below the expanded two-row sticky study header on phones. */
+@media(max-width:800px){
+ body.nhi-in-study .menu{
+   top:calc(var(--topbar) + 45px + env(safe-area-inset-top,0px))!important;
+ }
+}

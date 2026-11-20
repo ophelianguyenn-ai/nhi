@@ -1,0 +1,67 @@
+/* V12: The Korean encouragement, start-learning button AND their outlines
+   always follow the one cover-title palette selected at page load.
+   Keep color static until full reload; do not affect study cards or garden. */
+:root[data-nhi-cover-title="blue"]{
+  --nhi-cover-ui-ink:#1a719e;
+  --nhi-cover-ui-soft:#eef8ff;
+  --nhi-cover-ui-border:#86c3e3;
+  --nhi-cover-ui-edge:#add9ef;
+}
+:root[data-nhi-cover-title="green"]{
+  --nhi-cover-ui-ink:#237f58;
+  --nhi-cover-ui-soft:#effbf4;
+  --nhi-cover-ui-border:#8ed0ac;
+  --nhi-cover-ui-edge:#b6e3c9;
+}
+:root[data-nhi-cover-title="pink"]{
+  --nhi-cover-ui-ink:#b55280;
+  --nhi-cover-ui-soft:#fff0f7;
+  --nhi-cover-ui-border:#e7a4c6;
+  --nhi-cover-ui-edge:#f0c2da;
+}
+:root[data-theme="dark"][data-nhi-cover-title="blue"]{
+  --nhi-cover-ui-ink:#a6dcff;
+  --nhi-cover-ui-soft:#15364c;
+  --nhi-cover-ui-border:#478fbd;
+  --nhi-cover-ui-edge:#285d80;
+}
+:root[data-theme="dark"][data-nhi-cover-title="green"]{
+  --nhi-cover-ui-ink:#a2ecc0;
+  --nhi-cover-ui-soft:#173b2c;
+  --nhi-cover-ui-border:#55ae81;
+  --nhi-cover-ui-edge:#28674a;
+}
+:root[data-theme="dark"][data-nhi-cover-title="pink"]{
+  --nhi-cover-ui-ink:#ffc0df;
+  --nhi-cover-ui-soft:#42263a;
+  --nhi-cover-ui-border:#c47b9f;
+  --nhi-cover-ui-edge:#7a4560;
+}
+
+/* The Korean encouragement shares the same family as the title,
+   rather than retaining the fixed V9 blue color. */
+#cover.nhi-upper-v8 .lead,
+#cover.nhi-upper-v8 .lead>span[lang="ko"]{
+  color:var(--nhi-cover-ui-ink,#1a719e)!important;
+  filter:none!important;
+}
+
+/* Change the button label, the button's outline, fill, and its raised
+   lower edge together; the button continues to work in day/night mode. */
+#cover.nhi-upper-v8 #coverGo.primary.white{
+  box-sizing:border-box!important;
+  border:2px solid var(--nhi-cover-ui-border,#86c3e3)!important;
+  color:var(--nhi-cover-ui-ink,#1a719e)!important;
+  background:var(--nhi-cover-ui-soft,#eef8ff)!important;
+  box-shadow:0 5px 0 var(--nhi-cover-ui-edge,#add9ef)!important;
+  /* Palette changes must be immediate, never briefly display the old hue. */
+  transition-property:transform,filter!important;
+  filter:none!important;
+}
+#cover.nhi-upper-v8 #coverGo.primary.white:hover{
+  filter:brightness(1.025)!important;
+}
+#cover.nhi-upper-v8 #coverGo.primary.white:focus-visible{
+  outline:3px solid var(--nhi-cover-ui-ink,#1a719e)!important;
+  outline-offset:3px;
+}

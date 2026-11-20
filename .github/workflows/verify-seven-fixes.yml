@@ -1,0 +1,54 @@
+name: Verify Seven Study Upgrades
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'index.html'
+      - 'lessons.json'
+      - 'nhi-verified-pairs-20261117.js'
+      - 'nhi-phrases-v5.js'
+      - 'nhi-money-cat-20261117.svg'
+      - 'nhi-cat-original-8frames-20261117.gif'
+      - 'nhi-original-gif-review-v1.css'
+      - 'nhi-longpress-dictionary-v1.js'
+      - 'nhi-seven-fixes-20261117.css'
+      - 'study-update-v6.js'
+      - 'scripts/smoke-seven-fixes.mjs'
+      - '.github/workflows/verify-seven-fixes.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'index.html'
+      - 'nhi-money-cat-20261117.svg'
+      - 'nhi-cat-original-8frames-20261117.gif'
+      - 'nhi-original-gif-review-v1.css'
+      - 'scripts/smoke-seven-fixes.mjs'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  requested-ux:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install headless browser
+        run: npm install --no-save --no-package-lock puppeteer-core@24
+      - name: Start local site
+        run: |
+          if [ ! -f english.json ]; then printf '{"version":1,"cards":{}}\n' > english.json; fi
+          python3 -m http.server 8765 --bind 127.0.0.1 >/tmp/nhi-seven-server.log 2>&1 &
+          for i in $(seq 1 30); do
+            if curl -sf http://127.0.0.1:8765/index.html >/dev/null; then exit 0; fi
+            sleep 1
+          done
+          cat /tmp/nhi-seven-server.log
+          exit 1
+      - name: Verify requested features in headless Chrome
+        run: node scripts/smoke-seven-fixes.mjs

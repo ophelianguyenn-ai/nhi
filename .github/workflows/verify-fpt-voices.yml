@@ -1,0 +1,30 @@
+name: Verify FPT Ban Mai and InJoon voice migration
+on:
+  push:
+    branches: [main]
+    paths:
+      - scripts/generate_selected_voices.py
+      - scripts/generate_tts.py
+      - scripts/generate_daily_audio.py
+      - scripts/test_selected_voices.py
+      - recorded-voices-v11.js
+      - .github/workflows/verify-fpt-voices.yml
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  test-voice-migration:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m pip install 'mutagen>=1.47,<2'
+      - name: Check exact voices, API security, MP3 paths and dry-run safety
+        run: python -m unittest scripts/test_selected_voices.py -v
+      - name: Check audio player JavaScript syntax
+        run: node --check recorded-voices-v11.js
+      - name: Preview selected daily phrases without FPT key or paid requests
+        run: python scripts/generate_selected_voices.py --scope daily --limit 10 --dry-run

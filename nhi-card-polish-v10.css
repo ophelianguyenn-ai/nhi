@@ -1,0 +1,209 @@
+/* V10 — fresher title, left-aligned English contents, bright pastel-blue "Khó".
+   Layered after V9; portrait sizing, seasonal garden and card layout unchanged. */
+
+/* Choose a single fresh cover color once at document load, not an animation.
+   The two words use coordinated shades of the same selected hue.
+   Keep accessible contrast in light and dark themes. */
+:root[data-nhi-cover-title="blue"]{
+  --nhi-cover-title-main:#227dac;
+  --nhi-cover-title-accent:#088eb8;
+}
+:root[data-nhi-cover-title="green"]{
+  --nhi-cover-title-main:#278359;
+  --nhi-cover-title-accent:#169b71;
+}
+:root[data-nhi-cover-title="pink"]{
+  --nhi-cover-title-main:#ad527f;
+  --nhi-cover-title-accent:#d36a9b;
+}
+:root[data-theme="dark"][data-nhi-cover-title="blue"]{
+  --nhi-cover-title-main:#c1eaff;
+  --nhi-cover-title-accent:#91d9ff;
+}
+:root[data-theme="dark"][data-nhi-cover-title="green"]{
+  --nhi-cover-title-main:#baefce;
+  --nhi-cover-title-accent:#92e0b9;
+}
+:root[data-theme="dark"][data-nhi-cover-title="pink"]{
+  --nhi-cover-title-main:#ffdaeb;
+  --nhi-cover-title-accent:#ffb3d8;
+}
+#cover.nhi-upper-v8 h1{
+  color:var(--nhi-cover-title-main,#227dac)!important;
+  animation:none!important;
+  transition:none!important;
+  filter:none!important;
+  will-change:auto!important;
+}
+#cover.nhi-upper-v8 h1 em{
+  color:var(--nhi-cover-title-accent,#088eb8)!important;
+  animation:none!important;
+  transition:none!important;
+  filter:none!important;
+}
+/* The cover title is already weight 900. Add a very subtle stroke
+   so both lines look slightly fuller without changing layout or palette. */
+#cover.nhi-upper-v8 h1,
+#cover.nhi-upper-v8 h1 em{
+  -webkit-text-stroke:.35px currentColor;
+}
+/* Override the earlier V9 night headline rule (higher specificity) too. */
+:root[data-theme="dark"] #cover.nhi-upper-v8 h1{
+  color:var(--nhi-cover-title-main,#c1eaff)!important;
+  animation:none!important;
+  transition:none!important;
+  filter:none!important;
+}
+:root[data-theme="dark"] #cover.nhi-upper-v8 h1 em{
+  color:var(--nhi-cover-title-accent,#91d9ff)!important;
+  animation:none!important;
+  transition:none!important;
+  filter:none!important;
+}
+
+/* The English card itself stays centered relative to Vietnamese/Korean.
+   Only its INSIDE text becomes left-aligned, not the outer frame. */
+html body #planBox .pcard .nhi-english-v5>.nhi-en-head{
+  display:grid!important;
+  grid-template-columns:minmax(0,1fr) auto!important;
+  align-items:start!important;
+  justify-items:stretch!important;
+  column-gap:8px!important;
+  width:100%!important;
+}
+html body #planBox .pcard .nhi-english-v5>.nhi-en-head>.nhi-en-main{
+  grid-column:1!important;
+  grid-row:1!important;
+  box-sizing:border-box!important;
+  display:block!important;
+  width:100%!important;
+  min-width:0!important;
+  max-width:100%!important;
+  margin:0!important;
+  padding:0 4px 0 0!important;
+  justify-self:stretch!important;
+  text-align:left!important;
+}
+html body #planBox .pcard .nhi-english-v5>.nhi-en-head>.nhi-en-head-actions{
+  grid-column:2!important;
+  grid-row:1!important;
+  position:relative!important;
+  margin:0!important;
+  padding:0!important;
+  justify-self:end!important;
+  align-self:start!important;
+  z-index:2!important;
+}
+html body #planBox .pcard .nhi-english-v5 .nhi-en-translation,
+html body #planBox .pcard .nhi-english-v5 .nhi-en-ipa,
+html body #planBox .pcard .nhi-english-v5 .nhi-en-status,
+html body #planBox .pcard .nhi-english-v5 .nhi-en-choice,
+html body #planBox .pcard .nhi-english-v5 .nhi-comparison-choice-text{
+  text-align:left!important;
+  margin-left:0!important;
+  margin-right:0!important;
+}
+html body #planBox .pcard .nhi-english-v5 .nhi-en-translation,
+html body #planBox .pcard .nhi-english-v5 .nhi-en-ipa{
+  overflow-wrap:anywhere;
+  white-space:normal;
+}
+@media(max-width:650px){
+  html body #planBox .pcard .nhi-english-v5>.nhi-en-head{
+    grid-template-columns:minmax(0,1fr) auto!important;
+  }
+  html body #planBox .pcard .nhi-english-v5>.nhi-en-head>.nhi-en-main{
+    padding:0 3px 0 0!important;
+  }
+}
+
+/* One shade brighter, retaining a pastel-blue tone and legible labels. */
+html body #planBox .pcard>.prate.nhi-rating-v3>.hard,
+html body #planBox .pcard>.prate>.hard{
+  background:#eaf5ff!important;
+  color:#276184!important;
+  border-color:#a5d2ee!important;
+  box-shadow:0 3px 0 #b7ddf4!important;
+}
+html body #planBox .pcard>.prate.nhi-rating-v3>.hard.picked,
+html body #planBox .pcard>.prate>.hard.picked{
+  background:#d7edff!important;
+  color:#185578!important;
+  border-color:#84c2e9!important;
+  box-shadow:0 3px 0 #a0d1f2!important;
+}
+:root[data-theme="dark"] body #planBox .pcard>.prate.nhi-rating-v3>.hard,
+:root[data-theme="dark"] body #planBox .pcard>.prate>.hard{
+  background:#2e5879!important;
+  color:#e7f6ff!important;
+  border-color:#6b9fc0!important;
+  box-shadow:0 3px 0 #3c6685!important;
+}
+:root[data-theme="dark"] body #planBox .pcard>.prate.nhi-rating-v3>.hard.picked,
+:root[data-theme="dark"] body #planBox .pcard>.prate>.hard.picked{
+  background:#427999!important;
+  color:#fff!important;
+  border-color:#8cc8e9!important;
+  box-shadow:0 3px 0 #5b9abb!important;
+}
+@media(prefers-reduced-motion:reduce){
+  #cover.nhi-upper-v8 h1{animation:none!important;filter:none!important;will-change:auto}
+}
+
+
+/* Legacy compact English CSS used a higher-specificity inline-flex header.
+   Override that rule as well, so tiny mobile widths cannot put the text
+   underneath the headphones / thinking buttons. */
+html body #planBox .pcard .pfront .nhi-english-v5:not(.nhi-compare-expanded)>.nhi-en-head,
+html body #planBox .pcard .pfront .nhi-english-v5.nhi-compare-expanded>.nhi-en-head{
+  display:grid!important;
+  width:100%!important;
+  min-width:0!important;
+  max-width:100%!important;
+  grid-template-columns:minmax(0,1fr) auto!important;
+  gap:8px!important;
+  align-items:start!important;
+  justify-items:stretch!important;
+  justify-content:normal!important;
+  flex-wrap:nowrap!important;
+}
+html body #planBox .pcard .pfront .nhi-english-v5>.nhi-en-head>.nhi-en-main{
+  box-sizing:border-box!important;
+  grid-area:1/1!important;
+  display:block!important;
+  min-width:0!important;
+  width:100%!important;
+  max-width:100%!important;
+  padding:0 4px 0 0!important;
+  text-align:left!important;
+}
+html body #planBox .pcard .pfront .nhi-english-v5>.nhi-en-head>.nhi-en-head-actions{
+  grid-area:1/2!important;
+  min-width:0!important;
+  margin:0!important;
+  align-self:start!important;
+  justify-self:end!important;
+}
+
+
+/* Readable bilingual stack: English expression first, IPA on its own line.
+   Explicit [hidden] wins, including for phrases exceeding five words. */
+html body #planBox .pcard .nhi-english-v5 .nhi-en-main>.nhi-en-translation,
+html body #planBox .pcard .nhi-english-v5 .nhi-en-main>.nhi-en-ipa:not([hidden]){
+  display:block!important;
+  box-sizing:border-box!important;
+  width:100%!important;
+  max-width:100%!important;
+  margin:0!important;
+  padding:0!important;
+  text-align:left!important;
+  white-space:normal!important;
+  overflow-wrap:anywhere!important;
+}
+html body #planBox .pcard .nhi-english-v5 .nhi-en-main>.nhi-en-ipa:not([hidden]){
+  margin-top:3px!important;
+  line-height:1.4!important;
+}
+html body #planBox .pcard .nhi-english-v5 .nhi-en-main>.nhi-en-ipa[hidden]{
+  display:none!important;
+}

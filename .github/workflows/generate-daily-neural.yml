@@ -1,0 +1,91 @@
+name: Daily Ban Mai Vietnamese and InJoon Korean for Nhi Learning Corner
+
+# 22:00 UTC = 05:00 in Vietnam (UTC+07) the following morning.
+# New lesson pushes use small pilot-sized batches; nightly batches clear backlog.
+on:
+  schedule:
+    - cron: '0 22 * * *'
+  push:
+    branches: [main]
+    paths:
+      - lessons.json
+      - scripts/daily-audio-texts.json
+      - scripts/generate_selected_voices.py
+      - scripts/generate_daily_audio.py
+      - scripts/test_selected_voices.py
+      - .github/workflows/generate-daily-neural.yml
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: 'Only inspect missing voices; no API requests'
+        type: boolean
+        default: true
+      vi_limit:
+        description: 'Maximum Ban Mai MP3s in this manual run'
+        type: string
+        default: '100'
+      ko_limit:
+        description: 'Maximum InJoon MP3s in this manual run'
+        type: string
+        default: '200'
+
+permissions:
+  contents: write
+  actions: write
+
+concurrency:
+  group: nhi-voice-audio-generation
+  cancel-in-progress: false
+
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Prepare speech engines and MP3 validator
+        run: |
+          python -m pip install 'edge-tts>=7,<8' 'mutagen>=1.47,<2'
+          command -v ffmpeg || (sudo apt-get update -qq && sudo apt-get install -y ffmpeg)
+      - name: Verify Ban Mai and InJoon routing without API charges
+        run: python -m unittest scripts/test_selected_voices.py -v
+      - name: Fill new lessons first, then replace non-selected voices
+        env:
+          FPT_MARKETPLACE_API_KEY: ${{ secrets.FPT_MARKETPLACE_API_KEY }}
+          NHI_VI_DAILY_LIMIT: ${{ github.event_name == 'push' && '10' || github.event_name == 'workflow_dispatch' && inputs.vi_limit || '100' }}
+          NHI_KO_DAILY_LIMIT: ${{ github.event_name == 'push' && '20' || github.event_name == 'workflow_dispatch' && inputs.ko_limit || '200' }}
+          NHI_AUDIO_DRY_RUN: ${{ github.event_name == 'workflow_dispatch' && inputs.dry_run && 'true' || 'false' }}
+        run: python scripts/generate_daily_audio.py
+      - name: Commit and publish only verified MP3 changes
+        if: ${{ github.event_name != 'workflow_dispatch' || inputs.dry_run == false }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add -- audio/ audio-manifest.json
+          if git diff --cached --quiet; then
+            echo 'Already covered: nothing to publish'
+            exit 0
+          fi
+          git commit -m 'Add missing Vietnamese Ban Mai and Korean InJoon lesson audio'
+          for attempt in 1 2 3 4 5; do
+            git fetch origin main
+            git rebase origin/main
+            if git push origin HEAD:main; then
+              exit 0
+            fi
+            echo "Main branch moved; retrying commit ($attempt/5)"
+            sleep 5
+          done
+          exit 1
+      - name: Deploy updated MP3 and manifest to GitHub Pages
+        if: ${{ github.event_name != 'workflow_dispatch' || inputs.dry_run == false }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh workflow run deploy-pages.yml --ref main

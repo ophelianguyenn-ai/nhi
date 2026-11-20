@@ -1,0 +1,74 @@
+name: Daily fine-grained Vietnamese-Korean phrase correspondence
+
+# 22:10 UTC = 05:10 every morning in Vietnam.
+# Builds verified word-level links for new lessons and unfinished older cards.
+on:
+  schedule:
+    - cron: '10 22 * * *'
+  push:
+    branches: [main]
+    paths:
+      - lessons.json
+      - scripts/nov19_verified_phrase_pairs.json
+      - scripts/generate_phrase_pairs.py
+      - scripts/test_generate_phrase_pairs.py
+      - .github/workflows/daily-phrase-alignment.yml
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  actions: write
+
+concurrency:
+  group: nhi-daily-phrase-alignment
+  cancel-in-progress: false
+
+jobs:
+  phrase-segments:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Verify every phrase link is grounded and does not overlap
+        run: python -m unittest scripts/test_generate_phrase_pairs.py -v
+      - name: Regenerate accurate smallest useful VI-KO lexical segments
+        run: python scripts/generate_phrase_pairs.py
+      - name: Validate generated JavaScript and preserve study data
+        run: |
+          node --check nhi-daily-pairs.js
+          test -s lessons.json
+          test -s nhi-daily-pairs.js
+      - name: Commit only validated segment mapping updates
+        id: publish
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add -- nhi-daily-pairs.js
+          if git diff --cached --quiet; then
+            echo 'All VI-KO phrase correspondences already up-to-date.'
+            echo 'changed=false' >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          git commit -m 'Update daily VI-KO lexical pair breakdown for new lessons'
+          for attempt in 1 2 3 4 5; do
+            git fetch origin main
+            git rebase origin/main
+            if git push origin HEAD:main; then
+              echo 'changed=true' >> "$GITHUB_OUTPUT"
+              exit 0
+            fi
+            sleep 5
+          done
+          exit 1
+      - name: Republish website with new pair breakdown
+        if: ${{ steps.publish.outputs.changed == 'true' }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh workflow run deploy-pages.yml --ref main

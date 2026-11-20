@@ -1,0 +1,82 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 800" role="img" aria-label="Mèo trắng chibi vui vẻ tung tiền, tiền giấy đang rơi">
+<defs>
+ <linearGradient id="fur" x1=".15" y1=".05" x2=".88" y2="1"><stop stop-color="#fffefa"/><stop offset=".6" stop-color="#fffdfa"/><stop offset="1" stop-color="#f6e9e4"/></linearGradient>
+ <linearGradient id="ear" x1="0" y1="0" x2=".8" y2="1"><stop stop-color="#f3a4ab"/><stop offset="1" stop-color="#ffd4cc"/></linearGradient>
+ <linearGradient id="note" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#fffaf4"/><stop offset="1" stop-color="#f4dce0"/></linearGradient>
+ <radialGradient id="cheek"><stop stop-color="#f49e9e" stop-opacity=".65"/><stop offset="1" stop-color="#f49e9e" stop-opacity="0"/></radialGradient>
+ <symbol id="bill" viewBox="0 0 140 74">
+  <rect x="2" y="2" width="136" height="70" rx="5" fill="url(#note)" stroke="#a98d91" stroke-width="3"/>
+  <rect x="12" y="11" width="116" height="52" rx="3" fill="none" stroke="#b9a6a1" stroke-width="2"/>
+  <rect x="34" y="15" width="72" height="44" rx="4" fill="#b5c4a3" opacity=".83"/>
+  <circle cx="70" cy="37" r="18" fill="#9aaf98"/><circle cx="70" cy="37" r="10" fill="#b7a1a1"/>
+  <path d="M16 17h12m84 38h12M16 55h12m84-38h12" stroke="#c18d96" stroke-width="3" stroke-linecap="round"/>
+ </symbol>
+ <filter id="shade"><feGaussianBlur stdDeviation="7"/></filter>
+</defs>
+<style><![CDATA[
+#kitten {transform-box:fill-box;transform-origin:50% 88%;animation:bounce 1.4s ease-in-out infinite}
+#left-paw{transform-box:fill-box;transform-origin:85% 92%;animation:waveLeft .72s ease-in-out infinite alternate}
+#right-paw{transform-box:fill-box;transform-origin:18% 92%;animation:waveRight .8s ease-in-out infinite alternate}
+#tail{transform-box:fill-box;transform-origin:2% 87%;animation:tail 1.35s ease-in-out infinite alternate}
+.money{animation:fall 4.3s linear infinite;transform-box:fill-box;transform-origin:center}
+.m2{animation-delay:-1.4s;animation-duration:5s}.m3{animation-delay:-2.7s;animation-duration:3.8s}
+.m4{animation-delay:-3.6s;animation-duration:4.7s}.m5{animation-delay:-.6s}
+.m6{animation-delay:-2.1s;animation-duration:5.4s}.m7{animation-delay:-4s}
+.spark{transform-box:fill-box;transform-origin:center;animation:twinkle 2.5s ease-in-out infinite alternate}
+.spark:nth-of-type(even){animation-delay:-1.3s}
+@keyframes bounce{0%,100%{transform:translateY(0) rotate(-1deg)}50%{transform:translateY(-12px) rotate(1deg)}}
+@keyframes waveLeft{from{transform:rotate(-6deg)}to{transform:rotate(13deg)}}
+@keyframes waveRight{from{transform:rotate(7deg)}to{transform:rotate(-15deg)}}
+@keyframes tail{from{transform:rotate(-6deg)}to{transform:rotate(10deg)}}
+@keyframes fall{0%{transform:translateY(-245px) rotate(-18deg);opacity:0}14%{opacity:1}85%{opacity:1}100%{transform:translateY(285px) rotate(34deg);opacity:0}}
+@keyframes twinkle{from{transform:scale(.7);opacity:.4}to{transform:scale(1.22);opacity:1}}
+@media (prefers-reduced-motion:reduce){#kitten,#left-paw,#right-paw,#tail,.money,.spark{animation:none!important}}
+]]></style>
+<ellipse cx="405" cy="749" rx="244" ry="17" fill="#d6a8ad" opacity=".36" filter="url(#shade)"/>
+<g stroke="#e8b55e" stroke-width="3" fill="#ffe68d">
+ <path class="spark" d="M334 92l16 40 42 15-42 15-16 42-15-42-43-15 43-15z"/>
+ <path class="spark" d="M604 524l8 25 26 9-26 8-8 26-9-26-25-8 25-9z"/>
+ <path class="spark" d="M164 583l9 24 25 10-25 9-9 26-8-26-25-9 25-10z"/>
+ <path class="spark" d="M640 648l9 24 24 9-24 8-9 23-8-23-24-8 24-9z"/>
+</g>
+<!-- paper notes above and around the kitten -->
+<g transform="translate(71 146) rotate(17)"><g class="money m1"><use href="#bill" width="140" height="74"/></g></g>
+<g transform="translate(416 57) rotate(107)"><g class="money m2"><use href="#bill" width="140" height="74"/></g></g>
+<g transform="translate(562 211) rotate(-18)"><g class="money m3"><use href="#bill" width="140" height="74"/></g></g>
+<g transform="translate(50 294) rotate(78)"><g class="money m4"><use href="#bill" width="140" height="74"/></g></g>
+<g transform="translate(639 339) rotate(-70)"><g class="money m5"><use href="#bill" width="140" height="74"/></g></g>
+<g transform="translate(202 676) rotate(-17)"><g class="money m6"><use href="#bill" width="140" height="74"/></g></g>
+<g transform="translate(489 686) rotate(11)"><g class="money m7"><use href="#bill" width="140" height="74"/></g></g>
+<g id="kitten" stroke-linecap="round" stroke-linejoin="round">
+ <!-- curled tail behind body -->
+ <g id="tail"><path d="M526 566q125 9 112-67-6-56-69-38" fill="none" stroke="#bfa4a2" stroke-width="65"/>
+ <path d="M526 566q125 9 112-67-6-56-69-38" fill="none" stroke="url(#fur)" stroke-width="58"/></g>
+ <!-- body and plush haunches -->
+ <path d="M281 465q-41 54-38 163 3 102 155 112 145 10 163-85 11-76-37-178z" fill="url(#fur)" stroke="#bda5a5" stroke-width="4"/>
+ <ellipse cx="395" cy="594" rx="104" ry="127" fill="#fff" opacity=".73"/>
+ <path d="M299 702q-47-9-54 19 13 30 76 20 28-6 23-26M469 716q39-25 72 6-17 30-68 17-22-7-4-23" fill="url(#fur)" stroke="#baa3a3" stroke-width="4"/>
+ <!-- ears + gigantic round kitten head -->
+ <path d="M260 271q-26-85-8-129 8-16 85 46 62-24 137-2 72-61 86-43 13 42-20 127 50 64 29 151-17 89-168 111-158 10-191-98-18-73 50-163z" fill="url(#fur)" stroke="#b8a1a4" stroke-width="4.7"/>
+ <path d="M264 237q-9-45-6-71 22 9 66 50z" fill="url(#ear)"/>
+ <path d="M486 214q50-44 69-49 1 31-12 75z" fill="url(#ear)"/>
+ <path d="M363 187q-25 28-13 46M394 183q-8 30 5 41M427 184q10 19 4 38" stroke="#e8d7d5" stroke-width="7" fill="none"/>
+ <!-- blushing happy face -->
+ <ellipse cx="281" cy="397" rx="54" ry="37" fill="url(#cheek)"/>
+ <ellipse cx="517" cy="397" rx="54" ry="37" fill="url(#cheek)"/>
+ <path d="M284 355q20-24 43 4M460 359q21-31 44-4" stroke="#24272e" stroke-width="13" fill="none"/>
+ <path d="M381 387q16-9 30 0-14 12-30 0z" fill="#bf868b" stroke="#a97980" stroke-width="2"/>
+ <path d="M378 410q17 9 35 0 29 52-3 83-28 23-54-16-22-32 22-67z" fill="#f08f84" stroke="#51464d" stroke-width="4"/>
+ <path d="M383 468q16-16 34 0" fill="none" stroke="#ffb8a5" stroke-width="9"/>
+ <path d="M350 408l-36-6M348 423l-38 7M437 407l35-7M438 422l37 8" stroke="#ccbab8" stroke-width="3" fill="none"/>
+ <!-- raised arms: left hand holds a fluttering bill -->
+ <g id="left-paw"><path d="M290 497q-69-11-115-70-18-22-3-33 17-12 33 12-15-36 3-42 21-5 35 31 34 35 71 38" fill="url(#fur)" stroke="#b8a2a1" stroke-width="5"/>
+ <ellipse cx="200" cy="396" rx="25" ry="23" fill="#ffe4df" stroke="#cbaaaa" stroke-width="3"/>
+ <ellipse cx="197" cy="395" rx="13" ry="12" fill="#f4a8a4"/></g>
+ <g transform="translate(123 385) rotate(-14)"><use href="#bill" width="134" height="70"/></g>
+ <!-- right arm tossing money -->
+ <g id="right-paw"><path d="M508 488q53-8 70-87 6-26 23-25 23 2 16 32 20-33 39-15 15 18-21 55-45 82-107 94" fill="url(#fur)" stroke="#b8a2a1" stroke-width="5"/>
+ <ellipse cx="607" cy="417" rx="25" ry="23" fill="#ffe9e4" stroke="#cbaaaa" stroke-width="3"/>
+ <ellipse cx="608" cy="415" rx="12" ry="12" fill="#f4aaa7"/></g>
+ <g transform="translate(543 332) rotate(27)"><use href="#bill" width="135" height="70"/></g>
+</g>
+</svg>

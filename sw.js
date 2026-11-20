@@ -1,13 +1,30 @@
 // Offline support: network-first for GitHub Pages and static assets.
 // Fall back to cache only when offline. Different cache key forces eviction of earlier stale CSS/JS.
-const CACHE = 'nhi-corner-v37-english-rollback-no-gemini';
+const CACHE = 'nhi-corner-v75-vi-ko-microsegments';
 const CORE = [
+  'study-update-v6.js','study-update-v6.css','nhi-november-v15.js','nhi-november-v15.css',
+  'nhi-late-2026.js','nhi-late-2026.css','nhi-romance-v1.js','nhi-romance-v1.css','nhi-luong-v1.svg','nhi-couple-gif-v1.js','nhi-couple-gif-v1.css',
+  'nhi-romance-v2.js','nhi-romance-v2.css','nhi-controls-v3.css','nhi-bubble-effects-v3.css','nhi-luong-reference-v2.svg','nhi-luong-kiss-v2.svg','nhi-luong-demo-approved-v3.svg',
+  'nhi-cover-girl-rig-v3.svg','nhi-cover-airplane-v3.js','nhi-cover-story-v3.js','nhi-cover-story-v3.css',
+  'nhi-cover-gif-player-v4.js','nhi-cover-gif-player-v4.css','luong-nhi-goc.gif',
+  'nhi-romantic-cover-v5-1.js','nhi-romantic-cover-v5-1.css','nhi-luong-hands-at-sides-v5.svg',
+  'nhi-demo-pixel-cover-v5-2.js','nhi-demo-pixel-cover-v5-2.css',
+  'nhi-solo-cover-v7.css','nhi-card-polish-v8.css','nhi-card-polish-v9.css','nhi-card-polish-v10.css','nhi-cover-palette-v12.css','nhi-card-controls-v8.js',
+  'assets/romantic-demo/nhi-demo-original-pixels.png',
+  'assets/romantic-demo/luong-demo-original-pixels.png',
+  'assets/romantic-demo/luong-demo-head-v52.png',
+  'assets/romantic-demo/luong-demo-torso-v52.png',
+  'assets/romantic-demo/luong-demo-leg-left-v52.png',
+  'assets/romantic-demo/luong-demo-leg-right-v52.png',
+  'assets/cover-gif/manifest.json',
+  'assets/cover-gif/frame-00.webp','assets/cover-gif/frame-01.webp','assets/cover-gif/frame-02.webp','assets/cover-gif/frame-03.webp','assets/cover-gif/frame-04.webp','assets/cover-gif/frame-05.webp','assets/cover-gif/frame-06.webp','assets/cover-gif/frame-07.webp','assets/cover-gif/frame-08.webp',
+  'nhi-luong-articulated-v4.svg','nhi-romance-art-v4.css','nhi-polish-20261115.css','nhi-stage-move-v1.js','nhi-refine-20261115.css','nhi-celebration-cat-v1.svg','nhi-final-tight-v1.css','nhi-kitten-lifelike-v2.svg','nhi-kitten-meow-v1.js','nhi-card-no-overlap-v1.js','nhi-kitten-photo-v3.svg',
   './','index.html','manifest.webmanifest','qrcode.js','lessons.json',
   'icon-192.png','icon-512.png','refresh-v9.css','study-enhancements-v13.css',
   'hanja-v9.js','hanja-extra-v12.js','nhi-avatar.png','nhi-mascot.webp',
   'nhi-puzzled.webp','garden-v10.js','card-images-v11.js','technical-images.json',
   'nhi-google-images-v1.js','nhi-hard-minimal-v1.js','nhi-updates-v1.css','nhi-ai-resize-v2.js','nhi-ai-resize-v2.css',
-  'nhi-study-motion-v3.css','nhi-fireworks-v3.js','nhi-interface-v5.css','nhi-interface-v5.js','nhi-seasons-v1.css','nhi-seasons-v1.js','nhi-living-garden-v1.css','nhi-living-garden-v1.js','nhi-phrases-v5.js','nhi-english-data-v6.js','nhi-english-v5.js','nhi-interface-v4.css','nhi-interface-v4.js',
+  'nhi-study-motion-v3.css','nhi-fireworks-v3.js','nhi-interface-v5.css','nhi-interface-v5.js','nhi-seasons-v1.css','nhi-seasons-v1.js','nhi-living-garden-v1.css','nhi-living-garden-v1.js','nhi-phrases-v5.js','nhi-daily-pairs.js','nhi-chat-voice-v1.js','nhi-chat-image-notes-v1.css','nhi-corner-v2.js','nhi-corner-v2.css','nhi-chat-note-card-v2.css','nhi-cat-phu-ba-20261117-v2.svg','nhi-original-gif-review-v1.css','nhi-cat-original-8frames-20261117.gif','nhi-verified-pairs-20261117.js','nhi-longpress-dictionary-v1.js','nhi-money-cat-20261117.svg','nhi-seven-fixes-20261117.css','nhi-english-data-v6.js','nhi-english-v5.js','nhi-interface-v4.css','nhi-interface-v4.js',
   'recorded-voices-v11.js','audio-manifest.json','backup-portable-v1.js',
   'garden-day.webp','garden-night.webp',
   'garden-summer-day.webp','garden-summer-night.webp',

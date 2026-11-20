@@ -7,6 +7,7 @@ on:
 
 permissions:
   contents: read
+  actions: read
   pages: write
   id-token: write
 
@@ -24,6 +25,9 @@ jobs:
       - name: Checkout original app and study material
         uses: actions/checkout@v4
 
+      - name: Install exact GIF frame extractor
+        run: python3 -m pip install --user 'Pillow>=10,<13'
+
       - name: Prepare static GitHub Pages output
         shell: bash
         run: |
@@ -32,6 +36,16 @@ jobs:
           # Only publish files required by the app. Never upload .github,
           # scripts, Netlify settings, internal notes or credentials.
           files=(
+            study-update-v6.js study-update-v6.css nhi-november-v15.js nhi-november-v15.css
+            nhi-late-2026.js nhi-late-2026.css nhi-romance-v1.js nhi-romance-v1.css nhi-luong-v1.svg nhi-couple-gif-v1.js nhi-couple-gif-v1.css
+            nhi-romance-v2.js nhi-romance-v2.css nhi-controls-v3.css nhi-bubble-effects-v3.css
+            nhi-luong-reference-v2.svg nhi-luong-kiss-v2.svg nhi-luong-demo-approved-v3.svg
+            nhi-cover-girl-rig-v3.svg nhi-cover-airplane-v3.js nhi-cover-story-v3.js nhi-cover-story-v3.css
+            nhi-cover-gif-player-v4.js nhi-cover-gif-player-v4.css luong-nhi-goc.gif
+            nhi-romantic-cover-v5-1.js nhi-romantic-cover-v5-1.css nhi-luong-hands-at-sides-v5.svg
+            nhi-demo-pixel-cover-v5-2.js nhi-demo-pixel-cover-v5-2.css
+            nhi-solo-cover-v7.css nhi-card-polish-v8.css nhi-card-polish-v9.css nhi-card-polish-v10.css nhi-cover-palette-v12.css nhi-card-controls-v8.js
+            nhi-luong-articulated-v4.svg nhi-romance-art-v4.css nhi-polish-20261115.css nhi-stage-move-v1.js nhi-refine-20261115.css nhi-celebration-cat-v1.svg nhi-final-tight-v1.css nhi-kitten-lifelike-v2.svg nhi-kitten-meow-v1.js nhi-card-no-overlap-v1.js nhi-kitten-photo-v3.svg nhi-chat-voice-v1.js nhi-chat-image-notes-v1.css nhi-corner-v2.js nhi-corner-v2.css nhi-chat-note-card-v2.css nhi-cat-phu-ba-20261117-v2.svg nhi-original-gif-review-v1.css nhi-cat-original-8frames-20261117.gif
             index.html nhi-neck-options.html sw.js manifest.webmanifest
             lessons.json technical-images.json audio-manifest.json
             qrcode.js garden-v10.js
@@ -43,7 +57,7 @@ jobs:
             nhi-interface-v4.css nhi-interface-v4.js
             nhi-interface-v5.css nhi-interface-v5.js nhi-seasons-v1.css nhi-seasons-v1.js
             nhi-living-garden-v1.css nhi-living-garden-v1.js
-            refresh-app.html nhi-phrases-v5.js nhi-english-v5.js nhi-english-data-v6.js
+            refresh-app.html nhi-phrases-v5.js nhi-verified-pairs-20261117.js nhi-daily-pairs.js nhi-longpress-dictionary-v1.js nhi-money-cat-20261117.svg nhi-seven-fixes-20261117.css nhi-english-v5.js nhi-english-data-v6.js
             recorded-voices-v11.js backup-portable-v1.js
             refresh-v9.css study-enhancements-v13.css
             icon-192.png icon-512.png nhi-avatar.png
@@ -58,13 +72,73 @@ jobs:
             cp -- "$file" _site/
           done
           if [ -f english.json ]; then cp english.json _site/; else printf '{"version":1,"cards":{}}\n' > _site/english.json; fi
+          # Original GIF, when provided in the repository root, is published as-is.
+          if [ -f luong-nhi-goc.gif ]; then cp -- luong-nhi-goc.gif _site/; fi
           if [ -d pictures ]; then cp -R pictures _site/; fi
           if [ -d audio ]; then cp -R audio _site/; fi
+          # Preserve the approved demo character pixels without re-rendering them.
+          mkdir -p _site/assets/romantic-demo
+          cp -- assets/romantic-demo/*.png _site/assets/romantic-demo/
+          python3 scripts/build_cover_gif_frames.py --output _site/assets/cover-gif
           touch _site/.nojekyll
 
           test -s _site/index.html
           test -s _site/lessons.json
           echo "Static website assembled; data and illustrations preserved."
+
+      - name: Verify interactive cover JavaScript and required assets
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --check _site/nhi-cover-airplane-v3.js
+          node --check _site/nhi-cover-story-v3.js
+          node --check _site/nhi-cover-gif-player-v4.js
+          node --check _site/nhi-romantic-cover-v5-1.js
+          node --check _site/nhi-demo-pixel-cover-v5-2.js
+          node --check _site/nhi-card-controls-v8.js
+          node --check _site/nhi-english-v5.js
+          node --check _site/nhi-stage-move-v1.js
+          node --check _site/nhi-late-2026.js
+          node --check _site/nhi-daily-pairs.js
+          node --check _site/nhi-phrases-v5.js
+          test -s _site/nhi-cat-original-8frames-20261117.gif
+          test -s _site/nhi-original-gif-review-v1.css
+          test -s _site/nhi-corner-v2.js
+          test -s _site/nhi-corner-v2.css
+          grep -q 'nhi-corner-v2.js' _site/index.html
+          python3 -c "from pathlib import Path; import struct; d=Path('_site/nhi-cat-original-8frames-20261117.gif').read_bytes(); assert d[:6] in (b'GIF89a',b'GIF87a') and len(d)==413717 and struct.unpack_from('<HH',d,6)==(307,623), 'original GIF mismatch'; print('Original 8-frame GIF preserved:',len(d),'bytes')"
+          test -s _site/nhi-card-polish-v8.css
+          test -s _site/nhi-card-polish-v9.css
+          test -s _site/nhi-card-polish-v10.css
+          test -s _site/nhi-cover-palette-v12.css
+          test -s _site/assets/romantic-demo/nhi-demo-original-pixels.png
+          echo 'f4f280c95b5373299fd83e9e87e5dca606641242d9dd64f54c5926b44551b442  _site/assets/romantic-demo/nhi-demo-original-pixels.png' | sha256sum -c -
+          echo '730021cfe9c23d81b8d01c3a76a0e5791577bf5dae14f24faa7c8a0043243132  _site/assets/romantic-demo/luong-demo-original-pixels.png' | sha256sum -c -
+          test -s _site/nhi-cover-girl-rig-v3.svg
+          test -s _site/nhi-luong-articulated-v4.svg
+          test -s _site/luong-nhi-goc.gif
+          test -s _site/assets/cover-gif/manifest.json
+          for i in 00 01 02 03 04 05 06 07 08; do
+            test -s "_site/assets/cover-gif/frame-${i}.webp"
+          done
+          test -s _site/nhi-romantic-cover-v5-1.css
+          test -s _site/nhi-luong-hands-at-sides-v5.svg
+          for part in head torso leg-left leg-right; do
+            test -s "_site/assets/romantic-demo/luong-demo-${part}-v52.png"
+          done
+          grep -q 'nhi-card-polish-v8.css' _site/index.html
+          grep -q 'nhi-card-polish-v9.css' _site/index.html
+          grep -q 'nhi-card-polish-v10.css' _site/index.html
+          grep -q 'nhi-cover-palette-v12.css' _site/index.html
+          grep -q 'nhiCoverTitle' _site/index.html
+          grep -q 'data-nhi-cover-title' _site/nhi-card-polish-v10.css
+          grep -q 'nhi-card-controls-v8.js' _site/index.html
+          grep -q 'nhi-mascot.webp' _site/index.html
+          if grep -Eq 'nhi-3d-cover-v6.mjs|nhi-demo-pixel-cover-v5-2.js|nhi-cover-airplane-v3.js' _site/index.html; then
+            echo "Unexpected romance/3D runtime on solo Nhi cover"
+            exit 1
+          fi
+          echo "V9 Nhi cover and pastel study card polish verified."
 
       - name: Configure GitHub Pages
         uses: actions/configure-pages@v5
@@ -73,6 +147,25 @@ jobs:
         uses: actions/upload-pages-artifact@v4
         with:
           path: _site
+
+      - name: Wait for GitHub to register the Pages artifact
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          for attempt in $(seq 1 12); do
+            count="$(gh api "repos/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}/artifacts?name=github-pages" --jq '.artifacts | length' 2>/dev/null || echo 0)"
+            if [ "$count" -gt 0 ] 2>/dev/null; then
+              echo "GitHub Pages artifact is registered."
+              sleep 7
+              exit 0
+            fi
+            echo "Artifact metadata not indexed yet (attempt ${attempt}/12)"
+            sleep 5
+          done
+          echo "GitHub did not index the uploaded Pages artifact."
+          exit 1
 
       - name: Publish website
         id: deployment

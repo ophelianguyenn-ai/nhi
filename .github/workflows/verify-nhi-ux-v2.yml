@@ -1,0 +1,42 @@
+name: Verify Nhi Learning Corner 2.0
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'index.html'
+      - 'nhi-corner-v2.js'
+      - 'nhi-corner-v2.css'
+      - 'scripts/smoke-nhi-ux-v2.mjs'
+      - '.github/workflows/verify-nhi-ux-v2.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'index.html'
+      - 'nhi-corner-v2.js'
+      - 'nhi-corner-v2.css'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install browser driver
+        run: npm install --no-save --no-package-lock puppeteer-core@24
+      - name: Start local website
+        run: |
+          if [ ! -f english.json ]; then printf '{"version":1,"cards":{}}\n' > english.json; fi
+          python3 -m http.server 8765 --bind 127.0.0.1 >/tmp/nhi-ux2-http.log 2>&1 &
+          for i in $(seq 1 30); do
+            if curl -sf http://127.0.0.1:8765/index.html >/dev/null; then exit 0; fi
+            sleep 1
+          done
+          cat /tmp/nhi-ux2-http.log
+          exit 1
+      - name: Test genuine SRS checkpoint and responsive UI
+        run: node scripts/smoke-nhi-ux-v2.mjs

@@ -5,6 +5,46 @@ on:
     branches: [main]
     paths:
       - 'index.html'
+      - 'nhi-cover-story-v3.js'
+      - 'nhi-cover-airplane-v3.js'
+      - 'nhi-cover-story-v3.css'
+      - 'nhi-cover-girl-rig-v3.svg'
+      - 'nhi-luong-articulated-v4.svg'
+      - 'scripts/smoke-cover-v3.mjs'
+      - 'scripts/smoke-cover-v4.mjs'
+      - 'scripts/build_cover_gif_frames.py'
+      - 'luong-nhi-goc.gif'
+      - 'nhi-cover-gif-player-v4.js'
+      - 'nhi-cover-gif-player-v4.css'
+      - 'nhi-romantic-cover-v5-1.js'
+      - 'nhi-romantic-cover-v5-1.css'
+      - 'nhi-luong-hands-at-sides-v5.svg'
+      - 'scripts/smoke-romantic-v5-1.mjs'
+      - 'scripts/smoke-demo-pixel-v5-2.mjs'
+      - 'nhi-demo-pixel-cover-v5-2.js'
+      - 'nhi-demo-pixel-cover-v5-2.css'
+      - 'nhi-3d-cover-v6.mjs'
+      - 'nhi-3d-cover-v6.css'
+      - 'nhi-solo-cover-v7.css'
+      - 'scripts/smoke-nhi-solo-v7.mjs'
+      - 'scripts/smoke-nhi-card-v8.mjs'
+      - 'nhi-card-polish-v8.css'
+      - 'nhi-card-polish-v9.css'
+      - 'nhi-card-polish-v10.css'
+      - 'scripts/smoke-nhi-card-v10.mjs'
+      - 'scripts/smoke-nhi-title-v11.mjs'
+      - 'nhi-cover-palette-v12.css'
+      - 'scripts/smoke-nhi-palette-v12.mjs'
+      - 'scripts/smoke-nhi-card-v9.mjs'
+      - 'nhi-card-controls-v8.js'
+      - 'nhi-stage-move-v1.js'
+      - 'nhi-late-2026.js'
+      - 'scripts/smoke-three-v6.mjs'
+      - 'assets/romantic-demo/**'
+      - 'study-update-v6.js'
+      - 'study-update-v6.css'
+      - 'recorded-voices-v11.js'
+      - 'scripts/smoke-study-v6.mjs'
       - 'card-images-v11.js'
       - 'technical-visuals-v12.js'
       - 'hanja-extra-v12.js'
@@ -23,6 +63,8 @@ on:
       - 'nhi-phrases-v5.js'
       - 'nhi-english-v5.js'
       - '.github/workflows/smoke-cards.yml'
+  pull_request:
+    branches: [main]
   workflow_dispatch:
 
 permissions:
@@ -39,6 +81,11 @@ jobs:
           node-version: '22'
       - name: Install headless Chrome automation
         run: npm install --no-save --no-package-lock puppeteer-core@24
+      - name: Extract nine original GIF frames for browser tests
+        run: |
+          python3 -m pip install --user 'Pillow>=10,<13'
+          python3 scripts/build_cover_gif_frames.py
+
       - name: Start local static site
         run: |
           if [ ! -f english.json ]; then printf '{"version":1,"cards":{}}\n' > english.json; fi
@@ -49,11 +96,42 @@ jobs:
           done
           cat /tmp/nhi-site-server.log
           exit 1
+      - name: Verify phone and laptop follow the same card over Firebase
+        run: node scripts/smoke-cross-device.mjs
+      - name: Verify original half-body Nhi and all seven card improvements
+        run: node scripts/smoke-nhi-card-v8.mjs
+      - name: Verify V9 blue cover, centered meanings, compact pairs and comparison UI
+        run: node scripts/smoke-nhi-card-v9.mjs
+      - name: Verify left English layout and five-word IPA without title animation
+        run: node scripts/smoke-nhi-card-v10.mjs
+      - name: Verify fixed blue, green or pink title per page load
+        run: node scripts/smoke-nhi-title-v11.mjs
+      - name: Verify Korean encouragement, learning button and frame border follow fixed title palette
+        run: node scripts/smoke-nhi-palette-v12.mjs
+      - name: Save half-body cover and study card previews
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: nhi-cover-title-v11-preview
+          path: |
+            /tmp/nhi-v8-preview/*.png
+            /tmp/nhi-v9-preview/*.png
+            /tmp/nhi-v10-preview/*.png
+            /tmp/nhi-v11-preview/*.png
+          if-no-files-found: ignore
+          retention-days: 7
       - name: Confirm Vietnamese to Korean flip is visible
         run: node scripts/smoke-cards.mjs
       - name: Check mobile layout, rating animations and fireworks
+        if: ${{ !cancelled() }}
         run: node scripts/smoke-ux-v3.mjs
       - name: Check independent window closing, cover theme, English and phrase segments
+        if: ${{ !cancelled() }}
         run: node scripts/smoke-ux-v5.mjs
       - name: Verify English original survives compare, synonyms and neural download
+        if: ${{ !cancelled() }}
         run: node scripts/smoke-english-v7.mjs
+
+      - name: Verify face speech, hotkeys, notes, dictionary, clipboard images and English review
+        if: ${{ !cancelled() }}
+        run: node scripts/smoke-study-v6.mjs
