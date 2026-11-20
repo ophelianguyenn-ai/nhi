@@ -207,7 +207,9 @@ try{
  console.log('SMOKE_STEP 17 line130');
  await page.waitForSelector('#planBox .pcard',{timeout:15000});
  const saved=await page.evaluate(id=>JSON.parse(localStorage.getItem('viko-plan-v1')).img[id].v,cardID);
- assert(saved.width===350&&saved.height===280,'Image dimensions did not survive reload');
+ assert(saved.width===offsets.width&&saved.height===offsets.height&&
+   saved.offsetX===offsets.offsetX&&saved.offsetY===offsets.offsetY,
+   'Resized image dimensions and position did not survive reload: '+JSON.stringify({saved,offsets}));
  assert(errors.length===0,'Page errors: '+errors.join('; '));
  console.log('SELECTABLE CHAT AND NOTES UX PASS',JSON.stringify({note,grid:[before,after],height,voice:true,anchor}));
 }catch(err){
