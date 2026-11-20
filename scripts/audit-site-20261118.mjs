@@ -473,6 +473,30 @@ try{
    'Text center must remain aligned to card: '+JSON.stringify(result));
   return JSON.stringify(result);
  });
+ await check('Both sides and notes remain centered independently of dictionaries and English controls',async()=>{
+  const result=await page.evaluate(()=>{
+    const stage=document.querySelector('#planBox .pcard .pfront');
+    if(!stage)throw Error('Missing study front');
+    stage.click();
+    const flipped=document.querySelector('#planBox .pcard .pfront'),
+       box=flipped.getBoundingClientRect(),
+       center=box.left+box.width/2,
+       selectors=['.nhi-ko-line .answer','.vi-under','.nhi-card-note','.nhi-english-v5'];
+    return selectors.map(selector=>{
+      const node=flipped.querySelector(selector);
+      if(!node)return {selector,missing:true};
+      const r=node.getBoundingClientRect();
+      return {selector,centerDiff:Math.round((r.left+r.width/2-center)*10)/10,
+        width:r.width,visible:r.width>0&&r.height>0};
+    });
+  });
+  for(const entry of result){
+    if(entry.selector==='.nhi-english-v5'&&entry.missing)continue;
+    assert(!entry.missing&&entry.visible&&Math.abs(entry.centerDiff)<=9,
+      'Language or note is shifted from geometric card center: '+JSON.stringify(result));
+  }
+  return JSON.stringify(result);
+ });
  await check('Hard cards return later without infinite repeats',async()=>{
   const result=await page.evaluate(()=>{
     const current=JSON.parse(localStorage.getItem('viko-plan-sess-v1')||'{}'),
