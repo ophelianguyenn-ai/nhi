@@ -47,14 +47,18 @@ try{
  await page.$eval('#planBox .card-illustration img',e=>e.click());
  assert(await page.$eval('#planBox .nhi-image-adjust',e=>getComputedStyle(e).display)!=='none','Click did not show image sliders');
  const fixedCardHeight=await page.$eval('#planBox .pcard',e=>e.getBoundingClientRect().height);
- const before=await page.$eval('#planBox .pfront',e=>getComputedStyle(e).gridTemplateColumns);
+ const before=await page.$eval('#planBox .card-illustration',e=>e.getBoundingClientRect().width);
+ const languageCenter=await page.$eval('#planBox .pfront .vi-under',e=>{const r=e.getBoundingClientRect(),p=e.closest('.pcard').getBoundingClientRect();return r.left+r.width/2-(p.left+p.width/2);});
  await page.$eval('#planBox .nhi-image-adjust input[aria-label="Ngang hình"]',e=>{
   e.value='350';e.dispatchEvent(new Event('input',{bubbles:true}));e.dispatchEvent(new Event('change',{bubbles:true}));
  });
  console.log('SMOKE_STEP 7 line48');
  await page.waitForFunction(id=>JSON.parse(localStorage.getItem('viko-plan-v1')).img?.[id]?.v?.width===350,{},cardID);
- const after=await page.$eval('#planBox .pfront',e=>getComputedStyle(e).gridTemplateColumns);
- assert(before!==after,'Image width did not change grid: '+before+' / '+after);
+ const after=await page.$eval('#planBox .card-illustration',e=>e.getBoundingClientRect().width);
+ const languageCenterAfter=await page.$eval('#planBox .pfront .vi-under',e=>{const r=e.getBoundingClientRect(),p=e.closest('.pcard').getBoundingClientRect();return r.left+r.width/2-(p.left+p.width/2);});
+ assert(after>before+25,'Image width slider did not resize the illustration: '+before+' / '+after);
+ assert(Math.abs(languageCenterAfter-languageCenter)<2&&Math.abs(languageCenterAfter)<3,
+   'Image width adjustment shifted the Vietnamese text off center: '+languageCenter+' / '+languageCenterAfter);
  await page.$eval('#planBox .card-illustration img',e=>e.click());
  await page.$eval('#planBox .nhi-image-adjust input[aria-label="Cao hình"]',e=>{
   e.value='280';e.dispatchEvent(new Event('input',{bubbles:true}));e.dispatchEvent(new Event('change',{bubbles:true}));
