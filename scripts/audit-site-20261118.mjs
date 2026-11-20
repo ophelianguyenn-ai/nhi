@@ -559,8 +559,22 @@ try{
   },finish.lesson);
   assert(confirmed.prior===finish.doneBefore&&confirmed.after===finish.doneBefore+1&&!confirmed.stillAtEnd,
     'Only clicking Xong should complete the due study round: '+JSON.stringify({finish,confirmed}));
+  const reverted=await page.evaluate(lessonId=>{
+    const read=()=>((JSON.parse(localStorage.getItem('viko-plan-v1')||'{}').done||{})[lessonId]?.v||[]).length;
+    const before=read();
+    const btn=document.querySelector('#planBox .nhi-mark-unlearned');
+    if(!btn)throw Error('Missing Chưa học bài này button on lesson detail');
+    btn.click();
+    const after=read();
+    const remaining=document.querySelector('#planBox .nhi-mark-unlearned');
+    const round=document.querySelector('#planBox .nhi-review-round');
+    return {before,after,hasRollbackButton:!!remaining,round:round?.textContent?.trim()};
+  },finish.lesson);
+  assert(reverted.before===confirmed.after&&reverted.after===confirmed.prior&&
+         !reverted.hasRollbackButton&&reverted.round==='1',
+    'Chưa học bài này must undo only the last recorded study round: '+JSON.stringify(reverted));
   return JSON.stringify({sizes:measures.map(x=>({viewport:x.viewport,img:x.img,documentHeight:x.documentHeight,
-    backgrounds:x.bgColor})),pixelCorners:pixels.corners});
+    backgrounds:x.bgColor})),pixelCorners:pixels.corners,reverted});
  });
  // Basic CSS integrity and resource requests.
  await check('JavaScript runtime errors',async()=>{

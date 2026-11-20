@@ -50,6 +50,23 @@ try{
  assert(!(await page.$('#planBox .nhi-image-adjust')),
    'Legacy image size slider panel should not exist');
  const fixedCardHeight=await page.$eval('#planBox .pcard',e=>e.getBoundingClientRect().height);
+ assert(fixedCardHeight>520,'Flashcard with right image must be taller: '+fixedCardHeight);
+ const placement=await page.evaluate(()=>{
+   const bounds=selector=>document.querySelector(selector)?.getBoundingClientRect();
+   const picture=bounds('#planBox .card-illustration');
+   const korean=bounds('#planBox .nhi-ko-line');
+   const tools=bounds('#planBox .card-top .cicons');
+   const prev=bounds('#planBox .prate .nhi-prev-v3');
+   const hard=bounds('#planBox .prate .hard');
+   const next=bounds('#planBox .prate .nhi-next-v3');
+   const center=r=>r?(r.left+r.right)/2:null;
+   return {photoLeft:picture?.left,koreanCenter:center(korean),toolsCenter:center(tools),
+     prevCenter:center(prev),hardCenter:center(hard),nextCenter:center(next)};
+ });
+ console.log('IMAGE_LEFT_CONTROLS',JSON.stringify(placement));
+ assert([placement.toolsCenter,placement.prevCenter,placement.hardCenter,placement.nextCenter]
+   .every(x=>x<placement.photoLeft&&Math.abs(x-placement.koreanCenter)<135),
+   'Image mode must keep actions in the centered left half: '+JSON.stringify(placement));
  const before=await page.$eval('#planBox .pfront',e=>getComputedStyle(e).gridTemplateColumns);
  async function drag(selector,dx,dy,id){
    await page.$eval(selector,(e,dx,dy,id)=>{
