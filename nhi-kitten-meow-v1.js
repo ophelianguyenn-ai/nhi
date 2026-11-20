@@ -49,6 +49,9 @@ function note(at,length,base,volume){
 // Keep the offline oscillator as fallback when Wikimedia is inaccessible/unsupported.
 const MEOW_URL='https://upload.wikimedia.org/wikipedia/commons/c/c0/Maullido_de_gata_hembra_joven.ogg';
 let recording=null,last=0;
+document.addEventListener('pointerdown',function(e){
+ if(e.target.closest('#planBox'))preloadRealMeow();
+},{once:true,capture:true,passive:true});
 function fallbackMeow(){
  if(!Ctx)return;
  unlock();
@@ -59,14 +62,20 @@ function fallbackMeow(){
   note(when+.57,.44,740,.046);
  }catch(e){}
 }
+function preloadRealMeow(){
+ if(recording)return;
+ try{
+  recording=new Audio(MEOW_URL);
+  recording.preload='auto';
+  recording.volume=.86;
+  recording.playbackRate=1; // Keep the genuine cat's original, unpitched voice.
+  recording.load();
+ }catch(_e){recording=null;}
+}
 function playRealMeow(){
  try{
-  if(!recording){
-   recording=new Audio(MEOW_URL);
-   recording.preload='auto';
-   recording.volume=.8;
-   recording.playbackRate=1.08; // Just a little higher and sweeter, still the real recording.
-  }
+  preloadRealMeow();
+  if(!recording)return false;
   if(recording.canPlayType && !recording.canPlayType('audio/ogg; codecs="vorbis"'))return false;
   recording.pause();
   recording.currentTime=0;
