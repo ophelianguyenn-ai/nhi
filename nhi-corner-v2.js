@@ -317,59 +317,106 @@ function hookSettings(){
  });
  const foot=$('#footNote');if(foot)foot.textContent='Tự lưu trên thiết bị này. Đồng bộ giữa các máy cần được bật và thiết lập riêng. Hãy sao lưu trước khi xóa dữ liệu.';
 }
+/* Vietnamese/Korean chat examples, including independent "Ví dụ 1/2/3"
+   paragraphs. A single-language example gets + and is translated on demand. */
+function stripExampleLabel(text){
+ return String(text||'').replace(/^[\s*•\-–]+/,'')
+  .replace(/^(?:ví\s*dụ|vd|example|câu|예문)\s*(?:số\s*)?\d+\s*[.:：)－–-]?\s*/iu,'')
+  .replace(/^(?:tiếng\s*việt|vietnamese|vi|vn|tiếng\s*hàn|korean|kr|ko)\s*[:：]\s*/iu,'')
+  .trim();
+}
 function exampleFrom(text){
- const t=String(text||'').replace(/[＋✓🎧]/g,'').trim();
- if(!t)return null;
- const hasKo=s=>/[가-힣]/u.test(s),hasVi=s=>/[A-Za-zÀ-ỹ]/u.test(s);
- const clean=s=>String(s||'').replace(/^[\s\d.*•\-–]+/,'').trim();
+ const raw=String(text||'').replace(/[＋✓🎧]/g,'').trim();
+ if(!raw)return null;
+ const hasKo=s=>/[가-힣]/u.test(s);
+ const hasVi=s=>/[a-zA-ZÀ-ỹ]/u.test(s);
  function makePair(a,b){
-  a=clean(a);b=clean(b);
+  a=stripExampleLabel(a);b=stripExampleLabel(b);
+  if(!a||!b)return null;
   let vi='',ko='';
-  if(hasKo(a)&&!hasKo(b)&&hasVi(b)){ko=a;vi=b;}
-  else if(hasKo(b)&&!hasKo(a)&&hasVi(a)){vi=a;ko=b;}
-  if(!vi||!ko||vi.length>230||ko.length>230)return null;
+  if(hasKo(a)&&!hasKo(b)&&hasVi(b)&&!hasKo(b)){ko=a;vi=b;}
+  else if(hasKo(b)&&!hasKo(a)&&hasVi(a)&&!hasKo(a)){vi=a;ko=b;}
+  if(!vi||!ko||vi.length>350||ko.length>350)return null;
   vi=vi.replace(/[.．。]+\s*$/u,'').trim();
   return vi&&ko?{vi,ko}:null;
  }
- // Vietnamese: Korean, Korean: Vietnamese, including "VI: ... KO: ..."
- const candidates=[
-  /^(.+?)\s*[:：]\s*(.+)$/s,
-  /^(.+?)\s*[（(]([^()（）\n]+)[）)]/s,
-  /^(.+?)\s+(?:—|–|→|=>|⇒)\s+(.+)$/s,
-  /^(.+?)\s*\|\s*(.+)$/s,
-  /(?:^|\n)\s*(?:VI|Tiếng Việt)\s*[:：]\s*([^\n]+)[\s\S]*?(?:KO|KR|Tiếng Hàn)\s*[:：]\s*([^\n]+)/i,
-  /(?:^|\n)\s*(?:KO|KR|Tiếng Hàn)\s*[:：]\s*([^\n]+)[\s\S]*?(?:VI|Tiếng Việt)\s*[:：]\s*([^\n]+)/i
- ];
- for(const regex of candidates){
-  const m=t.match(regex);
-  if(m){const p=makePair(m[1],m[2]);if(p)return p;}
+ const taggedVi=raw.match(/(?:^|\n)\s*(?:Tiếng\s*Việt|VI|VN)\s*[:：]\s*([^\n]+)/i);
+ const taggedKo=raw.match(/(?:^|\n)\s*(?:Tiếng\s*Hàn|KO|KR)\s*[:：]\s*([^\n]+)/i);
+ if(taggedVi&&taggedKo){
+  const p=makePair(taggedVi[1],taggedKo[1]);if(p)return p;
  }
+ const candidates=[
+  /^(.+?)\s*[（(]([^()（）\n]+)[）)]\s*$/s,
+  /^(.+?)\s*(?:→|⇒|=>|\s[–—]\s|\s\|\s)\s*(.+)$/s,
+  /^(.+?)\s*[:：]\s*(.+)$/s
+ ];
+ for(const reg of candidates){const m=raw.match(reg);if(m){const p=makePair(m[1],m[2]);if(p)return p;}}
+ const lines=raw.split(/\n+/).map(stripExampleLabel).filter(Boolean);
+ if(lines.length===2){const p=makePair(lines[0],lines[1]);if(p)return p;}
  return null;
 }
+function isExampleLine(text,paragraph){
+ const s=String(text||'').trim();
+ if(!s||s.length<10)return false;
+ if(/^(?:[-•*]\s*)?(?:ví\s*dụ|vd|example|câu|예문)\s*(?:số\s*)?\d+\s*[:：.)-]?\s*\S/iu.test(s))return true;
+ if(/^\s*\d+[.)]\s+\S/.test(s)){
+  let cur=paragraph.previousElementSibling,n=0;
+  while(cur&&n++<6){
+   const prev=cur.querySelector('.nhi-ai-paragraph-text')?.textContent||'';
+   if(/(?:ví\s*dụ|ví\s*dụ\s*thực\s*tế|example|예문)/iu.test(prev))return true;
+   cur=cur.previousElementSibling;
+  }
+ }
+ return false;
+}
 window.NHI_EXAMPLE_PAIR=exampleFrom;
+window.NHI_EXAMPLE_STRIP=stripExampleLabel;
 function attachExamples(){
  const log=$('#aiLog');if(!log)return;
  log.querySelectorAll('.nhi-ai-paragraph').forEach(p=>{
-  if(p.dataset.v2Checked)return;p.dataset.v2Checked='1';
-  const text=p.querySelector('.nhi-ai-paragraph-text')?.textContent||'';
+  const source=p.querySelector('.nhi-ai-paragraph-text');
+  if(!source)return;
+  const text=source.textContent||'';
+  const next=p.nextElementSibling?.querySelector('.nhi-ai-paragraph-text')?.textContent||'';
+  const prev=p.previousElementSibling?.querySelector('.nhi-ai-paragraph-text')?.textContent||'';
+  const fingerprint=text+'¶'+next+'¶'+prev;
+  if(p.dataset.v2Fingerprint===fingerprint)return;
+  p.dataset.v2Fingerprint=fingerprint;
   let pair=exampleFrom(text);
-  if(!pair){
-    const next=p.nextElementSibling;
-    pair=exampleFrom(text+' '+(next?.querySelector('.nhi-ai-paragraph-text')?.textContent||''));
-  }
+  if(!pair && next)pair=exampleFrom(text+'\n'+next);
+  if(!pair && prev)pair=exampleFrom(prev+'\n'+text);
+  const marked=isExampleLine(text,p);
   const existing=p.querySelector('.nhi-add-to-note');
-  if(!pair){if(existing)existing.remove();return;}
-  p.dataset.v2Ko=pair.ko;p.dataset.v2Vi=pair.vi;
+  if(!pair&&!marked){
+   if(existing)existing.remove();
+   delete p.dataset.v2Vi;delete p.dataset.v2Ko;
+   return;
+  }
+  if(pair){p.dataset.v2Ko=pair.ko;p.dataset.v2Vi=pair.vi;}
+  else{delete p.dataset.v2Vi;delete p.dataset.v2Ko;}
   let add=existing;
   if(!add){add=document.createElement('button');add.type='button';add.className='nhi-add-to-note';add.textContent='＋';p.appendChild(add);}
-  add.title='Lưu đúng một câu Hàn và một câu Việt';
+  add.title=pair?'Thêm câu Việt–Hàn vào ghi chú':'Dịch câu ví dụ sang cặp Việt–Hàn rồi thêm ghi chú';
+  add.setAttribute('aria-label',add.title);
   add.onclick=function(ev){
    ev.preventDefault();ev.stopPropagation();ev.stopImmediatePropagation();
-   const saved=read(EXAMPLE,[]);if(!saved.some(x=>x.ko===pair.ko&&x.vi===pair.vi)){
-    saved.push({id:'ex-'+Date.now()+'-'+Math.random().toString(36).slice(2,5),ko:pair.ko,vi:pair.vi,at:Date.now()});write(EXAMPLE,saved.slice(-300));
-   }
-   if(P()?.active?.()&&P()?.appendChatExample)P().appendChatExample(pair.vi+': '+pair.ko);
-   status('Đã lưu 1 câu Hàn + 1 câu Việt');
+   if(add.disabled)return;
+   const selected=pair?pair.vi+': '+pair.ko:stripExampleLabel(text);
+   const translate=window.NHI_CHAT_ADD_SELECTED;
+   if(!translate){status('Chức năng ghi chú chưa sẵn sàng.');return;}
+   add.disabled=true;add.textContent='…';
+   Promise.resolve(translate(selected)).then(function(saved){
+    if(saved && pair){
+     const arr=read(EXAMPLE,[]);
+     if(!arr.some(x=>x.ko===pair.ko&&x.vi===pair.vi)){
+      arr.push({id:'ex-'+Date.now()+'-'+Math.random().toString(36).slice(2,5),ko:pair.ko,vi:pair.vi,at:Date.now()});
+      write(EXAMPLE,arr.slice(-300));
+     }
+    }
+    add.textContent=saved?'✓':'＋';
+    status(saved?'Đã thêm cặp Việt–Hàn vào ghi chú':'Chưa thêm được ví dụ');
+   }).catch(function(err){add.textContent='＋';status(String(err?.message||err));})
+    .finally(function(){add.disabled=false;if(add.isConnected)setTimeout(()=>{if(add.textContent==='✓')add.textContent='＋';},1500);});
   };
  });
 }
