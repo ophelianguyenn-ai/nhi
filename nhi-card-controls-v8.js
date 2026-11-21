@@ -19,9 +19,8 @@
  const clamp=(key,v)=>{const s=specs[key];const n=Number(v);return Math.round(Math.max(s.min,Math.min(s.max,Number.isFinite(n)?n:defaults[key]))/s.step)*s.step;};
  for(const k of Object.keys(specs))prefs[k]=clamp(k,prefs[k]);
  function apply(){
-  for(const [key,s] of Object.entries(specs)){
-   document.documentElement.style.setProperty(s.varName,prefs[key]+s.suffix);
-  }
+  // Card font choices are stored on the current card; only overall height is global.
+  document.documentElement.style.setProperty(specs.height.varName,prefs.height+'px');
  }
  apply();
  function save(){
@@ -40,7 +39,11 @@
   }
   sel.value=String(prefs[key]);
   sel.addEventListener('change',()=>{
-   prefs[key]=clamp(key,sel.value);apply();save();
+   prefs[key]=clamp(key,sel.value);
+   if(key==='height'){apply();save();}
+   else document.dispatchEvent(new CustomEvent('nhi:card-font-change',{
+     detail:{lang:key==='front'?'viFront':'vi',size:prefs[key]}
+   }));
    document.dispatchEvent(new CustomEvent('nhi-card-layout-changed',{detail:{...prefs}}));
   });
   row.append(lab,sel);
@@ -65,11 +68,24 @@
    size.after(box);
   }
  }
+ document.addEventListener('nhi:card-font-selected',()=>{
+   const card=document.querySelector('#planBox .pcard[data-nhi-card-id]');
+   if(!card)return;
+   let font={};try{font=JSON.parse(card.dataset.nhiFontSizes||'{}')||{};}catch(e){}
+   const f=document.getElementById('nhiV8-front'),b=document.getElementById('nhiV8-back');
+   if(f)f.value=String(font.viFront||font.vi||defaults.front);
+   if(b)b.value=String(font.vi||defaults.back);
+ });
  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init,{once:true});
  else init();
  window.NHI_CARD_LAYOUT_V8={
   get:()=>({...prefs}),
-  set:(key,value)=>{if(!specs[key])return false;prefs[key]=clamp(key,value);apply();save();document.getElementById('nhiV8-'+key)?.setAttribute('data-value',String(prefs[key]));return true;},
+  set:(key,value)=>{if(!specs[key])return false;prefs[key]=clamp(key,value);
+   if(key==='height'){apply();save();}
+   else document.dispatchEvent(new CustomEvent('nhi:card-font-change',{
+     detail:{lang:key==='front'?'viFront':'vi',size:prefs[key]}
+   }));
+   document.getElementById('nhiV8-'+key)?.setAttribute('data-value',String(prefs[key]));return true;},
   apply
  };
 })();
