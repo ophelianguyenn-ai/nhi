@@ -6787,6 +6787,20 @@ html body #planBox .pcard:has(.pfront.nhi-with-image)>.prate.nhi-rating-v3{
     english.style.setProperty('width',Math.ceil(wanted)+'px','important');
     english.style.setProperty('max-width',Math.min(lane,460)+'px','important');
   }
+  var observedComparison=null;
+  var comparisonResizeObserver=null;
+  function revealComparison(front,expanded,rate){
+    if(!front?.isConnected||!expanded?.isConnected||!expanded.classList.contains('nhi-compare-expanded'))return;
+    var frontRect=front.getBoundingClientRect();
+    var rateRect=rate?.getBoundingClientRect();
+    var visibleBottom=Math.min(frontRect.bottom,rateRect?rateRect.top-12:frontRect.bottom);
+    var overflow=expanded.getBoundingClientRect().bottom-visibleBottom;
+    if(overflow>2){
+      // Read after the FINAL text reflow. ResizeObserver repeats this when
+      // the English panel grows because of a long sentence or font resizing.
+      front.scrollTop=Math.max(0,front.scrollHeight-front.clientHeight);
+    }
+  }
   function refresh() {
     scheduled = false;
     root.querySelectorAll('.pcard').forEach(function (card) {
@@ -6871,21 +6885,20 @@ html body #planBox .pcard:has(.pfront.nhi-with-image)>.prate.nhi-rating-v3{
       front.classList.toggle('nhi-comparison-open',compareReady);
       if(compareReady&&front.classList.contains('nhi-with-image')){
         var rateForClearance=card.querySelector(':scope>.prate.nhi-rating-v3');
-        requestAnimationFrame(function(){
-          if(!front.isConnected||!expanded.isConnected)return;
-          var frontRect=front.getBoundingClientRect();
-          var rateRect=rateForClearance?.getBoundingClientRect();
-          var visibleBottom=Math.min(frontRect.bottom,rateRect?rateRect.top-12:frontRect.bottom);
-          var bottom=expanded.getBoundingClientRect().bottom;
-          var overflow=bottom-visibleBottom;
-          if(overflow>2){
-            var maxScroll=Math.max(0,front.scrollHeight-front.clientHeight);
-            // The expanded panel can be taller than the viewport. A single
-            // incremental scroll stops midway and leaves its last lines under
-            // navigation. Reveal the END of the comparison in one operation.
-            front.scrollTop=maxScroll;
+        if(observedComparison!==expanded){
+          if(comparisonResizeObserver)comparisonResizeObserver.disconnect();
+          observedComparison=expanded;
+          if(typeof ResizeObserver!=='undefined'){
+            comparisonResizeObserver=new ResizeObserver(function(){
+              requestAnimationFrame(function(){revealComparison(front,expanded,rateForClearance);});
+            });
+            comparisonResizeObserver.observe(expanded);
           }
-        });
+        }
+        requestAnimationFrame(function(){revealComparison(front,expanded,rateForClearance);});
+      }else if(observedComparison){
+        if(comparisonResizeObserver)comparisonResizeObserver.disconnect();
+        comparisonResizeObserver=null;observedComparison=null;
       }
     });
     root.querySelectorAll('.nhi-editor-window-v5 .nhi-editor-hanja-last').forEach(function (field) {
