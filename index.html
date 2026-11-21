@@ -6751,9 +6751,10 @@ html body #planBox .pcard:has(.pfront.nhi-with-image)>.prate.nhi-rating-v3{
     // For short phrases, IPA wraps below; don't stretch the note.
     var shortMeaning=(translation?translation.textContent.trim().length:0)<=26;
     if(shortMeaning&&!expanded)wanted=noteW;
+    note.style.setProperty('width',Math.ceil(noteW)+'px','important');
+    note.style.setProperty('max-width',Math.min(lane,460)+'px','important');
     english.style.setProperty('width',Math.ceil(wanted)+'px','important');
     english.style.setProperty('max-width',Math.min(lane,460)+'px','important');
-    note.style.setProperty('max-width',Math.min(lane,460)+'px','important');
   }
   function refresh() {
     scheduled = false;
@@ -6765,7 +6766,9 @@ html body #planBox .pcard:has(.pfront.nhi-with-image)>.prate.nhi-rating-v3{
         var lane = front.querySelector('.nhi-ko-line') || front.querySelector('.vi-under');
         if (lane) {
           var box = card.getBoundingClientRect(), rect = lane.getBoundingClientRect();
-          card.style.setProperty('--nhi-rate-left', Math.max(0,Math.round(rect.left-box.left))+'px');
+          var cardStyle=getComputedStyle(card);
+          var innerLeft=box.left+(parseFloat(cardStyle.paddingLeft)||0)+(parseFloat(cardStyle.borderLeftWidth)||0);
+          card.style.setProperty('--nhi-rate-left', Math.max(0,Math.round(rect.left-innerLeft))+'px');
           card.style.setProperty('--nhi-rate-width', Math.max(0,Math.round(rect.width))+'px');
         }
       } else {
