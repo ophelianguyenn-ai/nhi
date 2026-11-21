@@ -114,6 +114,13 @@ try{
    'Khó – Lùi – Tiến must center on text and photo gap must be small but visible: '+JSON.stringify(placement));
  // Four-arrow controls must move and persist the WHOLE frame, including X.
  const before4way=await page.evaluate(id=>JSON.parse(localStorage.getItem('viko-plan-v1')).img?.[id]?.v?.offsetX||0,cardID);
+ const geometryBefore=await page.evaluate(()=>{
+   const fig=document.querySelector('#planBox .card-illustration')?.getBoundingClientRect();
+   const row=document.querySelector('#planBox .pcard>.prate')?.getBoundingClientRect();
+   const content=document.querySelector('#planBox .nhi-ko-line')?.getBoundingClientRect();
+   return {photoX:fig?.left,rowCenter:row?(row.left+row.right)/2:0,
+     contentCenter:content?(content.left+content.right)/2:0};
+ });
  // User now has ONE four-way drag handle, not a separate four-button pad.
  assert(!(await page.$('#planBox .nhi-4way-pad')),
    'Old 4-button overlay should be removed, not layered over 2-way grip');
@@ -130,7 +137,19 @@ try{
    return v && v.offsetX>=prev+12;
  },{},cardID,before4way);
  const after4way=await page.evaluate(id=>JSON.parse(localStorage.getItem('viko-plan-v1')).img?.[id]?.v?.offsetX,cardID);
- console.log('FOUR_WAY_IMAGE_X',JSON.stringify({before:before4way,after:after4way}));
+ const geometryAfter=await page.evaluate(()=>{
+   const fig=document.querySelector('#planBox .card-illustration')?.getBoundingClientRect();
+   const row=document.querySelector('#planBox .pcard>.prate')?.getBoundingClientRect();
+   const content=document.querySelector('#planBox .nhi-ko-line')?.getBoundingClientRect();
+   return {photoX:fig?.left,rowCenter:row?(row.left+row.right)/2:0,
+     contentCenter:content?(content.left+content.right)/2:0};
+ });
+ assert(geometryAfter.photoX-geometryBefore.photoX>=9 &&
+   geometryAfter.rowCenter>geometryBefore.rowCenter+3 &&
+   Math.abs(geometryAfter.rowCenter-geometryAfter.contentCenter)<12,
+   'X drag must VISUALLY move photo and centered controls together: '+
+   JSON.stringify({geometryBefore,geometryAfter}));
+ console.log('FOUR_WAY_IMAGE_X',JSON.stringify({before:before4way,after:after4way,geometryBefore,geometryAfter}));
  const before=await page.$eval('#planBox .pfront',e=>getComputedStyle(e).gridTemplateColumns);
  async function drag(selector,dx,dy,id){
    await page.$eval(selector,(e,dx,dy,id)=>{
