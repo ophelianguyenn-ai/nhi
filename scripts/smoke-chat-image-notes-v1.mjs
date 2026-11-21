@@ -449,7 +449,7 @@ try{
     gridColumns:core?getComputedStyle(core).gridTemplateColumns:null,
     pairValue:pair?.value.split('\n').slice(0,2)};
  });
- assert(edit.core&&edit.hanLast&&!edit.kind&&edit.pairLabel.includes('Cặp từ Việt . Hàn')&&
+ assert(edit.core&&edit.hanLast&&!edit.kind&&edit.pairLabel.includes('Phân tách Việt – Hàn')&&
   edit.gridColumns?.split(' ').length===2,
    'Editor should be two columns and Hanja at bottom, without word-kind select: '+JSON.stringify(edit));
  console.log('CARD_EDITOR_COMPACT',JSON.stringify(edit));
