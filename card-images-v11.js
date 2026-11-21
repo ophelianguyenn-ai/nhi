@@ -35,6 +35,16 @@ function figure(it,value,onResize){
     // image within a fixed, clipped stage.
     f.style.setProperty('--nhi-frame-y',Math.round(offsetY)+'px');
     f.style.setProperty('--nhi-image-y','0px');
+    var onDesktop=window.matchMedia&&window.matchMedia('(min-width:621px)').matches;
+    if(parent){
+      parent.style.setProperty('--nhi-photo-shift-x',onDesktop?Math.round(offsetX)+'px':'0px');
+      parent.style.setProperty('--nhi-image-width',Math.round(width)+'px');
+    }
+    // IMPORTANT: inline-important wins over legacy Y-only transform CSS.
+    // Desktop: shift the grid column so the text + buttons follow the photo.
+    // Phone: shift image directly, preserving the one-column layout.
+    f.style.setProperty('transform',
+      'translate3d('+(onDesktop?0:Math.round(offsetX))+'px,'+Math.round(offsetY)+'px,0)','important');
   }
   function commit(){
     onResize(Object.assign({},v,{width:Math.round(width),height:Math.round(height),
@@ -58,7 +68,7 @@ function figure(it,value,onResize){
     if(!f.contains(e.relatedTarget))f.classList.remove('nhi-image-selected');
   });
 
-  // Dragging the photo itself moves the complete figure vertically.
+  // Dragging the photo moves the complete figure in both axes.
   var drag=null;
   im.addEventListener('pointerdown',function(e){
     if(e.pointerType==='mouse'&&e.button!==0)return;
@@ -74,7 +84,10 @@ function figure(it,value,onResize){
     drag.changed=true;f.classList.add('nhi-image-dragging');
     offsetX=clamp(drag.ox+dx,-320,320);
     offsetY=clamp(drag.oy+dy,-220,220);
-    paint();e.stopPropagation();
+    paint();
+    f.dispatchEvent(new CustomEvent('nhi:image-moved',{bubbles:true,
+      detail:{offsetX:offsetX,offsetY:offsetY}}));
+    e.stopPropagation();
   });
   function endMove(e){
     if(!drag||drag.id!==e.pointerId)return;
@@ -94,27 +107,40 @@ function figure(it,value,onResize){
   moveY.setAttribute('aria-label','Giữ và kéo để di chuyển ảnh lên, xuống, trái, phải');
   moveY.title='Giữ và kéo theo cả bốn hướng; phím ↑ ↓ ← → di chuyển 12 px';
   stage.appendChild(moveY);
-  var yDrag=null;
+  var xyDrag=null;
+  // Use document capture instead of relying on a moving button's pointer capture.
+  // This works even when the image changes its horizontal grid lane during drag.
+  function trackingMove(e){
+    if(!xyDrag||e.pointerId!==xyDrag.id)return;
+    var targetX=clamp(xyDrag.startX+e.clientX-xyDrag.clientX,-320,320);
+    var targetY=clamp(xyDrag.startY+e.clientY-xyDrag.clientY,-220,220);
+    if(targetX===offsetX&&targetY===offsetY)return;
+    offsetX=targetX;offsetY=targetY;
+    paint();
+    f.dispatchEvent(new CustomEvent('nhi:image-moved',{bubbles:true,
+      detail:{offsetX:offsetX,offsetY:offsetY}}));
+    e.preventDefault();
+  }
+  function trackingEnd(e){
+    if(!xyDrag||e.pointerId!==xyDrag.id)return;
+    xyDrag=null;
+    document.removeEventListener('pointermove',trackingMove,true);
+    document.removeEventListener('pointerup',trackingEnd,true);
+    document.removeEventListener('pointercancel',trackingEnd,true);
+    f.classList.remove('nhi-image-dragging');
+    f.classList.add('nhi-image-selected');
+    commit();
+    e.preventDefault();e.stopPropagation();
+  }
   moveY.addEventListener('pointerdown',function(e){
     if(e.pointerType==='mouse'&&e.button!==0)return;
     e.preventDefault();e.stopPropagation();
     f.classList.add('nhi-image-selected','nhi-image-dragging');
-    yDrag={id:e.pointerId,clientX:e.clientX,clientY:e.clientY,originalX:offsetX,originalY:offsetY};
-    try{moveY.setPointerCapture(e.pointerId);}catch(_e){}
+    xyDrag={id:e.pointerId,clientX:e.clientX,clientY:e.clientY,startX:offsetX,startY:offsetY};
+    document.addEventListener('pointermove',trackingMove,{capture:true,passive:false});
+    document.addEventListener('pointerup',trackingEnd,true);
+    document.addEventListener('pointercancel',trackingEnd,true);
   });
-  moveY.addEventListener('pointermove',function(e){
-    if(!yDrag||yDrag.id!==e.pointerId)return;
-    offsetX=clamp(yDrag.originalX+e.clientX-yDrag.clientX,-320,320);
-    offsetY=clamp(yDrag.originalY+e.clientY-yDrag.clientY,-220,220);
-    paint();e.preventDefault();e.stopPropagation();
-  });
-  function finishY(e){
-    if(!yDrag||yDrag.id!==e.pointerId)return;
-    yDrag=null;f.classList.remove('nhi-image-dragging');
-    commit();e.preventDefault();e.stopPropagation();
-  }
-  moveY.addEventListener('pointerup',finishY);
-  moveY.addEventListener('pointercancel',finishY);
   moveY.addEventListener('click',function(e){e.preventDefault();e.stopPropagation();});
   moveY.addEventListener('keydown',function(e){
     if(!['ArrowUp','ArrowDown','ArrowLeft','ArrowRight'].includes(e.key))return;
@@ -195,6 +221,7 @@ function figure(it,value,onResize){
     });
   });
   requestAnimationFrame(paint);
+  window.addEventListener('resize',paint,{passive:true});
   return f;
 }
 function editor(it,value,save){var box=node('fieldset');box.className='image-editor';box.appendChild(node('legend','Hình ảnh minh họa'));var current=value||presets[it.ko]||{},draft=Object.assign({},current);
