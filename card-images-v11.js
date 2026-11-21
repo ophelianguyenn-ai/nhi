@@ -72,6 +72,9 @@ function figure(it,value,onResize){
   function commit(){
     onResize(Object.assign({},v,{width:Math.round(width),height:Math.round(height),
       offsetX:Math.round(offsetX),offsetY:Math.round(offsetY)}));
+    // Resizing changes the live text column too. Notify the rate-button
+    // alignment code whenever width or image position is saved.
+    f.dispatchEvent(new CustomEvent('nhi:image-layout',{bubbles:true}));
   }
   // Public instance method for the four-way controller. Unlike proxy clicks
   // on hidden legacy buttons, this always updates the frame and persisted data.
