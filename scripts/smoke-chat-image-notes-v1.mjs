@@ -634,7 +634,7 @@ try{
    front.appendChild(host);
    try{
      const box=window.NHI_ENGLISH.mount(host,'compare-font-regression',
-       'Kim làm ca hai còn Luân làm ca ba','김 씨는 2조, 루언 씨는 3조로 근무해 주세요',
+       'đã được phê duyệt cuối cùng','최종 승인을 받았습니다',
        {format:{_sizes:{en:34}}});
      const main=box.querySelector('.nhi-en-translation');
      box.querySelector('.nhi-en-review')?.click();
