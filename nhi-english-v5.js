@@ -291,7 +291,10 @@ function display(box,entry,id,vi,ko){
  if(!box)return;
  entry=choices[entryKey(vi,ko)]||entry;
  const en=clean(entry&&entry.en),ipa=clean(entry&&entry.ipa);
- const translation=box.querySelector('.nhi-en-translation');translation.textContent=en||'Đang chuẩn bị bản dịch tiếng Anh…';if(en&&window.NHI_STUDY){window.NHI_STUDY.wordElements(translation,en);window.NHI_STUDY.formatText(translation,entry?.format||box._format||{},'en');}
+ const translation=box.querySelector('.nhi-en-translation');translation.textContent=en||'Đang chuẩn bị bản dịch tiếng Anh…';if(en&&window.NHI_STUDY){window.NHI_STUDY.wordElements(translation,en);window.NHI_STUDY.formatText(translation,{
+  ...(entry?.format||{}),...(box._format||{}),
+  _sizes:{...((entry?.format||{})._sizes||{}),...((box._format||{})._sizes||{})}
+ },'en');}
   // IPA eligibility is checked from word count every time a card rerenders.
   const span=box.querySelector('.nhi-en-ipa');
   const eligible=eligibleForIPA(en);
@@ -384,28 +387,17 @@ function fitEnglishWidth(box){
  // Short lines hug their text, while long sentences wrap instead of becoming a full-width banner.
  const maxWidth=Math.min(365,Math.max(116,(lane?.clientWidth||365)-8));
  const target=Math.min(maxWidth,Math.max(108,Math.ceil(contentWidth)));
- const parent=box.closest('.nhi-card-details');
- const pairedNote=parent?.querySelector('.nhi-card-note');
- if(pairedNote){
-  // Match paired panels for short English. Longer English meaning may expand;
-  // a long IPA alone wraps instead of stretching the frame.
-  const available=Math.min(560,Math.max(140,parent.clientWidth||365));
-  const noteWidth=Math.max(108,Math.min(available,
-    Math.ceil(pairedNote.getBoundingClientRect().width)));
-  const meaningWidth=measure(t);
-  const actionsNeeded=actionsWidth+38;
-  const isLong=clean(t?.textContent).length>26;
-  const hasComparison=!!box.querySelector('.nhi-en-choices:not(:empty)');
-  const enlarged=isLong?Math.ceil(meaningWidth+actionsNeeded):noteWidth;
-  const wanted=hasComparison?available:Math.max(noteWidth,Math.min(available,enlarged));
-  pairedNote.style.setProperty('width',Math.ceil(noteWidth)+'px','important');
-  pairedNote.style.setProperty('max-width',available+'px','important');
-  box.style.setProperty('--nhi-en-auto-width',Math.ceil(wanted)+'px');
-  box.style.setProperty('width',Math.ceil(wanted)+'px','important');
-  box.style.setProperty('max-width',available+'px','important');
-  return;
- }
- box.style.setProperty('--nhi-en-auto-width',target+'px');
+ const compare=box.querySelector('.nhi-en-choices:not(:empty)');
+ const areaWidth=Math.max(180,(lane?.clientWidth||440)-4);
+ const available=Math.min(460,areaWidth);
+ const meaning=measure(t);
+ const best=Math.max(190,Math.ceil(Math.max(meaning+actionsWidth+38,reviewWidth+22)));
+ // Long sentences wrap in a reasonably compact frame; comparison can use
+ // extra width without stretching to the entire bilingual text column.
+ const desired=Math.min(available,compare?Math.max(285,best):best);
+ box.style.setProperty('--nhi-en-auto-width',desired+'px');
+ box.style.setProperty('width',desired+'px','important');
+ box.style.setProperty('max-width',available+'px','important');
 }
 function mount(parent,id,vi,ko,options){
  if(!parent)return;
