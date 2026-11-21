@@ -359,8 +359,8 @@ function fitEnglishWidth(box){
  if(!box?.isConnected)return;
  // Respect explicit width chosen by dragging the box; otherwise size by the
  // longest actual line of translation/IPA and the small speaking control.
- const manual=getComputedStyle(box).getPropertyValue('--nhi-en-width').trim();
- if(/^\d+(?:\.\d+)?px$/.test(manual))return;
+ // Always measure actual contents: avoid an old manually stored oversize box.
+ // The editor remains independently editable; the card is content-sized.
  const main=box.querySelector('.nhi-en-main');
  if(!main)return;
  const canvas=document.createElement('canvas'),ctx=canvas.getContext('2d');
@@ -373,7 +373,8 @@ function fitEnglishWidth(box){
  }
  const t=box.querySelector('.nhi-en-translation'),ipa=box.querySelector('.nhi-en-ipa');
  const status=box.querySelector('.nhi-en-status');
- const words=Math.max(measure(t),ipa&&!ipa.hidden?measure(ipa):0,measure(status));
+ const transcription=ipa&&!ipa.hidden?measure(ipa):0;
+ const words=Math.max(measure(t)+ (transcription?transcription+12:0),measure(t),transcription,measure(status));
  const actions=box.querySelector('.nhi-en-head-actions');
  const actionsWidth=actions?.getBoundingClientRect().width||36;
  const review=box.querySelector('.nhi-en-review');
