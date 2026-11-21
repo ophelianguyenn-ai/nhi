@@ -484,7 +484,17 @@ try{
    const short=box.getBoundingClientRect().width;
    const noteAfter=note?.getBoundingClientRect().width||0;
    t.innerHTML=saved;if(ipa)ipa.hidden=wasHidden;
-   return {before,short,noteWidth,noteAfter};
+   return {before,short,noteWidth,noteAfter,
+     boxParent:box.parentElement?.className,
+     noteParent:note?.parentElement?.className,
+     paired:!!box.closest('.nhi-card-details')?.querySelector('.nhi-card-note'),
+     inlineWidth:box.style.width,
+     widthPriority:box.style.getPropertyPriority('width'),
+     englishInline:box.getAttribute('style'),
+     noteInline:note?.getAttribute('style'),
+     detailsWidth:box.closest('.nhi-card-details')?.getBoundingClientRect().width,
+     computedEnglish:getComputedStyle(box).width
+   };
  });
  assert(fit && (fit.noteAfter ? Math.abs(fit.short-fit.noteAfter)<4 : fit.short<fit.before),
   'Short English entries must match Korean note width (or shrink when no note): '+JSON.stringify(fit));
