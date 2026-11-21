@@ -6095,6 +6095,14 @@ html body #planBox .sdone .pstatus{
         log.push({ r: 'ai', e: 1, t: msg });
       }).then(function () { busy = false; saveLog(); paintLog('sent'); });
     }
+    function showSelectedNoteMessage(message){
+      var panel=$('aiPanel');if(!panel)return;
+      var note=$('nhiChatNoteNotice');
+      if(!note){note=document.createElement('div');note.id='nhiChatNoteNotice';note.className='nhi-chat-note-feedback';note.setAttribute('role','status');panel.appendChild(note);}
+      note.textContent=String(message||'');
+      clearTimeout(note._noticeTimer);
+      note._noticeTimer=setTimeout(function(){note.remove();},4600);
+    }
     function saveSelectedExample(raw){
       var original=String(raw||'').replace(/\r/g,'').trim();
       if(!original)return Promise.resolve(false);
@@ -6114,7 +6122,7 @@ html body #planBox .sdone .pstatus{
       stripped=stripped.replace(/^[\s*•-]+/,'').trim();
       if(!stripped||!/([가-힣]|[A-Za-zÀ-ỹ])/.test(stripped))return Promise.resolve(false);
       if(!key()){
-        toast('Chưa có mã AI để dịch câu ví dụ. Mở Cài đặt AI rồi thử lại.');
+        showSelectedNoteMessage('Chưa có mã AI để dịch câu ví dụ. Mở Cài đặt AI rồi thử lại.');
         return Promise.resolve(false);
       }
       var isKo=/[가-힣]/.test(stripped)&&!/[À-ỹ]/.test(stripped);
@@ -6130,7 +6138,7 @@ html body #planBox .sdone .pstatus{
         if(!translated)throw new Error('AI chưa trả về đủ cặp Việt–Hàn. Hãy thử bấm + lại.');
         return savePair(translated);
       }).catch(function(err){
-        toast('Chưa thêm được ghi chú: '+String(err&&err.message||err).slice(0,150));
+        showSelectedNoteMessage('Chưa thêm được ghi chú: '+String(err&&err.message||err).slice(0,150));
         return false;
       });
     }
@@ -6158,7 +6166,9 @@ html body #planBox .sdone .pstatus{
       $('aiInput').addEventListener('keydown', function (e) { if (e.key === 'Enter' && !e.shiftKey && !e.isComposing) { e.preventDefault(); send(this.value); } else if (e.key === 'Escape') close(); });
       // keep the "asking about this card" strip in step with the card on screen
       new MutationObserver(function () { if (isOpen()) { paintCtx(); paintQuick(); } }).observe($('planBox'), { childList: true });
-      window.NLC_NOTES={add:function(t){return saveSelectedExample(t);}};
+      // Keep the old synchronous notes API for all callers; the separate
+      // selection/drop helper translates a missing language asynchronously.
+      window.NLC_NOTES={add:function(t){return PLAN.appendChatExample(t);}};
       window.NHI_CHAT_ADD_SELECTED=saveSelectedExample;
       var panel=$('planBox');
       panel.addEventListener('dragover',function(e){
@@ -6320,6 +6330,6 @@ html body #planBox .sdone .pstatus{
 <script src="nhi-card-controls-v8.js?v=20261115-v8"></script>
 <script src="nhi-kitten-meow-v1.js?v=20261120-user-meow"></script>
 <script src="nhi-card-no-overlap-v1.js?v=20261115-safe-v1"></script>
-<script src="nhi-corner-v2.js?v=20261121-numbered-example-plus"></script>
+<script src="nhi-corner-v2.js?v=20261121-numbered-example-plus-v2"></script>
 
 </body></html>
