@@ -316,6 +316,53 @@ try{
  assert(activeHard.hard&&!offHard.hard&&offHard.rate!=='hard',
   'Second Khó click must remove the same word from difficult cards: '+JSON.stringify({activeHard,offHard}));
  console.log('HARD_TWO_TAPS_TOGGLE',JSON.stringify({activeHard,offHard}));
+ const dataStats=await page.evaluate(()=>({
+  stats:window.NHI_PAIR_SEGMENT_STATS||null,
+  sample:window.NHI_PAIR_SEGMENTS_V6&&Object.keys(window.NHI_PAIR_SEGMENTS_V6).length
+ }));
+ assert(dataStats.stats?.cards===2301&&dataStats.stats.lessons===51&&dataStats.sample>0,
+   'All 51 lesson source files must be evaluated for finer VI KO phrase segments: '+JSON.stringify(dataStats));
+ console.log('ALL_LESSON_SEGMENTATION',JSON.stringify(dataStats));
+ const openEditor=await page.evaluate(()=>{
+  const b=[...document.querySelectorAll('#planBox .card-top button')].find(x=>x.title?.startsWith('Sửa thẻ'));
+  if(b)b.click();
+  return !!b;
+ });
+ assert(openEditor,'No edit card action');
+ await page.waitForSelector('#planBox form.nhi-editor-window-v5');
+ const edit=await page.evaluate(()=>{
+  const form=document.querySelector('#planBox form.nhi-editor-window-v5');
+  const labels=[...form.querySelectorAll('.flabel>span')].map(x=>x.textContent);
+  const core=form.querySelector('.nhi-editor-main-grid');
+  const han=form.querySelector('.nhi-editor-hanja-last');
+  const pair=form.querySelector('textarea[name="pairs"]');
+  return {labels,core:!!core,hanLast:!!han&&han.compareDocumentPosition(pair)===Node.DOCUMENT_POSITION_PRECEDING,
+    kind:!!form.querySelector('select[name="kind"]'),pairLabel:pair?.closest('label')?.textContent,
+    gridColumns:core?getComputedStyle(core).gridTemplateColumns:null,
+    pairValue:pair?.value.split('\n').slice(0,2)};
+ });
+ assert(edit.core&&edit.hanLast&&!edit.kind&&edit.pairLabel.includes('Cặp từ Việt . Hàn')&&
+  edit.gridColumns?.split(' ').length===2,
+   'Editor should be two columns and Hanja at bottom, without word-kind select: '+JSON.stringify(edit));
+ console.log('CARD_EDITOR_COMPACT',JSON.stringify(edit));
+ await page.$eval('#planBox .nhi-editor-close-v5',e=>e.click());
+ await page.waitForSelector('#planBox .pcard:not(:has(form.nhi-editor-window-v5))');
+ // Check the English frame really fits short text rather than a fixed width.
+ const fit=await page.evaluate(async()=>{
+   const box=document.querySelector('#planBox .nhi-english-v5');
+   const t=box?.querySelector('.nhi-en-translation'),ipa=box?.querySelector('.nhi-en-ipa');
+   if(!box||!t)return null;
+   const before=box.getBoundingClientRect().width;
+   const saved=t.innerHTML,wasHidden=ipa?.hidden;
+   t.textContent='Hi';if(ipa)ipa.hidden=true;
+   await new Promise(ok=>requestAnimationFrame(()=>requestAnimationFrame(ok)));
+   const short=box.getBoundingClientRect().width;
+   t.innerHTML=saved;if(ipa)ipa.hidden=wasHidden;
+   return {before,short};
+ });
+ assert(fit&&fit.short<fit.before&&fit.short<200,
+  'Short English entries should create shorter panels: '+JSON.stringify(fit));
+ console.log('ENGLISH_CONTENT_WIDTH',JSON.stringify(fit));
  console.log('SELECTABLE CHAT AND NOTES UX PASS',JSON.stringify({note,grid:[before,after],height:afterCorner.height,voice:true,anchor}));
 }catch(err){
  console.error('ORIGINAL_SMOKE_ERROR',err&&err.stack||String(err));throw err;
