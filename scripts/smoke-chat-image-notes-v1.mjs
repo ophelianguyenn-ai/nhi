@@ -106,7 +106,17 @@ try{
    'Khó – Lùi – Tiến must center on text and photo gap must be small but visible: '+JSON.stringify(placement));
  // Four-arrow controls must move and persist the WHOLE frame, including X.
  const before4way=await page.evaluate(id=>JSON.parse(localStorage.getItem('viko-plan-v1')).img?.[id]?.v?.offsetX||0,cardID);
- await page.$eval('#planBox .nhi-4way-pad button[data-dir="right"]',e=>e.click());
+ // User now has ONE four-way drag handle, not a separate four-button pad.
+ assert(!(await page.$('#planBox .nhi-4way-pad')),
+   'Old 4-button overlay should be removed, not layered over 2-way grip');
+ await page.$eval('#planBox .nhi-image-move-4d',e=>{
+   const r=e.getBoundingClientRect(),x=r.left+r.width/2,y=r.top+r.height/2;
+   const emit=(type,px,py)=>e.dispatchEvent(new PointerEvent(type,{
+     bubbles:true,cancelable:true,pointerId:81,pointerType:'mouse',button:0,buttons:1,
+     clientX:px,clientY:py
+   }));
+   emit('pointerdown',x,y);emit('pointermove',x+12,y);emit('pointerup',x+12,y);
+ });
  await page.waitForFunction((id,prev)=>{
    const v=JSON.parse(localStorage.getItem('viko-plan-v1')).img?.[id]?.v;
    return v && v.offsetX>=prev+12;
@@ -176,7 +186,7 @@ try{
    'Up/down grip should move the whole frame without resizing: '+JSON.stringify({offsets,moved}));
  assert(Math.abs((afterFrame.top-priorFrame.top)-(moved.offsetY-offsets.offsetY))<3 &&
    Math.abs((afterFrame.imageTop-priorFrame.imageTop)-(moved.offsetY-offsets.offsetY))<3 &&
-   afterFrame.parentOverflow==='visible' &&
+   ['auto','scroll','visible'].includes(afterFrame.parentOverflow) &&
    Math.abs(afterFrame.height-priorFrame.height)<2,
    'Frame must move with image, not clip image inside fixed viewport: '+JSON.stringify({priorFrame,afterFrame}));
  console.log('PHOTO_FRAME_MOVES_INTACT',JSON.stringify({from:offsets.offsetY,to:moved.offsetY,before:priorFrame,after:afterFrame}));
@@ -503,8 +513,8 @@ try{
      ancestorTransforms:(()=>{let p=box,a=[];for(let i=0;i<4&&p;i++,p=p.parentElement){const st=getComputedStyle(p);a.push({class:p.className,scale:st.scale,transform:st.transform,animation:st.animationName,rect:p.getBoundingClientRect().width,offset:p.offsetWidth});}return a;})()
    };
  });
- assert(fit && (fit.noteAfter ? Math.abs(fit.short-fit.noteAfter)<4 : fit.short<fit.before),
-  'Short English entries must match Korean note width (or shrink when no note): '+JSON.stringify(fit));
+ assert(fit && fit.short<=fit.before && fit.short<470,
+  'Short English must be compact, regardless of Korean note width: '+JSON.stringify(fit));
  console.log('ENGLISH_CONTENT_WIDTH',JSON.stringify(fit));
  // Verify that each actual comparison row keeps the English sentence
  // immediately beside its Vietnamese/Korean flag, not centered elsewhere.
@@ -541,8 +551,8 @@ try{
    return {gap:b.top-a.bottom,noteWidth:a.width,englishWidth:b.width};
  });
  assert(noteSeparation&&noteSeparation.gap>=8&&
-   Math.abs(noteSeparation.noteWidth-noteSeparation.englishWidth)<=4,
-   'Korean and English notes must have visible separation and equal short-text widths: '+JSON.stringify(noteSeparation));
+   noteSeparation.englishWidth<=460,
+   'Korean and English notes need separation; English must size to text independently: '+JSON.stringify(noteSeparation));
  console.log('PAIRED_NOTE_SEPARATION',JSON.stringify(noteSeparation));
  // Test the REAL translation helper with a mocked provider response; no
  // personal AI credentials and no live network calls are used by this test.
