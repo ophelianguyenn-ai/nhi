@@ -8,10 +8,10 @@ html body #planBox .pcard:has(.pfront.nhi-with-image)>.prate.nhi-rating-v3{
   flex-flow:row nowrap!important;
   justify-content:center!important;
   align-items:center!important;
-  width:100%!important;
+  width:var(--nhi-left-controls-width,100%)!important;
   min-width:0!important;
   max-width:100%!important;
-  margin:8px auto 12px!important;
+  margin:8px auto 12px var(--nhi-left-controls-inset,10px)!important;
   padding:4px 12px!important;
   transform:none!important;
   translate:none!important;
