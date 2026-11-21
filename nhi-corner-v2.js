@@ -322,6 +322,7 @@ function hookSettings(){
 function stripExampleLabel(text){
  return String(text||'').replace(/^[\s*•\-–]+/,'')
   .replace(/^(?:ví\s*dụ|vd|example|câu|예문)\s*(?:số\s*)?\d+\s*[.:：)－–-]?\s*/iu,'')
+  .replace(/^\d+[.)-]\s*/u,'')
   .replace(/^(?:tiếng\s*việt|vietnamese|vi|vn|tiếng\s*hàn|korean|kr|ko)\s*[:：]\s*/iu,'')
   .trim();
 }
@@ -332,7 +333,8 @@ function exampleFrom(text){
  const hasVi=s=>/[a-zA-ZÀ-ỹ]/u.test(s);
  function makePair(a,b){
   a=stripExampleLabel(a);b=stripExampleLabel(b);
-  if(!a||!b)return null;
+  if(!a||!b||/^(?:ví\s*dụ|example|예문|câu\s*ví\s*dụ)\s*[:：.]?$/iu.test(a)||
+     /^(?:ví\s*dụ|example|예문|câu\s*ví\s*dụ)\s*[:：.]?$/iu.test(b))return null;
   let vi='',ko='';
   if(hasKo(a)&&!hasKo(b)&&hasVi(b)&&!hasKo(b)){ko=a;vi=b;}
   else if(hasKo(b)&&!hasKo(a)&&hasVi(a)&&!hasKo(a)){vi=a;ko=b;}
@@ -359,14 +361,14 @@ function isExampleLine(text,paragraph){
  const s=String(text||'').trim();
  if(!s||s.length<10)return false;
  if(/^(?:[-•*]\s*)?(?:ví\s*dụ|vd|example|câu|예문)\s*(?:số\s*)?\d+\s*[:：.)-]?\s*\S/iu.test(s))return true;
- if(/^\s*\d+[.)]\s+\S/.test(s)){
-  let cur=paragraph.previousElementSibling,n=0;
-  while(cur&&n++<6){
+ let cur=paragraph.previousElementSibling,n=0,exampleSection=false;
+ while(cur&&n++<6){
    const prev=cur.querySelector('.nhi-ai-paragraph-text')?.textContent||'';
-   if(/(?:ví\s*dụ|ví\s*dụ\s*thực\s*tế|example|예문)/iu.test(prev))return true;
+   if(/(?:ví\s*dụ|ví\s*dụ\s*thực\s*tế|example|예문)/iu.test(prev)){exampleSection=true;break;}
    cur=cur.previousElementSibling;
-  }
  }
+ if(exampleSection && /^\s*\d+[.)]\s+\S/.test(s))return true;
+ if(exampleSection && s.length>22 && /[.!?。][\s]*$/.test(s))return true;
  return false;
 }
 window.NHI_EXAMPLE_PAIR=exampleFrom;
