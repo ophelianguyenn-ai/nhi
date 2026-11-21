@@ -94,6 +94,9 @@ function expand(it,all){
  }
  // A learner's own corrections always take priority over built-in segmentation.
  if(it.edited){const fixed=supplied.filter(valid);return fixed.length?fixed:[[vi,ko]];}
+ const granular=(window.NHI_PAIR_SEGMENTS_V6||{})[it.id];
+ if(Array.isArray(granular)&&granular.length>1&&granular.every(valid))
+  return granular.map(p=>p.slice());
  const reviewed=(window.NHI_VERIFIED_PAIRS||{})[it.id];
  if(Array.isArray(reviewed)&&reviewed.length>1&&reviewed.every(valid))return reviewed.map(p=>p.slice());
  // Two historical sentence cards contain an orphan one-language fragment.
