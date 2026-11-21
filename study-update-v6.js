@@ -178,8 +178,36 @@ function initReader(){
 }
 function init(){
  initReader();
- const settings=document.getElementById('nhiCardFontSettings');let sizes={ko:36,vi:26,en:22};try{Object.assign(sizes,JSON.parse(localStorage.getItem('nhi-card-fonts-v1')||'{}'));}catch(e){}
- for(const [lang,label]of [['ko','Tiếng Hàn'],['vi','Tiếng Việt'],['en','Tiếng Anh']]){const row=make('div','setrow'),lab=make('label',null,label),select=make('select');select.id='nhiFont-'+lang;select.setAttribute('aria-label','Cỡ chữ '+label);lab.htmlFor=select.id;for(let n=12;n<=72;n+=2){const o=make('option',null,n+'');o.value=n;select.append(o);}select.value=String(sizes[lang]);const apply=()=>document.documentElement.style.setProperty('--nhi-card-'+lang,Math.max(12,Math.min(72,Number(sizes[lang])||22))+'px');select.onchange=()=>{sizes[lang]=Number(select.value);apply();try{localStorage.setItem('nhi-card-fonts-v1',JSON.stringify(sizes));}catch(e){}};apply();row.append(lab,select);settings?.append(row);}
+ const settings=document.getElementById('nhiCardFontSettings');
+ const defaults={ko:36,vi:26,en:22};
+ const controls={};
+ if(settings){
+   const h=settings.querySelector('h3');
+   if(h)h.textContent='Cỡ chữ của thẻ đang học';
+   const hint=make('p','voice-note','Mỗi lần chỉnh chỉ thay đổi thẻ hiện tại. Các thẻ khác giữ nguyên cỡ chữ.');
+   settings.append(hint);
+ }
+ for(const [lang,label] of [['ko','Tiếng Hàn'],['vi','Tiếng Việt'],['en','Tiếng Anh']]){
+   const row=make('div','setrow'),lab=make('label',null,label),select=make('select');
+   select.id='nhiFont-'+lang;select.setAttribute('aria-label','Cỡ chữ '+label+' của thẻ đang học');
+   lab.htmlFor=select.id;
+   for(let n=12;n<=72;n+=2){const option=make('option',null,n+'');option.value=n;select.append(option);}
+   select.value=String(defaults[lang]);
+   select.onchange=()=>document.dispatchEvent(new CustomEvent('nhi:card-font-change',
+     {detail:{lang,size:Number(select.value)}}));
+   controls[lang]=select;row.append(lab,select);settings?.append(row);
+ }
+ const syncFontControls=()=>{
+   const card=document.querySelector('#planBox .pcard[data-nhi-card-id]');
+   let saved={};
+   try{saved=JSON.parse(card?.dataset.nhiFontSizes||'{}')||{};}catch(e){}
+   for(const lang in controls){
+     const value=Number(saved[lang])||defaults[lang];
+     if(controls[lang].value!==String(value))controls[lang].value=String(value);
+   }
+ };
+ document.addEventListener('nhi:card-font-selected',syncFontControls);
+ syncFontControls();
  new MutationObserver(layout).observe(document.body,{attributes:true,attributeFilter:['class']});new MutationObserver(layout).observe(document.documentElement,{attributes:true,attributeFilter:['style']});
  window.addEventListener('resize',layout);layout();
  document.dispatchEvent(new Event('nhi-study-ready'));
