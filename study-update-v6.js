@@ -181,11 +181,37 @@ function init(){
  const settings=document.getElementById('nhiCardFontSettings');
  const defaults={ko:36,vi:26,en:22};
  const controls={};
+ const globalKey='nhi-card-global-font-scale-v1';
+ const allowable=[.75,.85,1,1.1,1.2,1.3,1.5];
+ let globalScale=1;
+ try{const value=Number(localStorage.getItem(globalKey));if(allowable.includes(value))globalScale=value;}catch(e){}
+ const applyGlobal=()=>document.documentElement.style.setProperty('--nhi-global-font-scale',String(globalScale));
+ applyGlobal();
  if(settings){
    const h=settings.querySelector('h3');
    if(h)h.textContent='Cỡ chữ của thẻ đang học';
    const hint=make('p','voice-note','Mỗi lần chỉnh chỉ thay đổi thẻ hiện tại. Các thẻ khác giữ nguyên cỡ chữ.');
    settings.append(hint);
+   const row=make('div','setrow nhi-global-font-row');
+   const label=make('label',null,'Cỡ chữ toàn bộ thẻ (mặc định)');
+   const select=make('select');select.id='nhiGlobalFontSize';
+   select.className='field small';
+   select.setAttribute('aria-label','Cỡ chữ chung cho các thẻ chưa chỉnh riêng');
+   label.htmlFor=select.id;
+   for(const scale of allowable){
+     const option=make('option',null,Math.round(scale*100)+'%');
+     option.value=String(scale);select.append(option);
+   }
+   select.value=String(globalScale);
+   select.addEventListener('change',()=>{
+     globalScale=Number(select.value)||1;applyGlobal();
+     try{localStorage.setItem(globalKey,String(globalScale));}catch(e){}
+     document.dispatchEvent(new Event('nhi:card-font-selected'));
+   });
+   row.append(label,select);settings.prepend(row);
+   const globalHint=make('p','voice-note',
+     'Áp dụng cho thẻ chưa chỉnh cỡ chữ riêng; thẻ có kích thước tùy chỉnh sẽ được giữ nguyên.');
+   row.after(globalHint);
  }
  for(const [lang,label] of [['ko','Tiếng Hàn'],['vi','Tiếng Việt'],['en','Tiếng Anh']]){
    const row=make('div','setrow'),lab=make('label',null,label),select=make('select');
@@ -202,7 +228,8 @@ function init(){
    let saved={};
    try{saved=JSON.parse(card?.dataset.nhiFontSizes||'{}')||{};}catch(e){}
    for(const lang in controls){
-     const value=Number(saved[lang])||defaults[lang];
+     const value=Number(saved[lang])||
+       Math.max(12,Math.min(72,Math.round(defaults[lang]*globalScale/2)*2));
      if(controls[lang].value!==String(value))controls[lang].value=String(value);
    }
  };
