@@ -1264,7 +1264,7 @@ html body #planBox .sdone .pstatus{
 }
 
 </style>
-<link rel="stylesheet" href="nhi-card-image-compact-v1.css?v=20261120-frame-move-half-controls-v7">
+<link rel="stylesheet" href="nhi-card-image-compact-v1.css?v=20261121-photo-motion-editor-v8">
 <link rel="stylesheet" href="nhi-lesson-finish-v1.css?v=20261120-compact-cancel-v5">
 </head>
 <body>
@@ -4507,18 +4507,15 @@ html body #planBox .sdone .pstatus{
       });
       if(notDue&&!alreadyStudied&&!rs.length&&!hasPending){launch.disabled=true;launch.title='Bài mới sẽ mở học vào đúng ngày đến hạn';}
       row2.appendChild(launch);
-      // Keep settings and the reversible study-round action beside one another.
-      // This action remains visible even when the lesson has zero completions.
-      var settingsGroup=el('div','nhi-lesson-settings-group');
-      settingsGroup.appendChild(lbtn('ghost','edit','⚙ Cài đặt bài',function(){openLessonSettings(L);}));
       var completedRounds=doneSteps(L);
-      settingsGroup.appendChild(btn('ghost nhi-mark-unlearned','↶ Chưa học bài này',function(){
+      row2.appendChild(btn('ghost nhi-mark-unlearned','↶ Chưa học bài này',function(){
         markLessonNotStudied(L);
       },completedRounds?'Hoàn tác '+STEP[completedRounds-1]+' gần nhất':'Chưa có lượt nào để hoàn tác'));
-      row2.appendChild(settingsGroup);
       var hd2 = hardIds(L.ids);
       if (hd2.length) row2.appendChild(lbtn('ghost', 'flip', 'Ôn lại thẻ khó (' + hd2.length + ')', function () { start('hard', hd2, L.title + ' · thẻ khó', L); }));
-      var enids=L.ids.filter(function(id){return alive(id)&&val('enHard',id);});if(enids.length)row2.appendChild(btn('ghost','Ôn chưa nhớ tiếng Anh ('+enids.length+')',function(){start('english',enids,L.title+' · chưa nhớ tiếng Anh',L);}));
+      var enids=L.ids.filter(function(id){return alive(id)&&val('enHard',id);});
+      if(enids.length)row2.appendChild(btn('ghost','Ôn chưa nhớ tiếng Anh ('+enids.length+')',function(){start('english',enids,L.title+' · chưa nhớ tiếng Anh',L);}));
+      row2.appendChild(lbtn('ghost nhi-settings-last','edit','⚙ Cài đặt bài',function(){openLessonSettings(L);}));
       hd.appendChild(row2);
       var modes=el('div','nhi-v2-lesson-modes');
       modes.appendChild(el('p','nhi-v2-source-label','Nguồn: '+titleMain(L)+' · '+L.ids.filter(alive).length+' thẻ'));
@@ -4648,22 +4645,18 @@ html body #planBox .sdone .pstatus{
       var f = el('form', 'editbox nhi-editor-window-v5');
       f.appendChild(ibtn('iconbtn sm nhi-editor-close-v5','x',function(){closeEditor();},'Đóng và tự lưu chỉnh sửa thẻ'));
       var savedHj = val('hj', it.id), initialHj = lookupHanja(it.ko, it.id);
-      var hanInput, readingInput, kindInput;
+      var hanInput, readingInput, section=null;
       if (it.type === 'w') {
         var section = el('fieldset', 'hanja-editor'); section.appendChild(el('legend', null, 'Chữ Hán & âm Hán–Việt'));
         function field(label, name, value) { var l = el('label', 'flabel'); l.appendChild(el('span', null, label)); var i = el('input', 'field'); i.type = 'text'; i.name = name; i.value = value || ''; i.maxLength = 200; l.appendChild(i); section.appendChild(l); return i; }
-        var kl = el('label', 'flabel'); kl.appendChild(el('span', null, 'Loại từ')); kindInput = el('select', 'field');
-        [['auto','Chưa phân loại / dùng dữ liệu sẵn có'],['han','Từ Hán–Hàn'],['none','Không phải từ Hán–Hàn']].forEach(function(x){var o=el('option',null,x[1]);o.value=x[0];kindInput.appendChild(o);});
-        kindInput.value = savedHj ? savedHj.kind : (initialHj ? 'han' : (window.NHI_NON_HANJA||[]).indexOf(it.ko.trim())>=0 ? 'none' : 'auto'); kl.appendChild(kindInput); section.appendChild(kl);
         hanInput = field('Chữ Hán', 'hanja', initialHj ? initialHj[0] : ''); readingInput = field('Âm Hán–Việt', 'hanviet', initialHj ? initialHj[1] : '');
         var links=el('div','dictionary-links');
         function dictionaryLink(label, href) {var a=el('a','ghost',label);a.href=href;a.target='_blank';a.rel='noopener noreferrer';links.appendChild(a);return a;}
         dictionaryLink('Tra chữ Hán Naver', 'https://hanja.dict.naver.com/#/search?query='+encodeURIComponent(it.ko));
         dictionaryLink('1. Tra Naver Hàn', 'https://korean.dict.naver.com/koendict/#/search?range=korean&query='+encodeURIComponent(it.ko));
         var vietLink=dictionaryLink('2. Tra Thi Viện', 'https://hvdic.thivien.net/whv/'+encodeURIComponent(hanInput.value || ''));
-        hanInput.addEventListener('input',function(){vietLink.href='https://hvdic.thivien.net/whv/'+encodeURIComponent(hanInput.value);if(hanInput.value.trim())kindInput.value='han';});
-        function updateKind(){hanInput.disabled=readingInput.disabled=kindInput.value==='none';}kindInput.addEventListener('change',updateKind);updateKind();
-        section.appendChild(links);section.appendChild(el('p','hint','Lưu để đồng bộ với tiến độ học. Chọn “Không phải từ Hán–Hàn” để ẩn nút 漢.')); f.appendChild(section);
+        hanInput.addEventListener('input',function(){vietLink.href='https://hvdic.thivien.net/whv/'+encodeURIComponent(hanInput.value);});
+        section.appendChild(links);section.appendChild(el('p','hint','Có thể để trống nếu từ không có chữ Hán.'));
       }
       var l1 = el('label', 'flabel'); l1.appendChild(el('span', null, 'Tiếng Hàn')); var ko = el('textarea', 'field'); ko.rows = 2; ko.lang = 'ko'; ko.value = it.ko; ko.name = 'ko'; l1.appendChild(ko); f.appendChild(l1);
       var l2 = el('label', 'flabel'); l2.appendChild(el('span', null, 'Nghĩa tiếng Việt')); var vi = el('textarea', 'field'); vi.rows = 2; vi.value = it.vi; vi.name = 'vi'; l2.appendChild(vi); f.appendChild(l2);
@@ -4684,33 +4677,39 @@ html body #planBox .sdone .pstatus{
         if(hanInput) {
           if(typeof pendingDraft.hanja==='string')hanInput.value=pendingDraft.hanja;
           if(typeof pendingDraft.hanviet==='string')readingInput.value=pendingDraft.hanviet;
-          if(typeof pendingDraft.kind==='string')kindInput.value=pendingDraft.kind;
+
         }
       }
       var savedFormat=Object.assign({},val('fmt',it.id)||{});if(enEntry.format){savedFormat.en=enEntry.format.en||savedFormat.en;savedFormat._sizes=Object.assign({},savedFormat._sizes||{},Number((enEntry.format._sizes||{}).en)?{en:enEntry.format._sizes.en}:{});}
       var formatting=window.NHI_STUDY?window.NHI_STUDY.editor(f,{ko:ko,vi:vi,note:notes,en:en},savedFormat,{noteColor:nc}):null;
-      var pl=el('label','flabel');pl.appendChild(el('span',null,'Cặp từ Việt | Hàn (mỗi dòng một cặp, có thể sửa khi tách tự động chưa đúng)'));var pairs=el('textarea','field');pairs.name='pairs';pairs.rows=4;pairs.value=it.pairs.filter(function(p){return p[0]&&p[1];}).map(function(p){return p.join(' | ');}).join('\n');pl.appendChild(pairs);f.appendChild(pl);if(pendingDraft&&typeof pendingDraft.pairs==='string')pairs.value=pendingDraft.pairs;var originalPairText=pairs.value;
+      var pl=el('label','flabel nhi-editor-pairs');pl.appendChild(el('span',null,'Cặp từ Việt . Hàn'));var pairs=el('textarea','field');pairs.name='pairs';pairs.rows=4;pairs.value=it.pairs.filter(function(p){return p[0]&&p[1];}).map(function(p){return p.join(' . ');}).join('\n');pl.appendChild(pairs);f.appendChild(pl);if(pendingDraft&&typeof pendingDraft.pairs==='string')pairs.value=pendingDraft.pairs;var originalPairText=pairs.value;
+      var editorMain=el('div','nhi-editor-main-grid');
+      [l1,l2,enLabel,nl,ipaLabel].forEach(function(field){editorMain.appendChild(field);});
+      f.insertBefore(editorMain,pl);
+      if(section){section.classList.add('nhi-editor-hanja-last');f.appendChild(section);}
       var autoTimer=null;
       function snapshot(){
         return {ko:ko.value,vi:vi.value,en:en.value,ipa:ipaInput.value,
           note:notes.value,noteColor:nc.value,pairs:pairs.value,
           hanja:hanInput?hanInput.value:'',hanviet:readingInput?readingInput.value:'',
-          kind:kindInput?kindInput.value:'auto'};
+          kind:hanInput&&hanInput.value.trim()&&readingInput.value.trim()?'han':'auto'};
       }
       function stash(){lsSet(draftKey,JSON.stringify(snapshot()));}
       function persistEditor(){
         stash();var k=ko.value.trim(),w=vi.value.trim();
         if(!k||!w)return false; // Unfinished text is still saved in the draft.
         var raw=pairs.value.split('\n').filter(function(x){return x.trim();});
-        var list=raw.map(function(x){return x.split('|').map(function(t){return t.trim();});});
+        var list=raw.map(function(x){
+          var p=x.includes(' . ')?x.split(' . '):x.split(' | ');
+          return p.length===2?p.map(function(t){return t.trim();}):[];
+        });
         var valid=list.every(function(p){return p.length===2&&p[0]&&p[1]&&w.toLocaleLowerCase('vi').includes(p[0].toLocaleLowerCase('vi'))&&k.includes(p[1]);});
         if(!valid||!list.length||(pairs.value===originalPairText&&(k!==it.ko||w!==it.vi)))list=[[w,k]];
         put('ed',it.id,{vi:w,ko:k,pairs:list});
         if(hanInput){
-          var han=hanInput.value.trim(),reading=readingInput.value.trim(),kind=kindInput.value;
-          if(kind==='none')put('hj',it.id,{kind:'none'});
-          else if(kind==='auto')put('hj',it.id,null);
-          else if(han&&reading)put('hj',it.id,{kind:'han',han:han,reading:reading});
+          var han=hanInput.value.trim(),reading=readingInput.value.trim();
+          if(han&&reading)put('hj',it.id,{kind:'han',han:han,reading:reading});
+          else if(savedHj)put('hj',it.id,null);
         }
         if(window.NHI_ENGLISH&&(en.value.trim()||enEntry.en))window.NHI_ENGLISH.saveEntry(it.id,it.vi,it.ko,
           Object.assign({},enEntry,{en:en.value.trim()||enEntry.en,ipa:ipaInput.value.trim().replace(/^\//,'').replace(/\/$/,''),
@@ -4810,16 +4809,7 @@ html body #planBox .sdone .pstatus{
       ci.appendChild(ibtn('iconbtn sm', 'vol', function () { toggleSpeech(s.flipped ? it.ko : it.vi, s.flipped ? 'ko-KR' : 'vi-VN'); }, 'Phát âm / Dừng mặt thẻ hiện tại'));
       var hj = null;
       if (it.type === 'w') { try { hj = lookupHanja(it.ko, it.id); if(hj&&(!hj[0]||!hj[1]))hj=null; } catch(hanjaErr) { console.warn('Nhi Hanja unavailable for this card', hanjaErr); } }
-      if (it.type === 'w') {
-        var hb=btn('iconbtn sm hjbtn','漢',function(){
-          if(!hj){s.flipped=true;s.hanja=false;s.editing=true;}
-          else if(!s.flipped){s.flipped=true;s.hanja=true;}
-          else{s.hanja=!s.hanja;}
-          render();
-        },hj?'Chữ Hán và âm Hán–Việt':'Tự thêm chữ Hán và âm Hán–Việt');
-        hb.setAttribute('aria-pressed',String(!!(hj&&s.hanja)));
-        ci.insertBefore(hb,ci.firstChild);
-      }
+      // The redundant 漢 toolbar icon is intentionally hidden; Hán tự remains editable.
       m.appendChild(ci); c.appendChild(m); c.appendChild(cm);
       if (legendOpen) c.appendChild(legendPop());
       var f = el('div', 'stage pfront');
@@ -4848,6 +4838,16 @@ html body #planBox .sdone .pstatus{
         
         var note=val('note',it.id)||{text:it.note,color:'#fff1ce'};if(note&&note.text){var nt=el('p','nhi-card-note',note.text);nt.style.background=(note.color&&note.color!=='#dbeefe')?note.color:'#fff1ce';if(window.NHI_STUDY)window.NHI_STUDY.formatText(nt,val('fmt',it.id)||{},'note');f.appendChild(nt);}
         var englishBox=window.NHI_ENGLISH?window.NHI_ENGLISH.mount(f,it.id,it.vi,it.ko,{format:val('fmt',it.id)||{},unremembered:!!val('enHard',it.id),toggle:function(on){put('enHard',it.id,on?1:null);}}):null;
+        if(englishBox){
+          var compare=englishBox.querySelector('.nhi-en-review');
+          var dictLine=koRow.querySelector('.nhi-card-dictionaries');
+          if(compare&&dictLine){
+            compare.classList.add('nhi-compare-near-dictionaries');
+            dictLine.appendChild(compare);
+          }
+          var emptyReviewTools=englishBox.querySelector('.nhi-en-tools');
+          if(emptyReviewTools&&!emptyReviewTools.children.length)emptyReviewTools.remove();
+        }
         if(nt&&englishBox){var details=el('div','nhi-card-details');nt.before(details);details.appendChild(nt);details.appendChild(englishBox);}
         if(window.NHI_IMAGES){try{var illustration=window.NHI_IMAGES.figure(it,val('img',it.id),function(img){put('img',it.id,img);});if(illustration){
           f.classList.add('nhi-with-image');f.appendChild(illustration);
@@ -4890,11 +4890,19 @@ html body #planBox .sdone .pstatus{
       nx.setAttribute('aria-label','Thẻ sau');r.appendChild(nx);
       if (undoHistory.length) r.appendChild(btn('pundo','↶ Hoàn tác',undoDelete,'Khôi phục thẻ vừa xóa (Ctrl+Z)'));
       c.appendChild(r);
+      if(s.flipped && f.classList.contains('nhi-with-image')){
+        var available=Math.max(140,c.clientWidth*.5-24);
+        var factor=Math.max(.57,Math.min(1,available/279));
+        r.style.setProperty('--nhi-photo-rate-scale',factor.toFixed(3));
+      }
       c.appendChild(ibtn('pdel nhi-card-corner-trash', 'trash', function () { del(it.id); anim = 'next'; saveSess(); render(); }, 'Xoá từ này khỏi danh sách (Delete)'));
       if (s.imagePicker && window.NHI_IMAGES && window.NHI_IMAGES.picker) {
         c.appendChild(window.NHI_IMAGES.picker(it, function (image) {
-          put('img', it.id, image);
-          s.imagePicker = false; render(); toast('Đã lưu ảnh minh họa vào thẻ.');
+          var applyPicture=function(){put('img',it.id,image);s.imagePicker=false;render();};
+          if(document.startViewTransition && !reduceMotion() && prefs.fx){
+            document.startViewTransition(applyPicture).finished.catch(function(){});
+          }else applyPicture();
+          toast('Đã lưu ảnh minh họa vào thẻ.');
         }, function () { s.imagePicker = false; render(); }));
       }
       if(s.editing){var scrim=el('div','nhi-edit-scrim');scrim.setAttribute('aria-hidden','true');scrim.addEventListener('click',function(){var ed=c.querySelector('form.editbox');if(ed&&ed.nhiSave)ed.nhiSave();s.editing=false;render();});c.appendChild(scrim);c.appendChild(editForm(it));}

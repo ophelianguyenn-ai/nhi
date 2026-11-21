@@ -560,3 +560,137 @@ html body #planBox .nhi-lesson-settings-group>.nhi-mark-unlearned:hover{
   padding:8px 6px!important;font-size:12px!important;
  }
 }
+
+
+/* Animated layout handoff when adding a picture (Chrome view transitions). */
+html body #planBox .pcard .card-top{view-transition-name:nhi-image-toolbar}
+html body #planBox .pcard .prate.nhi-rating-v3{view-transition-name:nhi-image-ratings}
+html body #planBox .pcard .nhi-ko-line{view-transition-name:nhi-image-korean}
+html body #planBox .pcard .vi-under{view-transition-name:nhi-image-vietnamese}
+html body #planBox .pcard .nhi-card-details{view-transition-name:nhi-image-details}
+html body #planBox .pcard .card-illustration{view-transition-name:nhi-image-illustration}
+::view-transition-group(nhi-image-toolbar),
+::view-transition-group(nhi-image-ratings),
+::view-transition-group(nhi-image-korean),
+::view-transition-group(nhi-image-vietnamese),
+::view-transition-group(nhi-image-details),
+::view-transition-group(nhi-image-illustration){
+ animation-duration:560ms;
+ animation-timing-function:cubic-bezier(.18,.83,.21,1);
+}
+::view-transition-new(nhi-image-illustration){
+ animation:nhi-image-appear 510ms cubic-bezier(.16,.8,.25,1);
+}
+@keyframes nhi-image-appear{
+ from{opacity:0;filter:blur(3px);transform:scale(.95) translateX(12px)}
+ to{opacity:1;filter:blur(0);transform:none}
+}
+@media(prefers-reduced-motion:reduce){
+ ::view-transition-group(nhi-image-toolbar),
+ ::view-transition-group(nhi-image-ratings),
+ ::view-transition-group(nhi-image-korean),
+ ::view-transition-group(nhi-image-vietnamese),
+ ::view-transition-group(nhi-image-details),
+ ::view-transition-group(nhi-image-illustration){animation-duration:0.01ms!important}
+}
+/* All three buttons preserve their proportions while shrinking together to
+ fit the left lane. The whole group is visibly left of the card midpoint. */
+@media(min-width:621px){
+ html body #planBox .pcard:has(.pfront.nhi-with-image)>.prate.nhi-rating-v3{
+  width:calc(50% - 12px)!important;
+  min-width:0!important;
+  max-width:calc(50% - 12px)!important;
+  margin:5px auto 10px 9px!important;
+  justify-content:center!important;
+  gap:calc(3px * var(--nhi-photo-rate-scale,1))!important;
+  padding:4px!important;
+ }
+ html body #planBox .pcard:has(.pfront.nhi-with-image)>.prate.nhi-rating-v3>.hard{
+  flex:0 0 calc(145px * var(--nhi-photo-rate-scale,1))!important;
+  width:calc(145px * var(--nhi-photo-rate-scale,1))!important;
+  max-width:calc(145px * var(--nhi-photo-rate-scale,1))!important;
+  min-width:0!important;
+  height:calc(44px * var(--nhi-photo-rate-scale,1))!important;
+  min-height:calc(44px * var(--nhi-photo-rate-scale,1))!important;
+  font-size:calc(15px * var(--nhi-photo-rate-scale,1))!important;
+ }
+ html body #planBox .pcard:has(.pfront.nhi-with-image)>.prate.nhi-rating-v3>.nhi-prev-v3,
+ html body #planBox .pcard:has(.pfront.nhi-with-image)>.prate.nhi-rating-v3>.nhi-next-v3{
+  flex:0 0 calc(63px * var(--nhi-photo-rate-scale,1))!important;
+  width:calc(63px * var(--nhi-photo-rate-scale,1))!important;
+  min-width:0!important;max-width:none!important;
+  height:calc(44px * var(--nhi-photo-rate-scale,1))!important;
+  min-height:calc(44px * var(--nhi-photo-rate-scale,1))!important;
+ }
+ html body #planBox .pcard:has(.pfront.nhi-with-image)>.prate.nhi-rating-v3>.parrow svg{
+  width:calc(24px * var(--nhi-photo-rate-scale,1))!important;
+  height:calc(24px * var(--nhi-photo-rate-scale,1))!important;
+ }
+}
+/* Keep the comparison action just left of the two dictionary bubbles. */
+html body #planBox .pcard .nhi-ko-line .nhi-card-dictionaries{
+ display:inline-flex!important;
+ align-items:center!important;justify-content:flex-start!important;
+ gap:5px!important;
+}
+html body #planBox .pcard .nhi-ko-line .nhi-card-dictionaries .nhi-compare-near-dictionaries{
+ order:-1!important;
+ display:inline-flex!important;align-items:center!important;justify-content:center!important;
+ flex:0 0 auto!important;
+ width:auto!important;min-height:33px!important;
+ padding:5px 9px!important;
+ border-radius:10px!important;
+ font-size:12px!important;white-space:nowrap!important;
+}
+html body #planBox .pcard .nhi-ko-line .nhi-card-dictionaries .nhi-compare-near-dictionaries[hidden]{
+ display:none!important;
+}
+/* Wider text panel only when needed, not a fixed bar for short English. */
+html body #planBox .pcard .pfront .nhi-english-v5,
+html body #planBox .pcard .pfront.nhi-with-image .nhi-card-details>.nhi-english-v5{
+ width:var(--nhi-en-width,var(--nhi-en-auto-width,fit-content))!important;
+ min-width:0!important;
+ max-width:min(100%,440px)!important;
+ align-self:center!important;justify-self:center!important;
+}
+html body #planBox .pcard .pfront .nhi-english-v5 .nhi-en-main{
+ min-width:0!important;
+}
+html body #planBox .pcard .pfront .nhi-english-v5 .nhi-en-head{
+ max-width:100%!important;
+}
+/* Dense, readable two-column card editor. Hanja lives at the very bottom. */
+html body #planBox .pcard .nhi-editor-window-v5 .nhi-editor-main-grid{
+ display:grid!important;
+ grid-template-columns:repeat(2,minmax(0,1fr))!important;
+ gap:10px!important;
+ width:100%!important;
+}
+html body #planBox .pcard .nhi-editor-window-v5 .nhi-editor-main-grid>.flabel{
+ min-width:0!important;margin:0!important;
+}
+html body #planBox .pcard .nhi-editor-window-v5 .nhi-editor-main-grid>.flabel textarea{
+ min-height:66px!important;resize:vertical!important;
+}
+html body #planBox .pcard .nhi-editor-window-v5>.nhi-editor-pairs{
+ width:100%!important;
+}
+html body #planBox .pcard .nhi-editor-window-v5>.nhi-editor-pairs textarea{
+ min-height:80px!important;
+}
+html body #planBox .pcard .nhi-editor-window-v5>.nhi-editor-hanja-last{
+ display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;
+ gap:7px 12px!important;margin:8px 0!important;
+}
+html body #planBox .pcard .nhi-editor-window-v5>.nhi-editor-hanja-last legend,
+html body #planBox .pcard .nhi-editor-window-v5>.nhi-editor-hanja-last .dictionary-links,
+html body #planBox .pcard .nhi-editor-window-v5>.nhi-editor-hanja-last .hint{
+ grid-column:1/-1!important;
+}
+html body #planBox .pcard .nhi-editor-window-v5>.nhi-editor-hanja-last .dictionary-links{
+ display:flex!important;flex-flow:row wrap!important;gap:8px!important;
+}
+@media(max-width:550px){
+ html body #planBox .pcard .nhi-editor-window-v5 .nhi-editor-main-grid{grid-template-columns:1fr!important}
+ html body #planBox .pcard .nhi-editor-window-v5>.nhi-editor-hanja-last{grid-template-columns:1fr!important}
+}
