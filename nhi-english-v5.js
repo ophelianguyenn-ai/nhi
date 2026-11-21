@@ -384,6 +384,27 @@ function fitEnglishWidth(box){
  // Short lines hug their text, while long sentences wrap instead of becoming a full-width banner.
  const maxWidth=Math.min(365,Math.max(116,(lane?.clientWidth||365)-8));
  const target=Math.min(maxWidth,Math.max(108,Math.ceil(contentWidth)));
+ const parent=box.closest('.nhi-card-details');
+ const pairedNote=parent?.querySelector('.nhi-card-note');
+ if(pairedNote){
+  // Match paired panels for short English. Longer English meaning may expand;
+  // a long IPA alone wraps instead of stretching the frame.
+  const available=Math.min(560,Math.max(140,parent.clientWidth||365));
+  const noteWidth=Math.max(108,Math.min(available,
+    Math.ceil(pairedNote.getBoundingClientRect().width)));
+  const meaningWidth=measure(t);
+  const actionsNeeded=actionsWidth+38;
+  const isLong=clean(t?.textContent).length>26;
+  const hasComparison=!!box.querySelector('.nhi-en-choices:not(:empty)');
+  const enlarged=isLong?Math.ceil(meaningWidth+actionsNeeded):noteWidth;
+  const wanted=hasComparison?available:Math.max(noteWidth,Math.min(available,enlarged));
+  pairedNote.style.setProperty('width',Math.ceil(noteWidth)+'px','important');
+  pairedNote.style.setProperty('max-width',available+'px','important');
+  box.style.setProperty('--nhi-en-auto-width',Math.ceil(wanted)+'px');
+  box.style.setProperty('width',Math.ceil(wanted)+'px','important');
+  box.style.setProperty('max-width',available+'px','important');
+  return;
+ }
  box.style.setProperty('--nhi-en-auto-width',target+'px');
 }
 function mount(parent,id,vi,ko,options){
