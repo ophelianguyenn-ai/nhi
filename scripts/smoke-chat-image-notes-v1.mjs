@@ -565,10 +565,20 @@ try{
      return rows.map(row=>{
        const flag=row.querySelector('.nhi-comparison-flag')?.getBoundingClientRect();
        const text=row.querySelector('.nhi-comparison-choice-text')?.getBoundingClientRect();
+       const span=row.querySelector('.nhi-comparison-choice-text');
+       const firstWord=span?.querySelector('.nhi-en-word');
+       const words=[...(span?.querySelectorAll('.nhi-en-word')||[])].slice(0,14).map(w=>{
+         const b=w.getBoundingClientRect();return {word:w.textContent,left:b.left,top:b.top,display:getComputedStyle(w).display,flex:getComputedStyle(w).flex};
+       });
        return {flagLeft:flag?.left,textLeft:text?.left,
          gap:flag&&text?text.left-flag.right:null,
          flagText:row.querySelector('.nhi-comparison-flag')?.textContent,
-         englishText:row.querySelector('.nhi-comparison-choice-text')?.textContent};
+         englishText:span?.textContent,
+         rowAlign:getComputedStyle(row).textAlign,
+         spanAlign:span?getComputedStyle(span).textAlign:null,
+         spanDisplay:span?getComputedStyle(span).display:null,
+         firstWordLeft:firstWord?.getBoundingClientRect().left,
+         words};
      });
    }finally{host.remove();}
  });
