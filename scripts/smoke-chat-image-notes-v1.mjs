@@ -778,7 +778,9 @@ try{
    return {cardLeft:card.left,pictureLeft:photo.left,pictureWidth:photo.width,
      expectedCenter:target,koCenter:center(lane),englishCenter:center(en),
      buttonsCenter:center(row),leftBlank:lane.left-card.left,
-     laneWidth:lane.width,grid:getComputedStyle(document.querySelector('#planBox .pfront')).gridTemplateColumns};
+     laneWidth:lane.width,grid:getComputedStyle(document.querySelector('#planBox .pfront')).gridTemplateColumns,
+     buttonStyle:document.querySelector('#planBox .pcard>.prate')?.getAttribute('style'),
+     cardStyle:document.querySelector('#planBox .pcard')?.getAttribute('style')};
  });
  assert(Math.abs(largePhoto.expectedCenter-largePhoto.koCenter)<15 &&
    Math.abs(largePhoto.expectedCenter-largePhoto.buttonsCenter)<15 &&
