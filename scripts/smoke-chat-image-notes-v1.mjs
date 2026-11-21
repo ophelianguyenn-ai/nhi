@@ -139,11 +139,16 @@ try{
  const after4way=await page.evaluate(id=>JSON.parse(localStorage.getItem('viko-plan-v1')).img?.[id]?.v?.offsetX,cardID);
  await new Promise(resolve=>setTimeout(resolve,70));
  const geometryAfter=await page.evaluate(()=>{
-   const fig=document.querySelector('#planBox .card-illustration')?.getBoundingClientRect();
+   const f=document.querySelector('#planBox .card-illustration');
+   const fig=f?.getBoundingClientRect();
    const row=document.querySelector('#planBox .pcard>.prate')?.getBoundingClientRect();
    const content=document.querySelector('#planBox .nhi-ko-line')?.getBoundingClientRect();
+   const front=document.querySelector('#planBox .pfront');
    return {photoX:fig?.left,rowCenter:row?(row.left+row.right)/2:0,
-     contentCenter:content?(content.left+content.right)/2:0};
+     contentCenter:content?(content.left+content.right)/2:0,
+     frameStyle:f?.getAttribute('style'),frameComputedTransform:f?getComputedStyle(f).transform:null,
+     frontStyle:front?.getAttribute('style'),frontGrid:front?getComputedStyle(front).gridTemplateColumns:null,
+     savedX:JSON.parse(localStorage.getItem('viko-plan-v1')).img?.[document.querySelector('#planBox .pcard')?.dataset.item]?.v?.offsetX};
  });
  assert(geometryAfter.photoX-geometryBefore.photoX>=9 &&
    geometryAfter.rowCenter>geometryBefore.rowCenter+3 &&
