@@ -148,3 +148,113 @@ html body #planBox .pcard .card-illustration:focus-within .nhi-image-move-4d{
    margin:7px auto!important;
  }
 }
+
+/* NOV 21 PATCH 2: visually move the real photo horizontally by its grid
+   position, not a fragile legacy transform (which used to force X=0). */
+:root{
+  --nhi-global-font-scale:1;
+  --nhi-effective-ko:calc(36px * var(--nhi-global-font-scale));
+  --nhi-effective-vi-front:calc(26px * var(--nhi-global-font-scale));
+  --nhi-effective-vi-back:calc(22px * var(--nhi-global-font-scale));
+  --nhi-effective-en:calc(22px * var(--nhi-global-font-scale));
+  --nhi-effective-ipa:calc(19px * var(--nhi-global-font-scale));
+  --nhi-effective-note:calc(15px * var(--nhi-global-font-scale));
+  --nhi-card-font-multiplier:var(--nhi-global-font-scale);
+}
+html body #planBox .pcard[data-nhi-font-custom="true"]{
+  --nhi-effective-ko:36px;
+  --nhi-effective-vi-front:26px;
+  --nhi-effective-vi-back:22px;
+  --nhi-effective-en:22px;
+  --nhi-effective-ipa:19px;
+  --nhi-effective-note:15px;
+  --nhi-card-font-multiplier:1;
+}
+html body #planBox .pcard .nhi-ko-line>.answer.ko{
+  font-size:var(--nhi-effective-ko)!important;
+}
+html body #planBox .pcard .nhi-card-note{
+  font-size:var(--nhi-effective-note)!important;
+}
+html body #planBox .pcard .nhi-english-v5 .nhi-en-translation{
+  font-size:var(--nhi-effective-en)!important;
+}
+html body #planBox .pcard .nhi-english-v5 .nhi-en-ipa{
+  font-size:var(--nhi-effective-ipa)!important;
+}
+@media(min-width:621px){
+ html body #planBox .pcard:has(>.pfront.nhi-with-image){
+   padding-left:0!important;
+   padding-right:0!important;
+ }
+ html body #planBox .pcard>.pfront.nhi-with-image{
+   padding-left:0!important;
+   padding-right:10px!important;
+   margin-left:0!important;
+   width:100%!important;
+   justify-content:stretch!important;
+   /* Offset changes the real content lane. The button row follows its center. */
+   grid-template-columns:
+     minmax(0,calc(100% - min(34%,var(--nhi-image-width,320px)) - 14px + var(--nhi-photo-shift-x,0px)))
+     minmax(160px,min(34%,var(--nhi-image-width,320px)))!important;
+   column-gap:14px!important;
+   overflow-x:auto!important;
+ }
+ html body #planBox .pcard>.pfront.nhi-with-image>.nhi-ko-line{
+   display:flex!important;
+   box-sizing:border-box!important;
+   justify-content:center!important;
+   align-items:center!important;
+   width:100%!important;
+   padding:0 78px!important;
+   position:relative!important;
+ }
+ html body #planBox .pcard>.pfront.nhi-with-image>.nhi-ko-line>.answer.ko{
+   width:100%!important;
+   max-width:100%!important;
+   min-width:0!important;
+   text-align:center!important;
+ }
+ html body #planBox .pcard>.pfront.nhi-with-image>.nhi-ko-line>.nhi-card-dictionaries{
+   position:absolute!important;
+   right:0!important;
+   top:50%!important;
+   transform:translateY(-50%)!important;
+   width:76px!important;
+   max-width:76px!important;
+ }
+ html body #planBox .pcard:has(>.pfront.nhi-with-image)>.prate.nhi-rating-v3{
+   transition:margin-left .09s linear,width .09s linear!important;
+ }
+}
+/* The new four-way button receives all horizontal and vertical pointer input. */
+html body #planBox .pcard .card-illustration .nhi-image-move-4d{
+  touch-action:none!important;
+  pointer-events:auto!important;
+  user-select:none!important;
+  -webkit-user-select:none!important;
+  overscroll-behavior:contain!important;
+  z-index:80!important;
+}
+/* Photo-mode comparison is left-aligned even against legacy
+   more-specific centered-text rules. */
+html body #planBox .pcard .pfront.nhi-with-image .nhi-card-details>.nhi-english-v5 .nhi-en-choices>.nhi-en-choice{
+  display:grid!important;
+  grid-template-columns:24px minmax(0,1fr) 22px!important;
+  column-gap:4px!important;
+  justify-items:start!important;
+  text-align:left!important;
+}
+html body #planBox .pcard .pfront.nhi-with-image .nhi-card-details>.nhi-english-v5 .nhi-en-choices>.nhi-en-choice>.nhi-comparison-choice-text{
+  display:block!important;
+  grid-column:2!important;
+  grid-row:1!important;
+  justify-self:start!important;
+  width:100%!important;
+  margin:0!important;
+  padding:0!important;
+  text-align:left!important;
+}
+html body #planBox .pcard .pfront.nhi-with-image .nhi-card-details>.nhi-english-v5 .nhi-en-choices>.nhi-en-choice>.nhi-comparison-choice-text *{
+  text-align:left!important;
+}
