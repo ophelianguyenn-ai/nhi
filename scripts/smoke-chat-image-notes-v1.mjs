@@ -149,7 +149,7 @@ try{
    return v && v.offsetX>=prev+12;
  },{},cardID,before4way);
  const after4way=await page.evaluate(id=>JSON.parse(localStorage.getItem('viko-plan-v1')).img?.[id]?.v?.offsetX,cardID);
- await new Promise(resolve=>setTimeout(resolve,70));
+ await new Promise(resolve=>setTimeout(resolve,190));
  const geometryAfter=await page.evaluate(()=>{
    const f=document.querySelector('#planBox .card-illustration');
    const fig=f?.getBoundingClientRect();
