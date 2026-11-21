@@ -370,3 +370,36 @@ html body #planBox .pcard .pfront .nhi-english-v5 .nhi-en-choices>.nhi-en-choice
   display:block!important;
   margin:0!important;
 }
+
+/* Compare English: both translated options inherit the exact live English
+   font-size, and EVERY wrapped line starts immediately after its flag. */
+html body #planBox .pcard .pfront .nhi-english-v5 .nhi-en-choices>.nhi-en-choice,
+html body #planBox .pcard .pfront.nhi-with-image .nhi-card-details>.nhi-english-v5 .nhi-en-choices>.nhi-en-choice,
+html body #planBox .pcard .pfront .nhi-english-v5 .nhi-en-choices>.nhi-en-choice[aria-pressed="true"]{
+  font-size:var(--nhi-comparison-english-size,var(--nhi-effective-en,22px))!important;
+  text-align:left!important;
+  justify-items:start!important;
+  justify-content:stretch!important;
+}
+html body #planBox .pcard .pfront .nhi-english-v5 .nhi-en-choices>.nhi-en-choice>.nhi-comparison-choice-text,
+html body #planBox .pcard .pfront.nhi-with-image .nhi-card-details>.nhi-english-v5 .nhi-en-choices>.nhi-en-choice>.nhi-comparison-choice-text{
+  text-align:left!important;
+  font-size:inherit!important;
+  line-height:1.3!important;
+  display:block!important;
+  width:100%!important;
+  min-width:0!important;
+  justify-self:stretch!important;
+  margin:0!important;
+  padding:0!important;
+}
+html body #planBox .pcard .pfront .nhi-english-v5 .nhi-en-choice .nhi-comparison-choice-text .nhi-en-word,
+html body #planBox .pcard .pfront.nhi-with-image .nhi-card-details>.nhi-english-v5 .nhi-en-choice .nhi-comparison-choice-text .nhi-en-word{
+  font-size:inherit!important;
+  line-height:inherit!important;
+  text-align:left!important;
+  display:inline!important;
+  flex:none!important;
+  margin:0!important;
+  padding:0!important;
+}
