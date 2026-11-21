@@ -478,6 +478,8 @@ try{
  // Test the REAL translation helper with a mocked provider response; no
  // personal AI credentials and no live network calls are used by this test.
  const translated=await page.evaluate(async()=>{
+   // The chat was closed/reloaded earlier; opening initializes AI provider options.
+   window.NLC_AI.open(false);
    const form=document.getElementById('aiSetup');
    form.hidden=false;
    document.getElementById('aiProv').value='gemini';
