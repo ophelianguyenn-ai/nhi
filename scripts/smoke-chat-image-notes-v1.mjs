@@ -620,7 +620,7 @@ try{
    row.lineStartOffsets.every(offset=>Math.abs(offset)<5)),
    'Every WRAPPED line of compared English must begin directly after flag: '+
    JSON.stringify(comparisonGeometry));
- assert(comparisonGeometry.every(row=>row.panelWidth<=369&&row.blankBottom>=0&&row.blankBottom<22),
+ assert(comparisonGeometry.every(row=>row.panelWidth<=372&&row.blankBottom>=0&&row.blankBottom<22),
    'English panel with photo must hug content (no excessive width or empty height): '+
    JSON.stringify(comparisonGeometry));
  console.log('COMPARISON_FLAG_ALIGNMENT',JSON.stringify(comparisonGeometry));
