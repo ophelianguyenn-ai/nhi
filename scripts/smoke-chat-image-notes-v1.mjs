@@ -554,6 +554,28 @@ try{
    noteSeparation.englishWidth<=460,
    'Korean and English notes need separation; English must size to text independently: '+JSON.stringify(noteSeparation));
  console.log('PAIRED_NOTE_SEPARATION',JSON.stringify(noteSeparation));
+ // Long bilingual text must never push the control row on top of its content.
+ const longLayout=await page.evaluate(()=>{
+   const front=document.querySelector('#planBox .pcard>.pfront');
+   const card=document.querySelector('#planBox .pcard');
+   const rate=card?.querySelector(':scope>.prate');
+   const answer=front?.querySelector('.nhi-ko-line>.answer.ko');
+   const vi=front?.querySelector('.vi-under');
+   if(!front||!rate||!answer||!vi)return null;
+   const oldKo=answer.innerHTML,oldVi=vi.innerHTML;
+   answer.textContent='신규 주문이 들어올 것으로 예상되므로 생산팀에서 KG와 SH18 물량을 신속하게 완료할 수 있도록 준비해 주세요. '.repeat(3);
+   vi.textContent='Do dự kiến sẽ có đơn hàng mới, mong bộ phận sản xuất nhanh chóng chuẩn bị để hoàn thành số lượng KG và SH18. '.repeat(3);
+   const f=front.getBoundingClientRect(),b=rate.getBoundingClientRect();
+   const result={frontBottom:f.bottom,rateTop:b.top,cardHeight:card.getBoundingClientRect().height,
+      scrollHeight:front.scrollHeight,clientHeight:front.clientHeight,
+      grid:getComputedStyle(front).gridTemplateColumns};
+   answer.innerHTML=oldKo;vi.innerHTML=oldVi;
+   return result;
+ });
+ assert(longLayout&&longLayout.rateTop>=longLayout.frontBottom-4&&
+   longLayout.cardHeight<=835,
+   'Long bilingual text should scroll inside a fixed-height card, never cover Khó/Lùi/Tiến: '+JSON.stringify(longLayout));
+ console.log('LONG_BILINGUAL_NO_OVERLAP',JSON.stringify(longLayout));
  // Test the REAL translation helper with a mocked provider response; no
  // personal AI credentials and no live network calls are used by this test.
  const translated=await page.evaluate(async()=>{
