@@ -120,8 +120,8 @@ try{
  console.log('LEFT_EDGE_GUTTER',JSON.stringify(koreanGutter));
  console.log('IMAGE_LEFT_CONTROLS',JSON.stringify(placement));
  assert(Math.abs(placement.rowCenter-placement.koreanCenter)<12 &&
-   placement.photoLeft-placement.koreanRight>=8 &&
-   placement.photoLeft-placement.koreanRight<=24 &&
+   placement.photoLeft-placement.koreanRight>=28 &&
+   placement.photoLeft-placement.koreanRight<=62 &&
    placement.hardCenter<placement.prevCenter&&placement.prevCenter<placement.nextCenter,
    'Khó – Lùi – Tiến must center on text and photo gap must be small but visible: '+JSON.stringify(placement));
  // Four-arrow controls must move and persist the WHOLE frame, including X.
@@ -130,8 +130,10 @@ try{
    const fig=document.querySelector('#planBox .card-illustration')?.getBoundingClientRect();
    const row=document.querySelector('#planBox .pcard>.prate')?.getBoundingClientRect();
    const content=document.querySelector('#planBox .nhi-ko-line')?.getBoundingClientRect();
-   return {photoX:fig?.left,rowCenter:row?(row.left+row.right)/2:0,
-     contentCenter:content?(content.left+content.right)/2:0};
+   const english=document.querySelector('#planBox .nhi-english-v5')?.getBoundingClientRect();
+   const mid=r=>r?(r.left+r.right)/2:0;
+   return {photoX:fig?.left,rowCenter:mid(row),
+     contentCenter:mid(content),englishCenter:mid(english)};
  });
  // User now has ONE four-way drag handle, not a separate four-button pad.
  assert(!(await page.$('#planBox .nhi-4way-pad')),
@@ -158,12 +160,20 @@ try{
    const front=document.querySelector('#planBox .pfront');
    return {photoX:fig?.left,rowCenter:row?(row.left+row.right)/2:0,
      contentCenter:content?(content.left+content.right)/2:0,
+     englishCenter:(()=>{
+       const e=document.querySelector('#planBox .nhi-english-v5')?.getBoundingClientRect();
+       return e?(e.left+e.right)/2:0;
+     })(),
      frameStyle:f?.getAttribute('style'),frameComputedTransform:f?getComputedStyle(f).transform:null,
      frontStyle:front?.getAttribute('style'),frontGrid:front?getComputedStyle(front).gridTemplateColumns:null,
      savedX:JSON.parse(localStorage.getItem('viko-plan-v1')).img?.[document.querySelector('#planBox .pcard')?.dataset.item]?.v?.offsetX};
  });
+ const koShift=geometryAfter.contentCenter-geometryBefore.contentCenter;
+ const englishShift=geometryAfter.englishCenter-geometryBefore.englishCenter;
  assert(geometryAfter.photoX-geometryBefore.photoX>=9 &&
-   geometryAfter.rowCenter>geometryBefore.rowCenter+3 &&
+   koShift>3 &&
+   Math.abs(englishShift-koShift)<2 &&
+   Math.abs(geometryAfter.contentCenter-geometryAfter.englishCenter)<3 &&
    Math.abs(geometryAfter.rowCenter-geometryAfter.contentCenter)<12,
    'X drag must VISUALLY move photo and centered controls together: '+
    JSON.stringify({geometryBefore,geometryAfter}));
@@ -774,7 +784,7 @@ try{
    const en=bounds('#planBox .nhi-english-v5');
    const row=bounds('#planBox .pcard>.prate');
    const center=r=>r?(r.left+r.right)/2:null;
-   const target=(card.left+photo.left-14)/2;
+   const target=(card.left+photo.left-14)/2-24;
    return {cardLeft:card.left,pictureLeft:photo.left,pictureWidth:photo.width,
      expectedCenter:target,koCenter:center(lane),englishCenter:center(en),
      buttonsCenter:center(row),leftBlank:lane.left-card.left,
@@ -787,6 +797,52 @@ try{
    Math.abs(largePhoto.expectedCenter-largePhoto.englishCenter)<15,
    'Wide photo-card bilingual content / English panel / buttons must align to real left-space center: '+JSON.stringify(largePhoto));
  console.log('WIDE_PHOTO_LEFT_REGION',JSON.stringify(largePhoto));
+ // Simulate opening the two translated comparison lines on the REAL card with
+ // long text, then verify the blue panel never covers Khó / Lùi / Tiến.
+ const compareClearance=await page.evaluate(async()=>{
+   const card=document.querySelector('#planBox .pcard');
+   const front=card?.querySelector('.pfront.nhi-with-image');
+   const english=front?.querySelector('.nhi-english-v5');
+   const rate=card?.querySelector(':scope>.prate.nhi-rating-v3');
+   if(!front||!english||!rate)return null;
+   const oldHTML=english.innerHTML,oldExpanded=english.classList.contains('nhi-compare-expanded');
+   const originalScroll=front.scrollTop;
+   const oldInline=english.getAttribute('style');
+   try{
+     english.classList.add('nhi-compare-expanded');
+     const tr=english.querySelector('.nhi-en-translation');
+     const long='Mr. Kim, please work in the 2nd group (14:00–22:00), and Mr. Luan, please work in the 3rd group (22:00–06:00).';
+     if(tr)tr.textContent=long;
+     const choices=english.querySelector('.nhi-en-choices')||document.createElement('div');
+     choices.className='nhi-en-choices';choices.replaceChildren();
+     const variants=[long,'Kim works the second shift (14–22 hours), while Luan works the third shift (22–6 hours).'];
+     for(let i=0;i<2;i++){
+       const row=document.createElement('div');row.className='nhi-en-choice';
+       row.innerHTML='<span class="nhi-comparison-flag">'+(i?'🇰🇷':'🇻🇳')+
+         '</span><span class="nhi-comparison-choice-text"></span><label class="nhi-choice-check"><input type="checkbox"></label>';
+       const text=row.querySelector('.nhi-comparison-choice-text');
+       window.NHI_STUDY.wordElements(text,variants[i]);
+       choices.append(row);
+     }
+     if(!choices.isConnected)english.append(choices);
+     await new Promise(ok=>setTimeout(ok,420));
+     const panel=english.getBoundingClientRect();
+     const frontRect=front.getBoundingClientRect(),buttons=rate.getBoundingClientRect();
+     return {panelBottom:panel.bottom,buttonsTop:buttons.top,frontBottom:frontRect.bottom,
+       scrollTop:front.scrollTop,scrollMax:front.scrollHeight-front.clientHeight,
+       panelHeight:panel.height,frontHeight:frontRect.height,expanded:front.classList.contains('nhi-comparison-open'),
+       clearance:buttons.top-panel.bottom};
+   }finally{
+     english.innerHTML=oldHTML;english.classList.toggle('nhi-compare-expanded',oldExpanded);
+     if(oldInline===null)english.removeAttribute('style');else english.setAttribute('style',oldInline);
+     front.scrollTop=originalScroll;
+   }
+ });
+ assert(compareClearance&&compareClearance.expanded &&
+   compareClearance.clearance>=8 &&
+   compareClearance.scrollTop>0,
+   'Expanded English comparison must scroll upward to remain above separate buttons: '+JSON.stringify(compareClearance));
+ console.log('COMPARE_BUTTON_CLEARANCE',JSON.stringify(compareClearance));
  console.log('SELECTABLE CHAT AND NOTES UX PASS',JSON.stringify({note,grid:[before,after],height:afterCorner.height,voice:true,anchor}));
 }catch(err){
  console.error('ORIGINAL_SMOKE_ERROR',err&&err.stack||String(err));throw err;
