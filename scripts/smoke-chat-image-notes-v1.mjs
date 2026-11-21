@@ -98,10 +98,11 @@ try{
      hardPosition:hard?getComputedStyle(document.querySelector('#planBox .pcard>.prate>.hard')).position:null};
  });
  console.log('IMAGE_LEFT_CONTROLS',JSON.stringify(placement));
- assert(placement.rowRight<=placement.photoLeft-100 &&
-   placement.rowCenter<placement.koreanCenter-100 &&
+ assert(Math.abs(placement.rowCenter-placement.koreanCenter)<35 &&
+   Math.abs(placement.rowCenter-placement.toolsCenter)<35 &&
+   placement.rowRight<=placement.photoLeft+30 &&
    placement.hardCenter<placement.prevCenter&&placement.prevCenter<placement.nextCenter,
-   'Original Khó – Lùi – Tiến order must remain in left half: '+JSON.stringify(placement));
+   'Khó – Lùi – Tiến must align to the bilingual content center and retain order: '+JSON.stringify(placement));
  const before=await page.$eval('#planBox .pfront',e=>getComputedStyle(e).gridTemplateColumns);
  async function drag(selector,dx,dy,id){
    await page.$eval(selector,(e,dx,dy,id)=>{
