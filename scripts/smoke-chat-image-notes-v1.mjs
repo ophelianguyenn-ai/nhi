@@ -562,6 +562,14 @@ try{
      if(btn)btn.click();
      await new Promise(ok=>requestAnimationFrame(()=>requestAnimationFrame(ok)));
      const rows=[...preview.querySelectorAll('.nhi-en-choice')];
+     // Real user examples are much longer than the original one-line fixture:
+     // force line wrapping so a centered second line cannot slip through.
+     const longSentence='Kim works the 2nd shift from 14:00 to 22:00, and Luan works the 3rd shift from 22:00 to 06:00, please arrange accordingly.';
+     rows.forEach(row=>{
+       const text=row.querySelector('.nhi-comparison-choice-text');
+       if(text&&window.NHI_STUDY)window.NHI_STUDY.wordElements(text,longSentence);
+     });
+     await new Promise(ok=>requestAnimationFrame(()=>requestAnimationFrame(ok)));
      return rows.map(row=>{
        const flag=row.querySelector('.nhi-comparison-flag')?.getBoundingClientRect();
        const text=row.querySelector('.nhi-comparison-choice-text')?.getBoundingClientRect();
@@ -576,6 +584,10 @@ try{
          englishText:span?.textContent,
          rowAlign:getComputedStyle(row).textAlign,
          spanAlign:span?getComputedStyle(span).textAlign:null,
+         lineStartOffsets:words.reduce((lines,w)=>{
+           if(!lines.some(x=>Math.abs(x.top-w.top)<2))lines.push({top:w.top,x:w.left});
+           return lines;
+         },[]).map(line=>Math.round((line.x-(text?.left||0))*10)/10),
          spanDisplay:span?getComputedStyle(span).display:null,
          firstWordLeft:firstWord?.getBoundingClientRect().left,
          words};
@@ -585,6 +597,10 @@ try{
  assert(comparisonGeometry.length===2&&comparisonGeometry.every(row=>
    row.gap>=0 && row.gap<=9 && row.textLeft>row.flagLeft),
    'Comparison English sentences must sit immediately beside each flag: '+JSON.stringify(comparisonGeometry));
+ assert(comparisonGeometry.every(row=>row.lineStartOffsets.length>=2 &&
+   row.lineStartOffsets.every(offset=>Math.abs(offset)<5)),
+   'Every WRAPPED line of compared English must begin directly after flag: '+
+   JSON.stringify(comparisonGeometry));
  console.log('COMPARISON_FLAG_ALIGNMENT',JSON.stringify(comparisonGeometry));
  const noteSeparation=await page.evaluate(()=>{
    const note=document.querySelector('#planBox .nhi-card-details .nhi-card-note');
