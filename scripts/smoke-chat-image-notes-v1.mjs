@@ -609,6 +609,36 @@ try{
    longLayout.cardHeight<=835,
    'Long bilingual text should scroll inside a fixed-height card, never cover Khó/Lùi/Tiến: '+JSON.stringify(longLayout));
  console.log('LONG_BILINGUAL_NO_OVERLAP',JSON.stringify(longLayout));
+ // Master font scale applies to untouched cards but never overrides a card
+ // with saved per-card typography. Exercise both branches in the live DOM.
+ const globalFont=await page.evaluate(()=>{
+   const card=document.querySelector('#planBox .pcard');
+   const note=card?.querySelector('.nhi-card-note');
+   const select=document.querySelector('#nhiGlobalFontSize');
+   if(!card||!note||!select)return {available:false};
+   const savedValue=select.value,custom=card.dataset.nhiFontCustom;
+   const setScale=value=>{select.value=String(value);select.dispatchEvent(new Event('change',{bubbles:true}));};
+   try{
+     card.dataset.nhiFontCustom='false';
+     setScale(1);
+     const normal=parseFloat(getComputedStyle(note).fontSize);
+     setScale(1.3);
+     const large=parseFloat(getComputedStyle(note).fontSize);
+     card.dataset.nhiFontCustom='true';
+     const customBefore=parseFloat(getComputedStyle(note).fontSize);
+     setScale(.85);
+     const customAfter=parseFloat(getComputedStyle(note).fontSize);
+     return {available:true,normal,large,customBefore,customAfter};
+   }finally{
+     if(custom===undefined)card.removeAttribute('data-nhi-font-custom');
+     else card.dataset.nhiFontCustom=custom;
+     setScale(Number(savedValue)||1);
+   }
+ });
+ assert(globalFont.available&&globalFont.large>globalFont.normal*1.2&&
+   Math.abs(globalFont.customBefore-globalFont.customAfter)<.1,
+   'Master font must resize non-custom cards but never affect custom cards: '+JSON.stringify(globalFont));
+ console.log('MASTER_FONT_CUSTOM_EXEMPT',JSON.stringify(globalFont));
  // Test the REAL translation helper with a mocked provider response; no
  // personal AI credentials and no live network calls are used by this test.
  const translated=await page.evaluate(async()=>{
