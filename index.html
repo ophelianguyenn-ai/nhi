@@ -596,7 +596,7 @@ section:not([hidden]) > .quiz, section:not([hidden]) > #cardWrap, .list > .row:n
 }
 </style>
 
-<script src="nhi-chat-voice-v1.js?v=20261117"></script><script src="hanja-v9.js?v=12"></script><script src="hanja-extra-v12.js"></script><script src="card-images-v11.js?v=20261120-move-whole-frame-v3"></script><script src="nhi-google-images-v1.js?v=20261114-study-v7"></script><script src="nhi-hard-minimal-v1.js?v=20261120-in-card-v2"></script><script src="nhi-verified-pairs-20261117.js?v=1"></script><script src="nhi-daily-pairs.js?v=20261119-micro-v1"></script><script src="nhi-all-lesson-pairs-v6.js?v=20261121-refined-51"></script><script src="nhi-phrases-v5.js?v=20261121-refined"></script><script src="nhi-english-data-v6.js?v=20261113-reviewed-173"></script><script src="nhi-english-v5.js?v=20261121-short-lines-v12"></script><script src="recorded-voices-v11.js?v=20261119-banmai-injoon-daily"></script>
+<script src="nhi-chat-voice-v1.js?v=20261117"></script><script src="hanja-v9.js?v=12"></script><script src="hanja-extra-v12.js"></script><script src="card-images-v11.js?v=20261121-xy-buttons-v1"></script><script src="nhi-google-images-v1.js?v=20261114-study-v7"></script><script src="nhi-hard-minimal-v1.js?v=20261120-in-card-v2"></script><script src="nhi-verified-pairs-20261117.js?v=1"></script><script src="nhi-daily-pairs.js?v=20261119-micro-v1"></script><script src="nhi-all-lesson-pairs-v6.js?v=20261121-refined-51"></script><script src="nhi-phrases-v5.js?v=20261121-refined"></script><script src="nhi-english-data-v6.js?v=20261113-reviewed-173"></script><script src="nhi-english-v5.js?v=20261121-inline-ipa-v13"></script><script src="recorded-voices-v11.js?v=20261119-banmai-injoon-daily"></script>
 <script src="qrcode.js" defer></script>
 <link rel="stylesheet" href="nhi-seven-fixes-20261117.css?v=1"><link rel="stylesheet" href="refresh-v9.css?v=13"><link rel="stylesheet" href="study-enhancements-v13.css?v=14"><link rel="stylesheet" href="nhi-updates-v1.css?v=1"><link rel="stylesheet" href="nhi-ai-resize-v2.css?v=1"><link rel="stylesheet" href="nhi-study-motion-v3.css?v=3"><link rel="stylesheet" href="nhi-interface-v4.css?v=4"><link rel="stylesheet" href="nhi-interface-v5.css?v=20261113-rollback-stable-v1"><link rel="stylesheet" href="nhi-seasons-v1.css?v=20261113-cartoon-soft-1">
 <link rel="stylesheet" href="nhi-living-garden-v1.css?v=20261113-cartoon-butterflies-v1">
@@ -1266,6 +1266,7 @@ html body #planBox .sdone .pstatus{
 </style>
 <link rel="stylesheet" href="nhi-card-image-compact-v1.css?v=20261121-restore-compare-v11">
 <link rel="stylesheet" href="nhi-lesson-finish-v1.css?v=20261120-compact-cancel-v5">
+<link rel="stylesheet" href="nhi-layout-20261121-v1.css?v=20261121-center-compact">
 </head>
 <body>
 <header class="topbar" id="topbar">
@@ -4662,7 +4663,7 @@ html body #planBox .sdone .pstatus{
       var l2 = el('label', 'flabel'); l2.appendChild(el('span', null, 'Nghĩa tiếng Việt')); var vi = el('textarea', 'field'); vi.rows = 2; vi.value = it.vi; vi.name = 'vi'; l2.appendChild(vi); f.appendChild(l2);
       var enLabel=el('label','flabel');enLabel.appendChild(el('span',null,'Tiếng Anh'));var en=el('textarea','field');en.name='en';en.lang='en';en.rows=2;var enEntry=window.NHI_ENGLISH?window.NHI_ENGLISH.entry(it.id,it.vi,it.ko):{};en.value=enEntry.en||'';enLabel.appendChild(en);f.appendChild(enLabel);
        var ipaLabel=el('label','flabel');ipaLabel.appendChild(el('span',null,'Phiên âm IPA tiếng Anh (có thể chỉnh sửa)'));var ipaInput=el('input','field');ipaInput.name='ipa';ipaInput.type='text';ipaInput.lang='en';ipaInput.autocomplete='off';ipaInput.value=String(enEntry.ipa||'').replace(/^\//,'').replace(/\/$/,'');ipaLabel.appendChild(ipaInput);f.appendChild(ipaLabel);
-      var nl=el('label','flabel');nl.appendChild(el('span',null,'Ghi chú dưới nghĩa'));var notes=el('textarea','field');notes.name='note';notes.rows=3;notes.value=(val('note',it.id)||{}).text||it.note||'';nl.appendChild(notes);f.appendChild(nl);
+      var nl=el('label','flabel nhi-editor-note');nl.appendChild(el('span',null,'Ghi chú tiếng Hàn'));var notes=el('textarea','field');notes.name='note';notes.rows=3;notes.value=(val('note',it.id)||{}).text||it.note||'';nl.appendChild(notes);f.appendChild(nl);
       var nc=el('input');nc.type='hidden';nc.name='noteColor';nc.value=(val('note',it.id)||{}).color||'#dbeefe';f.appendChild(nc);
       vi.parentElement.after(nl);
       var draftKey='nhi-edit-draft-v2-'+it.id, pendingDraft=null;
@@ -4682,10 +4683,15 @@ html body #planBox .sdone .pstatus{
       }
       var savedFormat=Object.assign({},val('fmt',it.id)||{});if(enEntry.format){savedFormat.en=enEntry.format.en||savedFormat.en;savedFormat._sizes=Object.assign({},savedFormat._sizes||{},Number((enEntry.format._sizes||{}).en)?{en:enEntry.format._sizes.en}:{});}
       var formatting=window.NHI_STUDY?window.NHI_STUDY.editor(f,{ko:ko,vi:vi,note:notes,en:en},savedFormat,{noteColor:nc}):null;
-      var pl=el('label','flabel nhi-editor-pairs');pl.appendChild(el('span',null,'Cặp từ Việt . Hàn'));var pairs=el('textarea','field');pairs.name='pairs';pairs.rows=4;pairs.value=it.pairs.filter(function(p){return p[0]&&p[1];}).map(function(p){return p.join(' . ');}).join('\n');pl.appendChild(pairs);f.appendChild(pl);if(pendingDraft&&typeof pendingDraft.pairs==='string')pairs.value=pendingDraft.pairs;var originalPairText=pairs.value;
+      var pl=el('label','flabel nhi-editor-pairs');pl.appendChild(el('span',null,'Phân tách Việt – Hàn'));var pairs=el('textarea','field');pairs.name='pairs';pairs.rows=4;pairs.value=it.pairs.filter(function(p){return p[0]&&p[1];}).map(function(p){return p.join(' . ');}).join('\n');pl.appendChild(pairs);f.appendChild(pl);if(pendingDraft&&typeof pendingDraft.pairs==='string')pairs.value=pendingDraft.pairs;var originalPairText=pairs.value;
       var editorMain=el('div','nhi-editor-main-grid');
-      [l1,l2,enLabel,nl,ipaLabel].forEach(function(field){editorMain.appendChild(field);});
+      [l1,l2,enLabel,ipaLabel].forEach(function(field){editorMain.appendChild(field);});
       f.insertBefore(editorMain,pl);
+      // Translation + IPA share one row; paired segmentation + Korean note share the next.
+      var editorBottom=el('div','nhi-editor-notes-grid');
+      f.insertBefore(editorBottom,pl);
+      editorBottom.appendChild(pl);
+      editorBottom.appendChild(nl);
       if(section){section.classList.add('nhi-editor-hanja-last');f.appendChild(section);}
       var autoTimer=null;
       function snapshot(){
@@ -5275,7 +5281,7 @@ html body #planBox .sdone .pstatus{
       }
     }
     function formatChatExample(line){
-      var t=String(line||'').trim(),a,b,m;
+      var t=String(line||'').trim().replace(/^(?:[-•*]\s*|\d+[.)]\s*)/,'').trim(),a,b,m;
       if(!t)return '';
       // Chat examples are always saved as "Tiếng Việt: tiếng Hàn".
       // Only trim the FINAL Vietnamese full stop; do not modify Korean punctuation.
@@ -5285,9 +5291,9 @@ html body #planBox .sdone .pstatus{
       function pair(first,second){
         first=String(first||'').trim();second=String(second||'').trim();
         if(/[가-힣]/.test(first)&&/[A-Za-zÀ-ỹ]/.test(second))
-          return cleanVietnamese(second)+': '+first;
+          return '- '+cleanVietnamese(second)+': '+first;
         if(/[A-Za-zÀ-ỹ]/.test(first)&&/[가-힣]/.test(second))
-          return cleanVietnamese(first)+': '+second;
+          return '- '+cleanVietnamese(first)+': '+second;
         return '';
       }
       m=t.match(/^(.+?)\s*[:：]\s*(.+)$/);
