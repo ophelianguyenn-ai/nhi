@@ -71,9 +71,10 @@ try{
    return {withPhoto,normal};
  });
  console.log('PRESERVED_PHOTO_SIZES',JSON.stringify(preserved));
- const ratios=preserved.withPhoto.buttons.map((w,i)=>w/preserved.normal.buttons[i]);
- assert(ratios.every(r=>r>=.55&&r<=1.02)&&Math.max(...ratios)-Math.min(...ratios)<.025,
-   'Photo rating buttons must shrink together, keeping proportions: '+JSON.stringify({preserved,ratios}));
+ assert(preserved.withPhoto.buttons[0]>=100 &&
+   preserved.withPhoto.buttons[1]>=40 && preserved.withPhoto.buttons[2]>=40 &&
+   Math.abs(preserved.withPhoto.buttons[1]-preserved.withPhoto.buttons[2])<2,
+   'Khó and square Lùi–Tiến pads must remain comfortably sized: '+JSON.stringify(preserved));
  assert(preserved.withPhoto.englishSize===preserved.normal.englishSize &&
    preserved.withPhoto.noteSize===preserved.normal.noteSize,
    'Bilingual note fonts shrank when a photo appeared: '+JSON.stringify(preserved));
@@ -99,10 +100,8 @@ try{
  console.log('IMAGE_LEFT_CONTROLS',JSON.stringify(placement));
  assert(placement.rowRight<=placement.photoLeft-100 &&
    placement.rowCenter<placement.koreanCenter-100 &&
-   placement.hardCenter===placement.hardCenter &&
-   Math.abs(placement.hardCenter-placement.rowCenter)<10 &&
-   placement.prevCenter<placement.hardCenter&&placement.hardCenter<placement.nextCenter,
-   'Photo-side controls must visibly shift into left half with unchanged sizes: '+JSON.stringify(placement));
+   placement.hardCenter<placement.prevCenter&&placement.prevCenter<placement.nextCenter,
+   'Original Khó – Lùi – Tiến order must remain in left half: '+JSON.stringify(placement));
  const before=await page.$eval('#planBox .pfront',e=>getComputedStyle(e).gridTemplateColumns);
  async function drag(selector,dx,dy,id){
    await page.$eval(selector,(e,dx,dy,id)=>{
@@ -184,14 +183,19 @@ try{
  assert(leftLayout.koCenter<leftLayout.photoLeft&&leftLayout.koAlign==='center',
    'Korean text must stay centered in the left section: '+JSON.stringify(leftLayout));
  const visual=await page.evaluate(()=>{
-   const compare=document.querySelector('#planBox .nhi-compare-near-dictionaries');
+   const compare=document.querySelector('#planBox .nhi-english-v5 .nhi-en-tools .nhi-en-review');
    const dict=document.querySelector('#planBox .nhi-card-dictionaries');
+   const prev=document.querySelector('#planBox .nhi-prev-v3').getBoundingClientRect();
+   const next=document.querySelector('#planBox .nhi-next-v3').getBoundingClientRect();
    return {compare:!!compare,inDict:!!dict?.contains(compare),
+      prevSize:[prev.width,prev.height],nextSize:[next.width,next.height],
       hanjaButton:!!document.querySelector('#planBox .card-top .hjbtn'),
       caption:!!document.querySelector('#planBox .card-illustration figcaption')};
  });
- assert(visual.compare&&visual.inDict&&!visual.hanjaButton&&!visual.caption,
-   'Compare should be near Hàn Việt dictionaries, no Han icon or photo caption: '+JSON.stringify(visual));
+ assert(visual.compare&&!visual.inDict&&!visual.hanjaButton&&!visual.caption &&
+        Math.abs(visual.prevSize[0]-visual.prevSize[1])<2 &&
+        Math.abs(visual.nextSize[0]-visual.nextSize[1])<2,
+   'Đối chiếu must return to English frame and Lùi/Tiến must be square: '+JSON.stringify(visual));
  console.log('PHOTO_COMPARISON_AND_ICONS',JSON.stringify(visual));
  console.log('SMOKE_CHAT_OPEN');
  await page.$eval('#aiBtn',e=>e.click());await page.waitForSelector('#aiForm .nhi-chat-mic');
@@ -309,6 +313,78 @@ try{
   'Bilingual chat selection should copy; monolingual text has no +: '+JSON.stringify(drop));
  await page.waitForFunction(id=>JSON.parse(localStorage.getItem('viko-plan-v1')).note?.[id]?.v?.text.includes('Xin chào: 안녕하세요'),{},cardID);
  console.log('CHAT_SELECTION_DROP',JSON.stringify(drop));
+ // User-supplied screenshot: all three numbered, Vietnamese-only examples
+ // must have a plus; pressing plus or dragging a selected subset must add a
+ // bilingual "Việt: Hàn" pair after translation, not silently fail.
+ await page.evaluate(()=>{
+   const ai=document.getElementById('aiLog');
+   const msg=document.createElement('div');msg.className='aimsg ai';
+   msg.dataset.case='threeexamples';
+   msg.innerHTML='3 ví dụ thực tế:<br>Ví dụ 1: Tôi đi làm hôm nay.<br>Ví dụ 2: Tôi đã báo cáo rồi.<br>Ví dụ 3: Ngày mai tôi sẽ kiểm tra.';
+   ai.append(msg);
+ });
+ await page.waitForFunction(()=>{
+   const examples=document.querySelector('[data-case="threeexamples"]');
+   return examples && examples.querySelectorAll('.nhi-add-to-note').length===3;
+ },{timeout:8000});
+ const diagnostics=await page.evaluate(()=>{
+   const msg=document.querySelector('[data-case="threeexamples"]');
+   return [...msg.querySelectorAll('.nhi-ai-paragraph')].map(p=>({
+     text:p.querySelector('.nhi-ai-paragraph-text')?.textContent.trim(),
+     plus:!!p.querySelector('.nhi-add-to-note')
+   }));
+ });
+ assert(diagnostics.length===4&&diagnostics.filter(p=>p.plus).length===3,
+    'Each of the 3 example sentences needs its own +: '+JSON.stringify(diagnostics));
+ const aiClick=await page.evaluate(()=>{
+   window.__originalSaveSelected=window.NHI_CHAT_ADD_SELECTED;
+   const samples=['Tôi đi làm hôm nay','Tôi đã báo cáo rồi','Ngày mai tôi sẽ kiểm tra'];
+   const translated=['오늘 출근합니다.','이미 보고했어요.','내일 확인하겠습니다.'];
+   window.NHI_CHAT_ADD_SELECTED=(source)=>{
+     const bare=window.NHI_EXAMPLE_STRIP(source).replace(/[.。]+$/,'');
+     const i=samples.indexOf(bare);
+     if(i<0)return window.__originalSaveSelected(source);
+     return window.__originalSaveSelected(bare+': '+translated[i]);
+   };
+   document.querySelectorAll('[data-case="threeexamples"] .nhi-add-to-note')
+      .forEach(b=>b.click());
+   return window.NHI_EXAMPLE_PAIR('Tiếng Việt: Tôi làm việc.\nTiếng Hàn: 저는 일합니다.');
+ });
+ assert(aiClick?.vi==='Tôi làm việc'&&aiClick?.ko==='저는 일합니다.',
+   'Labelled bilingual translation should parse as one VI:KO pair');
+ await page.waitForFunction(id=>{
+   const note=JSON.parse(localStorage.getItem('viko-plan-v1')).note?.[id]?.v?.text||'';
+   return ['Tôi đi làm hôm nay: 오늘 출근합니다.',
+           'Tôi đã báo cáo rồi: 이미 보고했어요.',
+           'Ngày mai tôi sẽ kiểm tra: 내일 확인하겠습니다.'].every(s=>note.includes(s));
+ },{timeout:8000},cardID);
+ const dragPartial=await page.evaluate(()=>{
+   const m=document.querySelector('[data-case="threeexamples"]');
+   const t=[...m.querySelectorAll('.nhi-ai-paragraph-text')]
+      .find(el=>el.textContent.includes('Ví dụ 2:'));
+   const text=t.firstChild;
+   const selected='Tôi đã báo cáo rồi';
+   const content=text.textContent;
+   const start=content.indexOf(selected);
+   if(start<0)throw Error('Selected subset missing');
+   const range=document.createRange();
+   range.setStart(text,start);range.setEnd(text,start+selected.length);
+   const selection=getSelection();selection.removeAllRanges();selection.addRange(range);
+   const transfer=new DataTransfer();
+   t.dispatchEvent(new DragEvent('dragstart',{bubbles:true,cancelable:true,dataTransfer:transfer}));
+   const card=document.querySelector('#planBox .pcard');
+   card.dispatchEvent(new DragEvent('dragover',{bubbles:true,cancelable:true,dataTransfer:transfer}));
+   card.dispatchEvent(new DragEvent('drop',{bubbles:true,cancelable:true,dataTransfer:transfer}));
+   return {selected:selection.toString(),transferred:transfer.getData('application/x-nhi-example')};
+ });
+ assert(dragPartial.transferred===dragPartial.selected,
+   'Only the exact selected phrase should transfer, not the whole AI paragraph: '+JSON.stringify(dragPartial));
+ await page.waitForFunction(id=>{
+   const note=JSON.parse(localStorage.getItem('viko-plan-v1')).note?.[id]?.v?.text||'';
+   return (note.match(/Tôi đã báo cáo rồi: 이미 보고했어요./g)||[]).length>=2;
+ },{timeout:8000},cardID);
+ await page.evaluate(()=>{window.NHI_CHAT_ADD_SELECTED=window.__originalSaveSelected;});
+ console.log('THREE_EXAMPLE_PLUS_AND_DRAG',JSON.stringify({diagnostics,dragPartial}));
  // Accidental card deletion can be undone until a NEW card is visited.
  await page.$eval('#aiClose',e=>e.click());
  const deletedId=await page.$eval('#planBox .pcard',e=>e.dataset.item);
