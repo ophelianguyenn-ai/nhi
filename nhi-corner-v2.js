@@ -348,7 +348,7 @@ function exampleFrom(text){
  const candidates=[
   /^(.+?)\s*[（(]([^()（）\n]+)[）)]\s*$/s,
   /^(.+?)\s*(?:→|⇒|=>|\s[–—]\s|\s\|\s)\s*(.+)$/s,
-  /^(.+?)\s*[:：]\s*(.+)$/s
+  /^([^\n:：]+?)\s*[:：]\s*([^\n]+)$/
  ];
  for(const reg of candidates){const m=raw.match(reg);if(m){const p=makePair(m[1],m[2]);if(p)return p;}}
  const lines=raw.split(/\n+/).map(stripExampleLabel).filter(Boolean);
@@ -384,7 +384,9 @@ function attachExamples(){
   p.dataset.v2Fingerprint=fingerprint;
   let pair=exampleFrom(text);
   if(!pair && next)pair=exampleFrom(text+'\n'+next);
-  if(!pair && prev)pair=exampleFrom(prev+'\n'+text);
+  // Add + to the first line of a bilingual pair, not again on its second line.
+  if(!pair && prev && !p.previousElementSibling?.dataset.v2Vi)
+    pair=exampleFrom(prev+'\n'+text);
   const marked=isExampleLine(text,p);
   const existing=p.querySelector('.nhi-add-to-note');
   if(!pair&&!marked){
