@@ -6337,5 +6337,285 @@ html body #planBox .sdone .pstatus{
 <script src="nhi-kitten-meow-v1.js?v=20261120-user-meow"></script>
 <script src="nhi-card-no-overlap-v1.js?v=20261115-safe-v1"></script>
 <script src="nhi-corner-v2.js?v=20261121-numbered-example-plus-v2"></script>
+<!-- NHI PATCH 22-11: dán nguyên khối này NGAY TRƯỚC </body> trong index.html -->
+<style id="nhi-patch-compact-v2">
+/* 1. Ảnh gần nội dung hơn, không phá layout một cột ở màn hình hẹp */
+@media (min-width: 621px) {
+  html body #planBox .pcard .pfront.nhi-with-image {
+    grid-template-columns: minmax(0, min(55%, 390px)) minmax(105px, min(43%, var(--nhi-image-width, 220px))) !important;
+    column-gap: 8px !important;
+    justify-content: center !important;
+    justify-items: stretch !important;
+  }
+}
+/* 2. Khó – Lùi – Tiến đi theo tâm CỘT chữ Hàn/Việt/ghi chú */
+html body #planBox .pcard:has(.pfront.nhi-with-image) > .prate.nhi-rating-v3 {
+  width: var(--nhi-rate-width, var(--nhi-left-controls-width, 100%)) !important;
+  max-width: 100% !important;
+  min-width: 0 !important;
+  margin: 7px auto 10px var(--nhi-rate-left, var(--nhi-left-controls-inset, 10px)) !important;
+  padding: 4px 2px !important;
+  display: flex !important;
+  flex-wrap: nowrap !important;
+  align-items: center !important;
+  justify-content: center !important;
+  transform: none !important;
+  translate: none !important;
+  box-sizing: border-box !important;
+}
+html body #planBox .pcard > .prate.nhi-rating-v3 > .hard { order: 0 !important; }
+html body #planBox .pcard > .prate.nhi-rating-v3 > .nhi-prev-v3 { order: 1 !important; }
+html body #planBox .pcard > .prate.nhi-rating-v3 > .nhi-next-v3 { order: 2 !important; }
+/* 3. Khung Anh ôm nội dung; IPA lên cùng hàng nếu đủ chỗ */
+html body #planBox .pcard .pfront .nhi-english-v5,
+html body #planBox .pcard .pfront.nhi-with-image .nhi-card-details > .nhi-english-v5 {
+  display: inline-flex !important;
+  flex: 0 0 auto !important;
+  flex-direction: column !important;
+  width: max-content !important;
+  min-width: 0 !important;
+  max-width: min(100%, 390px) !important;
+  height: auto !important;
+  min-height: 0 !important;
+  max-height: none !important;
+  margin: 2px auto 0 !important;
+  padding: 7px 11px !important;
+  gap: 3px !important;
+  align-self: center !important;
+  justify-self: center !important;
+  box-sizing: border-box !important;
+}
+html body #planBox .pcard .nhi-english-v5 > .nhi-en-head {
+  display: flex !important;
+  flex-wrap: nowrap !important;
+  align-items: flex-start !important;
+  justify-content: flex-start !important;
+  gap: 7px !important;
+  width: 100% !important;
+  min-width: 0 !important;
+}
+html body #planBox .pcard .nhi-english-v5 > .nhi-en-head > .nhi-en-main {
+  display: flex !important;
+  flex: 1 1 auto !important;
+  flex-direction: row !important;
+  flex-wrap: wrap !important;
+  gap: 2px 9px !important;
+  align-items: baseline !important;
+  justify-content: flex-start !important;
+  width: auto !important;
+  min-width: 0 !important;
+  max-width: 100% !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  text-align: left !important;
+}
+html body #planBox .pcard .nhi-english-v5 .nhi-en-translation,
+html body #planBox .pcard .nhi-english-v5 .nhi-en-ipa {
+  display: inline !important;
+  width: auto !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  line-height: 1.25 !important;
+  text-align: left !important;
+}
+html body #planBox .pcard .nhi-english-v5 .nhi-en-ipa:not([hidden]) { white-space: nowrap !important; }
+html body #planBox .pcard .nhi-english-v5 .nhi-en-ipa[hidden] { display: none !important; }
+html body #planBox .pcard .nhi-english-v5 > .nhi-en-status:empty { display: none !important; }
+html body #planBox .pcard .nhi-english-v5 > .nhi-en-tools { margin-top: 3px !important; padding: 0 !important; }
+/* Kích thước khung riêng sau khi đối chiếu, để hai câu dài không bị bóp vụn */
+html body #planBox .pcard .nhi-english-v5:has(.nhi-en-choices:not(:empty)) {
+  width: min(100%, 440px) !important;
+  max-width: 100% !important;
+  align-items: stretch !important;
+}
+/* Thu phần NỀN XANH của thẻ nếu không có ảnh: trước đây bị ép cao theo màn hình */
+html body #planBox .pcard:has(.pfront:not(.nhi-with-image) .nhi-english-v5):not(:has(.nhi-editor-window-v5)) {
+  height: auto !important;
+  min-height: 0 !important;
+  max-height: none !important;
+}
+html body #planBox .pcard:has(.pfront:not(.nhi-with-image) .nhi-english-v5) > .pfront {
+  flex: 0 0 auto !important;
+  height: auto !important;
+  min-height: 0 !important;
+  padding-top: 10px !important;
+  padding-bottom: 10px !important;
+}
+/* 4. Chữ Hán + Âm Hán–Việt gọn gàng; bỏ nhóm link và dòng gợi ý */
+html body #planBox .pcard .nhi-editor-window-v5 > .nhi-editor-hanja-last {
+  margin-top: 15px !important;
+  padding: 13px 13px 11px !important;
+  gap: 9px 12px !important;
+}
+html body #planBox .pcard .nhi-editor-window-v5 > .nhi-editor-hanja-last > legend {
+  padding: 0 9px !important;
+  margin-left: 7px !important;
+  margin-bottom: 4px !important;
+  line-height: 1.4 !important;
+}
+html body #planBox .pcard .nhi-editor-hanja-last > .flabel > span { display: block !important; margin-bottom: 7px !important; }
+html body #planBox .pcard .nhi-editor-hanja-last > .dictionary-links,
+html body #planBox .pcard .nhi-editor-hanja-last > .hint { display: none !important; }
+/* 5. Cờ + hai câu Anh căn trái, cùng hàng, ô đánh dấu ở cuối */
+html body #planBox .pcard .nhi-english-v5 .nhi-en-choices {
+  width: 100% !important;
+  display: grid !important;
+  gap: 6px !important;
+  justify-items: stretch !important;
+  text-align: left !important;
+  margin: 6px 0 0 !important;
+}
+html body #planBox .pcard .nhi-english-v5 .nhi-en-choice,
+html body #planBox .pcard .nhi-english-v5 .nhi-en-choice:hover,
+html body #planBox .pcard .nhi-english-v5 .nhi-en-choice[aria-pressed="true"] {
+  display: grid !important;
+  grid-template-columns: 25px minmax(0,1fr) 22px !important;
+  align-items: start !important;
+  justify-items: start !important;
+  gap: 5px !important;
+  text-align: left !important;
+  width: 100% !important;
+  padding: 3px 0 !important;
+}
+html body #planBox .pcard .nhi-english-v5 .nhi-en-choice .nhi-comparison-flag {
+  grid-column: 1 !important;
+  grid-row: 1 !important;
+  margin: 0 !important;
+  flex: none !important;
+  white-space: nowrap !important;
+}
+html body #planBox .pcard .nhi-english-v5 .nhi-en-choice .nhi-comparison-choice-text {
+  grid-column: 2 !important;
+  grid-row: 1 !important;
+  justify-self: start !important;
+  min-width: 0 !important;
+  width: 100% !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  flex: none !important;
+  text-align: left !important;
+  overflow-wrap: anywhere !important;
+}
+html body #planBox .pcard .nhi-english-v5 .nhi-en-choice .nhi-choice-check {
+  grid-column: 3 !important;
+  grid-row: 1 !important;
+  margin: 0 !important;
+  justify-self: end !important;
+}
+/* Pad điều khiển ảnh bốn hướng – dùng các handler lưu ảnh sẵn có */
+html body #planBox .pcard .card-illustration .nhi-image-move-y,
+html body #planBox .pcard .card-illustration .nhi-image-move-x { display: none !important; }
+html body #planBox .pcard .card-illustration .nhi-4way-pad {
+  display: none !important;
+  position: absolute !important;
+  z-index: 30 !important;
+  left: 9px !important;
+  bottom: 9px !important;
+  grid-template-columns: repeat(3, 29px) !important;
+  grid-template-rows: repeat(3, 29px) !important;
+  gap: 2px !important;
+  padding: 4px !important;
+  border-radius: 12px !important;
+  background: rgba(240,250,255,.88) !important;
+  box-shadow: 0 2px 12px #1b597a44 !important;
+}
+html body #planBox .pcard .card-illustration.nhi-image-selected .nhi-4way-pad,
+html body #planBox .pcard .card-illustration:focus-within .nhi-4way-pad { display: grid !important; }
+html body #planBox .pcard .card-illustration .nhi-4way-pad > button {
+  display: grid !important;
+  place-items: center !important;
+  width: 29px !important;
+  height: 29px !important;
+  min-width: 0 !important;
+  min-height: 0 !important;
+  padding: 0 !important;
+  border: 1px solid #8dbfd9 !important;
+  border-radius: 8px !important;
+  color: #155b82 !important;
+  background: #fff !important;
+  font: bold 19px/1 system-ui !important;
+  cursor: pointer !important;
+  user-select: none !important;
+  touch-action: manipulation !important;
+}
+html body #planBox .pcard .card-illustration .nhi-4way-pad > button[data-dir="up"] {grid-column:2;grid-row:1}
+html body #planBox .pcard .card-illustration .nhi-4way-pad > button[data-dir="left"] {grid-column:1;grid-row:2}
+html body #planBox .pcard .card-illustration .nhi-4way-pad > button[data-dir="right"] {grid-column:3;grid-row:2}
+html body #planBox .pcard .card-illustration .nhi-4way-pad > button[data-dir="down"] {grid-column:2;grid-row:3}
+</style>
+<script id="nhi-patch-compact-v2-script">
+(function () {
+  'use strict';
+  var root = document.getElementById('planBox');
+  if (!root) return;
+  var scheduled = false;
+
+  function refresh() {
+    scheduled = false;
+    root.querySelectorAll('.pcard').forEach(function (card) {
+      var front = card.querySelector('.pfront');
+      if (!front) return;
+      if (front.classList.contains('nhi-with-image')) {
+        // Đo chính xác cột nội dung, căn nhóm nút theo tâm đó.
+        var lane = front.querySelector('.nhi-ko-line') || front.querySelector('.vi-under');
+        if (lane) {
+          var box = card.getBoundingClientRect(), rect = lane.getBoundingClientRect();
+          card.style.setProperty('--nhi-rate-left', Math.max(0,Math.round(rect.left-box.left))+'px');
+          card.style.setProperty('--nhi-rate-width', Math.max(0,Math.round(rect.width))+'px');
+        }
+      } else {
+        card.style.removeProperty('--nhi-rate-left');
+        card.style.removeProperty('--nhi-rate-width');
+      }
+    });
+    root.querySelectorAll('.nhi-editor-window-v5 .nhi-editor-hanja-last').forEach(function (field) {
+      field.querySelectorAll('.dictionary-links, .hint').forEach(function (node) {node.remove();});
+    });
+    root.querySelectorAll('.card-illustration[data-resizable="true"] .nhi-image-stage').forEach(function (stage) {
+      if (stage.querySelector('.nhi-4way-pad')) return;
+      var pad = document.createElement('div');
+      pad.className = 'nhi-4way-pad';
+      pad.setAttribute('role','group');
+      pad.setAttribute('aria-label','Di chuyển ảnh bốn hướng');
+      [['up','↑','Lên'], ['left','←','Trái'], ['right','→','Phải'], ['down','↓','Xuống']]
+        .forEach(function (item) {
+          var btn = document.createElement('button');
+          btn.type = 'button';
+          btn.dataset.dir = item[0];
+          btn.textContent = item[1];
+          btn.setAttribute('aria-label','Di chuyển ảnh sang '+item[2]);
+          btn.title = item[2]+' 12 px';
+          btn.addEventListener('pointerdown',function (e) {e.stopPropagation();});
+          btn.addEventListener('click',function (e) {
+            e.preventDefault();e.stopPropagation();
+            var direction = btn.dataset.dir;
+            var figure = stage.closest('.card-illustration');
+            if (figure) figure.classList.add('nhi-image-selected');
+            if (direction==='left' || direction==='right') {
+              var originals = stage.querySelectorAll('.nhi-image-move-x .nhi-image-shift');
+              var control = originals[direction==='left'?0:1];
+              if (control) control.click();
+            } else {
+              var controlY = stage.querySelector('.nhi-image-move-y');
+              if (controlY) controlY.dispatchEvent(new KeyboardEvent('keydown', {
+                key: direction==='up'?'ArrowUp':'ArrowDown', bubbles:true, cancelable:true
+              }));
+            }
+          });
+          pad.appendChild(btn);
+        });
+      stage.appendChild(pad);
+    });
+  }
+  function schedule() {
+    if (scheduled) return;
+    scheduled=true;
+    requestAnimationFrame(refresh);
+  }
+  new MutationObserver(schedule).observe(root,{childList:true,subtree:true});
+  window.addEventListener('resize',schedule,{passive:true});
+  schedule();
+})();
+</script>
 
 </body></html>
