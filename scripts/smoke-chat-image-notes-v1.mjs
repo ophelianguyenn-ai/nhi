@@ -71,8 +71,9 @@ try{
    return {withPhoto,normal};
  });
  console.log('PRESERVED_PHOTO_SIZES',JSON.stringify(preserved));
- assert(preserved.withPhoto.buttons.every((v,i)=>Math.abs(v-preserved.normal.buttons[i])<2),
-   'Lùi, Khó, Tiến changed dimensions with photo: '+JSON.stringify(preserved));
+ const ratios=preserved.withPhoto.buttons.map((w,i)=>w/preserved.normal.buttons[i]);
+ assert(ratios.every(r=>r>=.55&&r<=1.02)&&Math.max(...ratios)-Math.min(...ratios)<.025,
+   'Photo rating buttons must shrink together, keeping proportions: '+JSON.stringify({preserved,ratios}));
  assert(preserved.withPhoto.englishSize===preserved.normal.englishSize &&
    preserved.withPhoto.noteSize===preserved.normal.noteSize,
    'Bilingual note fonts shrank when a photo appeared: '+JSON.stringify(preserved));
@@ -182,6 +183,16 @@ try{
  });
  assert(leftLayout.koCenter<leftLayout.photoLeft&&leftLayout.koAlign==='center',
    'Korean text must stay centered in the left section: '+JSON.stringify(leftLayout));
+ const visual=await page.evaluate(()=>{
+   const compare=document.querySelector('#planBox .nhi-compare-near-dictionaries');
+   const dict=document.querySelector('#planBox .nhi-card-dictionaries');
+   return {compare:!!compare,inDict:!!dict?.contains(compare),
+      hanjaButton:!!document.querySelector('#planBox .card-top .hjbtn'),
+      caption:!!document.querySelector('#planBox .card-illustration figcaption')};
+ });
+ assert(visual.compare&&visual.inDict&&!visual.hanjaButton&&!visual.caption,
+   'Compare should be near Hàn Việt dictionaries, no Han icon or photo caption: '+JSON.stringify(visual));
+ console.log('PHOTO_COMPARISON_AND_ICONS',JSON.stringify(visual));
  console.log('SMOKE_CHAT_OPEN');
  await page.$eval('#aiBtn',e=>e.click());await page.waitForSelector('#aiForm .nhi-chat-mic');
  console.log('SMOKE_CHAT_CONTEXT');
