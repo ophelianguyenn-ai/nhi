@@ -40,6 +40,19 @@ function figure(it,value,onResize){
     onResize(Object.assign({},v,{width:Math.round(width),height:Math.round(height),
       offsetX:Math.round(offsetX),offsetY:Math.round(offsetY)}));
   }
+  // Public instance method for the four-way controller. Unlike proxy clicks
+  // on hidden legacy buttons, this always updates the frame and persisted data.
+  f.nhiMoveBy=function(dx,dy){
+    var nextX=clamp(offsetX+(Number(dx)||0),-140,140);
+    var nextY=clamp(offsetY+(Number(dy)||0),-220,220);
+    if(nextX===offsetX&&nextY===offsetY)return false;
+    offsetX=nextX;offsetY=nextY;
+    f.classList.add('nhi-image-selected');
+    paint();commit();
+    f.dispatchEvent(new CustomEvent('nhi:image-moved',{bubbles:true,
+      detail:{offsetX:offsetX,offsetY:offsetY}}));
+    return true;
+  };
   f.addEventListener('click',function(e){f.classList.add('nhi-image-selected');e.stopPropagation();});
   f.addEventListener('focusout',function(e){
     if(!f.contains(e.relatedTarget))f.classList.remove('nhi-image-selected');
