@@ -96,7 +96,15 @@ try{
      toolsCenter:center(tools),
      rowLeft:row?.left,rowRight:row?.right,rowCenter:center(row),
      prevCenter:center(prev),hardCenter:center(hard),nextCenter:center(next),
-     hardPosition:hard?getComputedStyle(document.querySelector('#planBox .pcard>.prate>.hard')).position:null};
+     hardPosition:hard?getComputedStyle(document.querySelector('#planBox .pcard>.prate>.hard')).position:null,
+     rectKo:korean?{x:korean.left,width:korean.width}:null,
+     cardRect:bounds('#planBox .pcard')?.toJSON(),
+     rowComputed:row?{width:getComputedStyle(document.querySelector('#planBox .pcard>.prate')).width,
+       maxWidth:getComputedStyle(document.querySelector('#planBox .pcard>.prate')).maxWidth,
+       marginLeft:getComputedStyle(document.querySelector('#planBox .pcard>.prate')).marginLeft}:null,
+     inlineRateStyle:document.querySelector('#planBox .pcard>.prate')?.getAttribute('style'),
+     inlineCardStyle:document.querySelector('#planBox .pcard')?.getAttribute('style'),
+     frontStyle:document.querySelector('#planBox .pfront')?.getAttribute('style')};
  });
  console.log('IMAGE_LEFT_CONTROLS',JSON.stringify(placement));
  assert(Math.abs(placement.rowCenter-placement.koreanCenter)<12 &&
