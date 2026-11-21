@@ -6799,12 +6799,27 @@ html body #planBox .pcard:has(.pfront.nhi-with-image)>.prate.nhi-rating-v3{
           var box = card.getBoundingClientRect(), rect = lane.getBoundingClientRect();
           var cardStyle=getComputedStyle(card);
           var innerLeft=box.left+(parseFloat(cardStyle.paddingLeft)||0)+(parseFloat(cardStyle.borderLeftWidth)||0);
-          card.style.setProperty('--nhi-rate-left', Math.max(0,Math.round(rect.left-innerLeft))+'px');
-          card.style.setProperty('--nhi-rate-width', Math.max(0,Math.round(rect.width))+'px');
+          var rate=card.querySelector(':scope>.prate.nhi-rating-v3');
+          var rateLeft=Math.max(0,Math.round(rect.left-innerLeft));
+          var rateWidth=Math.max(0,Math.round(rect.width));
+          card.style.setProperty('--nhi-rate-left',rateLeft+'px');
+          card.style.setProperty('--nhi-rate-width',rateWidth+'px');
+          // Old style fixes the control row to 470px!important. Force measured
+          // bilingual lane width to keep the controls centered after X movement.
+          if(rate){
+            rate.style.setProperty('width',rateWidth+'px','important');
+            rate.style.setProperty('max-width',rateWidth+'px','important');
+            rate.style.setProperty('margin-left',rateLeft+'px','important');
+            rate.style.setProperty('margin-right','0px','important');
+            rate.style.setProperty('flex-shrink','0','important');
+          }
         }
       } else {
         card.style.removeProperty('--nhi-rate-left');
         card.style.removeProperty('--nhi-rate-width');
+        var normalRate=card.querySelector(':scope>.prate.nhi-rating-v3');
+        if(normalRate)for(var key of ['width','max-width','margin-left','margin-right','flex-shrink'])
+          normalRate.style.removeProperty(key);
       }
       // English note sizes itself to its contents; no forced Korean width.
     });
