@@ -347,6 +347,11 @@ try{
  console.log('CARD_EDITOR_COMPACT',JSON.stringify(edit));
  await page.$eval('#planBox .nhi-editor-close-v5',e=>e.click());
  await page.waitForSelector('#planBox .pcard:not(:has(form.nhi-editor-window-v5))');
+ // Reopen the translated side if closing the editor restored the card front.
+ if(!await page.$('#planBox .nhi-english-v5')){
+   await page.$eval('#planBox .pfront',e=>e.click());
+ }
+ await page.waitForSelector('#planBox .nhi-english-v5',{timeout:7000});
  // Check the English frame really fits short text rather than a fixed width.
  const fit=await page.evaluate(async()=>{
    const box=document.querySelector('#planBox .nhi-english-v5');
