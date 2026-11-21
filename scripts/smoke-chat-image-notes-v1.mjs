@@ -811,11 +811,12 @@ try{
    try{
      english.classList.add('nhi-compare-expanded');
      const tr=english.querySelector('.nhi-en-translation');
-     const long='Mr. Kim, please work in the 2nd group (14:00–22:00), and Mr. Luan, please work in the 3rd group (22:00–06:00).';
-     if(tr)tr.textContent=long;
+     const long='Mr. Kim, please work in the 2nd group (14:00–22:00), and Mr. Luan, please work in the 3rd group (22:00–06:00). ';
+     if(tr){tr.textContent=long.repeat(2);tr.style.setProperty('font-size','34px','important');}
+     english.style.setProperty('--nhi-comparison-english-size','34px');
      const choices=english.querySelector('.nhi-en-choices')||document.createElement('div');
      choices.className='nhi-en-choices';choices.replaceChildren();
-     const variants=[long,'Kim works the second shift (14–22 hours), while Luan works the third shift (22–6 hours).'];
+     const variants=[long.repeat(2),'Kim works the second shift (14–22 hours), while Luan works the third shift (22–6 hours). '.repeat(2)];
      for(let i=0;i<2;i++){
        const row=document.createElement('div');row.className='nhi-en-choice';
        row.innerHTML='<span class="nhi-comparison-flag">'+(i?'🇰🇷':'🇻🇳')+
