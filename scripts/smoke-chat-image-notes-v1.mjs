@@ -92,17 +92,27 @@ try{
    const hard=bounds('#planBox .pcard>.prate>.hard');
    const next=bounds('#planBox .pcard>.prate>.nhi-next-v3');
    const center=r=>r?(r.left+r.right)/2:null;
-   return {photoLeft:picture?.left,koreanCenter:center(korean),toolsCenter:center(tools),
+   return {photoLeft:picture?.left,koreanCenter:center(korean),koreanRight:korean?.right,
+     toolsCenter:center(tools),
      rowLeft:row?.left,rowRight:row?.right,rowCenter:center(row),
      prevCenter:center(prev),hardCenter:center(hard),nextCenter:center(next),
      hardPosition:hard?getComputedStyle(document.querySelector('#planBox .pcard>.prate>.hard')).position:null};
  });
  console.log('IMAGE_LEFT_CONTROLS',JSON.stringify(placement));
- assert(Math.abs(placement.rowCenter-placement.koreanCenter)<35 &&
-   Math.abs(placement.rowCenter-placement.toolsCenter)<35 &&
-   placement.rowRight<=placement.photoLeft+30 &&
+ assert(Math.abs(placement.rowCenter-placement.koreanCenter)<12 &&
+   placement.photoLeft-placement.koreanRight>=8 &&
+   placement.photoLeft-placement.koreanRight<=24 &&
    placement.hardCenter<placement.prevCenter&&placement.prevCenter<placement.nextCenter,
-   'Khó – Lùi – Tiến must align to the bilingual content center and retain order: '+JSON.stringify(placement));
+   'Khó – Lùi – Tiến must center on text and photo gap must be small but visible: '+JSON.stringify(placement));
+ // Four-arrow controls must move and persist the WHOLE frame, including X.
+ const before4way=await page.evaluate(id=>JSON.parse(localStorage.getItem('viko-plan-v1')).img?.[id]?.v?.offsetX||0,cardID);
+ await page.$eval('#planBox .nhi-4way-pad button[data-dir="right"]',e=>e.click());
+ await page.waitForFunction((id,prev)=>{
+   const v=JSON.parse(localStorage.getItem('viko-plan-v1')).img?.[id]?.v;
+   return v && v.offsetX>=prev+12;
+ },{},cardID,before4way);
+ const after4way=await page.evaluate(id=>JSON.parse(localStorage.getItem('viko-plan-v1')).img?.[id]?.v?.offsetX,cardID);
+ console.log('FOUR_WAY_IMAGE_X',JSON.stringify({before:before4way,after:after4way}));
  const before=await page.$eval('#planBox .pfront',e=>getComputedStyle(e).gridTemplateColumns);
  async function drag(selector,dx,dy,id){
    await page.$eval(selector,(e,dx,dy,id)=>{
@@ -463,18 +473,21 @@ try{
  // Check the English frame really fits short text rather than a fixed width.
  const fit=await page.evaluate(async()=>{
    const box=document.querySelector('#planBox .nhi-english-v5');
+   const note=document.querySelector('#planBox .nhi-card-details .nhi-card-note');
    const t=box?.querySelector('.nhi-en-translation'),ipa=box?.querySelector('.nhi-en-ipa');
    if(!box||!t)return null;
    const before=box.getBoundingClientRect().width;
+   const noteWidth=note?.getBoundingClientRect().width||0;
    const saved=t.innerHTML,wasHidden=ipa?.hidden;
    t.textContent='Hi';if(ipa)ipa.hidden=true;
    await new Promise(ok=>requestAnimationFrame(()=>requestAnimationFrame(ok)));
    const short=box.getBoundingClientRect().width;
+   const noteAfter=note?.getBoundingClientRect().width||0;
    t.innerHTML=saved;if(ipa)ipa.hidden=wasHidden;
-   return {before,short};
+   return {before,short,noteWidth,noteAfter};
  });
- assert(fit&&fit.short<fit.before&&fit.short<200,
-  'Short English entries should create shorter panels: '+JSON.stringify(fit));
+ assert(fit && (fit.noteAfter ? Math.abs(fit.short-fit.noteAfter)<4 : fit.short<fit.before),
+  'Short English entries must match Korean note width (or shrink when no note): '+JSON.stringify(fit));
  console.log('ENGLISH_CONTENT_WIDTH',JSON.stringify(fit));
  // Test the REAL translation helper with a mocked provider response; no
  // personal AI credentials and no live network calls are used by this test.
