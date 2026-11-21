@@ -1264,7 +1264,7 @@ html body #planBox .sdone .pstatus{
 }
 
 </style>
-<link rel="stylesheet" href="nhi-card-image-compact-v1.css?v=20261121-english-tight-v9">
+<link rel="stylesheet" href="nhi-card-image-compact-v1.css?v=20261121-final-layout-v10">
 <link rel="stylesheet" href="nhi-lesson-finish-v1.css?v=20261120-compact-cancel-v5">
 </head>
 <body>
@@ -4496,7 +4496,7 @@ html body #planBox .sdone .pstatus{
       var hasPending=!!(pendingSaved&&pendingSaved.recordOnDone&&!pendingSaved.recorded);
       var alreadyStudied=(val('done',L.id)||[]).length>0;
       var notDue=!!cur && (cur.st==='next'||cur.st==='future');
-      var label = hasPending ? 'Tiếp tục (chưa bấm Xong)' : rs.length ? 'Tiếp tục (còn ' + rs.length + ' thẻ)' :
+      var label = hasPending ? 'Tiếp tục' : rs.length ? 'Tiếp tục (còn ' + rs.length + ' thẻ)' :
         !cur ? 'Học lại' : notDue ? (alreadyStudied ? 'Học lại' : 'Chờ đến ngày học') :
         (cur.step ? 'Học ' + STEP[cur.step].toLowerCase() : 'Học ngay');
       var row2 = el('div', 'prow');
