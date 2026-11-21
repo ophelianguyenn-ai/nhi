@@ -480,6 +480,9 @@ try{
    const noteWidth=note?.getBoundingClientRect().width||0;
    const saved=t.innerHTML,wasHidden=ipa?.hidden;
    t.textContent='Hi';if(ipa)ipa.hidden=true;
+   // Let comparison-drawer and card-layout transitions finish before
+   // checking the stable width; two frames only catches mid-transition scale.
+   await new Promise(ok=>setTimeout(ok,680));
    await new Promise(ok=>requestAnimationFrame(()=>requestAnimationFrame(ok)));
    const short=box.getBoundingClientRect().width;
    const noteAfter=note?.getBoundingClientRect().width||0;
@@ -493,7 +496,11 @@ try{
      englishInline:box.getAttribute('style'),
      noteInline:note?.getAttribute('style'),
      detailsWidth:box.closest('.nhi-card-details')?.getBoundingClientRect().width,
-     computedEnglish:getComputedStyle(box).width
+     computedEnglish:getComputedStyle(box).width,
+     scale:getComputedStyle(box).scale,
+     transform:getComputedStyle(box).transform,
+     animation:getComputedStyle(box).animationName,
+     ancestorTransforms:(()=>{let p=box,a=[];for(let i=0;i<4&&p;i++,p=p.parentElement){const st=getComputedStyle(p);a.push({class:p.className,scale:st.scale,transform:st.transform,animation:st.animationName,rect:p.getBoundingClientRect().width,offset:p.offsetWidth});}return a;})()
    };
  });
  assert(fit && (fit.noteAfter ? Math.abs(fit.short-fit.noteAfter)<4 : fit.short<fit.before),
