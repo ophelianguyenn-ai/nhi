@@ -596,7 +596,7 @@ section:not([hidden]) > .quiz, section:not([hidden]) > #cardWrap, .list > .row:n
 }
 </style>
 
-<script src="nhi-chat-voice-v1.js?v=20261117"></script><script src="hanja-v9.js?v=12"></script><script src="hanja-extra-v12.js"></script><script src="card-images-v11.js?v=20261121-xy-buttons-v1"></script><script src="nhi-google-images-v1.js?v=20261114-study-v7"></script><script src="nhi-hard-minimal-v1.js?v=20261120-in-card-v2"></script><script src="nhi-verified-pairs-20261117.js?v=1"></script><script src="nhi-daily-pairs.js?v=20261119-micro-v1"></script><script src="nhi-all-lesson-pairs-v6.js?v=20261121-refined-51"></script><script src="nhi-phrases-v5.js?v=20261121-refined"></script><script src="nhi-english-data-v6.js?v=20261113-reviewed-173"></script><script src="nhi-english-v5.js?v=20261121-inline-ipa-v13"></script><script src="recorded-voices-v11.js?v=20261119-banmai-injoon-daily"></script>
+<script src="nhi-chat-voice-v1.js?v=20261117"></script><script src="hanja-v9.js?v=12"></script><script src="hanja-extra-v12.js"></script><script src="card-images-v11.js?v=20261121-four-way-direct-v3"></script><script src="nhi-google-images-v1.js?v=20261114-study-v7"></script><script src="nhi-hard-minimal-v1.js?v=20261120-in-card-v2"></script><script src="nhi-verified-pairs-20261117.js?v=1"></script><script src="nhi-daily-pairs.js?v=20261119-micro-v1"></script><script src="nhi-all-lesson-pairs-v6.js?v=20261121-refined-51"></script><script src="nhi-phrases-v5.js?v=20261121-refined"></script><script src="nhi-english-data-v6.js?v=20261113-reviewed-173"></script><script src="nhi-english-v5.js?v=20261121-inline-ipa-v13"></script><script src="recorded-voices-v11.js?v=20261119-banmai-injoon-daily"></script>
 <script src="qrcode.js" defer></script>
 <link rel="stylesheet" href="nhi-seven-fixes-20261117.css?v=1"><link rel="stylesheet" href="refresh-v9.css?v=13"><link rel="stylesheet" href="study-enhancements-v13.css?v=14"><link rel="stylesheet" href="nhi-updates-v1.css?v=1"><link rel="stylesheet" href="nhi-ai-resize-v2.css?v=1"><link rel="stylesheet" href="nhi-study-motion-v3.css?v=3"><link rel="stylesheet" href="nhi-interface-v4.css?v=4"><link rel="stylesheet" href="nhi-interface-v5.css?v=20261113-rollback-stable-v1"><link rel="stylesheet" href="nhi-seasons-v1.css?v=20261113-cartoon-soft-1">
 <link rel="stylesheet" href="nhi-living-garden-v1.css?v=20261113-cartoon-butterflies-v1">
@@ -6542,6 +6542,176 @@ html body #planBox .pcard .card-illustration .nhi-4way-pad > button[data-dir="up
 html body #planBox .pcard .card-illustration .nhi-4way-pad > button[data-dir="left"] {grid-column:1;grid-row:2}
 html body #planBox .pcard .card-illustration .nhi-4way-pad > button[data-dir="right"] {grid-column:3;grid-row:2}
 html body #planBox .pcard .card-illustration .nhi-4way-pad > button[data-dir="down"] {grid-column:2;grid-row:3}
+
+/* NHI FIX 23-11: preserve an 11–16px visual gap beside the photo. */
+@media (min-width:621px){
+  html body #planBox .pcard .pfront.nhi-with-image{
+    grid-template-columns:minmax(0,min(55%,390px))
+      minmax(105px,min(43%,var(--nhi-image-width,220px)))!important;
+    column-gap:clamp(11px,1.2vw,16px)!important;
+    justify-content:center!important;
+    justify-items:stretch!important;
+  }
+  /* Two bubbles have a dedicated symmetrical gutter, no letter overlaps. */
+  html body #planBox .pcard .pfront.nhi-with-image>.nhi-ko-line{
+    display:flex!important;
+    box-sizing:border-box!important;
+    width:100%!important;
+    justify-content:center!important;
+    align-items:center!important;
+    padding-inline:clamp(74px,8vw,91px)!important;
+    min-height:49px!important;
+  }
+  html body #planBox .pcard .pfront.nhi-with-image>.nhi-ko-line>.answer.ko{
+    width:100%!important;
+    max-width:100%!important;
+    margin:0!important;
+    text-align:center!important;
+    overflow-wrap:anywhere!important;
+  }
+  html body #planBox .pcard .pfront.nhi-with-image>.nhi-ko-line>.nhi-card-dictionaries{
+    position:absolute!important;
+    right:2px!important;
+    top:50%!important;
+    transform:translateY(-50%)!important;
+  }
+}
+/* Stack Korean and English notes with real separation, not negative offsets. */
+html body #planBox .pcard .pfront .nhi-card-details,
+html body #planBox .pcard .pfront.nhi-with-image>.nhi-card-details{
+  display:flex!important;
+  flex-flow:column nowrap!important;
+  align-items:center!important;
+  justify-content:flex-start!important;
+  gap:12px!important;
+  width:100%!important;
+  max-width:100%!important;
+  min-width:0!important;
+  margin:7px 0 0!important;
+  padding:0!important;
+  overflow:visible!important;
+}
+html body #planBox .pcard .pfront .nhi-card-details>.nhi-card-note{
+  box-sizing:border-box!important;
+  flex:none!important;
+  position:relative!important;
+  display:block!important;
+  height:auto!important;
+  min-height:0!important;
+  margin:0 auto!important;
+  max-width:100%!important;
+  transform:none!important;
+  align-self:center!important;
+  justify-self:center!important;
+}
+html body #planBox .pcard .pfront .nhi-card-details>.nhi-english-v5{
+  box-sizing:border-box!important;
+  display:inline-flex!important;
+  flex:0 0 auto!important;
+  position:relative!important;
+  top:auto!important;
+  bottom:auto!important;
+  transform:none!important;
+  min-height:0!important;
+  height:max-content!important;
+  margin:0 auto!important;
+  padding:8px 10px!important;
+  max-width:min(100%,460px)!important;
+  align-self:center!important;
+  justify-self:center!important;
+  isolation:isolate!important;
+}
+/* Keep meaning/IPA in one line only when enough real width exists. */
+html body #planBox .pcard .nhi-english-v5 .nhi-en-head>.nhi-en-main{
+  display:flex!important;
+  flex-flow:row wrap!important;
+  align-items:baseline!important;
+  justify-content:flex-start!important;
+  gap:3px 8px!important;
+  min-width:0!important;
+  text-align:left!important;
+}
+html body #planBox .pcard .nhi-english-v5 .nhi-en-head>.nhi-en-main>.nhi-en-translation,
+html body #planBox .pcard .nhi-english-v5 .nhi-en-head>.nhi-en-main>.nhi-en-ipa:not([hidden]){
+  display:inline!important;
+  flex:0 1 auto!important;
+  width:auto!important;
+  max-width:100%!important;
+  margin:0!important;
+  padding:0!important;
+  line-height:1.3!important;
+  text-align:left!important;
+}
+html body #planBox .pcard .nhi-english-v5 .nhi-en-head>.nhi-en-main>.nhi-en-ipa:not([hidden]){
+  white-space:nowrap!important;
+}
+/* Actual first two comparison columns: flag immediately followed by text. */
+html body #planBox .pcard .nhi-english-v5 .nhi-en-choices{
+  display:flex!important;
+  flex-direction:column!important;
+  align-items:stretch!important;
+  width:100%!important;
+  margin:7px 0 0!important;
+  padding:0!important;
+  gap:6px!important;
+}
+html body #planBox .pcard .nhi-english-v5 .nhi-en-choices>.nhi-en-choice,
+html body #planBox .pcard .nhi-english-v5 .nhi-en-choices>.nhi-en-choice:hover,
+html body #planBox .pcard .nhi-english-v5 .nhi-en-choices>.nhi-en-choice[aria-pressed="true"]{
+  display:grid!important;
+  grid-template-columns:24px minmax(0,1fr) 22px!important;
+  column-gap:4px!important;
+  row-gap:0!important;
+  align-items:start!important;
+  justify-items:start!important;
+  text-align:left!important;
+  width:100%!important;
+  padding:3px 0!important;
+  margin:0!important;
+}
+html body #planBox .pcard .nhi-english-v5 .nhi-en-choice>.nhi-comparison-flag{
+  display:block!important;
+  grid-column:1!important;grid-row:1!important;
+  width:24px!important;
+  min-width:24px!important;
+  flex:0 0 24px!important;
+  text-align:left!important;
+  margin:0!important;
+}
+html body #planBox .pcard .nhi-english-v5 .nhi-en-choice>.nhi-comparison-choice-text{
+  display:block!important;
+  grid-column:2!important;grid-row:1!important;
+  justify-self:start!important;
+  text-align:left!important;
+  min-width:0!important;
+  width:100%!important;
+  max-width:100%!important;
+  margin:0!important;
+  padding:0!important;
+  flex:none!important;
+  overflow-wrap:anywhere!important;
+}
+html body #planBox .pcard .nhi-english-v5 .nhi-en-choice>.nhi-comparison-choice-text *{
+  text-align:left!important;
+  justify-content:flex-start!important;
+  margin-left:0!important;
+}
+html body #planBox .pcard .nhi-english-v5 .nhi-en-choice>.nhi-choice-check{
+  grid-column:3!important;grid-row:1!important;
+  margin:0!important;justify-self:end!important;
+}
+/* A last-rule safeguard: the rate group tracks the actual text column.
+   The JS refresh below measures this group again on image movement/resize. */
+html body #planBox .pcard:has(.pfront.nhi-with-image)>.prate.nhi-rating-v3{
+  width:var(--nhi-rate-width,var(--nhi-left-controls-width,100%))!important;
+  max-width:var(--nhi-rate-width,100%)!important;
+  min-width:0!important;
+  margin-left:var(--nhi-rate-left,10px)!important;
+  margin-right:0!important;
+  justify-content:center!important;
+  transform:none!important;
+  translate:none!important;
+}
 </style>
 <script id="nhi-patch-compact-v2-script">
 (function () {
@@ -6550,6 +6720,41 @@ html body #planBox .pcard .card-illustration .nhi-4way-pad > button[data-dir="do
   if (!root) return;
   var scheduled = false;
 
+
+  // Reconcile the two note widths after each mount or size change.
+  // The Korean note sets the baseline. English grows only for a long meaning
+  // (never because of a long IPA transcription alone).
+  function syncNotes(card){
+    var details=card.querySelector('.pfront .nhi-card-details');
+    if(!details)return;
+    var note=details.querySelector('.nhi-card-note');
+    var english=details.querySelector('.nhi-english-v5');
+    if(!note||!english)return;
+    var lane=Math.max(140,Math.floor(details.clientWidth||390));
+    var noteW=Math.min(lane,Math.ceil(note.getBoundingClientRect().width));
+    if(!noteW)return;
+    var translation=english.querySelector('.nhi-en-translation');
+    var actions=english.querySelector('.nhi-en-head-actions');
+    var textW=0;
+    if(translation){
+      var ctx=document.createElement('canvas').getContext('2d');
+      if(ctx){
+        ctx.font=getComputedStyle(translation).font;
+        textW=Math.ceil(ctx.measureText(translation.textContent||'').width);
+      }
+    }
+    var controlsW=actions?Math.ceil(actions.getBoundingClientRect().width):45;
+    var needed=textW+controlsW+40;
+    var expanded=!!english.querySelector('.nhi-en-choices:not(:empty)');
+    var wanted=expanded?Math.max(noteW,Math.min(lane,450)):
+      Math.max(noteW,Math.min(lane,needed));
+    // For short phrases, IPA wraps below; don't stretch the note.
+    var shortMeaning=(translation?translation.textContent.trim().length:0)<=26;
+    if(shortMeaning&&!expanded)wanted=noteW;
+    english.style.setProperty('width',Math.ceil(wanted)+'px','important');
+    english.style.setProperty('max-width',Math.min(lane,460)+'px','important');
+    note.style.setProperty('max-width',Math.min(lane,460)+'px','important');
+  }
   function refresh() {
     scheduled = false;
     root.querySelectorAll('.pcard').forEach(function (card) {
@@ -6567,6 +6772,7 @@ html body #planBox .pcard .card-illustration .nhi-4way-pad > button[data-dir="do
         card.style.removeProperty('--nhi-rate-left');
         card.style.removeProperty('--nhi-rate-width');
       }
+      syncNotes(card);
     });
     root.querySelectorAll('.nhi-editor-window-v5 .nhi-editor-hanja-last').forEach(function (field) {
       field.querySelectorAll('.dictionary-links, .hint').forEach(function (node) {node.remove();});
@@ -6591,15 +6797,11 @@ html body #planBox .pcard .card-illustration .nhi-4way-pad > button[data-dir="do
             var direction = btn.dataset.dir;
             var figure = stage.closest('.card-illustration');
             if (figure) figure.classList.add('nhi-image-selected');
-            if (direction==='left' || direction==='right') {
-              var originals = stage.querySelectorAll('.nhi-image-move-x .nhi-image-shift');
-              var control = originals[direction==='left'?0:1];
-              if (control) control.click();
-            } else {
-              var controlY = stage.querySelector('.nhi-image-move-y');
-              if (controlY) controlY.dispatchEvent(new KeyboardEvent('keydown', {
-                key: direction==='up'?'ArrowUp':'ArrowDown', bubbles:true, cancelable:true
-              }));
+            var dx = direction==='left' ? -12 : direction==='right' ? 12 : 0;
+            var dy = direction==='up' ? -12 : direction==='down' ? 12 : 0;
+            if (figure && typeof figure.nhiMoveBy === 'function') {
+              figure.nhiMoveBy(dx,dy);
+              schedule();
             }
           });
           pad.appendChild(btn);
@@ -6614,6 +6816,7 @@ html body #planBox .pcard .card-illustration .nhi-4way-pad > button[data-dir="do
   }
   new MutationObserver(schedule).observe(root,{childList:true,subtree:true});
   window.addEventListener('resize',schedule,{passive:true});
+  root.addEventListener('nhi:image-moved',schedule);
   schedule();
 })();
 </script>
