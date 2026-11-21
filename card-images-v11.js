@@ -39,6 +39,19 @@ function figure(it,value,onResize){
     if(parent){
       parent.style.setProperty('--nhi-photo-shift-x',onDesktop?Math.round(offsetX)+'px':'0px');
       parent.style.setProperty('--nhi-image-width',Math.round(width)+'px');
+      if(onDesktop){
+        // Direct column sizing, not CSS calc(min()) with a percentage:
+        // legacy rules were silently winning and leaving X visually unchanged.
+        var pStyle=getComputedStyle(parent);
+        var available=Math.max(350,parent.clientWidth-
+          (parseFloat(pStyle.paddingLeft)||0)-(parseFloat(pStyle.paddingRight)||0));
+        var col=Math.max(160,Math.min(width,available*.34));
+        var left=Math.max(180,available-col-14+offsetX);
+        parent.style.setProperty('grid-template-columns',
+          'minmax(0,'+Math.round(left)+'px) minmax(0,'+Math.round(col)+'px)','important');
+      }else{
+        parent.style.removeProperty('grid-template-columns');
+      }
     }
     // IMPORTANT: inline-important wins over legacy Y-only transform CSS.
     // Desktop: shift the grid column so the text + buttons follow the photo.
