@@ -388,16 +388,23 @@ function fitEnglishWidth(box){
  const maxWidth=Math.min(365,Math.max(116,(lane?.clientWidth||365)-8));
  const target=Math.min(maxWidth,Math.max(108,Math.ceil(contentWidth)));
  const compare=box.querySelector('.nhi-en-choices:not(:empty)');
- const areaWidth=Math.max(180,(lane?.clientWidth||440)-4);
- const available=Math.min(460,areaWidth);
+ const imageCard=!!box.closest('.pfront.nhi-with-image');
+ const areaWidth=Math.max(172,(lane?.clientWidth||440)-4);
+ // Long English is intentionally broken over more lines instead of turning
+ // into a near-card-wide pale-blue banner. Same behavior with or without photos.
+ const limit=Math.min(imageCard?365:395,areaWidth);
  const meaning=measure(t);
- const best=Math.max(190,Math.ceil(Math.max(meaning+actionsWidth+38,reviewWidth+22)));
- // Long sentences wrap in a reasonably compact frame; comparison can use
- // extra width without stretching to the entire bilingual text column.
- const desired=Math.min(available,compare?Math.max(285,best):best);
- box.style.setProperty('--nhi-en-auto-width',desired+'px');
- box.style.setProperty('width',desired+'px','important');
- box.style.setProperty('max-width',available+'px','important');
+ const best=Math.max(175,Math.ceil(Math.max(meaning+actionsWidth+31,reviewWidth+20)));
+ const desired=Math.round(Math.max(175,Math.min(limit,compare?Math.max(265,best):best)));
+ const manual=box.style.getPropertyValue('--nhi-en-width').trim();
+ const chosen=/^\d+(?:\.\d+)?px$/.test(manual)?
+   Math.min(limit,Math.max(175,parseFloat(manual))):desired;
+ box.style.setProperty('--nhi-en-auto-width',chosen+'px');
+ box.style.setProperty('width',chosen+'px','important');
+ box.style.setProperty('max-width',limit+'px','important');
+ box.style.setProperty('height','max-content','important');
+ box.style.setProperty('min-height','0px','important');
+ box.style.setProperty('max-height','none','important');
 }
 function mount(parent,id,vi,ko,options){
  if(!parent)return;
@@ -422,6 +429,8 @@ function mount(parent,id,vi,ko,options){
  if(enMain)new MutationObserver(updateAutoWidth).observe(enMain,{childList:true,characterData:true,subtree:true});
  const enStatus=box.querySelector('.nhi-en-status');
  if(enStatus)new MutationObserver(updateAutoWidth).observe(enStatus,{childList:true,characterData:true,subtree:true});
+ // Dynamic comparison choices appear asynchronously: recalc whenever rows appear.
+ new MutationObserver(updateAutoWidth).observe(box,{childList:true,characterData:true,subtree:true});
  if(!data||!Object.keys(data).length){
   load().then(()=>{display(box,verifiedEntry(id,vi,ko),id,vi,ko);updateAutoWidth();if(!verifiedEntry(id,vi,ko))resolveAutomatic(id,vi,ko,box);});
  }else if(!verifiedEntry(id,vi,ko))resolveAutomatic(id,vi,ko,box);
