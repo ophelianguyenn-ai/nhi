@@ -355,6 +355,35 @@ function editEnglish(box,id,vi,ko) {
   });
   box.appendChild(form);(form.querySelector('[data-language=en]')||field).focus();
 }
+function fitEnglishWidth(box){
+ if(!box?.isConnected)return;
+ // Respect explicit width chosen by dragging the box; otherwise size by the
+ // longest actual line of translation/IPA and the small speaking control.
+ const manual=getComputedStyle(box).getPropertyValue('--nhi-en-width').trim();
+ if(/^\d+(?:\.\d+)?px$/.test(manual))return;
+ const main=box.querySelector('.nhi-en-main');
+ if(!main)return;
+ const canvas=document.createElement('canvas'),ctx=canvas.getContext('2d');
+ function measure(node){
+  if(!node)return 0;
+  const style=getComputedStyle(node);
+  ctx.font=style.font||'16px sans-serif';
+  const content=String(node.textContent||'').trim();
+  return content?ctx.measureText(content).width:0;
+ }
+ const t=box.querySelector('.nhi-en-translation'),ipa=box.querySelector('.nhi-en-ipa');
+ const status=box.querySelector('.nhi-en-status');
+ const words=Math.max(measure(t),ipa&&!ipa.hidden?measure(ipa):0,measure(status));
+ const actions=box.querySelector('.nhi-en-head-actions');
+ const actionsWidth=actions?.getBoundingClientRect().width||36;
+ const review=box.querySelector('.nhi-en-review');
+ const reviewWidth=review&&!review.hidden?measure(review)+18:0;
+ const contentWidth=Math.max(words+actionsWidth+18,reviewWidth,85)+36;
+ const lane=box.closest('.nhi-card-details')||box.parentElement;
+ const maxWidth=Math.min(440,Math.max(125,(lane?.clientWidth||440)-8));
+ const target=Math.min(maxWidth,Math.max(112,Math.ceil(contentWidth)));
+ box.style.setProperty('--nhi-en-auto-width',target+'px');
+}
 function mount(parent,id,vi,ko,options){
  if(!parent)return;
  const before=parent.querySelector('.nhi-english-v5');if(before)before.remove();
@@ -368,8 +397,18 @@ function mount(parent,id,vi,ko,options){
  box.addEventListener('keydown',e=>{if((e.key==='Enter'||e.key===' ')&&e.target.closest('button,input,textarea,[role="button"]'))e.stopPropagation();});
  parent.appendChild(box);
  display(box,verifiedEntry(id,vi,ko),id,vi,ko);
+ let autoWidthFrame=0;
+ const updateAutoWidth=()=>{
+  cancelAnimationFrame(autoWidthFrame);
+  autoWidthFrame=requestAnimationFrame(()=>fitEnglishWidth(box));
+ };
+ updateAutoWidth();
+ const enMain=box.querySelector('.nhi-en-main');
+ if(enMain)new MutationObserver(updateAutoWidth).observe(enMain,{childList:true,characterData:true,subtree:true});
+ const enStatus=box.querySelector('.nhi-en-status');
+ if(enStatus)new MutationObserver(updateAutoWidth).observe(enStatus,{childList:true,characterData:true,subtree:true});
  if(!data||!Object.keys(data).length){
-  load().then(()=>{display(box,verifiedEntry(id,vi,ko),id,vi,ko);if(!verifiedEntry(id,vi,ko))resolveAutomatic(id,vi,ko,box);});
+  load().then(()=>{display(box,verifiedEntry(id,vi,ko),id,vi,ko);updateAutoWidth();if(!verifiedEntry(id,vi,ko))resolveAutomatic(id,vi,ko,box);});
  }else if(!verifiedEntry(id,vi,ko))resolveAutomatic(id,vi,ko,box);
  return box;
 }

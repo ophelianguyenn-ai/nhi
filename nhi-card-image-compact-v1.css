@@ -694,3 +694,13 @@ html body #planBox .pcard .nhi-editor-window-v5>.nhi-editor-hanja-last .dictiona
  html body #planBox .pcard .nhi-editor-window-v5 .nhi-editor-main-grid{grid-template-columns:1fr!important}
  html body #planBox .pcard .nhi-editor-window-v5>.nhi-editor-hanja-last{grid-template-columns:1fr!important}
 }
+
+
+/* Dynamic width computed from the rendered English content; manual resize
+   still overrides --nhi-en-auto-width. */
+html body #planBox .pcard .pfront .nhi-english-v5,
+html body #planBox .pcard .pfront.nhi-with-image .nhi-card-details>.nhi-english-v5{
+ width:var(--nhi-en-width,var(--nhi-en-auto-width,fit-content))!important;
+ min-width:0!important;
+ max-width:100%!important;
+}
