@@ -3970,7 +3970,9 @@ html body #planBox .sdone .pstatus{
       });
       if(pos<text.length)elm.appendChild(document.createTextNode(text.slice(pos)));
       if(window.NHI_STUDY)window.NHI_STUDY.formatText(elm,val('fmt',it.id)||{},lang);
-      var localSize=Number((((val('fmt',it.id)||{})._sizes)||{})[lang]);
+      var perCardSizes=((val('fmt',it.id)||{})._sizes)||{};
+      var localSize=Number(lang==='vi'&&elm.classList.contains('prompt')?
+        (perCardSizes.viFront||perCardSizes.vi):perCardSizes[lang]);
       if(lang==='vi'&&elm.classList.contains('prompt'))elm.style.setProperty('font-size',
         localSize>=12&&localSize<=72?localSize+'px':'var(--nhi-v8-front-size,26px)','important');
       if(lang==='vi'&&elm.classList.contains('vi-under'))elm.style.setProperty('font-size',
@@ -4651,7 +4653,7 @@ html body #planBox .sdone .pstatus{
     function curItem() { return sess && sess.pos < sess.queue.length ? ITEMS[sess.queue[sess.pos]] : null; }
     document.addEventListener('nhi:card-font-change',function(e){
       var it=curItem(),lang=e.detail&&e.detail.lang,size=Number(e.detail&&e.detail.size);
-      if(!it||!['ko','vi','en'].includes(lang)){toast('Hãy mở thẻ cần chỉnh cỡ chữ.');return;}
+      if(!it||!['ko','vi','viFront','en'].includes(lang)){toast('Hãy mở thẻ cần chỉnh cỡ chữ.');return;}
       if(!Number.isFinite(size)||size<12||size>72)return;
       var existing=val('fmt',it.id)||{};
       var next=Object.assign({},existing,{_sizes:Object.assign({},existing._sizes||{})});
@@ -4838,7 +4840,7 @@ html body #planBox .sdone .pstatus{
       if (legendOpen) c.appendChild(legendPop());
       c.dataset.nhiCardId=it.id;
       c.dataset.nhiFontSizes=JSON.stringify(((val('fmt',it.id)||{})._sizes)||{});
-      document.dispatchEvent(new Event('nhi:card-font-selected'));
+      requestAnimationFrame(function(){document.dispatchEvent(new Event('nhi:card-font-selected'));});
       var f = el('div', 'stage pfront');
       if (s.flipped) {
         var koRow=el('div','nhi-ko-line');
@@ -6354,7 +6356,7 @@ html body #planBox .sdone .pstatus{
 <script src="nhi-living-garden-v1.js?v=20261113-cartoon-butterflies-v1"></script>
 <script src="nhi-late-2026.js?v=20261115-v9-compact-pairs"></script>
 <script src="nhi-stage-move-v1.js?v=20261116-desktop-paired-highlight-v1"></script>
-<script src="nhi-card-controls-v8.js?v=20261115-v8"></script>
+<script src="nhi-card-controls-v8.js?v=20261121-per-card-v9"></script>
 <script src="nhi-kitten-meow-v1.js?v=20261120-user-meow"></script>
 <script src="nhi-card-no-overlap-v1.js?v=20261115-safe-v1"></script>
 <script src="nhi-corner-v2.js?v=20261121-numbered-example-plus-v2"></script>
