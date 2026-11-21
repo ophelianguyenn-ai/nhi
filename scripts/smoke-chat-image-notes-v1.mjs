@@ -624,6 +624,42 @@ try{
    'English panel with photo must hug content (no excessive width or empty height): '+
    JSON.stringify(comparisonGeometry));
  console.log('COMPARISON_FLAG_ALIGNMENT',JSON.stringify(comparisonGeometry));
+ // The real complaint concerns the BLUE SELECTED option and its font following
+ // changes to the main English text size, not just inactive gray comparisons.
+ const activeCompare=await page.evaluate(async()=>{
+   const front=document.querySelector('#planBox .pfront.nhi-with-image');
+   const details=front.querySelector('.nhi-card-details');
+   const host=document.createElement('div');
+   host.className='nhi-card-details';
+   front.appendChild(host);
+   try{
+     const box=window.NHI_ENGLISH.mount(host,'compare-font-regression',
+       'Kim làm ca hai còn Luân làm ca ba','김 씨는 2조, 루언 씨는 3조로 근무해 주세요',
+       {format:{_sizes:{en:34}}});
+     const main=box.querySelector('.nhi-en-translation');
+     box.querySelector('.nhi-en-review')?.click();
+     await new Promise(ok=>setTimeout(ok,180));
+     const rows=[...box.querySelectorAll('.nhi-en-choice')];
+     rows[0]?.setAttribute('aria-pressed','true');
+     rows[0]?.querySelector('.nhi-choice-check input')?.setAttribute('checked','checked');
+     const realFont=parseFloat(getComputedStyle(main).fontSize);
+     const matched=rows.map(row=>{
+       const text=row.querySelector('.nhi-comparison-choice-text');
+       return {textAlign:getComputedStyle(text).textAlign,
+         font:parseFloat(getComputedStyle(text).fontSize),
+         firstWordFont:parseFloat(getComputedStyle(text.querySelector('.nhi-en-word')||text).fontSize),
+         pressed:row.getAttribute('aria-pressed')};
+     });
+     return {realFont,matched};
+   }finally{host.remove();}
+ });
+ assert(activeCompare.realFont>=32 && activeCompare.matched.length===2 &&
+   activeCompare.matched.every(x=>x.textAlign==='left' &&
+     Math.abs(x.font-activeCompare.realFont)<.5 &&
+     Math.abs(x.firstWordFont-activeCompare.realFont)<.5),
+   'Selected and unselected comparison rows must follow the main English 34px size: '+
+     JSON.stringify(activeCompare));
+ console.log('COMPARE_FONT_MATCH',JSON.stringify(activeCompare));
  const noteSeparation=await page.evaluate(()=>{
    const note=document.querySelector('#planBox .nhi-card-details .nhi-card-note');
    const english=document.querySelector('#planBox .nhi-card-details .nhi-english-v5');
