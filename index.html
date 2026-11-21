@@ -6189,7 +6189,7 @@ html body #planBox .sdone .pstatus{
           e.dataTransfer.getData('text/plain');
         if(!t)return;
         e.preventDefault();e.stopPropagation();card.classList.remove('nhi-chat-drop-hover');
-        saveSelectedExample(t);
+        window.NHI_CHAT_ADD_SELECTED(t);
       });
       $('aiLog').addEventListener('dragstart',function(e){
         var p=e.target.closest('.nhi-ai-paragraph');
@@ -6276,7 +6276,7 @@ html body #planBox .sdone .pstatus{
             card=under&&under.closest('#planBox .pcard');
           }
           removeDrag();
-          if(ready&&card)saveSelectedExample(txt);
+          if(ready&&card)window.NHI_CHAT_ADD_SELECTED(txt);
         });
         window.addEventListener('pointercancel',removeDrag);
         log.addEventListener('scroll',function(){if(state)removeDrag();},{passive:true});
