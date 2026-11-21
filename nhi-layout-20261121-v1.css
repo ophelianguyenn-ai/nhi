@@ -1,0 +1,217 @@
+/* November 21: compact English, centered controls, and tidy editing.
+   Loaded last deliberately: preserve all existing card/mascot/animation logic. */
+
+/* Align Khó – Lùi – Tiến with the center axis of Korean / Vietnamese text
+   even when a right-hand photo is present. Keep the legacy button order. */
+html body #planBox .pcard:has(.pfront.nhi-with-image)>.prate.nhi-rating-v3{
+  display:flex!important;
+  flex-flow:row nowrap!important;
+  justify-content:center!important;
+  align-items:center!important;
+  width:100%!important;
+  min-width:0!important;
+  max-width:100%!important;
+  margin:8px auto 12px!important;
+  padding:4px 12px!important;
+  transform:none!important;
+  translate:none!important;
+  box-sizing:border-box!important;
+  --nhi-photo-rate-scale:1!important;
+}
+html body #planBox .pcard:has(.pfront.nhi-with-image)>.prate.nhi-rating-v3>.hard{order:0!important}
+html body #planBox .pcard:has(.pfront.nhi-with-image)>.prate.nhi-rating-v3>.nhi-prev-v3{order:1!important}
+html body #planBox .pcard:has(.pfront.nhi-with-image)>.prate.nhi-rating-v3>.nhi-next-v3{order:2!important}
+@media(max-width:390px){
+ html body #planBox .pcard:has(.pfront.nhi-with-image)>.prate.nhi-rating-v3{--nhi-photo-rate-scale:.82!important;padding-inline:4px!important}
+}
+
+/* English note hugs its actual words and transcription, not the card height.
+   The translation and IPA sit on the SAME line where there is space. */
+html body #planBox .pcard .pfront .nhi-english-v5,
+html body #planBox .pcard .pfront.nhi-with-image .nhi-card-details>.nhi-english-v5,
+html body #planBox .pcard .pfront.nhi-with-image>.nhi-english-v5{
+  display:inline-flex!important;
+  flex:0 0 auto!important;
+  flex-direction:column!important;
+  justify-content:flex-start!important;
+  align-items:stretch!important;
+  width:var(--nhi-en-auto-width,fit-content)!important;
+  max-width:min(100%,365px)!important;
+  min-width:0!important;
+  min-height:0!important;
+  height:fit-content!important;
+  max-height:none!important;
+  margin:var(--nhi-en-offset-y,0px) auto 0!important;
+  padding:7px 10px!important;
+  gap:3px!important;
+  align-self:center!important;
+  justify-self:center!important;
+  box-sizing:border-box!important;
+}
+html body #planBox .pcard .nhi-english-v5>.nhi-en-head{
+  display:grid!important;
+  grid-template-columns:minmax(0,1fr) auto!important;
+  align-items:center!important;
+  width:100%!important;
+  column-gap:6px!important;
+}
+html body #planBox .pcard .nhi-english-v5>.nhi-en-head>.nhi-en-main{
+  display:flex!important;
+  flex-direction:row!important;
+  flex-wrap:wrap!important;
+  align-items:baseline!important;
+  justify-content:flex-start!important;
+  gap:2px 9px!important;
+  width:auto!important;
+  min-width:0!important;
+  max-width:100%!important;
+  margin:0!important;
+  padding:0!important;
+  text-align:left!important;
+}
+html body #planBox .pcard .nhi-english-v5 .nhi-en-translation,
+html body #planBox .pcard .nhi-english-v5 .nhi-en-ipa{
+  display:inline!important;
+  width:auto!important;
+  max-width:100%!important;
+  margin:0!important;
+  padding:0!important;
+  line-height:1.22!important;
+  text-align:left!important;
+}
+html body #planBox .pcard .nhi-english-v5 .nhi-en-ipa[hidden]{display:none!important}
+html body #planBox .pcard .nhi-english-v5>.nhi-en-status:empty{display:none!important}
+html body #planBox .pcard .nhi-english-v5>.nhi-en-tools{
+  display:flex!important;
+  justify-content:center!important;
+  margin:3px 0 0!important;
+  padding:0!important;
+}
+html body #planBox .pcard .nhi-english-v5>.nhi-en-tools>.nhi-en-review{
+  min-height:31px!important;
+  height:auto!important;
+  margin:0!important;
+}
+
+/* Compared English sentences align left immediately after each flag. */
+html body #planBox .pcard .nhi-english-v5 .nhi-en-choices{
+  width:100%!important;max-width:100%!important;
+  display:grid!important;gap:4px!important;
+  justify-items:stretch!important;margin:6px 0 0!important;
+}
+html body #planBox .pcard .nhi-english-v5 .nhi-en-choice{
+  display:grid!important;
+  grid-template-columns:25px minmax(0,1fr) 22px!important;
+  align-items:start!important;
+  justify-items:start!important;
+  gap:7px!important;
+  width:100%!important;
+  min-height:25px!important;
+  padding:2px 0!important;
+  text-align:left!important;
+}
+html body #planBox .pcard .nhi-english-v5 .nhi-comparison-flag{
+  grid-column:1!important;margin:0!important;white-space:nowrap!important;
+}
+html body #planBox .pcard .nhi-english-v5 .nhi-comparison-choice-text{
+  grid-column:2!important;
+  min-width:0!important;
+  margin:0!important;
+  padding:0!important;
+  text-align:left!important;
+  justify-self:start!important;
+  overflow-wrap:anywhere!important;
+}
+html body #planBox .pcard .nhi-english-v5 .nhi-choice-check{
+  grid-column:3!important;margin:0!important;justify-self:end!important;
+}
+
+/* Editor: Korean / Vietnamese; English / IPA; segmentation / Korean note.
+   Even spacing for the Hanja and Sino-Vietnamese fields. */
+html body #planBox .pcard .nhi-editor-window-v5 .nhi-editor-main-grid,
+html body #planBox .pcard .nhi-editor-window-v5 .nhi-editor-notes-grid{
+  display:grid!important;
+  grid-template-columns:repeat(2,minmax(0,1fr))!important;
+  align-items:start!important;
+  gap:10px 12px!important;
+  width:100%!important;
+  margin:0 0 10px!important;
+}
+html body #planBox .pcard .nhi-editor-window-v5 .nhi-editor-main-grid>.flabel,
+html body #planBox .pcard .nhi-editor-window-v5 .nhi-editor-notes-grid>.flabel{
+  display:flex!important;
+  flex-direction:column!important;
+  min-width:0!important;
+  width:100%!important;
+  margin:0!important;
+}
+html body #planBox .pcard .nhi-editor-window-v5 .nhi-editor-main-grid .field,
+html body #planBox .pcard .nhi-editor-window-v5 .nhi-editor-notes-grid .field{
+  box-sizing:border-box!important;width:100%!important;min-width:0!important;
+}
+html body #planBox .pcard .nhi-editor-window-v5>.nhi-editor-hanja-last{
+  display:grid!important;
+  grid-template-columns:repeat(2,minmax(0,1fr))!important;
+  gap:7px 12px!important;
+  align-items:start!important;
+  margin:6px 0!important;
+  padding:10px 12px!important;
+}
+html body #planBox .pcard .nhi-editor-window-v5>.nhi-editor-hanja-last>.flabel{
+  display:flex!important;
+  flex-direction:column!important;
+  min-width:0!important;
+  width:100%!important;
+  margin:0!important;
+}
+html body #planBox .pcard .nhi-editor-window-v5>.nhi-editor-hanja-last .field{
+  box-sizing:border-box!important;width:100%!important;min-width:0!important;
+}
+html body #planBox .pcard .nhi-editor-window-v5>.nhi-editor-hanja-last legend,
+html body #planBox .pcard .nhi-editor-window-v5>.nhi-editor-hanja-last .dictionary-links,
+html body #planBox .pcard .nhi-editor-window-v5>.nhi-editor-hanja-last .hint{
+  grid-column:1/-1!important;
+}
+@media(max-width:550px){
+ html body #planBox .pcard .nhi-editor-window-v5 .nhi-editor-main-grid,
+ html body #planBox .pcard .nhi-editor-window-v5 .nhi-editor-notes-grid,
+ html body #planBox .pcard .nhi-editor-window-v5>.nhi-editor-hanja-last{
+  grid-template-columns:minmax(0,1fr)!important;
+ }
+}
+
+/* Image frame, not image pixels, moves horizontally and vertically.
+   Small arrow controls appear when the photo is selected. */
+html body #planBox .pcard .pfront.nhi-with-image>.card-illustration{
+  transform:translate3d(var(--nhi-frame-x,0px),var(--nhi-frame-y,0px),0)!important;
+}
+html body #planBox .pcard .pfront.nhi-with-image>.card-illustration .nhi-image-stage img{
+  transform:none!important;
+}
+html body #planBox .pcard .card-illustration .nhi-image-move-x{
+  display:none!important;
+  position:absolute!important;left:8px!important;bottom:8px!important;
+  z-index:16!important;
+  align-items:center!important;gap:5px!important;
+  pointer-events:auto!important;
+}
+html body #planBox .pcard .card-illustration.nhi-image-selected .nhi-image-move-x,
+html body #planBox .pcard .card-illustration:focus-within .nhi-image-move-x{
+  display:flex!important;
+}
+html body #planBox .pcard .card-illustration .nhi-image-move-x>.nhi-image-shift{
+  display:grid!important;place-items:center!important;
+  box-sizing:border-box!important;
+  min-width:32px!important;width:32px!important;
+  min-height:30px!important;height:30px!important;
+  margin:0!important;padding:0!important;
+  border:1.5px solid #fff!important;border-radius:10px!important;
+  background:rgba(46,105,141,.90)!important;color:#fff!important;
+  box-shadow:0 2px 7px #16364e55!important;
+  font-size:19px!important;font-weight:800!important;
+  line-height:1!important;cursor:pointer!important;
+  touch-action:manipulation!important;
+}
+html body #planBox .pcard .card-illustration .nhi-image-move-x>.nhi-image-shift:focus-visible{
+  outline:2px solid #ffc657!important;outline-offset:2px!important;
+}
