@@ -633,6 +633,9 @@ try{
    host.className='nhi-card-details';
    front.appendChild(host);
    try{
+     window.NHI_ENGLISH.saveEntry('compare-font-regression',
+       'đã được phê duyệt cuối cùng','최종 승인을 받았습니다',
+       {en:'Final approval has been given',ipa:'',format:{_sizes:{en:34}}});
      const box=window.NHI_ENGLISH.mount(host,'compare-font-regression',
        'đã được phê duyệt cuối cùng','최종 승인을 받았습니다',
        {format:{_sizes:{en:34}}});
@@ -758,6 +761,30 @@ try{
     .includes('Tôi đang hoàn tất báo cáo: 보고서를 마무리하고 있어요.'),
    {timeout:7000},toggleId);
  console.log('AI_EXAMPLE_TRANSLATION_TO_NOTE',JSON.stringify(translated));
+ // Wide desktop like the reported screenshot: photo is large and its
+ // visible X position, not an obsolete content-grid width, sets the text center.
+ await page.setViewport({width:1826,height:900});
+ await drag('#planBox .nhi-image-handle-e',200,0,92);
+ await new Promise(ok=>setTimeout(ok,220));
+ const largePhoto=await page.evaluate(()=>{
+   const bounds=q=>document.querySelector(q)?.getBoundingClientRect();
+   const card=bounds('#planBox .pcard');
+   const photo=bounds('#planBox .card-illustration');
+   const lane=bounds('#planBox .nhi-ko-line');
+   const en=bounds('#planBox .nhi-english-v5');
+   const row=bounds('#planBox .pcard>.prate');
+   const center=r=>r?(r.left+r.right)/2:null;
+   const target=(card.left+photo.left-14)/2;
+   return {cardLeft:card.left,pictureLeft:photo.left,pictureWidth:photo.width,
+     expectedCenter:target,koCenter:center(lane),englishCenter:center(en),
+     buttonsCenter:center(row),leftBlank:lane.left-card.left,
+     laneWidth:lane.width,grid:getComputedStyle(document.querySelector('#planBox .pfront')).gridTemplateColumns};
+ });
+ assert(Math.abs(largePhoto.expectedCenter-largePhoto.koCenter)<15 &&
+   Math.abs(largePhoto.expectedCenter-largePhoto.buttonsCenter)<15 &&
+   Math.abs(largePhoto.expectedCenter-largePhoto.englishCenter)<15,
+   'Wide photo-card bilingual content / English panel / buttons must align to real left-space center: '+JSON.stringify(largePhoto));
+ console.log('WIDE_PHOTO_LEFT_REGION',JSON.stringify(largePhoto));
  console.log('SELECTABLE CHAT AND NOTES UX PASS',JSON.stringify({note,grid:[before,after],height:afterCorner.height,voice:true,anchor}));
 }catch(err){
  console.error('ORIGINAL_SMOKE_ERROR',err&&err.stack||String(err));throw err;
