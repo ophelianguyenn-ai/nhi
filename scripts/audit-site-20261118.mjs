@@ -424,9 +424,9 @@ try{
    'Notes must accept bilingual examples only: '+JSON.stringify(result));
   assert(result.originalUnchanged,'Existing learner notes should not be modified');
   assert(JSON.stringify(result.added)===JSON.stringify([
-    'Tôi học tiếng Hàn: 저는 한국어를 공부해요.',
-    'Tôi đi đến trường: 저는 학교에 갑니다.',
-    'Tôi đang làm việc: 저는 일하고 있습니다.'
+    '- Tôi học tiếng Hàn: 저는 한국어를 공부해요.',
+    '- Tôi đi đến trường: 저는 학교에 갑니다.',
+    '- Tôi đang làm việc: 저는 일하고 있습니다.'
   ]),'Incorrect Vietnamese: Korean punctuation in chat note: '+JSON.stringify(result));
   return 'No trailing Vietnamese dot, Korean punctuation unchanged, no unpaired line';
  });
