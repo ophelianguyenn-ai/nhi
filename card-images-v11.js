@@ -16,7 +16,7 @@ function figure(it,value,onResize){
   if(typeof onResize!=='function')return f;
   var width=Math.max(100,Math.min(680,Number(v.width)||220));
   var height=Math.max(0,Math.min(520,Number(v.height)||0));
-  var offsetX=Math.max(-140,Math.min(140,Number(v.offsetX)||0));
+  var offsetX=Math.max(-320,Math.min(320,Number(v.offsetX)||0));
   var offsetY=Math.max(-220,Math.min(220,Number(v.offsetY)||0));
   var clamp=function(n,min,max){return Math.max(min,Math.min(max,n));};
   f.dataset.resizable='true';
@@ -43,7 +43,7 @@ function figure(it,value,onResize){
   // Public instance method for the four-way controller. Unlike proxy clicks
   // on hidden legacy buttons, this always updates the frame and persisted data.
   f.nhiMoveBy=function(dx,dy){
-    var nextX=clamp(offsetX+(Number(dx)||0),-140,140);
+    var nextX=clamp(offsetX+(Number(dx)||0),-320,320);
     var nextY=clamp(offsetY+(Number(dy)||0),-220,220);
     if(nextX===offsetX&&nextY===offsetY)return false;
     offsetX=nextX;offsetY=nextY;
@@ -72,7 +72,7 @@ function figure(it,value,onResize){
     var dx=e.clientX-drag.x,dy=e.clientY-drag.y;
     if(Math.abs(dx)+Math.abs(dy)<4&&!drag.changed)return;
     drag.changed=true;f.classList.add('nhi-image-dragging');
-    offsetX=clamp(drag.ox+dx,-140,140);
+    offsetX=clamp(drag.ox+dx,-320,320);
     offsetY=clamp(drag.oy+dy,-220,220);
     paint();e.stopPropagation();
   });
@@ -86,25 +86,26 @@ function figure(it,value,onResize){
   im.addEventListener('pointerup',endMove);
   im.addEventListener('pointercancel',endMove);
 
-  // Dedicated ↕ handle moves the ENTIRE picture frame on touch screens;
-  // it does not change dimensions or replace edge/corner resizing.
-  var moveY=node('button','↕');
+  // The former vertical two-way grip is now ONE four-way drag handle.
+  // Keep its class for historical smoke tests and backward-compatible selectors.
+  var moveY=node('button','✥');
   moveY.type='button';
-  moveY.className='nhi-image-move-y';
-  moveY.setAttribute('aria-label','Kéo lên hoặc xuống để di chuyển ảnh theo chiều dọc');
-  moveY.title='Kéo lên/xuống để di chuyển ảnh; phím ↑ ↓ mỗi lần 12 px';
+  moveY.className='nhi-image-move-y nhi-image-move-4d';
+  moveY.setAttribute('aria-label','Giữ và kéo để di chuyển ảnh lên, xuống, trái, phải');
+  moveY.title='Giữ và kéo theo cả bốn hướng; phím ↑ ↓ ← → di chuyển 12 px';
   stage.appendChild(moveY);
   var yDrag=null;
   moveY.addEventListener('pointerdown',function(e){
     if(e.pointerType==='mouse'&&e.button!==0)return;
     e.preventDefault();e.stopPropagation();
     f.classList.add('nhi-image-selected','nhi-image-dragging');
-    yDrag={id:e.pointerId,clientY:e.clientY,original:offsetY};
+    yDrag={id:e.pointerId,clientX:e.clientX,clientY:e.clientY,originalX:offsetX,originalY:offsetY};
     try{moveY.setPointerCapture(e.pointerId);}catch(_e){}
   });
   moveY.addEventListener('pointermove',function(e){
     if(!yDrag||yDrag.id!==e.pointerId)return;
-    offsetY=clamp(yDrag.original+e.clientY-yDrag.clientY,-220,220);
+    offsetX=clamp(yDrag.originalX+e.clientX-yDrag.clientX,-320,320);
+    offsetY=clamp(yDrag.originalY+e.clientY-yDrag.clientY,-220,220);
     paint();e.preventDefault();e.stopPropagation();
   });
   function finishY(e){
@@ -116,26 +117,11 @@ function figure(it,value,onResize){
   moveY.addEventListener('pointercancel',finishY);
   moveY.addEventListener('click',function(e){e.preventDefault();e.stopPropagation();});
   moveY.addEventListener('keydown',function(e){
-    if(e.key!=='ArrowUp'&&e.key!=='ArrowDown')return;
+    if(!['ArrowUp','ArrowDown','ArrowLeft','ArrowRight'].includes(e.key))return;
     e.preventDefault();e.stopPropagation();
-    offsetY=clamp(offsetY+(e.key==='ArrowUp'?-12:12),-220,220);
-    paint();commit();
+    f.nhiMoveBy(e.key==='ArrowLeft'?-12:e.key==='ArrowRight'?12:0,
+      e.key==='ArrowUp'?-12:e.key==='ArrowDown'?12:0);
   });
-
-  // Dedicated left/right controls move the WHOLE picture and are saved per card.
-  var moveX=node('div');moveX.className='nhi-image-move-x';
-  [['←',-12,'Dịch ảnh sang trái 12 pixel'],['→',12,'Dịch ảnh sang phải 12 pixel']].forEach(function(spec){
-    var b=node('button',spec[0]);b.type='button';b.className='nhi-image-shift';
-    b.setAttribute('aria-label',spec[2]);b.title=spec[2];
-    b.addEventListener('pointerdown',function(e){e.stopPropagation();});
-    b.addEventListener('click',function(e){
-      e.preventDefault();e.stopPropagation();
-      offsetX=clamp(offsetX+spec[1],-140,140);
-      f.classList.add('nhi-image-selected');paint();commit();
-    });
-    moveX.appendChild(b);
-  });
-  stage.appendChild(moveX);
 
   // Eight edge/corner handles replace ALL old range sliders and panels.
   // Corners always keep the image's current width:height ratio.
