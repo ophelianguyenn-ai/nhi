@@ -64,6 +64,15 @@ function comparisonRows(box,id,vi,ko){
   const action=document.createElement('input');action.type='checkbox';action.checked=active;action.setAttribute('aria-label','Chọn bản dịch từ '+(lang==='vi'?'tiếng Việt':'tiếng Hàn'));
   const flagIcon=document.createElement('span');flagIcon.className='nhi-comparison-flag';flagIcon.textContent=flag;flagIcon.setAttribute('aria-label',lang==='vi'?'Từ tiếng Việt':'Từ tiếng Hàn');
   if(window.NHI_STUDY)window.NHI_STUDY.wordElements(text,result[lang]);
+  // Do not inherit a centered alignment from the photo-card text stack.
+  // Inline important covers both selected and unselected comparisons.
+  button.style.setProperty('text-align','left','important');
+  text.style.setProperty('text-align','left','important');
+  text.style.setProperty('display','block','important');
+  text.querySelectorAll('.nhi-en-word').forEach(word=>{
+    word.style.setProperty('display','inline','important');
+    word.style.setProperty('text-align','left','important');
+  });
   const checkLabel=document.createElement('label');checkLabel.className='nhi-choice-check';checkLabel.append(action);
    button.append(flagIcon,text,checkLabel);action.onchange=()=>{
    const key=entryKey(vi,ko),previous=choices[key];
@@ -375,6 +384,12 @@ function fitEnglishWidth(box){
   return content?ctx.measureText(content).width:0;
  }
  const t=box.querySelector('.nhi-en-translation'),ipa=box.querySelector('.nhi-en-ipa');
+ // The two compared English sentences use exactly the main English font
+ // (including the card's own per-item override or the global default).
+ if(t){
+   const current=getComputedStyle(t).fontSize;
+   box.style.setProperty('--nhi-comparison-english-size',current);
+ }
  const status=box.querySelector('.nhi-en-status');
  const transcription=ipa&&!ipa.hidden?measure(ipa):0;
  const words=Math.max(measure(t)+ (transcription?transcription+12:0),measure(t),transcription,measure(status));
