@@ -378,10 +378,11 @@ function fitEnglishWidth(box){
  const actionsWidth=actions?.getBoundingClientRect().width||36;
  const review=box.querySelector('.nhi-en-review');
  const reviewWidth=review&&!review.hidden?measure(review)+18:0;
- const contentWidth=Math.max(words+actionsWidth+18,reviewWidth,85)+36;
+ const contentWidth=Math.max(words+actionsWidth+10,reviewWidth,78)+24;
  const lane=box.closest('.nhi-card-details')||box.parentElement;
- const maxWidth=Math.min(440,Math.max(125,(lane?.clientWidth||440)-8));
- const target=Math.min(maxWidth,Math.max(112,Math.ceil(contentWidth)));
+ // Short lines hug their text, while long sentences wrap instead of becoming a full-width banner.
+ const maxWidth=Math.min(365,Math.max(116,(lane?.clientWidth||365)-8));
+ const target=Math.min(maxWidth,Math.max(108,Math.ceil(contentWidth)));
  box.style.setProperty('--nhi-en-auto-width',target+'px');
 }
 function mount(parent,id,vi,ko,options){

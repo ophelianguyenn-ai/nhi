@@ -596,7 +596,7 @@ section:not([hidden]) > .quiz, section:not([hidden]) > #cardWrap, .list > .row:n
 }
 </style>
 
-<script src="nhi-chat-voice-v1.js?v=20261117"></script><script src="hanja-v9.js?v=12"></script><script src="hanja-extra-v12.js"></script><script src="card-images-v11.js?v=20261120-move-whole-frame-v3"></script><script src="nhi-google-images-v1.js?v=20261114-study-v7"></script><script src="nhi-hard-minimal-v1.js?v=20261120-in-card-v2"></script><script src="nhi-verified-pairs-20261117.js?v=1"></script><script src="nhi-daily-pairs.js?v=20261119-micro-v1"></script><script src="nhi-all-lesson-pairs-v6.js?v=20261121-refined-51"></script><script src="nhi-phrases-v5.js?v=20261121-refined"></script><script src="nhi-english-data-v6.js?v=20261113-reviewed-173"></script><script src="nhi-english-v5.js?v=20261121-content-width-v11"></script><script src="recorded-voices-v11.js?v=20261119-banmai-injoon-daily"></script>
+<script src="nhi-chat-voice-v1.js?v=20261117"></script><script src="hanja-v9.js?v=12"></script><script src="hanja-extra-v12.js"></script><script src="card-images-v11.js?v=20261120-move-whole-frame-v3"></script><script src="nhi-google-images-v1.js?v=20261114-study-v7"></script><script src="nhi-hard-minimal-v1.js?v=20261120-in-card-v2"></script><script src="nhi-verified-pairs-20261117.js?v=1"></script><script src="nhi-daily-pairs.js?v=20261119-micro-v1"></script><script src="nhi-all-lesson-pairs-v6.js?v=20261121-refined-51"></script><script src="nhi-phrases-v5.js?v=20261121-refined"></script><script src="nhi-english-data-v6.js?v=20261113-reviewed-173"></script><script src="nhi-english-v5.js?v=20261121-short-lines-v12"></script><script src="recorded-voices-v11.js?v=20261119-banmai-injoon-daily"></script>
 <script src="qrcode.js" defer></script>
 <link rel="stylesheet" href="nhi-seven-fixes-20261117.css?v=1"><link rel="stylesheet" href="refresh-v9.css?v=13"><link rel="stylesheet" href="study-enhancements-v13.css?v=14"><link rel="stylesheet" href="nhi-updates-v1.css?v=1"><link rel="stylesheet" href="nhi-ai-resize-v2.css?v=1"><link rel="stylesheet" href="nhi-study-motion-v3.css?v=3"><link rel="stylesheet" href="nhi-interface-v4.css?v=4"><link rel="stylesheet" href="nhi-interface-v5.css?v=20261113-rollback-stable-v1"><link rel="stylesheet" href="nhi-seasons-v1.css?v=20261113-cartoon-soft-1">
 <link rel="stylesheet" href="nhi-living-garden-v1.css?v=20261113-cartoon-butterflies-v1">
@@ -1264,7 +1264,7 @@ html body #planBox .sdone .pstatus{
 }
 
 </style>
-<link rel="stylesheet" href="nhi-card-image-compact-v1.css?v=20261121-final-layout-v10">
+<link rel="stylesheet" href="nhi-card-image-compact-v1.css?v=20261121-restore-compare-v11">
 <link rel="stylesheet" href="nhi-lesson-finish-v1.css?v=20261120-compact-cancel-v5">
 </head>
 <body>
@@ -4838,16 +4838,7 @@ html body #planBox .sdone .pstatus{
         
         var note=val('note',it.id)||{text:it.note,color:'#fff1ce'};if(note&&note.text){var nt=el('p','nhi-card-note',note.text);nt.style.background=(note.color&&note.color!=='#dbeefe')?note.color:'#fff1ce';if(window.NHI_STUDY)window.NHI_STUDY.formatText(nt,val('fmt',it.id)||{},'note');f.appendChild(nt);}
         var englishBox=window.NHI_ENGLISH?window.NHI_ENGLISH.mount(f,it.id,it.vi,it.ko,{format:val('fmt',it.id)||{},unremembered:!!val('enHard',it.id),toggle:function(on){put('enHard',it.id,on?1:null);}}):null;
-        if(englishBox){
-          var compare=englishBox.querySelector('.nhi-en-review');
-          var dictLine=koRow.querySelector('.nhi-card-dictionaries');
-          if(compare&&dictLine){
-            compare.classList.add('nhi-compare-near-dictionaries');
-            dictLine.appendChild(compare);
-          }
-          var emptyReviewTools=englishBox.querySelector('.nhi-en-tools');
-          if(emptyReviewTools&&!emptyReviewTools.children.length)emptyReviewTools.remove();
-        }
+        // Keep "Đối chiếu" in the English frame as it was before the dictionary relocation.
         if(nt&&englishBox){var details=el('div','nhi-card-details');nt.before(details);details.appendChild(nt);details.appendChild(englishBox);}
         if(window.NHI_IMAGES){try{var illustration=window.NHI_IMAGES.figure(it,val('img',it.id),function(img){put('img',it.id,img);});if(illustration){
           f.classList.add('nhi-with-image');f.appendChild(illustration);
@@ -4890,11 +4881,7 @@ html body #planBox .sdone .pstatus{
       nx.setAttribute('aria-label','Thẻ sau');r.appendChild(nx);
       if (undoHistory.length) r.appendChild(btn('pundo','↶ Hoàn tác',undoDelete,'Khôi phục thẻ vừa xóa (Ctrl+Z)'));
       c.appendChild(r);
-      if(s.flipped && f.classList.contains('nhi-with-image')){
-        var available=Math.max(140,c.clientWidth*.5-24);
-        var factor=Math.max(.57,Math.min(1,available/279));
-        r.style.setProperty('--nhi-photo-rate-scale',factor.toFixed(3));
-      }
+      // Measure the available lane after mounting: here c.clientWidth is zero.
       c.appendChild(ibtn('pdel nhi-card-corner-trash', 'trash', function () { del(it.id); anim = 'next'; saveSess(); render(); }, 'Xoá từ này khỏi danh sách (Delete)'));
       if (s.imagePicker && window.NHI_IMAGES && window.NHI_IMAGES.picker) {
         c.appendChild(window.NHI_IMAGES.picker(it, function (image) {
@@ -4907,6 +4894,14 @@ html body #planBox .sdone .pstatus{
       }
       if(s.editing){var scrim=el('div','nhi-edit-scrim');scrim.setAttribute('aria-hidden','true');scrim.addEventListener('click',function(){var ed=c.querySelector('form.editbox');if(ed&&ed.nhiSave)ed.nhiSave();s.editing=false;render();});c.appendChild(scrim);c.appendChild(editForm(it));}
       wrap.appendChild(c); v.appendChild(wrap);
+      if(s.flipped && f.classList.contains('nhi-with-image')){
+        requestAnimationFrame(function(){
+          if(!r.isConnected)return;
+          var lane=window.innerWidth<=620?Math.max(190,c.clientWidth-28):Math.max(170,c.clientWidth*.5-24);
+          var factor=Math.min(1.06,Math.max(.70,lane/267));
+          r.style.setProperty('--nhi-photo-rate-scale',factor.toFixed(3));
+        });
+      }
       if(s.editing){var rich=c.querySelector('[data-language=vi]');if(rich)rich.focus();}
       if (window.NHI_HARD_MASCOT && window.NHI_HARD_MASCOT.sync) window.NHI_HARD_MASCOT.sync(c);
       if (c.animate && !reduceMotion() && prefs.fx && anim) {

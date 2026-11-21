@@ -714,3 +714,65 @@ html body #planBox .ppage .quiz>.prow .nhi-mark-unlearned{
 html body #planBox .ppage .quiz>.prow .nhi-settings-last{
  order:99!important;
 }
+
+/* v11: restore "Đối chiếu" to the English-card footer */
+html body #planBox .pcard .nhi-english-v5>.nhi-en-tools{
+ display:flex!important;justify-content:center!important;align-items:center!important;
+ width:100%!important;gap:5px!important;margin-top:6px!important;
+}
+html body #planBox .pcard .nhi-english-v5>.nhi-en-tools>.nhi-en-review{
+ display:inline-flex!important;width:auto!important;min-height:31px!important;
+ padding:5px 10px!important;
+}
+html body #planBox .pcard .nhi-english-v5>.nhi-en-tools>.nhi-en-review[hidden]{display:none!important}
+/* Make the frame follow its text lines and preserve user-set manual width. */
+html body #planBox .pcard .pfront .nhi-english-v5,
+html body #planBox .pcard .pfront.nhi-with-image .nhi-card-details>.nhi-english-v5{
+ display:inline-flex!important;flex-direction:column!important;
+ width:var(--nhi-en-width,var(--nhi-en-auto-width,fit-content))!important;
+ min-width:0!important;max-width:min(100%,365px)!important;
+ margin-inline:auto!important;padding:9px 12px!important;
+ align-self:center!important;justify-self:center!important;
+}
+/* Original order Khó – Lùi – Tiến. Arrows grow from ~36 px to square pads
+   of ~50 px, scaled together to stay in the left half with a photo. */
+html body #planBox .pcard:has(.pfront.nhi-with-image)>.prate.nhi-rating-v3{
+ display:flex!important;flex-flow:row nowrap!important;justify-content:center!important;
+ align-items:center!important;width:calc(50% - 12px)!important;
+ max-width:calc(50% - 12px)!important;min-width:0!important;
+ margin:8px auto 12px 10px!important;
+ padding:6px 2px!important;gap:calc(4px * var(--nhi-photo-rate-scale,1))!important;
+ transform:none!important;translate:none!important;
+}
+html body #planBox .pcard:has(.pfront.nhi-with-image)>.prate.nhi-rating-v3>.hard{
+ order:0!important;grid-column:auto!important;grid-row:auto!important;
+ flex:0 0 calc(145px * var(--nhi-photo-rate-scale,1))!important;
+ width:calc(145px * var(--nhi-photo-rate-scale,1))!important;
+ max-width:none!important;min-width:0!important;
+ height:calc(50px * var(--nhi-photo-rate-scale,1))!important;
+ min-height:0!important;max-height:none!important;
+ font-size:calc(15px * var(--nhi-photo-rate-scale,1))!important;
+ padding:4px 7px!important;margin:0 calc(7px * var(--nhi-photo-rate-scale,1)) 0 0!important;
+ border-radius:12px!important;align-self:center!important;justify-self:auto!important;
+}
+html body #planBox .pcard:has(.pfront.nhi-with-image)>.prate.nhi-rating-v3>.nhi-prev-v3,
+html body #planBox .pcard:has(.pfront.nhi-with-image)>.prate.nhi-rating-v3>.nhi-next-v3{
+ grid-column:auto!important;grid-row:auto!important;
+ flex:0 0 calc(50px * var(--nhi-photo-rate-scale,1))!important;
+ width:calc(50px * var(--nhi-photo-rate-scale,1))!important;
+ height:calc(50px * var(--nhi-photo-rate-scale,1))!important;
+ max-width:none!important;min-width:0!important;
+ min-height:0!important;max-height:none!important;
+ padding:0!important;margin:0!important;
+ border-radius:12px!important;
+ display:grid!important;place-items:center!important;
+ justify-self:auto!important;align-self:center!important;
+}
+html body #planBox .pcard:has(.pfront.nhi-with-image)>.prate.nhi-rating-v3>.nhi-prev-v3{order:1!important}
+html body #planBox .pcard:has(.pfront.nhi-with-image)>.prate.nhi-rating-v3>.nhi-next-v3{order:2!important}
+@media(max-width:620px){
+ html body #planBox .pcard:has(.pfront.nhi-with-image)>.prate.nhi-rating-v3{
+  width:calc(100% - 20px)!important;max-width:calc(100% - 20px)!important;
+  margin:8px auto 10px!important;
+ }
+}
