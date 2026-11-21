@@ -403,3 +403,38 @@ html body #planBox .pcard .pfront.nhi-with-image .nhi-card-details>.nhi-english-
   margin:0!important;
   padding:0!important;
 }
+
+/* Nov 22: when Đối chiếu creates two long sentences, bring the English
+   block upward WITH its surrounding content instead of allowing it to hide
+   behind the separate Khó / Lùi / Tiến row. */
+html body #planBox .pcard>.pfront.nhi-with-image.nhi-comparison-open{
+  row-gap:4px!important;
+  align-content:start!important;
+  overflow-y:auto!important;
+  overscroll-behavior-y:contain!important;
+  scroll-padding-bottom:18px!important;
+  padding-bottom:18px!important;
+}
+html body #planBox .pcard>.pfront.nhi-with-image.nhi-comparison-open>.nhi-ko-line{
+  margin-bottom:0!important;
+}
+html body #planBox .pcard>.pfront.nhi-with-image.nhi-comparison-open>.vi-under{
+  margin-top:0!important;
+  margin-bottom:0!important;
+}
+html body #planBox .pcard>.pfront.nhi-with-image.nhi-comparison-open>.nhi-card-details{
+  gap:5px!important;
+  margin-top:0!important;
+  margin-bottom:0!important;
+}
+html body #planBox .pcard>.pfront.nhi-with-image.nhi-comparison-open .nhi-card-details>.nhi-english-v5{
+  margin-top:0!important;
+  margin-bottom:0!important;
+}
+/* Comparison remains constrained in width. Its content grows upward in the
+   scrollable front, never inside the rate buttons. */
+html body #planBox .pcard:has(>.pfront.nhi-with-image.nhi-comparison-open)>.prate.nhi-rating-v3{
+  z-index:6!important;
+  position:relative!important;
+  flex-shrink:0!important;
+}
