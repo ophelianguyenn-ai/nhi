@@ -5303,6 +5303,17 @@ html body #planBox .sdone .pstatus{
       // phrase or fabricate a translation in the learner's paired notes.
       return '';
     }
+    function knownSelectionPair(raw){
+      var chosen=String(raw||'').trim(),it=curItem();
+      if(!chosen||!it)return '';
+      var pairs=window.NHI_PHRASES_V5?window.NHI_PHRASES_V5.expand(it,ITEMS):it.pairs||[];
+      var found=pairs.find(function(p){
+        return Array.isArray(p)&&p[0]&&p[1]&&
+          (String(p[0]).trim().toLocaleLowerCase('vi')===chosen.toLocaleLowerCase('vi')||
+           String(p[1]).trim()===chosen);
+      });
+      return found?found[0]+': '+found[1]:'';
+    }
     function appendChatExample(raw) {
       var it=curItem();if(!it || !alive(it.id))return false;
       var rawText=String(raw||'').replace(/\r/g,'').trim();
@@ -5401,7 +5412,7 @@ html body #planBox .sdone .pstatus{
     return {
       render: render, merge: merge, extras: applyExtras, follow: follow, active: function () { return !!sess; }, load: load, leave: function () { if (!page) leave(); }, route: route,
       home: home,setView:setViewV2,snapshot:snapshotV2,startLessonById:function(id){var L=BY_LESSON[id];if(L)startLesson(L);},startPractice:function(ids,title){start('free',ids,title||'Luyện tập');},openDailyCreator: openDailyCreator, summary: summary, onData: function (fn) { dataCb = fn; },
-      appendChatExample:appendChatExample,
+      appendChatExample:appendChatExample,knownSelectionPair:knownSelectionPair,
       ctx: function () { var it = curItem(); if (it) return { ko: it.ko, vi: it.vi, topic: it.topic, type: it.type }; return page && BY_LESSON[page] ? { lesson: BY_LESSON[page].title } : null; }
     };
   })();
@@ -6148,6 +6159,10 @@ html body #planBox .sdone .pstatus{
           if(txt.trim()===p.dataset.v2Vi||txt.trim()===p.dataset.v2Ko)
             parsed={vi:p.dataset.v2Vi,ko:p.dataset.v2Ko};
         }
+        if(!parsed&&PLAN.knownSelectionPair){
+          var match=PLAN.knownSelectionPair(txt);
+          if(match)parsed=window.NHI_EXAMPLE_PAIR&&window.NHI_EXAMPLE_PAIR(match);
+        }
         if(!parsed)return;
         var standardized=parsed.vi+': '+parsed.ko;
         e.dataTransfer.setData('text/plain',standardized);
@@ -6173,6 +6188,10 @@ html body #planBox .sdone .pstatus{
           if(!parsed&&paragraph.dataset.v2Vi&&paragraph.dataset.v2Ko){
             if(selected===paragraph.dataset.v2Vi||selected===paragraph.dataset.v2Ko)
               parsed={vi:paragraph.dataset.v2Vi,ko:paragraph.dataset.v2Ko};
+          }
+          if(!parsed&&PLAN.knownSelectionPair){
+            var exact=PLAN.knownSelectionPair(selected);
+            if(exact)parsed=window.NHI_EXAMPLE_PAIR&&window.NHI_EXAMPLE_PAIR(exact);
           }
           return parsed?{value:parsed.vi+': '+parsed.ko,paragraph:paragraph}:null;
         }
