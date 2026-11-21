@@ -506,6 +506,44 @@ try{
  assert(fit && (fit.noteAfter ? Math.abs(fit.short-fit.noteAfter)<4 : fit.short<fit.before),
   'Short English entries must match Korean note width (or shrink when no note): '+JSON.stringify(fit));
  console.log('ENGLISH_CONTENT_WIDTH',JSON.stringify(fit));
+ // Verify that each actual comparison row keeps the English sentence
+ // immediately beside its Vietnamese/Korean flag, not centered elsewhere.
+ const comparisonGeometry=await page.evaluate(async()=>{
+   const front=document.querySelector('#planBox .pfront');
+   const host=document.createElement('div');host.className='nhi-card-details';
+   front.appendChild(host);
+   try{
+     const preview=window.NHI_ENGLISH.mount(host,'test-comparison-ui',
+       'đã được phê duyệt cuối cùng','최종 승인을 받았습니다',{});
+     const btn=preview?.querySelector('.nhi-en-review');
+     if(btn)btn.click();
+     await new Promise(ok=>requestAnimationFrame(()=>requestAnimationFrame(ok)));
+     const rows=[...preview.querySelectorAll('.nhi-en-choice')];
+     return rows.map(row=>{
+       const flag=row.querySelector('.nhi-comparison-flag')?.getBoundingClientRect();
+       const text=row.querySelector('.nhi-comparison-choice-text')?.getBoundingClientRect();
+       return {flagLeft:flag?.left,textLeft:text?.left,
+         gap:flag&&text?text.left-flag.right:null,
+         flagText:row.querySelector('.nhi-comparison-flag')?.textContent,
+         englishText:row.querySelector('.nhi-comparison-choice-text')?.textContent};
+     });
+   }finally{host.remove();}
+ });
+ assert(comparisonGeometry.length===2&&comparisonGeometry.every(row=>
+   row.gap>=0 && row.gap<=9 && row.textLeft>row.flagLeft),
+   'Comparison English sentences must sit immediately beside each flag: '+JSON.stringify(comparisonGeometry));
+ console.log('COMPARISON_FLAG_ALIGNMENT',JSON.stringify(comparisonGeometry));
+ const noteSeparation=await page.evaluate(()=>{
+   const note=document.querySelector('#planBox .nhi-card-details .nhi-card-note');
+   const english=document.querySelector('#planBox .nhi-card-details .nhi-english-v5');
+   if(!note||!english)return null;
+   const a=note.getBoundingClientRect(),b=english.getBoundingClientRect();
+   return {gap:b.top-a.bottom,noteWidth:a.width,englishWidth:b.width};
+ });
+ assert(noteSeparation&&noteSeparation.gap>=8&&
+   Math.abs(noteSeparation.noteWidth-noteSeparation.englishWidth)<=4,
+   'Korean and English notes must have visible separation and equal short-text widths: '+JSON.stringify(noteSeparation));
+ console.log('PAIRED_NOTE_SEPARATION',JSON.stringify(noteSeparation));
  // Test the REAL translation helper with a mocked provider response; no
  // personal AI credentials and no live network calls are used by this test.
  const translated=await page.evaluate(async()=>{
