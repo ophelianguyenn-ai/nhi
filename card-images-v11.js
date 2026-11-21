@@ -46,18 +46,28 @@ function figure(it,value,onResize){
         var available=Math.max(350,parent.clientWidth-
           (parseFloat(pStyle.paddingLeft)||0)-(parseFloat(pStyle.paddingRight)||0));
         var col=Math.max(160,Math.min(width,available*.34));
-        var left=Math.max(180,available-col-14+offsetX);
+        // For left moves the content lane shrinks and moves the photo in-grid.
+        // For right moves the photo itself translates; the column cannot grow
+        // beyond free space because CSS Grid would silently shrink it back.
+        var left=Math.max(180,available-col-14+Math.min(0,offsetX));
         parent.style.setProperty('grid-template-columns',
           'minmax(0,'+Math.round(left)+'px) minmax(0,'+Math.round(col)+'px)','important');
       }else{
         parent.style.removeProperty('grid-template-columns');
       }
+      // The bilingual text and notes follow the visual free-space center.
+      // Translation is separate from their existing drag transforms.
+      var follow=onDesktop?Math.round(Math.max(0,offsetX)/2):0;
+      parent.querySelectorAll(':scope>.nhi-ko-line,:scope>.vi-under,:scope>.hanja,:scope>.nhi-card-details')
+        .forEach(function(el){
+          el.style.setProperty('translate',follow+'px 0px','important');
+        });
     }
-    // IMPORTANT: inline-important wins over legacy Y-only transform CSS.
-    // Desktop: shift the grid column so the text + buttons follow the photo.
-    // Phone: shift image directly, preserving the one-column layout.
+    // Inline-important wins over old Y-only CSS. Positive X moves the
+    // figure directly, negative X moves its grid column, avoiding double X.
+    var visualX=onDesktop?Math.max(0,offsetX):offsetX;
     f.style.setProperty('transform',
-      'translate3d('+(onDesktop?0:Math.round(offsetX))+'px,'+Math.round(offsetY)+'px,0)','important');
+      'translate3d('+Math.round(visualX)+'px,'+Math.round(offsetY)+'px,0)','important');
   }
   function commit(){
     onResize(Object.assign({},v,{width:Math.round(width),height:Math.round(height),
