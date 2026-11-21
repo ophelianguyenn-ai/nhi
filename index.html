@@ -6804,12 +6804,34 @@ html body #planBox .pcard:has(.pfront.nhi-with-image)>.prate.nhi-rating-v3{
           var preRect = lane.getBoundingClientRect();
           var previousTranslate = parseFloat(getComputedStyle(lane).translate)||0;
           var unshiftedCenter = (preRect.left+preRect.right)/2-previousTranslate;
-          var actualLeftCenter = (frame.left+photo.left-14)/2;
+          // Use the ACTUAL picture edge; nudge the entire left-side composition
+          // 24px further LEFT while preserving its shared visual center.
+          var actualLeftCenter = (frame.left+photo.left-14)/2 - 24;
           var alignedX = Math.round(actualLeftCenter-unshiftedCenter);
           front.querySelectorAll(':scope>.nhi-ko-line,:scope>.vi-under,:scope>.hanja,:scope>.nhi-card-details')
             .forEach(function(item){
               item.style.setProperty('translate',alignedX+'px 0px','important');
             });
+          // English may be a direct child OR nested within Korean notes. Its
+          // own legacy centering/transform can cancel horizontal photo moves.
+          // Always align its ACTUAL rectangle to the Korean sentence center.
+          var english = front.querySelector('.nhi-english-v5');
+          if(english){
+            english.style.removeProperty('translate');
+            var englishRect=english.getBoundingClientRect();
+            var koRect=lane.getBoundingClientRect();
+            var englishFix=Math.round((koRect.left+koRect.right-englishRect.left-englishRect.right)/2);
+            english.style.setProperty('translate',englishFix+'px 0px','important');
+          }
+          // Match the icon toolbar as well, so everything shares one axis.
+          var tools=card.querySelector(':scope>.card-top .cicons');
+          var toolbar=card.querySelector(':scope>.card-top');
+          if(toolbar&&tools){
+            toolbar.style.removeProperty('translate');
+            var toolsRect=tools.getBoundingClientRect();
+            var toolbarFix=Math.round(actualLeftCenter-(toolsRect.left+toolsRect.right)/2);
+            toolbar.style.setProperty('translate',toolbarFix+'px 0px','important');
+          }
         }
         // Measure the bilingual track AFTER applying its visual correction.
         if (lane) {
@@ -6817,8 +6839,11 @@ html body #planBox .pcard:has(.pfront.nhi-with-image)>.prate.nhi-rating-v3{
           var cardStyle=getComputedStyle(card);
           var innerLeft=box.left+(parseFloat(cardStyle.paddingLeft)||0)+(parseFloat(cardStyle.borderLeftWidth)||0);
           var rate=card.querySelector(':scope>.prate.nhi-rating-v3');
-          var rateLeft=Math.max(0,Math.round(rect.left-innerLeft));
-          var rateWidth=Math.max(0,Math.round(rect.width));
+          // Keep the control ROW inside the left card border while aligning
+          // its center with the actual, deliberately left-shifted Korean axis.
+          var rateLeft=0;
+          var visualCenter=(rect.left+rect.right)/2;
+          var rateWidth=Math.max(280,Math.round(2*(visualCenter-innerLeft)));
           card.style.setProperty('--nhi-rate-left',rateLeft+'px');
           card.style.setProperty('--nhi-rate-width',rateWidth+'px');
           // Old style fixes the control row to 470px!important. Force measured
@@ -6838,7 +6863,27 @@ html body #planBox .pcard:has(.pfront.nhi-with-image)>.prate.nhi-rating-v3{
         if(normalRate)for(var key of ['width','max-width','margin-left','margin-right','flex-shrink'])
           normalRate.style.removeProperty(key);
       }
-      // English note sizes itself to its contents; no forced Korean width.
+      // When Đối chiếu opens, compress empty vertical margins and automatically
+      // scroll the FRONT CONTENT (never the buttons) so the English panel's
+      // bottom stays ABOVE Khó – Lùi – Tiến.
+      var expanded=front.querySelector('.nhi-english-v5.nhi-compare-expanded');
+      var compareReady=!!expanded&&!!expanded.querySelector('.nhi-en-choice');
+      front.classList.toggle('nhi-comparison-open',compareReady);
+      if(compareReady&&front.classList.contains('nhi-with-image')){
+        var rateForClearance=card.querySelector(':scope>.prate.nhi-rating-v3');
+        requestAnimationFrame(function(){
+          if(!front.isConnected||!expanded.isConnected)return;
+          var frontRect=front.getBoundingClientRect();
+          var rateRect=rateForClearance?.getBoundingClientRect();
+          var visibleBottom=Math.min(frontRect.bottom,rateRect?rateRect.top-12:frontRect.bottom);
+          var bottom=expanded.getBoundingClientRect().bottom;
+          var overflow=bottom-visibleBottom;
+          if(overflow>2){
+            var maxScroll=Math.max(0,front.scrollHeight-front.clientHeight);
+            front.scrollTop=Math.min(maxScroll,front.scrollTop+Math.ceil(overflow)+6);
+          }
+        });
+      }
     });
     root.querySelectorAll('.nhi-editor-window-v5 .nhi-editor-hanja-last').forEach(function (field) {
       field.querySelectorAll('.dictionary-links, .hint').forEach(function (node) {node.remove();});
@@ -6857,5 +6902,5 @@ html body #planBox .pcard:has(.pfront.nhi-with-image)>.prate.nhi-rating-v3{
 })();
 </script>
 
-<link rel="stylesheet" href="nhi-card-fit-fixes-20261121.css?v=20261122-visual-center-v4">
+<link rel="stylesheet" href="nhi-card-fit-fixes-20261121.css?v=20261122-compare-autofit-x-sync-v5">
 </body></html>
