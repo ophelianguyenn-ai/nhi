@@ -319,28 +319,34 @@ function hookSettings(){
 }
 function exampleFrom(text){
  const t=String(text||'').replace(/[＋✓🎧]/g,'').trim();
- // Accept Korean (Vietnamese), Vietnamese (Korean), and either colon order.
- let m=t.match(/([가-힣][^\n()（）]{1,130}[.?!。]?)\s*[\(（]([^()（）\n]{2,170})[\)）]/);
- let ko='',vi='';
- if(m&&/[A-Za-zÀ-ỹ]/.test(m[2])){ko=m[1];vi=m[2];}
- if(!ko){
-  m=t.match(/([^\n()（）]{2,170})\s*[（(]([가-힣][^\n()（）]{1,140})[）)]/);
-  if(m&&/[A-Za-zÀ-ỹ]/.test(m[1])){vi=m[1];ko=m[2];}
+ if(!t)return null;
+ const hasKo=s=>/[가-힣]/u.test(s),hasVi=s=>/[A-Za-zÀ-ỹ]/u.test(s);
+ const clean=s=>String(s||'').replace(/^[\s\d.*•\-–]+/,'').trim();
+ function makePair(a,b){
+  a=clean(a);b=clean(b);
+  let vi='',ko='';
+  if(hasKo(a)&&!hasKo(b)&&hasVi(b)){ko=a;vi=b;}
+  else if(hasKo(b)&&!hasKo(a)&&hasVi(a)){vi=a;ko=b;}
+  if(!vi||!ko||vi.length>230||ko.length>230)return null;
+  vi=vi.replace(/[.．。]+\s*$/u,'').trim();
+  return vi&&ko?{vi,ko}:null;
  }
- if(!ko){
-  m=t.match(/([^\n:：]{2,170})\s*[:：]\s*([^\n:：]{2,170})/);
-  if(m){
-   const a=m[1].trim(),b=m[2].trim();
-   if(/[가-힣]/.test(a)&&/[A-Za-zÀ-ỹ]/.test(b)){ko=a;vi=b;}
-   else if(/[A-Za-zÀ-ỹ]/.test(a)&&/[가-힣]/.test(b)){ko=b;vi=a;}
-  }
+ // Vietnamese: Korean, Korean: Vietnamese, including "VI: ... KO: ..."
+ const candidates=[
+  /^(.+?)\s*[:：]\s*(.+)$/s,
+  /^(.+?)\s*[（(]([^()（）\n]+)[）)]/s,
+  /^(.+?)\s+(?:—|–|→|=>|⇒)\s+(.+)$/s,
+  /^(.+?)\s*\|\s*(.+)$/s,
+  /(?:^|\n)\s*(?:VI|Tiếng Việt)\s*[:：]\s*([^\n]+)[\s\S]*?(?:KO|KR|Tiếng Hàn)\s*[:：]\s*([^\n]+)/i,
+  /(?:^|\n)\s*(?:KO|KR|Tiếng Hàn)\s*[:：]\s*([^\n]+)[\s\S]*?(?:VI|Tiếng Việt)\s*[:：]\s*([^\n]+)/i
+ ];
+ for(const regex of candidates){
+  const m=t.match(regex);
+  if(m){const p=makePair(m[1],m[2]);if(p)return p;}
  }
- if(!ko||!vi)return null;
- ko=ko.replace(/^[0-9.\-*•\s]+/,'').trim();
- vi=vi.replace(/^[0-9.\-*•\s]+/,'').trim();
- if(!ko||!vi||ko.length>160||vi.length>175)return null;
- return {ko,vi};
+ return null;
 }
+window.NHI_EXAMPLE_PAIR=exampleFrom;
 function attachExamples(){
  const log=$('#aiLog');if(!log)return;
  log.querySelectorAll('.nhi-ai-paragraph').forEach(p=>{

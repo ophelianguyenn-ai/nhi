@@ -5305,7 +5305,10 @@ html body #planBox .sdone .pstatus{
     }
     function appendChatExample(raw) {
       var it=curItem();if(!it || !alive(it.id))return false;
-      var lines=String(raw||'').replace(/\r/g,'').split(/\n+/).map(formatChatExample).filter(Boolean);
+      var rawText=String(raw||'').replace(/\r/g,'').trim();
+      var fromExample=window.NHI_EXAMPLE_PAIR&&window.NHI_EXAMPLE_PAIR(rawText);
+      var lines=fromExample?[formatChatExample(fromExample.vi+': '+fromExample.ko)]:
+        rawText.split(/\n+/).map(formatChatExample).filter(Boolean);
       if(!lines.length)return false;
       var previous=val('note',it.id)||{text:it.note||'',color:'#fff1ce'};
       var next=(String(previous.text||'').trimEnd()?String(previous.text).trimEnd()+'\n':'')+lines.join('\n');
@@ -6114,7 +6117,8 @@ html body #planBox .sdone .pstatus{
       var panel=$('planBox');
       panel.addEventListener('dragover',function(e){
         if(e.target.closest('.pcard')&&e.dataTransfer&&
-          Array.from(e.dataTransfer.types||[]).includes('application/x-nhi-example')){
+          (Array.from(e.dataTransfer.types||[]).includes('application/x-nhi-example')||
+           Array.from(e.dataTransfer.types||[]).includes('text/plain'))){
           e.preventDefault();e.dataTransfer.dropEffect='copy';
           var card=e.target.closest('.pcard');card.classList.add('nhi-chat-drop-hover');
         }
@@ -6125,10 +6129,11 @@ html body #planBox .sdone .pstatus{
       panel.addEventListener('drop',function(e){
         var card=e.target.closest('.pcard');
         if(!card||!e.dataTransfer)return;
-        var t=e.dataTransfer.getData('application/x-nhi-example');
+        var t=e.dataTransfer.getData('application/x-nhi-example')||
+          e.dataTransfer.getData('text/plain');
         if(!t)return;
         e.preventDefault();e.stopPropagation();card.classList.remove('nhi-chat-drop-hover');
-        PLAN.appendChatExample(t);
+        if(!PLAN.appendChatExample(t))toast('Hãy chọn một cặp tiếng Việt và tiếng Hàn có bản dịch tương ứng.');
       });
       $('aiLog').addEventListener('dragstart',function(e){
         var p=e.target.closest('.nhi-ai-paragraph');
@@ -6136,10 +6141,82 @@ html body #planBox .sdone .pstatus{
         var node=p.querySelector('.nhi-ai-paragraph-text'),selected=String(window.getSelection()||'').trim();
         var txt=selected&&node&&node.contains(window.getSelection().anchorNode)?selected:node&&node.textContent||'';
         if(!txt.trim())return;
-        e.dataTransfer.setData('text/plain',txt.trim());
-        e.dataTransfer.setData('application/x-nhi-example',txt.trim());
+        var parsed=window.NHI_EXAMPLE_PAIR&&window.NHI_EXAMPLE_PAIR(txt);
+        // Only transfer accurate bilingual pairs. If one entire translated
+        // side was selected, its existing partner in the AI answer is known.
+        if(!parsed&&p.dataset.v2Vi&&p.dataset.v2Ko){
+          if(txt.trim()===p.dataset.v2Vi||txt.trim()===p.dataset.v2Ko)
+            parsed={vi:p.dataset.v2Vi,ko:p.dataset.v2Ko};
+        }
+        if(!parsed)return;
+        var standardized=parsed.vi+': '+parsed.ko;
+        e.dataTransfer.setData('text/plain',standardized);
+        e.dataTransfer.setData('application/x-nhi-example',standardized);
         e.dataTransfer.effectAllowed='copy';
       });
+      // Touch selection can be held and dragged to the white flashcard area.
+      // Unlike HTML native DnD, this works on mobile browsers as well.
+      (function(){
+        var log=$('aiLog'),state=null,hover=null,ghost=null,timeout=null;
+        function removeDrag(){
+          clearTimeout(timeout);
+          if(hover)hover.classList.remove('nhi-chat-drop-hover');
+          if(ghost)ghost.remove();
+          hover=null;ghost=null;state=null;
+        }
+        function pairForSelection(){
+          var sel=window.getSelection(),selected=String(sel||'').trim();
+          if(!selected||!sel.anchorNode||!log.contains(sel.anchorNode))return null;
+          var paragraph=sel.anchorNode.parentElement&&sel.anchorNode.parentElement.closest('.nhi-ai-paragraph');
+          if(!paragraph)return null;
+          var parsed=window.NHI_EXAMPLE_PAIR&&window.NHI_EXAMPLE_PAIR(selected);
+          if(!parsed&&paragraph.dataset.v2Vi&&paragraph.dataset.v2Ko){
+            if(selected===paragraph.dataset.v2Vi||selected===paragraph.dataset.v2Ko)
+              parsed={vi:paragraph.dataset.v2Vi,ko:paragraph.dataset.v2Ko};
+          }
+          return parsed?{value:parsed.vi+': '+parsed.ko,paragraph:paragraph}:null;
+        }
+        log.addEventListener('pointerdown',function(ev){
+          if(ev.pointerType==='mouse'&&ev.button!==0)return;
+          var selected=pairForSelection();
+          if(!selected)return;
+          state={id:ev.pointerId,x:ev.clientX,y:ev.clientY,ready:false, value:selected.value};
+          timeout=setTimeout(function(){
+            if(!state)return;
+            state.ready=true;
+            ghost=document.createElement('span');
+            ghost.className='nhi-chat-drag-ghost';
+            ghost.textContent=state.value;
+            ghost.style.left=state.x+'px';ghost.style.top=state.y+'px';
+            document.body.appendChild(ghost);
+          },350);
+        });
+        window.addEventListener('pointermove',function(ev){
+          if(!state||ev.pointerId!==state.id)return;
+          state.x=ev.clientX;state.y=ev.clientY;
+          if(!state.ready)return;
+          ev.preventDefault();
+          if(ghost){ghost.style.left=state.x+'px';ghost.style.top=state.y+'px';}
+          var under=document.elementFromPoint(ev.clientX,ev.clientY);
+          var next=under&&under.closest('#planBox .pcard');
+          if(next!==hover){
+            if(hover)hover.classList.remove('nhi-chat-drop-hover');
+            hover=next;if(hover)hover.classList.add('nhi-chat-drop-hover');
+          }
+        },{passive:false});
+        window.addEventListener('pointerup',function(ev){
+          if(!state||ev.pointerId!==state.id)return;
+          var txt=state.value, ready=state.ready, card=hover;
+          if(ready&&!card){
+            var under=document.elementFromPoint(ev.clientX,ev.clientY);
+            card=under&&under.closest('#planBox .pcard');
+          }
+          removeDrag();
+          if(ready&&card)PLAN.appendChatExample(txt);
+        });
+        window.addEventListener('pointercancel',removeDrag);
+        log.addEventListener('scroll',function(){if(state)removeDrag();},{passive:true});
+      })();
     }
     window.NLC_AI = { open: open, close: close, ask:send, history:listThreads, switchThread:switchThread, newThread:newThread, renameThread:renameThread };
     return { init: init, open: open, close: close };

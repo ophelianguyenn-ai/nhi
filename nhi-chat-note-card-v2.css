@@ -133,3 +133,28 @@ html body #planBox .pcard .card-illustration.nhi-image-selected .nhi-image-adjus
   #aiPanel .nhi-ai-reader-speed select{width:58px;height:32px}
   #planBox .pcard .nhi-image-adjust{width:min(220px,calc(100% - 10px))!important}
 }
+
+
+/* Text remains selectable, while an active long-press drag gives a small
+   visual preview and highlights the white card's drop area. */
+#aiPanel .nhi-ai-paragraph,#aiPanel .nhi-ai-paragraph-text{
+ user-select:text!important;-webkit-user-select:text!important;
+ cursor:text!important;
+}
+.nhi-chat-drag-ghost{
+ position:fixed!important;z-index:9999!important;
+ display:block!important;
+ max-width:min(300px,65vw)!important;
+ white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important;
+ padding:8px 12px!important;border-radius:12px!important;
+ background:#f0faff!important;color:#244868!important;
+ border:2px solid #7fc5e8!important;box-shadow:0 9px 26px #0002!important;
+ font:750 13px/1.3 system-ui,sans-serif!important;
+ pointer-events:none!important;
+ transform:translate(-50%,-120%)!important;
+}
+html body #planBox .pcard.nhi-chat-drop-hover{
+ outline:3px dashed #5dbbe9!important;
+ outline-offset:3px!important;
+ background:color-mix(in srgb,#d2f2ff 12%,var(--surface))!important;
+}

@@ -167,15 +167,7 @@ function initReader(){
     text.innerHTML=paragraph;
     if(!text.textContent.trim())continue;
     const p=make('div','nhi-ai-paragraph');
-    const add=button('＋',()=>{
-      const pair=p.dataset.v2Vi&&p.dataset.v2Ko?p.dataset.v2Vi+': '+p.dataset.v2Ko:text.textContent;
-      const saved=window.NLC_NOTES?.add(pair);
-      if(saved){add.textContent='✓';setTimeout(()=>{if(add.isConnected)add.textContent='＋';},1100);}
-    });
-    add.classList.add('nhi-add-to-note');
-    add.title='Thêm ví dụ này vào ghi chú trên thẻ đang học';
-    add.setAttribute('aria-label','Thêm câu này vào ghi chú thẻ');
-    p.append(text,add);
+    p.append(text);
     msg.append(p);
    }
    for(const link of links)msg.append(link);
