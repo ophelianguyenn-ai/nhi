@@ -278,6 +278,37 @@ try{
  const added=await page.evaluate(id=>JSON.parse(localStorage.getItem('viko-plan-v1')).note?.[id]?.v?.text,cardID);
  assert(added.includes('Ví dụ một')&&added.includes('Ví dụ hai')&&added.indexOf('Ví dụ hai')>added.indexOf('Ví dụ một'),
    'Note buttons did not append separate text lines: '+added);
+ // A bilingual selection has a + and can be dragged onto the white card,
+ // while monolingual AI paragraphs must never show a pointless +.
+ await page.evaluate(()=>{
+  const ai=document.getElementById('aiLog');
+  for(const [tag,text] of [['bilingual','Xin chào: 안녕하세요'],['single','Chỉ có tiếng Việt']]){
+   const m=document.createElement('div');m.className='aimsg ai';m.dataset.case=tag;
+   m.textContent=text;ai.appendChild(m);
+  }
+ });
+ await page.waitForFunction(()=>{
+  const both=document.querySelector('#aiLog [data-case="bilingual"]');
+  const alone=document.querySelector('#aiLog [data-case="single"]');
+  return !!both?.querySelector('.nhi-add-to-note') &&
+   alone?.dataset.readerMounted==='true'&&!alone.querySelector('.nhi-add-to-note');
+ },{timeout:7000});
+ const drop=await page.evaluate(()=>{
+  const text=document.querySelector('#aiLog [data-case="bilingual"] .nhi-ai-paragraph-text');
+  const data=new DataTransfer(),selection=window.getSelection();
+  selection.removeAllRanges();
+  const r=document.createRange();r.selectNodeContents(text);selection.addRange(r);
+  text.dispatchEvent(new DragEvent('dragstart',{bubbles:true,cancelable:true,dataTransfer:data}));
+  const dest=document.querySelector('#planBox .pcard');
+  dest.dispatchEvent(new DragEvent('dragover',{bubbles:true,cancelable:true,dataTransfer:data}));
+  dest.dispatchEvent(new DragEvent('drop',{bubbles:true,cancelable:true,dataTransfer:data}));
+  return {text:data.getData('application/x-nhi-example'),
+    monoHasPlus:!!document.querySelector('#aiLog [data-case="single"] .nhi-add-to-note')};
+ });
+ assert(drop.text==='Xin chào: 안녕하세요'&&!drop.monoHasPlus,
+  'Bilingual chat selection should copy; monolingual text has no +: '+JSON.stringify(drop));
+ await page.waitForFunction(id=>JSON.parse(localStorage.getItem('viko-plan-v1')).note?.[id]?.v?.text.includes('Xin chào: 안녕하세요'),{},cardID);
+ console.log('CHAT_SELECTION_DROP',JSON.stringify(drop));
  // Accidental card deletion can be undone until a NEW card is visited.
  await page.$eval('#aiClose',e=>e.click());
  const deletedId=await page.$eval('#planBox .pcard',e=>e.dataset.item);
