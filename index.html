@@ -596,7 +596,7 @@ section:not([hidden]) > .quiz, section:not([hidden]) > #cardWrap, .list > .row:n
 }
 </style>
 
-<script src="nhi-chat-voice-v1.js?v=20261117"></script><script src="hanja-v9.js?v=12"></script><script src="hanja-extra-v12.js"></script><script src="card-images-v11.js?v=20261121-single-four-way-handle-v4"></script><script src="nhi-google-images-v1.js?v=20261114-study-v7"></script><script src="nhi-hard-minimal-v1.js?v=20261120-in-card-v2"></script><script src="nhi-verified-pairs-20261117.js?v=1"></script><script src="nhi-daily-pairs.js?v=20261119-micro-v1"></script><script src="nhi-all-lesson-pairs-v6.js?v=20261121-refined-51"></script><script src="nhi-phrases-v5.js?v=20261121-refined"></script><script src="nhi-english-data-v6.js?v=20261113-reviewed-173"></script><script src="nhi-english-v5.js?v=20261121-compact-independent-v15"></script><script src="recorded-voices-v11.js?v=20261119-banmai-injoon-daily"></script>
+<script src="nhi-chat-voice-v1.js?v=20261117"></script><script src="hanja-v9.js?v=12"></script><script src="hanja-extra-v12.js"></script><script src="card-images-v11.js?v=20261121-xy-persist-grid-v5"></script><script src="nhi-google-images-v1.js?v=20261114-study-v7"></script><script src="nhi-hard-minimal-v1.js?v=20261120-in-card-v2"></script><script src="nhi-verified-pairs-20261117.js?v=1"></script><script src="nhi-daily-pairs.js?v=20261119-micro-v1"></script><script src="nhi-all-lesson-pairs-v6.js?v=20261121-refined-51"></script><script src="nhi-phrases-v5.js?v=20261121-refined"></script><script src="nhi-english-data-v6.js?v=20261113-reviewed-173"></script><script src="nhi-english-v5.js?v=20261121-compact-independent-v15"></script><script src="recorded-voices-v11.js?v=20261119-banmai-injoon-daily"></script>
 <script src="qrcode.js" defer></script>
 <link rel="stylesheet" href="nhi-seven-fixes-20261117.css?v=1"><link rel="stylesheet" href="refresh-v9.css?v=13"><link rel="stylesheet" href="study-enhancements-v13.css?v=14"><link rel="stylesheet" href="nhi-updates-v1.css?v=1"><link rel="stylesheet" href="nhi-ai-resize-v2.css?v=1"><link rel="stylesheet" href="nhi-study-motion-v3.css?v=3"><link rel="stylesheet" href="nhi-interface-v4.css?v=4"><link rel="stylesheet" href="nhi-interface-v5.css?v=20261113-rollback-stable-v1"><link rel="stylesheet" href="nhi-seasons-v1.css?v=20261113-cartoon-soft-1">
 <link rel="stylesheet" href="nhi-living-garden-v1.css?v=20261113-cartoon-butterflies-v1">
@@ -3974,12 +3974,13 @@ html body #planBox .sdone .pstatus{
       var localSize=Number(lang==='vi'&&elm.classList.contains('prompt')?
         (perCardSizes.viFront||perCardSizes.vi):perCardSizes[lang]);
       if(lang==='vi'&&elm.classList.contains('prompt'))elm.style.setProperty('font-size',
-        localSize>=12&&localSize<=72?localSize+'px':'var(--nhi-v8-front-size,26px)','important');
+        localSize>=12&&localSize<=72?localSize+'px':'var(--nhi-effective-vi-front,26px)','important');
       if(lang==='vi'&&elm.classList.contains('vi-under'))elm.style.setProperty('font-size',
-        localSize>=12&&localSize<=72?localSize+'px':'var(--nhi-v8-back-size,22px)','important');
+        localSize>=12&&localSize<=72?localSize+'px':'var(--nhi-effective-vi-back,22px)','important');
       if(lang==='ko'&&!(localSize>=12&&localSize<=72)&&it.ko.length>65){
         // Fit long Korean naturally inside the card, without increasing card height.
-        elm.style.setProperty('font-size',(it.ko.length>155?22:it.ko.length>110?26:30)+'px','important');
+        elm.style.setProperty('font-size',
+          'calc('+(it.ko.length>155?22:it.ko.length>110?26:30)+'px * var(--nhi-card-font-multiplier,1))','important');
       }
       return elm;
     }
@@ -4839,7 +4840,14 @@ html body #planBox .sdone .pstatus{
       m.appendChild(ci); c.appendChild(m); c.appendChild(cm);
       if (legendOpen) c.appendChild(legendPop());
       c.dataset.nhiCardId=it.id;
-      c.dataset.nhiFontSizes=JSON.stringify(((val('fmt',it.id)||{})._sizes)||{});
+      var cardSizes=((val('fmt',it.id)||{})._sizes)||{};
+      var cardEnglish=window.NHI_ENGLISH?window.NHI_ENGLISH.entry(it.id,it.vi,it.ko):{};
+      var englishSizes=((cardEnglish.format||{})._sizes)||{};
+      var customFont=Object.keys(Object.assign({},cardSizes,englishSizes)).some(function(key){
+        return Number(cardSizes[key]||englishSizes[key])>=12&&Number(cardSizes[key]||englishSizes[key])<=72;
+      });
+      c.dataset.nhiFontSizes=JSON.stringify(cardSizes);
+      c.dataset.nhiFontCustom=customFont?'true':'false';
       requestAnimationFrame(function(){document.dispatchEvent(new Event('nhi:card-font-selected'));});
       var f = el('div', 'stage pfront');
       if (s.flipped) {
@@ -6348,7 +6356,7 @@ html body #planBox .sdone .pstatus{
 <script src="backup-portable-v1.js"></script>
 <script src="nhi-ai-resize-v2.js?v=20261114-study-v7"></script>
 <script src="nhi-fireworks-v3.js?v=3"></script>
-<script src="study-update-v6.js?v=20261121-font-per-card-v2"></script>
+<script src="study-update-v6.js?v=20261121-master-font-v3"></script>
 <script src="nhi-longpress-dictionary-v1.js?v=20261117"></script>
 <script src="nhi-interface-v5.js?v=20261114"></script>
 <script src="nhi-november-v15.js?v=20261114-ux-v17"></script>
@@ -6816,5 +6824,5 @@ html body #planBox .pcard:has(.pfront.nhi-with-image)>.prate.nhi-rating-v3{
 })();
 </script>
 
-<link rel="stylesheet" href="nhi-card-fit-fixes-20261121.css?v=20261121-layout-v1">
+<link rel="stylesheet" href="nhi-card-fit-fixes-20261121.css?v=20261121-xy-master-v2">
 </body></html>
