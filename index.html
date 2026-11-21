@@ -6880,7 +6880,10 @@ html body #planBox .pcard:has(.pfront.nhi-with-image)>.prate.nhi-rating-v3{
           var overflow=bottom-visibleBottom;
           if(overflow>2){
             var maxScroll=Math.max(0,front.scrollHeight-front.clientHeight);
-            front.scrollTop=Math.min(maxScroll,front.scrollTop+Math.ceil(overflow)+6);
+            // The expanded panel can be taller than the viewport. A single
+            // incremental scroll stops midway and leaves its last lines under
+            // navigation. Reveal the END of the comparison in one operation.
+            front.scrollTop=maxScroll;
           }
         });
       }
