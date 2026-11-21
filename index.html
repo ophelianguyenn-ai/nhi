@@ -596,7 +596,7 @@ section:not([hidden]) > .quiz, section:not([hidden]) > #cardWrap, .list > .row:n
 }
 </style>
 
-<script src="nhi-chat-voice-v1.js?v=20261117"></script><script src="hanja-v9.js?v=12"></script><script src="hanja-extra-v12.js"></script><script src="card-images-v11.js?v=20261121-four-way-direct-v3"></script><script src="nhi-google-images-v1.js?v=20261114-study-v7"></script><script src="nhi-hard-minimal-v1.js?v=20261120-in-card-v2"></script><script src="nhi-verified-pairs-20261117.js?v=1"></script><script src="nhi-daily-pairs.js?v=20261119-micro-v1"></script><script src="nhi-all-lesson-pairs-v6.js?v=20261121-refined-51"></script><script src="nhi-phrases-v5.js?v=20261121-refined"></script><script src="nhi-english-data-v6.js?v=20261113-reviewed-173"></script><script src="nhi-english-v5.js?v=20261121-paired-notes-v14"></script><script src="recorded-voices-v11.js?v=20261119-banmai-injoon-daily"></script>
+<script src="nhi-chat-voice-v1.js?v=20261117"></script><script src="hanja-v9.js?v=12"></script><script src="hanja-extra-v12.js"></script><script src="card-images-v11.js?v=20261121-single-four-way-handle-v4"></script><script src="nhi-google-images-v1.js?v=20261114-study-v7"></script><script src="nhi-hard-minimal-v1.js?v=20261120-in-card-v2"></script><script src="nhi-verified-pairs-20261117.js?v=1"></script><script src="nhi-daily-pairs.js?v=20261119-micro-v1"></script><script src="nhi-all-lesson-pairs-v6.js?v=20261121-refined-51"></script><script src="nhi-phrases-v5.js?v=20261121-refined"></script><script src="nhi-english-data-v6.js?v=20261113-reviewed-173"></script><script src="nhi-english-v5.js?v=20261121-compact-independent-v15"></script><script src="recorded-voices-v11.js?v=20261119-banmai-injoon-daily"></script>
 <script src="qrcode.js" defer></script>
 <link rel="stylesheet" href="nhi-seven-fixes-20261117.css?v=1"><link rel="stylesheet" href="refresh-v9.css?v=13"><link rel="stylesheet" href="study-enhancements-v13.css?v=14"><link rel="stylesheet" href="nhi-updates-v1.css?v=1"><link rel="stylesheet" href="nhi-ai-resize-v2.css?v=1"><link rel="stylesheet" href="nhi-study-motion-v3.css?v=3"><link rel="stylesheet" href="nhi-interface-v4.css?v=4"><link rel="stylesheet" href="nhi-interface-v5.css?v=20261113-rollback-stable-v1"><link rel="stylesheet" href="nhi-seasons-v1.css?v=20261113-cartoon-soft-1">
 <link rel="stylesheet" href="nhi-living-garden-v1.css?v=20261113-cartoon-butterflies-v1">
@@ -3970,8 +3970,15 @@ html body #planBox .sdone .pstatus{
       });
       if(pos<text.length)elm.appendChild(document.createTextNode(text.slice(pos)));
       if(window.NHI_STUDY)window.NHI_STUDY.formatText(elm,val('fmt',it.id)||{},lang);
-      if(lang==='vi'&&elm.classList.contains('prompt'))elm.style.setProperty('font-size','var(--nhi-v8-front-size,26px)','important');
-      if(lang==='vi'&&elm.classList.contains('vi-under'))elm.style.setProperty('font-size','var(--nhi-v8-back-size,22px)','important');
+      var localSize=Number((((val('fmt',it.id)||{})._sizes)||{})[lang]);
+      if(lang==='vi'&&elm.classList.contains('prompt'))elm.style.setProperty('font-size',
+        localSize>=12&&localSize<=72?localSize+'px':'var(--nhi-v8-front-size,26px)','important');
+      if(lang==='vi'&&elm.classList.contains('vi-under'))elm.style.setProperty('font-size',
+        localSize>=12&&localSize<=72?localSize+'px':'var(--nhi-v8-back-size,22px)','important');
+      if(lang==='ko'&&!(localSize>=12&&localSize<=72)&&it.ko.length>65){
+        // Fit long Korean naturally inside the card, without increasing card height.
+        elm.style.setProperty('font-size',(it.ko.length>155?22:it.ko.length>110?26:30)+'px','important');
+      }
       return elm;
     }
     function toggleHl(id,i){
@@ -4642,6 +4649,17 @@ html body #planBox .sdone .pstatus{
     function pause() { leave(); render(); }
     function setFocus(on) { document.body.classList.toggle('focus', !!on); }
     function curItem() { return sess && sess.pos < sess.queue.length ? ITEMS[sess.queue[sess.pos]] : null; }
+    document.addEventListener('nhi:card-font-change',function(e){
+      var it=curItem(),lang=e.detail&&e.detail.lang,size=Number(e.detail&&e.detail.size);
+      if(!it||!['ko','vi','en'].includes(lang)){toast('Hãy mở thẻ cần chỉnh cỡ chữ.');return;}
+      if(!Number.isFinite(size)||size<12||size>72)return;
+      var existing=val('fmt',it.id)||{};
+      var next=Object.assign({},existing,{_sizes:Object.assign({},existing._sizes||{})});
+      next._sizes[lang]=size;
+      put('fmt',it.id,next);
+      render();
+      toast('Đã lưu cỡ chữ riêng cho thẻ này.');
+    });
     function editForm(it) {
       var f = el('form', 'editbox nhi-editor-window-v5');
       f.appendChild(ibtn('iconbtn sm nhi-editor-close-v5','x',function(){closeEditor();},'Đóng và tự lưu chỉnh sửa thẻ'));
@@ -4818,6 +4836,9 @@ html body #planBox .sdone .pstatus{
       // The redundant 漢 toolbar icon is intentionally hidden; Hán tự remains editable.
       m.appendChild(ci); c.appendChild(m); c.appendChild(cm);
       if (legendOpen) c.appendChild(legendPop());
+      c.dataset.nhiCardId=it.id;
+      c.dataset.nhiFontSizes=JSON.stringify(((val('fmt',it.id)||{})._sizes)||{});
+      document.dispatchEvent(new Event('nhi:card-font-selected'));
       var f = el('div', 'stage pfront');
       if (s.flipped) {
         var koRow=el('div','nhi-ko-line');
@@ -6325,7 +6346,7 @@ html body #planBox .sdone .pstatus{
 <script src="backup-portable-v1.js"></script>
 <script src="nhi-ai-resize-v2.js?v=20261114-study-v7"></script>
 <script src="nhi-fireworks-v3.js?v=3"></script>
-<script src="study-update-v6.js?v=20261120-selectable-chat-v1"></script>
+<script src="study-update-v6.js?v=20261121-font-per-card-v2"></script>
 <script src="nhi-longpress-dictionary-v1.js?v=20261117"></script>
 <script src="nhi-interface-v5.js?v=20261114"></script>
 <script src="nhi-november-v15.js?v=20261114-ux-v17"></script>
@@ -6775,41 +6796,10 @@ html body #planBox .pcard:has(.pfront.nhi-with-image)>.prate.nhi-rating-v3{
         card.style.removeProperty('--nhi-rate-left');
         card.style.removeProperty('--nhi-rate-width');
       }
-      syncNotes(card);
+      // English note sizes itself to its contents; no forced Korean width.
     });
     root.querySelectorAll('.nhi-editor-window-v5 .nhi-editor-hanja-last').forEach(function (field) {
       field.querySelectorAll('.dictionary-links, .hint').forEach(function (node) {node.remove();});
-    });
-    root.querySelectorAll('.card-illustration[data-resizable="true"] .nhi-image-stage').forEach(function (stage) {
-      if (stage.querySelector('.nhi-4way-pad')) return;
-      var pad = document.createElement('div');
-      pad.className = 'nhi-4way-pad';
-      pad.setAttribute('role','group');
-      pad.setAttribute('aria-label','Di chuyển ảnh bốn hướng');
-      [['up','↑','Lên'], ['left','←','Trái'], ['right','→','Phải'], ['down','↓','Xuống']]
-        .forEach(function (item) {
-          var btn = document.createElement('button');
-          btn.type = 'button';
-          btn.dataset.dir = item[0];
-          btn.textContent = item[1];
-          btn.setAttribute('aria-label','Di chuyển ảnh sang '+item[2]);
-          btn.title = item[2]+' 12 px';
-          btn.addEventListener('pointerdown',function (e) {e.stopPropagation();});
-          btn.addEventListener('click',function (e) {
-            e.preventDefault();e.stopPropagation();
-            var direction = btn.dataset.dir;
-            var figure = stage.closest('.card-illustration');
-            if (figure) figure.classList.add('nhi-image-selected');
-            var dx = direction==='left' ? -12 : direction==='right' ? 12 : 0;
-            var dy = direction==='up' ? -12 : direction==='down' ? 12 : 0;
-            if (figure && typeof figure.nhiMoveBy === 'function') {
-              figure.nhiMoveBy(dx,dy);
-              schedule();
-            }
-          });
-          pad.appendChild(btn);
-        });
-      stage.appendChild(pad);
     });
   }
   function schedule() {
@@ -6824,4 +6814,5 @@ html body #planBox .pcard:has(.pfront.nhi-with-image)>.prate.nhi-rating-v3{
 })();
 </script>
 
+<link rel="stylesheet" href="nhi-card-fit-fixes-20261121.css?v=20261121-layout-v1">
 </body></html>
