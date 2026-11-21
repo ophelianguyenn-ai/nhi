@@ -21,7 +21,7 @@ function figure(it,value,onResize){
   var clamp=function(n,min,max){return Math.max(min,Math.min(max,n));};
   f.dataset.resizable='true';
   f.setAttribute('aria-label','Ảnh minh họa. Kéo để di chuyển cả khung; kéo cạnh hoặc góc để đổi kích thước.');
-  im.title='Kéo ảnh để di chuyển cả khung lên hoặc xuống; kéo cạnh để chỉnh kích thước';
+  im.title='Kéo ảnh để di chuyển cả khung theo chiều ngang hoặc dọc; kéo cạnh để chỉnh kích thước';
   im.style.touchAction='none';
 
   function paint(){
@@ -29,7 +29,8 @@ function figure(it,value,onResize){
     var parent=f.closest('.pfront');
     if(parent)parent.style.setProperty('--nhi-image-width',Math.round(width)+'px');
     f.style.setProperty('--nhi-image-height',height?Math.round(height)+'px':'auto');
-    f.style.setProperty('--nhi-image-x',Math.round(offsetX)+'px');
+    f.style.setProperty('--nhi-frame-x',Math.round(offsetX)+'px');
+    f.style.setProperty('--nhi-image-x','0px');
     // Move the entire figure (frame, resize grips and photograph), NOT the
     // image within a fixed, clipped stage.
     f.style.setProperty('--nhi-frame-y',Math.round(offsetY)+'px');
@@ -107,6 +108,21 @@ function figure(it,value,onResize){
     offsetY=clamp(offsetY+(e.key==='ArrowUp'?-12:12),-220,220);
     paint();commit();
   });
+
+  // Dedicated left/right controls move the WHOLE picture and are saved per card.
+  var moveX=node('div');moveX.className='nhi-image-move-x';
+  [['←',-12,'Dịch ảnh sang trái 12 pixel'],['→',12,'Dịch ảnh sang phải 12 pixel']].forEach(function(spec){
+    var b=node('button',spec[0]);b.type='button';b.className='nhi-image-shift';
+    b.setAttribute('aria-label',spec[2]);b.title=spec[2];
+    b.addEventListener('pointerdown',function(e){e.stopPropagation();});
+    b.addEventListener('click',function(e){
+      e.preventDefault();e.stopPropagation();
+      offsetX=clamp(offsetX+spec[1],-140,140);
+      f.classList.add('nhi-image-selected');paint();commit();
+    });
+    moveX.appendChild(b);
+  });
+  stage.appendChild(moveX);
 
   // Eight edge/corner handles replace ALL old range sliders and panels.
   // Corners always keep the image's current width:height ratio.
