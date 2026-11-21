@@ -475,6 +475,39 @@ try{
  assert(fit&&fit.short<fit.before&&fit.short<200,
   'Short English entries should create shorter panels: '+JSON.stringify(fit));
  console.log('ENGLISH_CONTENT_WIDTH',JSON.stringify(fit));
+ // Test the REAL translation helper with a mocked provider response; no
+ // personal AI credentials and no live network calls are used by this test.
+ const translated=await page.evaluate(async()=>{
+   const form=document.getElementById('aiSetup');
+   form.hidden=false;
+   document.getElementById('aiProv').value='gemini';
+   document.getElementById('aiKey').value='test-only-local-key';
+   document.getElementById('aiModel').value='gemini-2.5-flash';
+   form.dispatchEvent(new Event('submit',{bubbles:true,cancelable:true}));
+   const original=window.fetch;
+   let calls=0;
+   window.fetch=function(url,options){
+     if(String(url).includes('generativelanguage.googleapis.com')){
+       calls++;
+       const body={
+         candidates:[{content:{parts:[{text:'Tiếng Việt: Tôi đang hoàn tất báo cáo.\nTiếng Hàn: 보고서를 마무리하고 있어요.'}]}}]
+       };
+       return Promise.resolve(new Response(JSON.stringify(body),{status:200,headers:{'content-type':'application/json'}}));
+     }
+     return original.call(this,url,options);
+   };
+   try{
+     const saved=await window.NLC_AI.saveSelectedExample('Ví dụ 1: Tôi đang hoàn tất báo cáo.');
+     return {saved,calls};
+   }finally{window.fetch=original;}
+ });
+ assert(translated.saved&&translated.calls===1,
+   'AI-configured monolingual example must translate before note save: '+JSON.stringify(translated));
+ await page.waitForFunction(id=>
+   (JSON.parse(localStorage.getItem('viko-plan-v1')).note?.[id]?.v?.text||'')
+    .includes('Tôi đang hoàn tất báo cáo: 보고서를 마무리하고 있어요.'),
+   {timeout:7000},toggleId);
+ console.log('AI_EXAMPLE_TRANSLATION_TO_NOTE',JSON.stringify(translated));
  console.log('SELECTABLE CHAT AND NOTES UX PASS',JSON.stringify({note,grid:[before,after],height:afterCorner.height,voice:true,anchor}));
 }catch(err){
  console.error('ORIGINAL_SMOKE_ERROR',err&&err.stack||String(err));throw err;
