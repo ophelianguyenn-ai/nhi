@@ -106,6 +106,18 @@ try{
      inlineCardStyle:document.querySelector('#planBox .pcard')?.getAttribute('style'),
      frontStyle:document.querySelector('#planBox .pfront')?.getAttribute('style')};
  });
+ const koreanGutter=await page.evaluate(()=>{
+   const front=document.querySelector('#planBox .pfront.nhi-with-image');
+   const ko=front?.querySelector('.nhi-ko-line');
+   const f=front?.getBoundingClientRect(),k=ko?.getBoundingClientRect();
+   return {frontLeft:f?.left,koreanLeft:k?.left,
+     paddingLeft:ko?getComputedStyle(ko).paddingLeft:null};
+ });
+ assert(koreanGutter&&parseFloat(koreanGutter.paddingLeft)===0&&
+   koreanGutter.koreanLeft-koreanGutter.frontLeft<4,
+   'Korean content lane must start at card left edge, no artificial left padding: '+
+   JSON.stringify(koreanGutter));
+ console.log('LEFT_EDGE_GUTTER',JSON.stringify(koreanGutter));
  console.log('IMAGE_LEFT_CONTROLS',JSON.stringify(placement));
  assert(Math.abs(placement.rowCenter-placement.koreanCenter)<12 &&
    placement.photoLeft-placement.koreanRight>=8 &&
@@ -569,7 +581,13 @@ try{
        const text=row.querySelector('.nhi-comparison-choice-text');
        if(text&&window.NHI_STUDY)window.NHI_STUDY.wordElements(text,longSentence);
      });
+     await new Promise(ok=>setTimeout(ok,150));
      await new Promise(ok=>requestAnimationFrame(()=>requestAnimationFrame(ok)));
+     const previewRect=preview.getBoundingClientRect();
+     const lastChildBottom=Math.max(...[...preview.children]
+       .filter(el=>getComputedStyle(el).display!=='none'&&!el.hidden)
+       .map(el=>el.getBoundingClientRect().bottom));
+     const blankBottom=Math.round((previewRect.bottom-lastChildBottom)*10)/10;
      return rows.map(row=>{
        const flag=row.querySelector('.nhi-comparison-flag')?.getBoundingClientRect();
        const text=row.querySelector('.nhi-comparison-choice-text')?.getBoundingClientRect();
@@ -589,6 +607,7 @@ try{
            return lines;
          },[]).map(line=>Math.round((line.x-(text?.left||0))*10)/10),
          spanDisplay:span?getComputedStyle(span).display:null,
+         panelWidth:previewRect.width,panelHeight:previewRect.height,blankBottom,
          firstWordLeft:firstWord?.getBoundingClientRect().left,
          words};
      });
@@ -600,6 +619,9 @@ try{
  assert(comparisonGeometry.every(row=>row.lineStartOffsets.length>=2 &&
    row.lineStartOffsets.every(offset=>Math.abs(offset)<5)),
    'Every WRAPPED line of compared English must begin directly after flag: '+
+   JSON.stringify(comparisonGeometry));
+ assert(comparisonGeometry.every(row=>row.panelWidth<=369&&row.blankBottom>=0&&row.blankBottom<22),
+   'English panel with photo must hug content (no excessive width or empty height): '+
    JSON.stringify(comparisonGeometry));
  console.log('COMPARISON_FLAG_ALIGNMENT',JSON.stringify(comparisonGeometry));
  const noteSeparation=await page.evaluate(()=>{
