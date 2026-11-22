@@ -4810,7 +4810,7 @@ html body #planBox .sdone .pstatus{
     function legendPop() {
       var p = el('div', 'legendpop'); p.setAttribute('role', 'note');
       var hh = el('div', 'lrow'); hh.appendChild(el('h3', null, 'Chú giải')); hh.appendChild(ibtn('iconbtn sm lclose', 'x', function () { legendOpen = false; render(); }, 'Đóng chú giải')); p.appendChild(hh);
-      [['Chuyển thẻ', ['←', '→']], ['Lật thẻ', ['Enter']], ['Khó', ['S']], ['Bình thường', ['2']], ['Xoá từ', ['Delete']], ['Chế độ tập trung', ['F']], ['Hỏi AI về thẻ này', ['A']]].forEach(function (x) {
+      [['Chuyển thẻ', ['←', '→']], ['Lật thẻ', ['Enter']], ['Khó', ['S']], ['Bình thường', ['2']], ['Xoá từ', ['Delete']], ['Chế độ tập trung', ['F']], ['Chỉnh sửa thẻ (mở / đóng)', ['C']], ['Hỏi AI (mở / đóng)', ['A']]].forEach(function (x) {
         var r = el('div', 'lrow'); r.appendChild(el('span', null, x[0])); var k = el('span'); x[1].forEach(function (key) { k.appendChild(el('kbd', null, key)); }); r.appendChild(k); p.appendChild(r);
       });
       p.appendChild(el('p', 'hint', 'Vuốt để chuyển thẻ · chạm thẻ để lật · chạm chữ Việt để tô sáng'));
@@ -4861,7 +4861,7 @@ html body #planBox .sdone .pstatus{
           legendOpen = false; render();
         }, 280);
       }, 'Một lần: thêm ảnh · Hai lần: tìm hình theo từ tiếng Hàn'));
-      ci.appendChild(ibtn('iconbtn sm', 'edit', function () { s.editing = !s.editing; legendOpen = false; render(); }, 'Sửa thẻ, chữ Hán và hình ảnh'));
+      ci.appendChild(ibtn('iconbtn sm', 'edit', function () { s.editing = !s.editing; legendOpen = false; render(); }, 'Sửa thẻ, chữ Hán và hình ảnh (C để mở / đóng)'));
       var bk = ibtn('iconbtn sm', 'book', function () { legendOpen = !legendOpen; render(); }, 'Chú giải phím tắt và thao tác'); bk.setAttribute('aria-expanded', String(legendOpen)); ci.appendChild(bk);
       ci.appendChild(ibtn('iconbtn sm', 'vol', function () { toggleSpeech(s.flipped ? it.ko : it.vi, s.flipped ? 'ko-KR' : 'vi-VN'); }, 'Phát âm / Dừng mặt thẻ hiện tại'));
       var hj = null;
@@ -6428,7 +6428,7 @@ html body #planBox .sdone .pstatus{
 <script src="nhi-living-garden-v1.js?v=20261113-cartoon-butterflies-v1"></script>
 <script src="nhi-late-2026.js?v=20261115-v9-compact-pairs"></script>
 <script src="nhi-stage-move-v1.js?v=20261122-vertical-drag-v2"></script>
-<script src="nhi-card-controls-v8.js?v=20261121-per-card-v9"></script>
+<script src="nhi-card-controls-v8.js?v=20261122-back-vertical-drag-v10"></script>
 <script src="nhi-kitten-meow-v1.js?v=20261120-user-meow"></script>
 <script src="nhi-card-no-overlap-v1.js?v=20261115-safe-v1"></script>
 <script src="nhi-corner-v2.js?v=20261121-numbered-example-plus-v2"></script>
@@ -7003,10 +7003,17 @@ html body #planBox .pcard>.card-top>.cicons {
 }
 html body #planBox .pcard .nhi-last-hard-icon {
   display:block!important;position:static!important;transform:none!important;
-  width:39px!important;height:36px!important;max-width:39px!important;
-  max-height:36px!important;object-fit:contain!important;flex:none!important;
+  width:35px!important;height:33px!important;max-width:35px!important;
+  max-height:33px!important;object-fit:contain!important;flex:none!important;
   margin:0!important;padding:0!important;pointer-events:none!important;
   border:0!important;box-shadow:none!important;background:transparent!important;
+}
+@media(max-width:480px){
+  html body #planBox .pcard>.card-top{flex-wrap:wrap!important;}
+  html body #planBox .pcard>.card-top>.cmeta{max-width:40px!important;}
+  html body #planBox .pcard>.card-top>.cicons{
+    flex-wrap:wrap!important;min-width:0!important;max-width:calc(100% - 48px)!important;
+  }
 }
 /* Four controls, one continuous row in the requested order, even with a photo. */
 html body #planBox .pcard>.prate.nhi-rating-v3:has(>.pundo) {
