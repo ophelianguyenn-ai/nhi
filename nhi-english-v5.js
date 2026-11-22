@@ -392,31 +392,37 @@ function fitEnglishWidth(box){
  }
  const status=box.querySelector('.nhi-en-status');
  const transcription=ipa&&!ipa.hidden?measure(ipa):0;
- const words=Math.max(measure(t)+ (transcription?transcription+12:0),measure(t),transcription,measure(status));
+ const meaning=measure(t);
  const actions=box.querySelector('.nhi-en-head-actions');
  const actionsWidth=actions?.getBoundingClientRect().width||36;
  const review=box.querySelector('.nhi-en-review');
  const reviewWidth=review&&!review.hidden?measure(review)+18:0;
- const contentWidth=Math.max(words+actionsWidth+10,reviewWidth,78)+24;
  const lane=box.closest('.nhi-card-details')||box.parentElement;
- // Short lines hug their text, while long sentences wrap instead of becoming a full-width banner.
- const maxWidth=Math.min(365,Math.max(116,(lane?.clientWidth||365)-8));
- const target=Math.min(maxWidth,Math.max(108,Math.ceil(contentWidth)));
- const compare=box.querySelector('.nhi-en-choices:not(:empty)');
  const imageCard=!!box.closest('.pfront.nhi-with-image');
- const areaWidth=Math.max(172,(lane?.clientWidth||440)-4);
- // Long English is intentionally broken over more lines instead of turning
- // into a near-card-wide pale-blue banner. Same behavior with or without photos.
- const limit=Math.min(imageCard?365:395,areaWidth);
- const meaning=measure(t);
- const best=Math.max(175,Math.ceil(Math.max(meaning+actionsWidth+31,reviewWidth+20)));
- const desired=Math.round(Math.max(175,Math.min(limit,compare?Math.max(265,best):best)));
+ // Allow the note to grow for longer English instead of wrapping even though
+ // the parent has ample free space; never overflow the actual left-hand lane.
+ const available=Math.max(172,(lane?.clientWidth||440)-8);
+ const cap=Math.min(available,imageCard?590:620);
+ const horizontalPadding=34;
+ const singleMeaning=meaning+actionsWidth+horizontalPadding;
+ const singleIPA=transcription+actionsWidth+horizontalPadding;
+ const together=meaning+(transcription?transcription+12:0)+actionsWidth+horizontalPadding;
+ let natural=Math.max(175,Math.ceil(singleMeaning),Math.ceil(singleIPA),Math.ceil(reviewWidth+24));
+ // Keep English and IPA on one row when both fit, otherwise let IPA wrap.
+ if(together<=cap) natural=Math.max(natural,Math.ceil(together));
+ const compare=box.querySelector('.nhi-en-choices:not(:empty)');
+ if(compare){
+   const choiceLengths=[...compare.querySelectorAll('.nhi-comparison-choice-text')]
+     .map(x=>measure(x)+85);
+   natural=Math.max(natural,Math.min(cap,Math.max(0,...choiceLengths)));
+ }
+ const desired=Math.max(175,Math.min(cap,Math.ceil(natural)));
  const manual=box.style.getPropertyValue('--nhi-en-width').trim();
- const chosen=/^\d+(?:\.\d+)?px$/.test(manual)?
-   Math.min(limit,Math.max(175,parseFloat(manual))):desired;
+ const chosen=/^\\d+(?:\\.\\d+)?px$/.test(manual)?
+   Math.max(175,Math.min(cap,parseFloat(manual))):desired;
  box.style.setProperty('--nhi-en-auto-width',chosen+'px');
  box.style.setProperty('width',chosen+'px','important');
- box.style.setProperty('max-width',limit+'px','important');
+ box.style.setProperty('max-width',cap+'px','important');
  box.style.setProperty('height','max-content','important');
  box.style.setProperty('min-height','0px','important');
  box.style.setProperty('max-height','none','important');
