@@ -1492,13 +1492,14 @@ html body #planBox .sdone .pstatus{
       <h3 id="nhiTransitionTitle">✨ Hiệu ứng chuyển cảnh</h3>
       <p class="voice-note">Chọn kiểu mở/đóng cửa sổ và chuyển thẻ. Cửa sổ sửa thẻ sử dụng đúng hiệu ứng của Cài đặt tổng.</p>
       <div id="nhiTransitionOptions">
-      <div class="setrow nhi-fx-setting-row"><label for="nhi-fx-default">Mặc định cho tất cả</label><select id="nhi-fx-default" aria-label="Mặc định cho tất cả"><option value="icon">Phóng từ biểu tượng</option><option value="fade" selected>Mờ dần</option><option value="zoom">Phóng nhẹ</option><option value="slide-up">Trượt lên</option><option value="slide-side">Trượt ngang</option><option value="soft-pop">Bật mềm</option><option value="none">Không hiệu ứng</option></select></div>
-      <div class="setrow nhi-fx-setting-row"><label for="nhi-fx-editor">Cửa sổ chỉnh sửa thẻ</label><select id="nhi-fx-editor" aria-label="Cửa sổ chỉnh sửa thẻ" disabled title="Mở và đóng giống Cài đặt tổng"><option value="inherit" selected>Theo Cài đặt tổng</option></select></div>
-      <div class="setrow nhi-fx-setting-row"><label for="nhi-fx-settings">Cửa sổ Cài đặt</label><select id="nhi-fx-settings" aria-label="Cửa sổ Cài đặt"><option value="inherit">Theo mặc định</option><option value="icon">Phóng từ biểu tượng</option><option value="fade">Mờ dần</option><option value="zoom">Phóng nhẹ</option><option value="slide-up">Trượt lên</option><option value="slide-side">Trượt ngang</option><option value="soft-pop" selected>Bật mềm</option><option value="none">Không hiệu ứng</option></select></div>
-      <div class="setrow nhi-fx-setting-row"><label for="nhi-fx-ai">Cửa sổ chat AI</label><select id="nhi-fx-ai" aria-label="Cửa sổ chat AI"><option value="inherit">Theo mặc định</option><option value="icon">Phóng từ biểu tượng</option><option value="fade">Mờ dần</option><option value="zoom">Phóng nhẹ</option><option value="slide-up">Trượt lên</option><option value="slide-side" selected>Trượt ngang</option><option value="soft-pop">Bật mềm</option><option value="none">Không hiệu ứng</option></select></div>
-      <div class="setrow nhi-fx-setting-row"><label for="nhi-fx-dialog">Hộp thoại khác</label><select id="nhi-fx-dialog" aria-label="Hộp thoại khác"><option value="inherit">Theo mặc định</option><option value="icon">Phóng từ biểu tượng</option><option value="fade">Mờ dần</option><option value="zoom" selected>Phóng nhẹ</option><option value="slide-up">Trượt lên</option><option value="slide-side">Trượt ngang</option><option value="soft-pop">Bật mềm</option><option value="none">Không hiệu ứng</option></select></div>
-      <div class="setrow nhi-fx-setting-row"><label for="nhi-fx-card">Chuyển / lật thẻ</label><select id="nhi-fx-card" aria-label="Chuyển / lật thẻ"><option value="inherit">Theo mặc định</option><option value="icon">Phóng từ biểu tượng</option><option value="fade">Mờ dần</option><option value="zoom">Phóng nhẹ</option><option value="slide-up">Trượt lên</option><option value="slide-side" selected>Trượt ngang</option><option value="soft-pop">Bật mềm</option><option value="none">Không hiệu ứng</option></select></div>
-      <div class="setrow nhi-fx-setting-row"><label for="nhi-fx-change">Thay đổi nội dung</label><select id="nhi-fx-change" aria-label="Thay đổi nội dung"><option value="inherit">Theo mặc định</option><option value="icon">Phóng từ biểu tượng</option><option value="fade" selected>Mờ dần</option><option value="zoom">Phóng nhẹ</option><option value="slide-up">Trượt lên</option><option value="slide-side">Trượt ngang</option><option value="soft-pop">Bật mềm</option><option value="none">Không hiệu ứng</option></select></div>
+      <div class="setrow nhi-fx-setting-row"><label for="nhi-fx-default">Mặc định cho tất cả</label><select id="nhi-fx-default" aria-label="Mặc định cho tất cả"><option value="icon">Phóng từ biểu tượng</option><option value="fade" selected>Mờ dần</option><option value="zoom">Phóng nhẹ</option><option value="slide-up">Trượt lên</option><option value="slide-side">Trượt ngang</option><option value="soft-pop">Bật mềm</option><option value="none">Không hiệu ứng</option></select><label class="nhi-fx-duration-wrap" for="nhi-fx-duration-default">Giây <input class="nhi-fx-duration" type="number" id="nhi-fx-duration-default" min="0.1" max="5" step="0.05" inputmode="decimal" value=".29" aria-label="Thời gian default (giây)"></label></div>
+      <div class="setrow nhi-fx-setting-row"><label for="nhi-fx-editor">Cửa sổ chỉnh sửa thẻ</label><select id="nhi-fx-editor" aria-label="Cửa sổ chỉnh sửa thẻ" disabled title="Mở và đóng giống Cài đặt tổng"><option value="inherit" selected>Theo Cài đặt tổng</option></select><label class="nhi-fx-duration-wrap" for="nhi-fx-duration-editor">Giây <input class="nhi-fx-duration" type="number" id="nhi-fx-duration-editor" min="0.1" max="5" step="0.05" inputmode="decimal" value=".29" aria-label="Thời gian editor (giây)"></label></div>
+      <div class="setrow nhi-fx-setting-row"><label for="nhi-fx-settings">Cửa sổ Cài đặt</label><select id="nhi-fx-settings" aria-label="Cửa sổ Cài đặt"><option value="inherit">Theo mặc định</option><option value="icon">Phóng từ biểu tượng</option><option value="fade">Mờ dần</option><option value="zoom">Phóng nhẹ</option><option value="slide-up">Trượt lên</option><option value="slide-side">Trượt ngang</option><option value="soft-pop" selected>Bật mềm</option><option value="none">Không hiệu ứng</option></select><label class="nhi-fx-duration-wrap" for="nhi-fx-duration-settings">Giây <input class="nhi-fx-duration" type="number" id="nhi-fx-duration-settings" min="0.1" max="5" step="0.05" inputmode="decimal" value=".29" aria-label="Thời gian settings (giây)"></label></div>
+      <div class="setrow nhi-fx-setting-row"><label for="nhi-fx-ai">Cửa sổ chat AI</label><select id="nhi-fx-ai" aria-label="Cửa sổ chat AI"><option value="inherit">Theo mặc định</option><option value="icon">Phóng từ biểu tượng</option><option value="fade">Mờ dần</option><option value="zoom">Phóng nhẹ</option><option value="slide-up">Trượt lên</option><option value="slide-side" selected>Trượt ngang</option><option value="soft-pop">Bật mềm</option><option value="none">Không hiệu ứng</option></select><label class="nhi-fx-duration-wrap" for="nhi-fx-duration-ai">Giây <input class="nhi-fx-duration" type="number" id="nhi-fx-duration-ai" min="0.1" max="5" step="0.05" inputmode="decimal" value=".29" aria-label="Thời gian ai (giây)"></label></div>
+      <div class="setrow nhi-fx-setting-row"><label for="nhi-fx-dialog">Hộp thoại khác</label><select id="nhi-fx-dialog" aria-label="Hộp thoại khác"><option value="inherit">Theo mặc định</option><option value="icon">Phóng từ biểu tượng</option><option value="fade">Mờ dần</option><option value="zoom" selected>Phóng nhẹ</option><option value="slide-up">Trượt lên</option><option value="slide-side">Trượt ngang</option><option value="soft-pop">Bật mềm</option><option value="none">Không hiệu ứng</option></select><label class="nhi-fx-duration-wrap" for="nhi-fx-duration-dialog">Giây <input class="nhi-fx-duration" type="number" id="nhi-fx-duration-dialog" min="0.1" max="5" step="0.05" inputmode="decimal" value=".29" aria-label="Thời gian dialog (giây)"></label></div>
+      <div class="setrow nhi-fx-setting-row"><label for="nhi-fx-card">Lật thẻ (mặt trước / sau)</label><select id="nhi-fx-card" aria-label="Chuyển / lật thẻ"><option value="inherit">Theo mặc định</option><option value="icon">Phóng từ biểu tượng</option><option value="fade">Mờ dần</option><option value="zoom">Phóng nhẹ</option><option value="slide-up">Trượt lên</option><option value="slide-side" selected>Trượt ngang</option><option value="soft-pop">Bật mềm</option><option value="none">Không hiệu ứng</option></select><label class="nhi-fx-duration-wrap" for="nhi-fx-duration-card">Giây <input class="nhi-fx-duration" type="number" id="nhi-fx-duration-card" min="0.1" max="5" step="0.05" inputmode="decimal" value=".31" aria-label="Thời gian card (giây)"></label></div>
+      <div class="setrow nhi-fx-setting-row"><label for="nhi-fx-navigation">Tiến / Lùi giữa các thẻ</label><select id="nhi-fx-navigation" aria-label="Chuyển / lật thẻ"><option value="inherit">Theo mặc định</option><option value="icon">Phóng từ biểu tượng</option><option value="fade">Mờ dần</option><option value="zoom">Phóng nhẹ</option><option value="slide-up">Trượt lên</option><option value="slide-side" selected>Trượt ngang</option><option value="soft-pop">Bật mềm</option><option value="none">Không hiệu ứng</option></select><label class="nhi-fx-duration-wrap" for="nhi-fx-duration-card">Giây <input class="nhi-fx-duration" type="number" id="nhi-fx-duration-card" min="0.1" max="5" step="0.05" inputmode="decimal" value=".42" aria-label="Thời gian navigation (giây)"></label></div>
+      <div class="setrow nhi-fx-setting-row"><label for="nhi-fx-change">Thay đổi nội dung</label><select id="nhi-fx-change" aria-label="Thay đổi nội dung"><option value="inherit">Theo mặc định</option><option value="icon">Phóng từ biểu tượng</option><option value="fade" selected>Mờ dần</option><option value="zoom">Phóng nhẹ</option><option value="slide-up">Trượt lên</option><option value="slide-side">Trượt ngang</option><option value="soft-pop">Bật mềm</option><option value="none">Không hiệu ứng</option></select><label class="nhi-fx-duration-wrap" for="nhi-fx-duration-change">Giây <input class="nhi-fx-duration" type="number" id="nhi-fx-duration-change" min="0.1" max="5" step="0.05" inputmode="decimal" value=".19" aria-label="Thời gian change (giây)"></label></div>
       <p id="nhiFxCurrent" class="voice-note" role="status" aria-live="polite"></p>
       </div>
       <button type="button" class="ghost" id="nhiFxPreview">▶ Xem thử hiệu ứng</button>
@@ -5441,7 +5442,9 @@ html body #planBox .sdone .pstatus{
       if(s.editing){var rich=c.querySelector('[data-language=vi]');if(rich)rich.focus();}
       if (window.NHI_HARD_MASCOT && window.NHI_HARD_MASCOT.sync) window.NHI_HARD_MASCOT.sync(c);
       if (c.animate && !reduceMotion() && prefs.fx && anim && window.NHI_WINDOW_FX) {
-        window.NHI_WINDOW_FX.open(c,'card');
+        if((anim==='next'||anim==='prev')&&window.NHI_WINDOW_FX.navigate)
+          window.NHI_WINDOW_FX.navigate(c,anim==='prev'?-1:1);
+        else window.NHI_WINDOW_FX.open(c,'card');
       } else if (c.animate && !reduceMotion() && prefs.fx && anim) {
         var ease = 'cubic-bezier(.16,.78,.23,1)';
         if (anim === 'flip') {
@@ -5467,7 +5470,7 @@ html body #planBox .sdone .pstatus{
       var pos0 = sess.pos, c = document.querySelector('#planBox .pcard');
       stopSpeech(); haptic(8); legendOpen = false;
       function turn() { flipping = false; if (!sess || sess.pos !== pos0) return; sess.flipped = !sess.flipped; sess.hanja = sess.flipped; if(window.NHI_HARD_MASCOT)window.NHI_HARD_MASCOT.clear(); var item=ITEMS[sess.queue[sess.pos]]; sess.spoken=sess.pos; speak(sess.flipped?item.ko:item.vi,sess.flipped?'ko-KR':'vi-VN'); anim = 'flip'; render(); }
-      if (c && c.animate && !reduceMotion() && prefs.fx) {
+      if (c && c.animate && !reduceMotion() && prefs.fx && !window.NHI_WINDOW_FX) {
         flipping = true;
         var a = c.animate([
           { opacity: 1, transform: 'translateY(0) scale(1)' },
@@ -7831,7 +7834,8 @@ const TYPES=[
   ['settings','Cửa sổ Cài đặt'],
   ['ai','Cửa sổ chat AI'],
   ['dialog','Hộp thoại và cửa sổ khác'],
-  ['card','Chuyển / lật thẻ'],
+  ['card','Lật thẻ (mặt trước / sau)'],
+  ['navigation','Tiến / Lùi giữa các thẻ'],
   ['change','Thay đổi nội dung / tùy chọn']
 ];
 const OPTIONS=[
@@ -7844,10 +7848,19 @@ const OPTIONS=[
   ['soft-pop','Bật mềm'],
   ['none','Không hiệu ứng']
 ];
-const FALLBACK={default:'fade',editor:'icon',settings:'soft-pop',ai:'slide-side',dialog:'zoom',card:'slide-side',change:'fade'};
+const FALLBACK={default:'fade',editor:'icon',settings:'soft-pop',ai:'slide-side',dialog:'zoom',card:'slide-side',navigation:'slide-side',change:'fade'};
+const DEFAULT_DURATION={default:.29,editor:.29,settings:.29,ai:.29,dialog:.29,card:.31,navigation:.42,change:.19};
+const MIN_SECONDS=.1,MAX_SECONDS=5;
 let prefs={};try{prefs=JSON.parse(localStorage.getItem(STORAGE)||'{}')||{};}catch(_){}
 if(!prefs||typeof prefs!=='object')prefs={};
 const running=new WeakMap();
+const durationSeconds=type=>{
+  const value=Number(prefs.durations?.[type]);
+  return Number.isFinite(value)&&value>=MIN_SECONDS&&value<=MAX_SECONDS?value:DEFAULT_DURATION[type]??DEFAULT_DURATION.default;
+};
+const durationMs=type=>Math.round(durationSeconds(type)*1000);
+const saveSettings=()=>{try{localStorage.setItem(STORAGE,JSON.stringify(prefs));}catch(_){}};
+
 const reduced=()=>window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches;
 const choose=type=>{
   // Editor must use exactly the same effect as the main Settings window.
@@ -7857,7 +7870,7 @@ const choose=type=>{
   if(category!=='default' && prefs.default && prefs.default!=='inherit')return prefs.default;
   return FALLBACK[category]||FALLBACK.default;
 };
-function keyframes(name,out) {
+function keyframes(name,out,direction) {
   let frames;
   switch(name){
    case 'icon':
@@ -7867,7 +7880,7 @@ function keyframes(name,out) {
    case 'slide-up':
      frames=[{opacity:0,translate:'0 23px'},{opacity:1,translate:'0 0'}];break;
    case 'slide-side':
-     frames=[{opacity:.12,translate:'42px 0'},{opacity:1,translate:'0 0'}];break;
+     frames=[{opacity:.12,translate:(direction===-1?'-42px':'42px')+' 0'},{opacity:1,translate:'0 0'}];break;
    case 'soft-pop':
      frames=[{opacity:0,scale:'.90'},{offset:.72,opacity:1,scale:'1.025'},{opacity:1,scale:'1'}];break;
    default:
@@ -7875,7 +7888,7 @@ function keyframes(name,out) {
   }
   return out?frames.slice().reverse():frames;
 }
-function play(node,type,closing,after){
+function play(node,type,closing,after,direction){
   const done=typeof after==='function'?after:()=>{};
   if(!node||!node.isConnected){done();return;}
   if(type==='editor')node.style.setProperty('animation','none','important');
@@ -7884,7 +7897,7 @@ function play(node,type,closing,after){
  const effect=choose(type);
   const old=running.get(node);if(old){try{old.cancel();}catch(_){ }running.delete(node);}
   if(reduced()||effect==='none'||!node.animate){done();return;}
-  const frames=keyframes(effect,closing);
+  const frames=keyframes(effect,closing,direction);
   let finished=false;
   const finish=()=>{
     if(finished)return;finished=true;
@@ -7893,15 +7906,19 @@ function play(node,type,closing,after){
   };
   let animation;
   try{
-    // Settings and the card editor share duration, easing and keyframes.
-    const duration=type==='change'?190:type==='card'?310:290;
-    animation=node.animate(frames,{duration,easing:closing?'cubic-bezier(.42,0,.8,.3)':'cubic-bezier(.2,.72,.27,1)',fill:'both'});
+    // Each transition category has its own user-configurable duration.
+    animation=node.animate(frames,{duration:durationMs(type),easing:closing?'cubic-bezier(.42,0,.8,.3)':'cubic-bezier(.2,.72,.27,1)',fill:'both'});
     running.set(node,animation);
     animation.onfinish=finish;
     animation.oncancel=()=>{if(running.get(node)===animation)running.delete(node);};
   }catch(_){done();}
 }
-const api={open:(node,type)=>play(node,type,false),close:(node,type,after)=>play(node,type,true,after),choose,get:()=>({...prefs})};
+const api={
+ open:(node,type)=>play(node,type,false),
+ close:(node,type,after)=>play(node,type,true,after),
+ navigate:(node,direction)=>play(node,'navigation',false,null,direction<0?-1:1),
+ duration:durationMs,durationSeconds,choose,get:()=>({...prefs})
+};
 window.NHI_WINDOW_FX=api;
 document.body?.classList.add('nhi-fx-runtime');
 function buildSettings(){
@@ -7933,18 +7950,53 @@ function buildSettings(){
    if(type==='editor'){
      select.replaceChildren(new Option('Theo Cài đặt tổng','inherit'));
      select.value='inherit';select.disabled=true;
-     select.title='Mở và đóng giống cửa sổ Cài đặt tổng';
+     select.title='Kiểu chuyển cảnh giống Cài đặt tổng; thời gian chỉnh riêng';
    }else{
      select.disabled=false;
      select.value=prefs[type]||(type==='default'?'fade':FALLBACK[type]);
    }
    select.addEventListener('change',()=>{
      prefs[type]=select.value;
-     try{localStorage.setItem(STORAGE,JSON.stringify(prefs));}catch(_){}
+     saveSettings();
      const feedback=group.querySelector('#nhiFxCurrent');
      if(feedback)feedback.textContent='Đã lưu hiệu ứng '+label.toLowerCase();
      play(group,'change',false);
    });
+   // Every effect, including the editor linked to Settings, has its own seconds.
+   const row=select.closest('.nhi-fx-setting-row');
+   if(row){
+     let seconds=row.querySelector('#nhi-fx-duration-'+type);
+     if(!seconds){
+       const wrap=document.createElement('label');
+       wrap.className='nhi-fx-duration-wrap';
+       wrap.textContent='Giây';
+       seconds=document.createElement('input');
+       seconds.className='nhi-fx-duration';
+       seconds.id='nhi-fx-duration-'+type;
+       wrap.appendChild(seconds);
+       row.appendChild(wrap);
+     }
+     seconds.type='number';seconds.min=String(MIN_SECONDS);seconds.max=String(MAX_SECONDS);
+     seconds.step='.05';seconds.inputMode='decimal';
+     seconds.setAttribute('aria-label','Thời gian '+label+' (giây)');
+     seconds.value=durationSeconds(type).toFixed(2);
+     seconds.addEventListener('change',()=>{
+       const val=Number(seconds.value);
+       if(!Number.isFinite(val)||val<MIN_SECONDS||val>MAX_SECONDS){
+         seconds.setCustomValidity('Chọn từ 0,1 đến 5 giây');
+         seconds.reportValidity();return;
+       }
+       seconds.setCustomValidity('');
+       prefs.durations=Object.assign({},prefs.durations||{},{[type]:val});
+       saveSettings();
+       const feedback=group.querySelector('#nhiFxCurrent');
+       if(feedback)feedback.textContent='Đã lưu '+label.toLowerCase()+': '+val+' giây';
+     });
+     seconds.addEventListener('input',()=>{
+       const val=Number(seconds.value);
+       seconds.setCustomValidity(val>=MIN_SECONDS&&val<=MAX_SECONDS?'':'Chọn từ 0,1 đến 5 giây');
+     });
+   }
  });
  let feedback=group.querySelector('#nhiFxCurrent');
  if(!feedback){
@@ -7958,7 +8010,7 @@ function buildSettings(){
    if(reduced()||choose('settings')==='none'){feedback.textContent='Hiệu ứng đang tắt';return;}
    if(typeof group.animate==='function'){
      group.animate(keyframes(choose('settings'),false),{
-       duration:650,easing:'cubic-bezier(.2,.72,.27,1)',fill:'none'
+       duration:durationMs('settings'),easing:'cubic-bezier(.2,.72,.27,1)',fill:'none'
      });
    }
    feedback.textContent='Đang xem trước: '+(OPTIONS.find(o=>o[0]===choose('settings'))?.[1]||choose('settings'));
