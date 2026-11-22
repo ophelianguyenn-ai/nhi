@@ -1492,14 +1492,14 @@ html body #planBox .sdone .pstatus{
       <h3 id="nhiTransitionTitle">✨ Hiệu ứng chuyển cảnh</h3>
       <p class="voice-note">Chọn kiểu mở/đóng cửa sổ và chuyển thẻ. Cửa sổ sửa thẻ sử dụng đúng hiệu ứng của Cài đặt tổng.</p>
       <div id="nhiTransitionOptions">
-      <div class="setrow nhi-fx-setting-row"><label for="nhi-fx-default">Mặc định cho tất cả</label><select id="nhi-fx-default" aria-label="Mặc định cho tất cả"><option value="icon">Phóng từ biểu tượng</option><option value="fade" selected>Mờ dần</option><option value="zoom">Phóng nhẹ</option><option value="slide-up">Trượt lên</option><option value="slide-side">Trượt ngang</option><option value="soft-pop">Bật mềm</option><option value="none">Không hiệu ứng</option></select><label class="nhi-fx-duration-wrap" for="nhi-fx-duration-default">Giây <input class="nhi-fx-duration" type="number" id="nhi-fx-duration-default" min="0.1" max="5" step="0.01" inputmode="decimal" value=".29" aria-label="Thời gian default (giây)"></label></div>
+      <div class="setrow nhi-fx-setting-row"><label for="nhi-fx-default">Mặc định cho tất cả</label><select id="nhi-fx-default" aria-label="Mặc định cho tất cả"><optgroup label="Mờ dần · Phóng/thu"><option value="fade" selected>Mờ dần</option><option value="fade-up">Mờ dần từ dưới</option><option value="fade-down">Mờ dần từ trên</option><option value="fade-left">Mờ dần từ trái</option><option value="fade-right">Mờ dần từ phải</option><option value="zoom">Phóng nhẹ</option><option value="zoom-strong">Phóng từ nhỏ</option><option value="zoom-out">Thu từ lớn</option><option value="zoom-blur">Phóng và tan mờ</option><option value="soft-pop">Bật mềm</option><option value="icon">Phóng từ biểu tượng</option><option value="blur-in">Từ mờ thành nét</option><option value="focus-in">Lấy nét mềm</option></optgroup><optgroup label="Trượt · Bay vào"><option value="slide-side">Trượt ngang theo hướng</option><option value="slide-up">Trượt lên</option><option value="slide-down">Trượt xuống</option><option value="slide-left">Trượt từ trái</option><option value="slide-right">Trượt từ phải</option><option value="slide-far">Trượt xa</option><option value="slide-diagonal-up">Trượt chéo lên</option><option value="slide-diagonal-down">Trượt chéo xuống</option><option value="slide-overshoot">Trượt vượt đà</option><option value="float-in">Lướt nhẹ vào</option></optgroup><optgroup label="Nảy · Đàn hồi"><option value="bounce">Nảy xuống</option><option value="spring">Lò xo mềm</option><option value="elastic">Đàn hồi ngang</option><option value="rubber">Co giãn cao su</option><option value="back-in">Lùi rồi bật</option><option value="pop">Bật nổi</option><option value="pulse">Nhịp phóng</option><option value="heartbeat">Nhịp tim</option><option value="shake-x">Rung ngang</option><option value="shake-y">Rung dọc</option><option value="wobble">Lắc lư</option><option value="jello">Rung thạch</option></optgroup><optgroup label="Xoay · Lật 3D"><option value="flip-x">Lật 3D trục ngang</option><option value="flip-y">Lật 3D trục dọc</option><option value="flip-diagonal">Lật 3D chéo</option><option value="tilt-in">Nghiêng vào</option><option value="rotate-left">Xoay từ trái</option><option value="rotate-right">Xoay từ phải</option><option value="spin-in">Xoay tròn</option><option value="swing">Đu đưa</option><option value="cube-left">Khối lập phương trái</option><option value="cube-right">Khối lập phương phải</option><option value="page-turn">Lật trang sách</option><option value="book-open">Mở quyển sách</option></optgroup><optgroup label="Màn che · Hiện hình"><option value="wipe-left">Mở màn từ trái</option><option value="wipe-right">Mở màn từ phải</option><option value="wipe-up">Mở màn từ dưới</option><option value="wipe-down">Mở màn từ trên</option><option value="curtain">Rèm mở dọc</option><option value="iris">Khẩu độ tròn</option><option value="unfold">Mở nếp gấp</option><option value="fold-in">Gấp 3D</option><option value="blinds">Rèm trượt giữa</option><option value="reveal-top">Hiện dần từ trên</option></optgroup><optgroup label="Độc đáo · Nổi bật"><option value="light-speed">Lướt tốc độ cao</option><option value="skew-in">Nghiêng phối cảnh</option><option value="glow-in">Phát sáng nhẹ</option><option value="drop-in">Rơi từ trên</option><option value="rise-in">Vút từ dưới</option><option value="hinge-in">Bản lề xoay</option><option value="roll-in">Lăn vào</option><option value="magnetic">Hút nam châm</option><option value="stretch">Kéo giãn</option><option value="squash">Nén bật</option></optgroup><option value="none">Tắt hiệu ứng</option></select><label class="nhi-fx-duration-wrap" for="nhi-fx-duration-default">Giây <input class="nhi-fx-duration" type="number" id="nhi-fx-duration-default" min="0.1" max="5" step="0.01" inputmode="decimal" value=".29" aria-label="Thời gian default (giây)"></label></div>
       <div class="setrow nhi-fx-setting-row"><label for="nhi-fx-editor">Cửa sổ chỉnh sửa thẻ</label><select id="nhi-fx-editor" aria-label="Cửa sổ chỉnh sửa thẻ" disabled title="Mở và đóng giống Cài đặt tổng"><option value="inherit" selected>Theo Cài đặt tổng</option></select><label class="nhi-fx-duration-wrap" for="nhi-fx-duration-editor">Giây <input class="nhi-fx-duration" type="number" id="nhi-fx-duration-editor" min="0.1" max="5" step="0.01" inputmode="decimal" value=".29" aria-label="Thời gian editor (giây)"></label></div>
-      <div class="setrow nhi-fx-setting-row"><label for="nhi-fx-settings">Cửa sổ Cài đặt</label><select id="nhi-fx-settings" aria-label="Cửa sổ Cài đặt"><option value="inherit">Theo mặc định</option><option value="icon">Phóng từ biểu tượng</option><option value="fade">Mờ dần</option><option value="zoom">Phóng nhẹ</option><option value="slide-up">Trượt lên</option><option value="slide-side">Trượt ngang</option><option value="soft-pop" selected>Bật mềm</option><option value="none">Không hiệu ứng</option></select><label class="nhi-fx-duration-wrap" for="nhi-fx-duration-settings">Giây <input class="nhi-fx-duration" type="number" id="nhi-fx-duration-settings" min="0.1" max="5" step="0.01" inputmode="decimal" value=".29" aria-label="Thời gian settings (giây)"></label></div>
-      <div class="setrow nhi-fx-setting-row"><label for="nhi-fx-ai">Cửa sổ chat AI</label><select id="nhi-fx-ai" aria-label="Cửa sổ chat AI"><option value="inherit">Theo mặc định</option><option value="icon">Phóng từ biểu tượng</option><option value="fade">Mờ dần</option><option value="zoom">Phóng nhẹ</option><option value="slide-up">Trượt lên</option><option value="slide-side" selected>Trượt ngang</option><option value="soft-pop">Bật mềm</option><option value="none">Không hiệu ứng</option></select><label class="nhi-fx-duration-wrap" for="nhi-fx-duration-ai">Giây <input class="nhi-fx-duration" type="number" id="nhi-fx-duration-ai" min="0.1" max="5" step="0.01" inputmode="decimal" value=".29" aria-label="Thời gian ai (giây)"></label></div>
-      <div class="setrow nhi-fx-setting-row"><label for="nhi-fx-dialog">Hộp thoại khác</label><select id="nhi-fx-dialog" aria-label="Hộp thoại khác"><option value="inherit">Theo mặc định</option><option value="icon">Phóng từ biểu tượng</option><option value="fade">Mờ dần</option><option value="zoom" selected>Phóng nhẹ</option><option value="slide-up">Trượt lên</option><option value="slide-side">Trượt ngang</option><option value="soft-pop">Bật mềm</option><option value="none">Không hiệu ứng</option></select><label class="nhi-fx-duration-wrap" for="nhi-fx-duration-dialog">Giây <input class="nhi-fx-duration" type="number" id="nhi-fx-duration-dialog" min="0.1" max="5" step="0.01" inputmode="decimal" value=".29" aria-label="Thời gian dialog (giây)"></label></div>
-      <div class="setrow nhi-fx-setting-row"><label for="nhi-fx-card">Lật thẻ (mặt trước / sau)</label><select id="nhi-fx-card" aria-label="Chuyển / lật thẻ"><option value="classic" selected>Hiệu ứng gốc (khuyến nghị)</option><option value="inherit">Theo mặc định</option><option value="icon">Phóng từ biểu tượng</option><option value="fade">Mờ dần</option><option value="zoom">Phóng nhẹ</option><option value="slide-up">Trượt lên</option><option value="slide-side">Trượt ngang</option><option value="soft-pop">Bật mềm</option><option value="none">Không hiệu ứng</option></select><label class="nhi-fx-duration-wrap" for="nhi-fx-duration-card">Giây <input class="nhi-fx-duration" type="number" id="nhi-fx-duration-card" min="0.1" max="5" step="0.01" inputmode="decimal" value=".35" aria-label="Thời gian card (giây)"></label></div>
-      <div class="setrow nhi-fx-setting-row"><label for="nhi-fx-navigation">Tiến / Lùi giữa các thẻ</label><select id="nhi-fx-navigation" aria-label="Tiến / Lùi giữa các thẻ"><option value="classic" selected>Hiệu ứng gốc (khuyến nghị)</option><option value="inherit">Theo mặc định</option><option value="icon">Phóng từ biểu tượng</option><option value="fade">Mờ dần</option><option value="zoom">Phóng nhẹ</option><option value="slide-up">Trượt lên</option><option value="slide-side">Trượt ngang</option><option value="soft-pop">Bật mềm</option><option value="none">Không hiệu ứng</option></select><label class="nhi-fx-duration-wrap" for="nhi-fx-duration-navigation">Giây <input class="nhi-fx-duration" type="number" id="nhi-fx-duration-navigation" min="0.1" max="5" step="0.01" inputmode="decimal" value=".62" aria-label="Thời gian navigation (giây)"></label></div>
-      <div class="setrow nhi-fx-setting-row"><label for="nhi-fx-change">Thay đổi nội dung</label><select id="nhi-fx-change" aria-label="Thay đổi nội dung"><option value="inherit">Theo mặc định</option><option value="icon">Phóng từ biểu tượng</option><option value="fade" selected>Mờ dần</option><option value="zoom">Phóng nhẹ</option><option value="slide-up">Trượt lên</option><option value="slide-side">Trượt ngang</option><option value="soft-pop">Bật mềm</option><option value="none">Không hiệu ứng</option></select><label class="nhi-fx-duration-wrap" for="nhi-fx-duration-change">Giây <input class="nhi-fx-duration" type="number" id="nhi-fx-duration-change" min="0.1" max="5" step="0.01" inputmode="decimal" value=".19" aria-label="Thời gian change (giây)"></label></div>
+      <div class="setrow nhi-fx-setting-row"><label for="nhi-fx-settings">Cửa sổ Cài đặt</label><select id="nhi-fx-settings" aria-label="Cửa sổ Cài đặt"><option value="inherit">Theo mặc định</option><optgroup label="Mờ dần · Phóng/thu"><option value="fade">Mờ dần</option><option value="fade-up">Mờ dần từ dưới</option><option value="fade-down">Mờ dần từ trên</option><option value="fade-left">Mờ dần từ trái</option><option value="fade-right">Mờ dần từ phải</option><option value="zoom">Phóng nhẹ</option><option value="zoom-strong">Phóng từ nhỏ</option><option value="zoom-out">Thu từ lớn</option><option value="zoom-blur">Phóng và tan mờ</option><option value="soft-pop" selected>Bật mềm</option><option value="icon">Phóng từ biểu tượng</option><option value="blur-in">Từ mờ thành nét</option><option value="focus-in">Lấy nét mềm</option></optgroup><optgroup label="Trượt · Bay vào"><option value="slide-side">Trượt ngang theo hướng</option><option value="slide-up">Trượt lên</option><option value="slide-down">Trượt xuống</option><option value="slide-left">Trượt từ trái</option><option value="slide-right">Trượt từ phải</option><option value="slide-far">Trượt xa</option><option value="slide-diagonal-up">Trượt chéo lên</option><option value="slide-diagonal-down">Trượt chéo xuống</option><option value="slide-overshoot">Trượt vượt đà</option><option value="float-in">Lướt nhẹ vào</option></optgroup><optgroup label="Nảy · Đàn hồi"><option value="bounce">Nảy xuống</option><option value="spring">Lò xo mềm</option><option value="elastic">Đàn hồi ngang</option><option value="rubber">Co giãn cao su</option><option value="back-in">Lùi rồi bật</option><option value="pop">Bật nổi</option><option value="pulse">Nhịp phóng</option><option value="heartbeat">Nhịp tim</option><option value="shake-x">Rung ngang</option><option value="shake-y">Rung dọc</option><option value="wobble">Lắc lư</option><option value="jello">Rung thạch</option></optgroup><optgroup label="Xoay · Lật 3D"><option value="flip-x">Lật 3D trục ngang</option><option value="flip-y">Lật 3D trục dọc</option><option value="flip-diagonal">Lật 3D chéo</option><option value="tilt-in">Nghiêng vào</option><option value="rotate-left">Xoay từ trái</option><option value="rotate-right">Xoay từ phải</option><option value="spin-in">Xoay tròn</option><option value="swing">Đu đưa</option><option value="cube-left">Khối lập phương trái</option><option value="cube-right">Khối lập phương phải</option><option value="page-turn">Lật trang sách</option><option value="book-open">Mở quyển sách</option></optgroup><optgroup label="Màn che · Hiện hình"><option value="wipe-left">Mở màn từ trái</option><option value="wipe-right">Mở màn từ phải</option><option value="wipe-up">Mở màn từ dưới</option><option value="wipe-down">Mở màn từ trên</option><option value="curtain">Rèm mở dọc</option><option value="iris">Khẩu độ tròn</option><option value="unfold">Mở nếp gấp</option><option value="fold-in">Gấp 3D</option><option value="blinds">Rèm trượt giữa</option><option value="reveal-top">Hiện dần từ trên</option></optgroup><optgroup label="Độc đáo · Nổi bật"><option value="light-speed">Lướt tốc độ cao</option><option value="skew-in">Nghiêng phối cảnh</option><option value="glow-in">Phát sáng nhẹ</option><option value="drop-in">Rơi từ trên</option><option value="rise-in">Vút từ dưới</option><option value="hinge-in">Bản lề xoay</option><option value="roll-in">Lăn vào</option><option value="magnetic">Hút nam châm</option><option value="stretch">Kéo giãn</option><option value="squash">Nén bật</option></optgroup><option value="none">Tắt hiệu ứng</option></select><label class="nhi-fx-duration-wrap" for="nhi-fx-duration-settings">Giây <input class="nhi-fx-duration" type="number" id="nhi-fx-duration-settings" min="0.1" max="5" step="0.01" inputmode="decimal" value=".29" aria-label="Thời gian settings (giây)"></label></div>
+      <div class="setrow nhi-fx-setting-row"><label for="nhi-fx-ai">Cửa sổ chat AI</label><select id="nhi-fx-ai" aria-label="Cửa sổ chat AI"><option value="inherit">Theo mặc định</option><optgroup label="Mờ dần · Phóng/thu"><option value="fade">Mờ dần</option><option value="fade-up">Mờ dần từ dưới</option><option value="fade-down">Mờ dần từ trên</option><option value="fade-left">Mờ dần từ trái</option><option value="fade-right">Mờ dần từ phải</option><option value="zoom">Phóng nhẹ</option><option value="zoom-strong">Phóng từ nhỏ</option><option value="zoom-out">Thu từ lớn</option><option value="zoom-blur">Phóng và tan mờ</option><option value="soft-pop">Bật mềm</option><option value="icon">Phóng từ biểu tượng</option><option value="blur-in">Từ mờ thành nét</option><option value="focus-in">Lấy nét mềm</option></optgroup><optgroup label="Trượt · Bay vào"><option value="slide-side" selected>Trượt ngang theo hướng</option><option value="slide-up">Trượt lên</option><option value="slide-down">Trượt xuống</option><option value="slide-left">Trượt từ trái</option><option value="slide-right">Trượt từ phải</option><option value="slide-far">Trượt xa</option><option value="slide-diagonal-up">Trượt chéo lên</option><option value="slide-diagonal-down">Trượt chéo xuống</option><option value="slide-overshoot">Trượt vượt đà</option><option value="float-in">Lướt nhẹ vào</option></optgroup><optgroup label="Nảy · Đàn hồi"><option value="bounce">Nảy xuống</option><option value="spring">Lò xo mềm</option><option value="elastic">Đàn hồi ngang</option><option value="rubber">Co giãn cao su</option><option value="back-in">Lùi rồi bật</option><option value="pop">Bật nổi</option><option value="pulse">Nhịp phóng</option><option value="heartbeat">Nhịp tim</option><option value="shake-x">Rung ngang</option><option value="shake-y">Rung dọc</option><option value="wobble">Lắc lư</option><option value="jello">Rung thạch</option></optgroup><optgroup label="Xoay · Lật 3D"><option value="flip-x">Lật 3D trục ngang</option><option value="flip-y">Lật 3D trục dọc</option><option value="flip-diagonal">Lật 3D chéo</option><option value="tilt-in">Nghiêng vào</option><option value="rotate-left">Xoay từ trái</option><option value="rotate-right">Xoay từ phải</option><option value="spin-in">Xoay tròn</option><option value="swing">Đu đưa</option><option value="cube-left">Khối lập phương trái</option><option value="cube-right">Khối lập phương phải</option><option value="page-turn">Lật trang sách</option><option value="book-open">Mở quyển sách</option></optgroup><optgroup label="Màn che · Hiện hình"><option value="wipe-left">Mở màn từ trái</option><option value="wipe-right">Mở màn từ phải</option><option value="wipe-up">Mở màn từ dưới</option><option value="wipe-down">Mở màn từ trên</option><option value="curtain">Rèm mở dọc</option><option value="iris">Khẩu độ tròn</option><option value="unfold">Mở nếp gấp</option><option value="fold-in">Gấp 3D</option><option value="blinds">Rèm trượt giữa</option><option value="reveal-top">Hiện dần từ trên</option></optgroup><optgroup label="Độc đáo · Nổi bật"><option value="light-speed">Lướt tốc độ cao</option><option value="skew-in">Nghiêng phối cảnh</option><option value="glow-in">Phát sáng nhẹ</option><option value="drop-in">Rơi từ trên</option><option value="rise-in">Vút từ dưới</option><option value="hinge-in">Bản lề xoay</option><option value="roll-in">Lăn vào</option><option value="magnetic">Hút nam châm</option><option value="stretch">Kéo giãn</option><option value="squash">Nén bật</option></optgroup><option value="none">Tắt hiệu ứng</option></select><label class="nhi-fx-duration-wrap" for="nhi-fx-duration-ai">Giây <input class="nhi-fx-duration" type="number" id="nhi-fx-duration-ai" min="0.1" max="5" step="0.01" inputmode="decimal" value=".29" aria-label="Thời gian ai (giây)"></label></div>
+      <div class="setrow nhi-fx-setting-row"><label for="nhi-fx-dialog">Hộp thoại khác</label><select id="nhi-fx-dialog" aria-label="Hộp thoại khác"><option value="inherit">Theo mặc định</option><optgroup label="Mờ dần · Phóng/thu"><option value="fade">Mờ dần</option><option value="fade-up">Mờ dần từ dưới</option><option value="fade-down">Mờ dần từ trên</option><option value="fade-left">Mờ dần từ trái</option><option value="fade-right">Mờ dần từ phải</option><option value="zoom" selected>Phóng nhẹ</option><option value="zoom-strong">Phóng từ nhỏ</option><option value="zoom-out">Thu từ lớn</option><option value="zoom-blur">Phóng và tan mờ</option><option value="soft-pop">Bật mềm</option><option value="icon">Phóng từ biểu tượng</option><option value="blur-in">Từ mờ thành nét</option><option value="focus-in">Lấy nét mềm</option></optgroup><optgroup label="Trượt · Bay vào"><option value="slide-side">Trượt ngang theo hướng</option><option value="slide-up">Trượt lên</option><option value="slide-down">Trượt xuống</option><option value="slide-left">Trượt từ trái</option><option value="slide-right">Trượt từ phải</option><option value="slide-far">Trượt xa</option><option value="slide-diagonal-up">Trượt chéo lên</option><option value="slide-diagonal-down">Trượt chéo xuống</option><option value="slide-overshoot">Trượt vượt đà</option><option value="float-in">Lướt nhẹ vào</option></optgroup><optgroup label="Nảy · Đàn hồi"><option value="bounce">Nảy xuống</option><option value="spring">Lò xo mềm</option><option value="elastic">Đàn hồi ngang</option><option value="rubber">Co giãn cao su</option><option value="back-in">Lùi rồi bật</option><option value="pop">Bật nổi</option><option value="pulse">Nhịp phóng</option><option value="heartbeat">Nhịp tim</option><option value="shake-x">Rung ngang</option><option value="shake-y">Rung dọc</option><option value="wobble">Lắc lư</option><option value="jello">Rung thạch</option></optgroup><optgroup label="Xoay · Lật 3D"><option value="flip-x">Lật 3D trục ngang</option><option value="flip-y">Lật 3D trục dọc</option><option value="flip-diagonal">Lật 3D chéo</option><option value="tilt-in">Nghiêng vào</option><option value="rotate-left">Xoay từ trái</option><option value="rotate-right">Xoay từ phải</option><option value="spin-in">Xoay tròn</option><option value="swing">Đu đưa</option><option value="cube-left">Khối lập phương trái</option><option value="cube-right">Khối lập phương phải</option><option value="page-turn">Lật trang sách</option><option value="book-open">Mở quyển sách</option></optgroup><optgroup label="Màn che · Hiện hình"><option value="wipe-left">Mở màn từ trái</option><option value="wipe-right">Mở màn từ phải</option><option value="wipe-up">Mở màn từ dưới</option><option value="wipe-down">Mở màn từ trên</option><option value="curtain">Rèm mở dọc</option><option value="iris">Khẩu độ tròn</option><option value="unfold">Mở nếp gấp</option><option value="fold-in">Gấp 3D</option><option value="blinds">Rèm trượt giữa</option><option value="reveal-top">Hiện dần từ trên</option></optgroup><optgroup label="Độc đáo · Nổi bật"><option value="light-speed">Lướt tốc độ cao</option><option value="skew-in">Nghiêng phối cảnh</option><option value="glow-in">Phát sáng nhẹ</option><option value="drop-in">Rơi từ trên</option><option value="rise-in">Vút từ dưới</option><option value="hinge-in">Bản lề xoay</option><option value="roll-in">Lăn vào</option><option value="magnetic">Hút nam châm</option><option value="stretch">Kéo giãn</option><option value="squash">Nén bật</option></optgroup><option value="none">Tắt hiệu ứng</option></select><label class="nhi-fx-duration-wrap" for="nhi-fx-duration-dialog">Giây <input class="nhi-fx-duration" type="number" id="nhi-fx-duration-dialog" min="0.1" max="5" step="0.01" inputmode="decimal" value=".29" aria-label="Thời gian dialog (giây)"></label></div>
+      <div class="setrow nhi-fx-setting-row"><label for="nhi-fx-card">Lật thẻ (mặt trước / sau)</label><select id="nhi-fx-card" aria-label="Chuyển / lật thẻ"><option value="inherit">Theo mặc định</option><option value="classic" selected>★ Hiệu ứng gốc</option><optgroup label="Mờ dần · Phóng/thu"><option value="fade">Mờ dần</option><option value="fade-up">Mờ dần từ dưới</option><option value="fade-down">Mờ dần từ trên</option><option value="fade-left">Mờ dần từ trái</option><option value="fade-right">Mờ dần từ phải</option><option value="zoom">Phóng nhẹ</option><option value="zoom-strong">Phóng từ nhỏ</option><option value="zoom-out">Thu từ lớn</option><option value="zoom-blur">Phóng và tan mờ</option><option value="soft-pop">Bật mềm</option><option value="icon">Phóng từ biểu tượng</option><option value="blur-in">Từ mờ thành nét</option><option value="focus-in">Lấy nét mềm</option></optgroup><optgroup label="Trượt · Bay vào"><option value="slide-side">Trượt ngang theo hướng</option><option value="slide-up">Trượt lên</option><option value="slide-down">Trượt xuống</option><option value="slide-left">Trượt từ trái</option><option value="slide-right">Trượt từ phải</option><option value="slide-far">Trượt xa</option><option value="slide-diagonal-up">Trượt chéo lên</option><option value="slide-diagonal-down">Trượt chéo xuống</option><option value="slide-overshoot">Trượt vượt đà</option><option value="float-in">Lướt nhẹ vào</option></optgroup><optgroup label="Nảy · Đàn hồi"><option value="bounce">Nảy xuống</option><option value="spring">Lò xo mềm</option><option value="elastic">Đàn hồi ngang</option><option value="rubber">Co giãn cao su</option><option value="back-in">Lùi rồi bật</option><option value="pop">Bật nổi</option><option value="pulse">Nhịp phóng</option><option value="heartbeat">Nhịp tim</option><option value="shake-x">Rung ngang</option><option value="shake-y">Rung dọc</option><option value="wobble">Lắc lư</option><option value="jello">Rung thạch</option></optgroup><optgroup label="Xoay · Lật 3D"><option value="flip-x">Lật 3D trục ngang</option><option value="flip-y">Lật 3D trục dọc</option><option value="flip-diagonal">Lật 3D chéo</option><option value="tilt-in">Nghiêng vào</option><option value="rotate-left">Xoay từ trái</option><option value="rotate-right">Xoay từ phải</option><option value="spin-in">Xoay tròn</option><option value="swing">Đu đưa</option><option value="cube-left">Khối lập phương trái</option><option value="cube-right">Khối lập phương phải</option><option value="page-turn">Lật trang sách</option><option value="book-open">Mở quyển sách</option></optgroup><optgroup label="Màn che · Hiện hình"><option value="wipe-left">Mở màn từ trái</option><option value="wipe-right">Mở màn từ phải</option><option value="wipe-up">Mở màn từ dưới</option><option value="wipe-down">Mở màn từ trên</option><option value="curtain">Rèm mở dọc</option><option value="iris">Khẩu độ tròn</option><option value="unfold">Mở nếp gấp</option><option value="fold-in">Gấp 3D</option><option value="blinds">Rèm trượt giữa</option><option value="reveal-top">Hiện dần từ trên</option></optgroup><optgroup label="Độc đáo · Nổi bật"><option value="light-speed">Lướt tốc độ cao</option><option value="skew-in">Nghiêng phối cảnh</option><option value="glow-in">Phát sáng nhẹ</option><option value="drop-in">Rơi từ trên</option><option value="rise-in">Vút từ dưới</option><option value="hinge-in">Bản lề xoay</option><option value="roll-in">Lăn vào</option><option value="magnetic">Hút nam châm</option><option value="stretch">Kéo giãn</option><option value="squash">Nén bật</option></optgroup><option value="none">Tắt hiệu ứng</option></select><label class="nhi-fx-duration-wrap" for="nhi-fx-duration-card">Giây <input class="nhi-fx-duration" type="number" id="nhi-fx-duration-card" min="0.1" max="5" step="0.01" inputmode="decimal" value=".35" aria-label="Thời gian card (giây)"></label></div>
+      <div class="setrow nhi-fx-setting-row"><label for="nhi-fx-navigation">Tiến / Lùi giữa các thẻ</label><select id="nhi-fx-navigation" aria-label="Tiến / Lùi giữa các thẻ"><option value="inherit">Theo mặc định</option><option value="classic" selected>★ Hiệu ứng gốc</option><optgroup label="Mờ dần · Phóng/thu"><option value="fade">Mờ dần</option><option value="fade-up">Mờ dần từ dưới</option><option value="fade-down">Mờ dần từ trên</option><option value="fade-left">Mờ dần từ trái</option><option value="fade-right">Mờ dần từ phải</option><option value="zoom">Phóng nhẹ</option><option value="zoom-strong">Phóng từ nhỏ</option><option value="zoom-out">Thu từ lớn</option><option value="zoom-blur">Phóng và tan mờ</option><option value="soft-pop">Bật mềm</option><option value="icon">Phóng từ biểu tượng</option><option value="blur-in">Từ mờ thành nét</option><option value="focus-in">Lấy nét mềm</option></optgroup><optgroup label="Trượt · Bay vào"><option value="slide-side">Trượt ngang theo hướng</option><option value="slide-up">Trượt lên</option><option value="slide-down">Trượt xuống</option><option value="slide-left">Trượt từ trái</option><option value="slide-right">Trượt từ phải</option><option value="slide-far">Trượt xa</option><option value="slide-diagonal-up">Trượt chéo lên</option><option value="slide-diagonal-down">Trượt chéo xuống</option><option value="slide-overshoot">Trượt vượt đà</option><option value="float-in">Lướt nhẹ vào</option></optgroup><optgroup label="Nảy · Đàn hồi"><option value="bounce">Nảy xuống</option><option value="spring">Lò xo mềm</option><option value="elastic">Đàn hồi ngang</option><option value="rubber">Co giãn cao su</option><option value="back-in">Lùi rồi bật</option><option value="pop">Bật nổi</option><option value="pulse">Nhịp phóng</option><option value="heartbeat">Nhịp tim</option><option value="shake-x">Rung ngang</option><option value="shake-y">Rung dọc</option><option value="wobble">Lắc lư</option><option value="jello">Rung thạch</option></optgroup><optgroup label="Xoay · Lật 3D"><option value="flip-x">Lật 3D trục ngang</option><option value="flip-y">Lật 3D trục dọc</option><option value="flip-diagonal">Lật 3D chéo</option><option value="tilt-in">Nghiêng vào</option><option value="rotate-left">Xoay từ trái</option><option value="rotate-right">Xoay từ phải</option><option value="spin-in">Xoay tròn</option><option value="swing">Đu đưa</option><option value="cube-left">Khối lập phương trái</option><option value="cube-right">Khối lập phương phải</option><option value="page-turn">Lật trang sách</option><option value="book-open">Mở quyển sách</option></optgroup><optgroup label="Màn che · Hiện hình"><option value="wipe-left">Mở màn từ trái</option><option value="wipe-right">Mở màn từ phải</option><option value="wipe-up">Mở màn từ dưới</option><option value="wipe-down">Mở màn từ trên</option><option value="curtain">Rèm mở dọc</option><option value="iris">Khẩu độ tròn</option><option value="unfold">Mở nếp gấp</option><option value="fold-in">Gấp 3D</option><option value="blinds">Rèm trượt giữa</option><option value="reveal-top">Hiện dần từ trên</option></optgroup><optgroup label="Độc đáo · Nổi bật"><option value="light-speed">Lướt tốc độ cao</option><option value="skew-in">Nghiêng phối cảnh</option><option value="glow-in">Phát sáng nhẹ</option><option value="drop-in">Rơi từ trên</option><option value="rise-in">Vút từ dưới</option><option value="hinge-in">Bản lề xoay</option><option value="roll-in">Lăn vào</option><option value="magnetic">Hút nam châm</option><option value="stretch">Kéo giãn</option><option value="squash">Nén bật</option></optgroup><option value="none">Tắt hiệu ứng</option></select><label class="nhi-fx-duration-wrap" for="nhi-fx-duration-navigation">Giây <input class="nhi-fx-duration" type="number" id="nhi-fx-duration-navigation" min="0.1" max="5" step="0.01" inputmode="decimal" value=".62" aria-label="Thời gian navigation (giây)"></label></div>
+      <div class="setrow nhi-fx-setting-row"><label for="nhi-fx-change">Thay đổi nội dung</label><select id="nhi-fx-change" aria-label="Thay đổi nội dung"><option value="inherit">Theo mặc định</option><optgroup label="Mờ dần · Phóng/thu"><option value="fade" selected>Mờ dần</option><option value="fade-up">Mờ dần từ dưới</option><option value="fade-down">Mờ dần từ trên</option><option value="fade-left">Mờ dần từ trái</option><option value="fade-right">Mờ dần từ phải</option><option value="zoom">Phóng nhẹ</option><option value="zoom-strong">Phóng từ nhỏ</option><option value="zoom-out">Thu từ lớn</option><option value="zoom-blur">Phóng và tan mờ</option><option value="soft-pop">Bật mềm</option><option value="icon">Phóng từ biểu tượng</option><option value="blur-in">Từ mờ thành nét</option><option value="focus-in">Lấy nét mềm</option></optgroup><optgroup label="Trượt · Bay vào"><option value="slide-side">Trượt ngang theo hướng</option><option value="slide-up">Trượt lên</option><option value="slide-down">Trượt xuống</option><option value="slide-left">Trượt từ trái</option><option value="slide-right">Trượt từ phải</option><option value="slide-far">Trượt xa</option><option value="slide-diagonal-up">Trượt chéo lên</option><option value="slide-diagonal-down">Trượt chéo xuống</option><option value="slide-overshoot">Trượt vượt đà</option><option value="float-in">Lướt nhẹ vào</option></optgroup><optgroup label="Nảy · Đàn hồi"><option value="bounce">Nảy xuống</option><option value="spring">Lò xo mềm</option><option value="elastic">Đàn hồi ngang</option><option value="rubber">Co giãn cao su</option><option value="back-in">Lùi rồi bật</option><option value="pop">Bật nổi</option><option value="pulse">Nhịp phóng</option><option value="heartbeat">Nhịp tim</option><option value="shake-x">Rung ngang</option><option value="shake-y">Rung dọc</option><option value="wobble">Lắc lư</option><option value="jello">Rung thạch</option></optgroup><optgroup label="Xoay · Lật 3D"><option value="flip-x">Lật 3D trục ngang</option><option value="flip-y">Lật 3D trục dọc</option><option value="flip-diagonal">Lật 3D chéo</option><option value="tilt-in">Nghiêng vào</option><option value="rotate-left">Xoay từ trái</option><option value="rotate-right">Xoay từ phải</option><option value="spin-in">Xoay tròn</option><option value="swing">Đu đưa</option><option value="cube-left">Khối lập phương trái</option><option value="cube-right">Khối lập phương phải</option><option value="page-turn">Lật trang sách</option><option value="book-open">Mở quyển sách</option></optgroup><optgroup label="Màn che · Hiện hình"><option value="wipe-left">Mở màn từ trái</option><option value="wipe-right">Mở màn từ phải</option><option value="wipe-up">Mở màn từ dưới</option><option value="wipe-down">Mở màn từ trên</option><option value="curtain">Rèm mở dọc</option><option value="iris">Khẩu độ tròn</option><option value="unfold">Mở nếp gấp</option><option value="fold-in">Gấp 3D</option><option value="blinds">Rèm trượt giữa</option><option value="reveal-top">Hiện dần từ trên</option></optgroup><optgroup label="Độc đáo · Nổi bật"><option value="light-speed">Lướt tốc độ cao</option><option value="skew-in">Nghiêng phối cảnh</option><option value="glow-in">Phát sáng nhẹ</option><option value="drop-in">Rơi từ trên</option><option value="rise-in">Vút từ dưới</option><option value="hinge-in">Bản lề xoay</option><option value="roll-in">Lăn vào</option><option value="magnetic">Hút nam châm</option><option value="stretch">Kéo giãn</option><option value="squash">Nén bật</option></optgroup><option value="none">Tắt hiệu ứng</option></select><label class="nhi-fx-duration-wrap" for="nhi-fx-duration-change">Giây <input class="nhi-fx-duration" type="number" id="nhi-fx-duration-change" min="0.1" max="5" step="0.01" inputmode="decimal" value=".19" aria-label="Thời gian change (giây)"></label></div>
       <p id="nhiFxCurrent" class="voice-note" role="status" aria-live="polite"></p>
       </div>
       <button type="button" class="ghost" id="nhiFxPreview">▶ Xem thử hiệu ứng</button>
@@ -7848,7 +7848,7 @@ html body #planBox .pcard>.card-top>.cicons {
   gap:4px!important;justify-content:flex-end!important;
 }
 </style>
-<link rel="stylesheet" href="nhi-ui-refine-v2.css?v=20261122-fx-timing-per-item-v1">
+<link rel="stylesheet" href="nhi-ui-refine-v2.css?v=20261122-effect-library-69-v110">
 <script id="nhiFxInlineV5">
 /* Nhi's Learning Corner: selectable window/card transitions. */
 (function(){
@@ -7864,17 +7864,307 @@ const TYPES=[
   ['navigation','Tiến / Lùi giữa các thẻ'],
   ['change','Thay đổi nội dung / tùy chọn']
 ];
-const OPTIONS=[
-  ['inherit','Theo mặc định'],
-  ['classic','Hiệu ứng gốc (khuyến nghị)'],
-  ['icon','Phóng từ biểu tượng'],
-  ['fade','Mờ dần'],
-  ['zoom','Phóng nhẹ'],
-  ['slide-up','Trượt lên'],
-  ['slide-side','Trượt ngang'],
-  ['soft-pop','Bật mềm'],
-  ['none','Không hiệu ứng']
+const EFFECT_GROUPS=[
+  {
+    "label": "Mờ dần · Phóng/thu",
+    "options": [
+      [
+        "fade",
+        "Mờ dần"
+      ],
+      [
+        "fade-up",
+        "Mờ dần từ dưới"
+      ],
+      [
+        "fade-down",
+        "Mờ dần từ trên"
+      ],
+      [
+        "fade-left",
+        "Mờ dần từ trái"
+      ],
+      [
+        "fade-right",
+        "Mờ dần từ phải"
+      ],
+      [
+        "zoom",
+        "Phóng nhẹ"
+      ],
+      [
+        "zoom-strong",
+        "Phóng từ nhỏ"
+      ],
+      [
+        "zoom-out",
+        "Thu từ lớn"
+      ],
+      [
+        "zoom-blur",
+        "Phóng và tan mờ"
+      ],
+      [
+        "soft-pop",
+        "Bật mềm"
+      ],
+      [
+        "icon",
+        "Phóng từ biểu tượng"
+      ],
+      [
+        "blur-in",
+        "Từ mờ thành nét"
+      ],
+      [
+        "focus-in",
+        "Lấy nét mềm"
+      ]
+    ]
+  },
+  {
+    "label": "Trượt · Bay vào",
+    "options": [
+      [
+        "slide-side",
+        "Trượt ngang theo hướng"
+      ],
+      [
+        "slide-up",
+        "Trượt lên"
+      ],
+      [
+        "slide-down",
+        "Trượt xuống"
+      ],
+      [
+        "slide-left",
+        "Trượt từ trái"
+      ],
+      [
+        "slide-right",
+        "Trượt từ phải"
+      ],
+      [
+        "slide-far",
+        "Trượt xa"
+      ],
+      [
+        "slide-diagonal-up",
+        "Trượt chéo lên"
+      ],
+      [
+        "slide-diagonal-down",
+        "Trượt chéo xuống"
+      ],
+      [
+        "slide-overshoot",
+        "Trượt vượt đà"
+      ],
+      [
+        "float-in",
+        "Lướt nhẹ vào"
+      ]
+    ]
+  },
+  {
+    "label": "Nảy · Đàn hồi",
+    "options": [
+      [
+        "bounce",
+        "Nảy xuống"
+      ],
+      [
+        "spring",
+        "Lò xo mềm"
+      ],
+      [
+        "elastic",
+        "Đàn hồi ngang"
+      ],
+      [
+        "rubber",
+        "Co giãn cao su"
+      ],
+      [
+        "back-in",
+        "Lùi rồi bật"
+      ],
+      [
+        "pop",
+        "Bật nổi"
+      ],
+      [
+        "pulse",
+        "Nhịp phóng"
+      ],
+      [
+        "heartbeat",
+        "Nhịp tim"
+      ],
+      [
+        "shake-x",
+        "Rung ngang"
+      ],
+      [
+        "shake-y",
+        "Rung dọc"
+      ],
+      [
+        "wobble",
+        "Lắc lư"
+      ],
+      [
+        "jello",
+        "Rung thạch"
+      ]
+    ]
+  },
+  {
+    "label": "Xoay · Lật 3D",
+    "options": [
+      [
+        "flip-x",
+        "Lật 3D trục ngang"
+      ],
+      [
+        "flip-y",
+        "Lật 3D trục dọc"
+      ],
+      [
+        "flip-diagonal",
+        "Lật 3D chéo"
+      ],
+      [
+        "tilt-in",
+        "Nghiêng vào"
+      ],
+      [
+        "rotate-left",
+        "Xoay từ trái"
+      ],
+      [
+        "rotate-right",
+        "Xoay từ phải"
+      ],
+      [
+        "spin-in",
+        "Xoay tròn"
+      ],
+      [
+        "swing",
+        "Đu đưa"
+      ],
+      [
+        "cube-left",
+        "Khối lập phương trái"
+      ],
+      [
+        "cube-right",
+        "Khối lập phương phải"
+      ],
+      [
+        "page-turn",
+        "Lật trang sách"
+      ],
+      [
+        "book-open",
+        "Mở quyển sách"
+      ]
+    ]
+  },
+  {
+    "label": "Màn che · Hiện hình",
+    "options": [
+      [
+        "wipe-left",
+        "Mở màn từ trái"
+      ],
+      [
+        "wipe-right",
+        "Mở màn từ phải"
+      ],
+      [
+        "wipe-up",
+        "Mở màn từ dưới"
+      ],
+      [
+        "wipe-down",
+        "Mở màn từ trên"
+      ],
+      [
+        "curtain",
+        "Rèm mở dọc"
+      ],
+      [
+        "iris",
+        "Khẩu độ tròn"
+      ],
+      [
+        "unfold",
+        "Mở nếp gấp"
+      ],
+      [
+        "fold-in",
+        "Gấp 3D"
+      ],
+      [
+        "blinds",
+        "Rèm trượt giữa"
+      ],
+      [
+        "reveal-top",
+        "Hiện dần từ trên"
+      ]
+    ]
+  },
+  {
+    "label": "Độc đáo · Nổi bật",
+    "options": [
+      [
+        "light-speed",
+        "Lướt tốc độ cao"
+      ],
+      [
+        "skew-in",
+        "Nghiêng phối cảnh"
+      ],
+      [
+        "glow-in",
+        "Phát sáng nhẹ"
+      ],
+      [
+        "drop-in",
+        "Rơi từ trên"
+      ],
+      [
+        "rise-in",
+        "Vút từ dưới"
+      ],
+      [
+        "hinge-in",
+        "Bản lề xoay"
+      ],
+      [
+        "roll-in",
+        "Lăn vào"
+      ],
+      [
+        "magnetic",
+        "Hút nam châm"
+      ],
+      [
+        "stretch",
+        "Kéo giãn"
+      ],
+      [
+        "squash",
+        "Nén bật"
+      ]
+    ]
+  }
 ];
+const OPTIONS=[['inherit','Theo mặc định'],['classic','Hiệu ứng gốc (khuyến nghị)'],...EFFECT_GROUPS.flatMap(group=>group.options),['none','Không hiệu ứng']];
 const FALLBACK={default:'fade',editor:'icon',settings:'soft-pop',ai:'slide-side',dialog:'zoom',card:'classic',navigation:'classic',change:'fade'};
 const DEFAULT_DURATION={default:.29,editor:.29,settings:.29,ai:.29,dialog:.29,card:.35,navigation:.62,change:.19};
 const MIN_SECONDS=.1,MAX_SECONDS=5;
@@ -7906,38 +8196,217 @@ const choose=type=>{
   return FALLBACK[category]||FALLBACK.default;
 };
 function keyframes(name,out,direction) {
+  const sign=direction===-1?-1:1;
+  const base='translate3d(0,0,0) scale(1) rotate(0deg)';
+  const neutral3d='perspective(1100px) translate3d(0,0,0) rotateX(0deg) rotateY(0deg) rotate(0deg) scale(1)';
+  const from=(value,extra)=>[
+    Object.assign({opacity:.09,transform:value},extra||{}),
+    {opacity:1,transform:base,...(extra?.filter?{filter:'blur(0px)'}:{})}
+  ];
+  const frame=(opacity,transform,offset)=>offset===undefined?{opacity,transform}:{opacity,transform,offset};
   let frames;
   switch(name){
-   case 'classic':
-     if(direction===1||direction===-1){
-       const sign=direction===-1?-1:1;
-       frames=[
-         {opacity:.08,transform:'perspective(1100px) translateX('+(sign*54)+'px) rotateY('+(sign*-7)+'deg) scale(.947)',filter:'blur(2px)'},
-         {offset:.72,opacity:1,transform:'perspective(1100px) translateX('+(sign*-5)+'px) rotateY('+(sign*.8)+'deg) scale(1.008)',filter:'blur(0)'},
-         {opacity:1,transform:'perspective(1100px) translateX(0) rotateY(0deg) scale(1)',filter:'blur(0)'}
-       ];
-     }else{
-       // Original post-flip reveal.
-       frames=[
-         {opacity:.2,transform:'perspective(1100px) translateY(12px) scale(.982)'},
-         {opacity:1,transform:'perspective(1100px) translateY(0) scale(1)'}
-       ];
-     }
-     break;
-   case 'icon':
-     frames=[{opacity:.12,translate:'38% -30%',scale:'.18',filter:'blur(2px)'},{opacity:1,translate:'0 0',scale:'1',filter:'blur(0px)'}];break;
-   case 'zoom':
-     frames=[{opacity:.12,scale:'.87'},{opacity:1,scale:'1'}];break;
-   case 'slide-up':
-     frames=[{opacity:0,translate:'0 23px'},{opacity:1,translate:'0 0'}];break;
-   case 'slide-side':
-     frames=[{opacity:.12,translate:(direction===-1?'-42px':'42px')+' 0'},{opacity:1,translate:'0 0'}];break;
-   case 'soft-pop':
-     frames=[{opacity:0,scale:'.90'},{offset:.72,opacity:1,scale:'1.025'},{opacity:1,scale:'1'}];break;
-   default:
-     frames=[{opacity:0},{opacity:1}];
+    case 'classic':
+      if(direction===1||direction===-1){
+        frames=[
+          {opacity:.08,transform:'perspective(1100px) translateX('+(sign*54)+'px) rotateY('+(sign*-7)+'deg) scale(.947)',filter:'blur(2px)'},
+          {offset:.72,opacity:1,transform:'perspective(1100px) translateX('+(sign*-5)+'px) rotateY('+(sign*.8)+'deg) scale(1.008)',filter:'blur(0px)'},
+          {opacity:1,transform:'perspective(1100px) translateX(0) rotateY(0deg) scale(1)',filter:'blur(0px)'}
+        ];
+      }else frames=[
+        {opacity:.2,transform:'perspective(1100px) translateY(12px) scale(.982)'},
+        {opacity:1,transform:'perspective(1100px) translateY(0) scale(1)'}
+      ];
+      break;
+    case 'fade':frames=[{opacity:0},{opacity:1}];break;
+    case 'fade-up':frames=from('translate3d(0,22px,0) scale(1) rotate(0deg)');break;
+    case 'fade-down':frames=from('translate3d(0,-22px,0) scale(1) rotate(0deg)');break;
+    case 'fade-left':frames=from('translate3d(-26px,0,0) scale(1) rotate(0deg)');break;
+    case 'fade-right':frames=from('translate3d(26px,0,0) scale(1) rotate(0deg)');break;
+    case 'zoom':frames=from('translate3d(0,0,0) scale(.87) rotate(0deg)');break;
+    case 'zoom-strong':frames=from('translate3d(0,0,0) scale(.45) rotate(0deg)');break;
+    case 'zoom-out':frames=from('translate3d(0,0,0) scale(1.4) rotate(0deg)');break;
+    case 'zoom-blur':frames=from('translate3d(0,0,0) scale(.66) rotate(0deg)',{filter:'blur(8px)'});break;
+    case 'soft-pop':frames=[frame(0,'scale(.9)'),frame(1,'scale(1.035)',.72),frame(1,'scale(1)')];break;
+    case 'icon':frames=[{opacity:.12,transform:'translate3d(38%,-30%,0) scale(.18)',filter:'blur(2px)'},{opacity:1,transform:base,filter:'blur(0px)'}];break;
+    case 'blur-in':frames=[{opacity:0,filter:'blur(14px)'},{opacity:1,filter:'blur(0px)'}];break;
+    case 'focus-in':frames=[{opacity:0,transform:'scale(1.08)',filter:'blur(10px)'},{opacity:1,transform:'scale(1)',filter:'blur(0px)'}];break;
+
+    case 'slide-side':frames=from('translate3d('+(sign*46)+'px,0,0) scale(1) rotate(0deg)');break;
+    case 'slide-up':frames=from('translate3d(0,65px,0) scale(1) rotate(0deg)');break;
+    case 'slide-down':frames=from('translate3d(0,-65px,0) scale(1) rotate(0deg)');break;
+    case 'slide-left':frames=from('translate3d(-75px,0,0) scale(1) rotate(0deg)');break;
+    case 'slide-right':frames=from('translate3d(75px,0,0) scale(1) rotate(0deg)');break;
+    case 'slide-far':frames=from('translate3d('+(sign*170)+'px,0,0) scale(.97) rotate(0deg)');break;
+    case 'slide-diagonal-up':frames=from('translate3d('+(sign*60)+'px,52px,0) scale(.95) rotate(0deg)');break;
+    case 'slide-diagonal-down':frames=from('translate3d('+(sign*60)+'px,-52px,0) scale(.95) rotate(0deg)');break;
+    case 'slide-overshoot':frames=[
+      frame(.08,'translateX('+(sign*105)+'px)'),
+      frame(1,'translateX('+(sign*-13)+'px)',.76),
+      frame(1,'translateX(0)')
+    ];break;
+    case 'float-in':frames=[
+      frame(.05,'translateY(48px) rotate(-3deg) scale(.97)'),
+      frame(.85,'translateY(-7px) rotate(1deg) scale(1.01)',.74),
+      frame(1,'translateY(0) rotate(0deg) scale(1)')
+    ];break;
+
+    case 'bounce':frames=[
+      frame(.08,'translateY(-80px) scale(.93)'),
+      frame(1,'translateY(10px) scale(1.02)',.58),
+      frame(1,'translateY(-6px) scale(.99)',.80),
+      frame(1,'translateY(0) scale(1)')
+    ];break;
+    case 'spring':frames=[
+      frame(.03,'scale(.63)'),
+      frame(1,'scale(1.13)',.56),
+      frame(1,'scale(.94)',.79),
+      frame(1,'scale(1)')
+    ];break;
+    case 'elastic':frames=[
+      frame(.08,'translateX('+(sign*90)+'px) scale(.92)'),
+      frame(1,'translateX('+(sign*-22)+'px) scale(1.04)',.54),
+      frame(1,'translateX('+(sign*9)+'px) scale(.98)',.79),
+      frame(1,'translateX(0) scale(1)')
+    ];break;
+    case 'rubber':frames=[
+      frame(.06,'scale(.74,.86)'),
+      frame(1,'scale(1.16,.88)',.45),
+      frame(1,'scale(.93,1.08)',.72),
+      frame(1,'scale(1)')
+    ];break;
+    case 'back-in':frames=[
+      frame(0,'translateY(45px) scale(.48)'),
+      frame(1,'translateY(-10px) scale(1.05)',.77),
+      frame(1,'translateY(0) scale(1)')
+    ];break;
+    case 'pop':frames=[
+      frame(0,'scale(.36)'),
+      frame(1,'scale(1.09)',.76),
+      frame(1,'scale(1)')
+    ];break;
+    case 'pulse':frames=[
+      frame(.12,'scale(.91)'),
+      frame(1,'scale(1.07)',.65),
+      frame(1,'scale(1)')
+    ];break;
+    case 'heartbeat':frames=[
+      frame(.12,'scale(.75)'),
+      frame(1,'scale(1.07)',.35),
+      frame(1,'scale(.95)',.57),
+      frame(1,'scale(1.045)',.77),
+      frame(1,'scale(1)')
+    ];break;
+    case 'shake-x':frames=[
+      frame(.22,'translateX('+(sign*12)+'px)'),
+      frame(1,'translateX('+(sign*-9)+'px)',.35),
+      frame(1,'translateX('+(sign*6)+'px)',.63),
+      frame(1,'translateX(0)')
+    ];break;
+    case 'shake-y':frames=[
+      frame(.22,'translateY(13px)'),
+      frame(1,'translateY(-9px)',.35),
+      frame(1,'translateY(6px)',.63),
+      frame(1,'translateY(0)')
+    ];break;
+    case 'wobble':frames=[
+      frame(.2,'translateX('+(sign*20)+'px) rotate('+(sign*-8)+'deg)'),
+      frame(1,'translateX('+(sign*-12)+'px) rotate('+(sign*5)+'deg)',.44),
+      frame(1,'translateX('+(sign*5)+'px) rotate('+(sign*-2)+'deg)',.76),
+      frame(1,'translateX(0) rotate(0)')
+    ];break;
+    case 'jello':frames=[
+      frame(.2,'skewX(-13deg) skewY(-11deg)'),
+      frame(1,'skewX(9deg) skewY(7deg)',.4),
+      frame(1,'skewX(-4deg) skewY(-3deg)',.76),
+      frame(1,'skewX(0deg) skewY(0deg)')
+    ];break;
+
+    case 'flip-x':frames=from('perspective(1100px) rotateX(-84deg) scale(.93)');break;
+    case 'flip-y':frames=from('perspective(1100px) rotateY('+(sign*-84)+'deg) scale(.93)');break;
+    case 'flip-diagonal':frames=from('perspective(1100px) rotateX(25deg) rotateY('+(sign*-74)+'deg) scale(.9)');break;
+    case 'tilt-in':frames=from('translateY(20px) rotate('+(sign*-12)+'deg) scale(.96)');break;
+    case 'rotate-left':frames=from('rotate(-34deg) scale(.8)');break;
+    case 'rotate-right':frames=from('rotate(34deg) scale(.8)');break;
+    case 'spin-in':frames=from('rotate('+(sign*-260)+'deg) scale(.48)');break;
+    case 'swing':frames=[
+      frame(.15,'rotate('+(sign*17)+'deg)'),
+      frame(1,'rotate('+(sign*-9)+'deg)',.52),
+      frame(1,'rotate('+(sign*4)+'deg)',.81),
+      frame(1,'rotate(0deg)')
+    ];break;
+    case 'cube-left':frames=from('perspective(1100px) rotateY(75deg) translateX(-45px) scale(.93)');break;
+    case 'cube-right':frames=from('perspective(1100px) rotateY(-75deg) translateX(45px) scale(.93)');break;
+    case 'page-turn':frames=[
+      {opacity:.05,transformOrigin:sign===1?'left center':'right center',transform:'perspective(1050px) rotateY('+(sign*-90)+'deg)'},
+      {opacity:1,transformOrigin:sign===1?'left center':'right center',transform:'perspective(1050px) rotateY(0deg)'}
+    ];break;
+    case 'book-open':frames=[
+      {opacity:.03,transformOrigin:'left center',transform:'perspective(1000px) rotateY(-100deg) scale(.96)'},
+      {opacity:1,transformOrigin:'left center',transform:'perspective(1000px) rotateY(0deg) scale(1)'}
+    ];break;
+
+    case 'wipe-left':frames=[{opacity:.25,clipPath:'inset(0 100% 0 0)'},{opacity:1,clipPath:'inset(0 0 0 0)'}];break;
+    case 'wipe-right':frames=[{opacity:.25,clipPath:'inset(0 0 0 100%)'},{opacity:1,clipPath:'inset(0 0 0 0)'}];break;
+    case 'wipe-up':frames=[{opacity:.25,clipPath:'inset(100% 0 0 0)'},{opacity:1,clipPath:'inset(0 0 0 0)'}];break;
+    case 'wipe-down':frames=[{opacity:.25,clipPath:'inset(0 0 100% 0)'},{opacity:1,clipPath:'inset(0 0 0 0)'}];break;
+    case 'curtain':frames=[{opacity:.15,transform:'scaleY(.03)',transformOrigin:'center top'},{opacity:1,transform:'scaleY(1)',transformOrigin:'center top'}];break;
+    case 'iris':frames=[{opacity:.4,clipPath:'circle(0% at 50% 50%)'},{opacity:1,clipPath:'circle(75% at 50% 50%)'}];break;
+    case 'unfold':frames=[
+      frame(.15,'scaleY(.05) translateY(-25px)'),
+      frame(1,'scaleY(1.04) translateY(0)',.76),
+      frame(1,'scaleY(1) translateY(0)')
+    ];break;
+    case 'fold-in':frames=from('perspective(1100px) rotateX(-88deg) scaleY(.85)');break;
+    case 'blinds':frames=[{opacity:.15,clipPath:'inset(0 50% 0 50%)'},{opacity:1,clipPath:'inset(0 0 0 0)'}];break;
+    case 'reveal-top':frames=[{opacity:.35,clipPath:'inset(0 0 100% 0)'},{opacity:1,clipPath:'inset(0 0 0 0)'}];break;
+
+    case 'light-speed':frames=[
+      frame(.06,'translateX('+(sign*150)+'px) skewX('+(sign*-18)+'deg)'),
+      frame(1,'translateX('+(sign*-9)+'px) skewX('+(sign*4)+'deg)',.77),
+      frame(1,'translateX(0) skewX(0deg)')
+    ];break;
+    case 'skew-in':frames=from('translateX('+(sign*35)+'px) skewX('+(sign*-26)+'deg)');break;
+    case 'glow-in':frames=[{opacity:.07,filter:'brightness(1.8) blur(5px)'},{opacity:1,filter:'brightness(1) blur(0px)'}];break;
+    case 'drop-in':frames=[
+      frame(.05,'translateY(-115px) scale(.9)'),
+      frame(1,'translateY(10px) scale(1.02)',.77),
+      frame(1,'translateY(0) scale(1)')
+    ];break;
+    case 'rise-in':frames=[
+      frame(.05,'translateY(110px) scale(.9)'),
+      frame(1,'translateY(-9px) scale(1.02)',.77),
+      frame(1,'translateY(0) scale(1)')
+    ];break;
+    case 'hinge-in':frames=[
+      {opacity:.05,transformOrigin:'top left',transform:'rotate(-76deg) translateY(-45px)'},
+      {opacity:1,transformOrigin:'top left',transform:'rotate(0deg) translateY(0)'}
+    ];break;
+    case 'roll-in':frames=from('translateX('+(sign*-100)+'px) rotate('+(sign*-140)+'deg) scale(.82)');break;
+    case 'magnetic':frames=[
+      frame(.12,'translateX('+(sign*75)+'px) scale(.9)'),
+      frame(1,'translateX('+(sign*-10)+'px) scale(1.035)',.77),
+      frame(1,'translateX(0) scale(1)')
+    ];break;
+    case 'stretch':frames=[
+      frame(.06,'scaleX(.45) scaleY(1.18)'),
+      frame(1,'scaleX(1.06) scaleY(.97)',.75),
+      frame(1,'scaleX(1) scaleY(1)')
+    ];break;
+    case 'squash':frames=[
+      frame(.07,'scaleX(1.18) scaleY(.45)'),
+      frame(1,'scaleX(.96) scaleY(1.06)',.75),
+      frame(1,'scaleX(1) scaleY(1)')
+    ];break;
+    default:frames=[{opacity:0},{opacity:1}];
   }
-  return out?frames.slice().reverse():frames;
+  if(!out)return frames;
+  // Reverse keyframes AND their offset positions for smooth closing.
+  return frames.slice().reverse().map(f=>{
+    const result={...f};
+    if(typeof result.offset==='number')result.offset=1-result.offset;
+    return result;
+  });
 }
 function play(node,type,closing,after,direction){
   const done=typeof after==='function'?after:()=>{};
@@ -7973,99 +8442,144 @@ const api={
 window.NHI_WINDOW_FX=api;
 document.body?.classList.add('nhi-fx-runtime');
 function buildSettings(){
- let group=document.getElementById('nhiTransitionSettings');
- if(!group){
-   const anchor=document.getElementById('nhiCardFontSettings');if(!anchor)return;
-   group=document.createElement('section');group.id='nhiTransitionSettings';
-   group.className='setgroup nhi-transitions-settings';
-   group.innerHTML='<h3>✨ Hiệu ứng chuyển cảnh</h3><div id="nhiTransitionOptions"></div>';
-   anchor.parentNode.insertBefore(group,anchor);
- }
+ const group=document.getElementById('nhiTransitionSettings');
+ if(!group)return;
  if(group.dataset.nhiFxReady==='true')return;
  group.dataset.nhiFxReady='true';
  const target=group.querySelector('#nhiTransitionOptions')||group;
+ const feedback=group.querySelector('#nhiFxCurrent');
+ const selectMap={};
+ const allowed=(type,id)=>id==='inherit'?type!=='default':
+   id==='classic'?(type==='card'||type==='navigation'):
+   OPTIONS.some(option=>option[0]===id);
+ const option=(value,title,selected)=>new Option(title,value,false,selected);
+ function prepareSelect(select,type){
+   const selected=allowed(type,prefs[type])?prefs[type]:
+     type==='default'?FALLBACK.default:FALLBACK[type];
+   // Use real native optgroups so 60+ choices remain easy to browse.
+   const frag=document.createDocumentFragment();
+   if(type==='editor'){
+     frag.appendChild(option('inherit','Theo Cài đặt tổng',true));
+     select.replaceChildren(frag);
+     select.value='inherit';select.disabled=true;
+     select.title='Kiểu mở/đóng giống Cài đặt tổng; thời gian chỉnh riêng';
+     return;
+   }
+   if(type!=='default')frag.appendChild(option('inherit','Theo mặc định',false));
+   if(type==='card'||type==='navigation')frag.appendChild(option('classic','★ Hiệu ứng gốc',false));
+   EFFECT_GROUPS.forEach(groupInfo=>{
+     const optgroup=document.createElement('optgroup');
+     optgroup.label=groupInfo.label;
+     groupInfo.options.forEach(([id,label])=>optgroup.appendChild(option(id,label,false)));
+     frag.appendChild(optgroup);
+   });
+   frag.appendChild(option('none','Tắt hiệu ứng',false));
+   select.replaceChildren(frag);
+   select.disabled=false;
+   select.value=selected;
+ }
+ function previewType(type,closing){
+   const tile=group.querySelector('#nhiFxDemoSample');
+   if(!tile)return;
+   if(reduced()){
+     if(feedback)feedback.textContent='Thiết bị đang bật Giảm chuyển động, hiệu ứng được tắt để bảo đảm dễ sử dụng.';
+     return;
+   }
+   const effect=choose(type);
+   if(effect==='none'){
+     if(feedback)feedback.textContent='Đã chọn Tắt hiệu ứng cho '+(TYPES.find(x=>x[0]===type)?.[1]||type);
+     return;
+   }
+   const direction=type==='navigation'?(closing?-1:1):undefined;
+   play(tile,type,Boolean(closing),null,direction);
+   if(feedback)feedback.textContent=(closing?'Đóng thử: ':'Xem thử: ')+
+      (OPTIONS.find(x=>x[0]===effect)?.[1]||effect)+' · '+
+      durationSeconds(type).toFixed(2)+' giây';
+ }
  TYPES.forEach(([type,label])=>{
-   // Prefer the seven static selectors in index.html so the menu is visible
-   // even before JavaScript loads, and never append a duplicate row.
    let select=target.querySelector('#nhi-fx-'+type);
    if(!select){
-     const row=document.createElement('div');row.className='setrow nhi-fx-setting-row';
-     const name=document.createElement('label');name.textContent=label;name.htmlFor='nhi-fx-'+type;
-     select=document.createElement('select');select.id='nhi-fx-'+type;
-     select.setAttribute('aria-label',label);
-     OPTIONS.filter(o=>(type!=='default'||o[0]!=='inherit')&&(o[0]!=='classic'||type==='card'||type==='navigation')).forEach(([value,title])=>{
-       const opt=document.createElement('option');opt.value=value;opt.textContent=title;select.append(opt);
-     });
-     row.append(name,select);target.append(row);
+     const row=document.createElement('div');
+     row.className='setrow nhi-fx-setting-row';
+     const name=document.createElement('label');
+     name.htmlFor='nhi-fx-'+type;name.textContent=label;
+     select=document.createElement('select');
+     select.id='nhi-fx-'+type;
+     row.append(name,select);
+     target.appendChild(row);
    }
-   if(type==='editor'){
-     select.replaceChildren(new Option('Theo Cài đặt tổng','inherit'));
-     select.value='inherit';select.disabled=true;
-     select.title='Kiểu chuyển cảnh giống Cài đặt tổng; thời gian chỉnh riêng';
-   }else{
-     select.disabled=false;
-     select.value=prefs[type]||(type==='default'?'fade':FALLBACK[type]);
-   }
+   select.setAttribute('aria-label','Kiểu hiệu ứng: '+label);
+   prepareSelect(select,type);
+   selectMap[type]=select;
    select.addEventListener('change',()=>{
      prefs[type]=select.value;
      saveSettings();
-     const feedback=group.querySelector('#nhiFxCurrent');
-     if(feedback)feedback.textContent='Đã lưu hiệu ứng '+label.toLowerCase();
-     play(group,'change',false);
+     const previewSelect=group.querySelector('#nhiFxPreviewTarget');
+     if(previewSelect)previewSelect.value=type;
+     previewType(type,false);
    });
-   // Every effect, including the editor linked to Settings, has its own seconds.
    const row=select.closest('.nhi-fx-setting-row');
-   if(row){
-     let seconds=row.querySelector('#nhi-fx-duration-'+type);
-     if(!seconds){
-       const wrap=document.createElement('label');
-       wrap.className='nhi-fx-duration-wrap';
-       wrap.textContent='Giây';
-       seconds=document.createElement('input');
-       seconds.className='nhi-fx-duration';
-       seconds.id='nhi-fx-duration-'+type;
-       wrap.appendChild(seconds);
-       row.appendChild(wrap);
+   if(!row)return;
+   let seconds=row.querySelector('#nhi-fx-duration-'+type);
+   if(!seconds){
+     const wrap=document.createElement('label');
+     wrap.className='nhi-fx-duration-wrap';
+     wrap.htmlFor='nhi-fx-duration-'+type;
+     wrap.appendChild(document.createTextNode('Giây'));
+     seconds=document.createElement('input');
+     seconds.id='nhi-fx-duration-'+type;seconds.className='nhi-fx-duration';
+     wrap.appendChild(seconds);row.append(wrap);
+   }
+   seconds.type='number';seconds.min=String(MIN_SECONDS);seconds.max=String(MAX_SECONDS);
+   seconds.step='.01';seconds.inputMode='decimal';
+   seconds.setAttribute('aria-label','Thời gian '+label+' (giây)');
+   seconds.value=durationSeconds(type).toFixed(2);
+   seconds.addEventListener('change',()=>{
+     const value=Number(seconds.value);
+     if(!Number.isFinite(value)||value<MIN_SECONDS||value>MAX_SECONDS){
+       seconds.setCustomValidity('Chọn từ 0,10 đến 5,00 giây');
+       seconds.reportValidity();return;
      }
-     seconds.type='number';seconds.min=String(MIN_SECONDS);seconds.max=String(MAX_SECONDS);
-     seconds.step='.01';seconds.inputMode='decimal';
-     seconds.setAttribute('aria-label','Thời gian '+label+' (giây)');
-     seconds.value=durationSeconds(type).toFixed(2);
-     seconds.addEventListener('change',()=>{
-       const val=Number(seconds.value);
-       if(!Number.isFinite(val)||val<MIN_SECONDS||val>MAX_SECONDS){
-         seconds.setCustomValidity('Chọn từ 0,1 đến 5 giây');
-         seconds.reportValidity();return;
-       }
-       seconds.setCustomValidity('');
-       prefs.durations=Object.assign({},prefs.durations||{},{[type]:val});
-       saveSettings();
-       const feedback=group.querySelector('#nhiFxCurrent');
-       if(feedback)feedback.textContent='Đã lưu '+label.toLowerCase()+': '+val+' giây';
-     });
-     seconds.addEventListener('input',()=>{
-       const val=Number(seconds.value);
-       seconds.setCustomValidity(val>=MIN_SECONDS&&val<=MAX_SECONDS?'':'Chọn từ 0,1 đến 5 giây');
-     });
-   }
+     seconds.setCustomValidity('');
+     prefs.durations=Object.assign({},prefs.durations||{},{[type]:value});
+     saveSettings();
+     previewType(type,false);
+   });
+   seconds.addEventListener('input',()=>{
+     const value=Number(seconds.value);
+     seconds.setCustomValidity(value>=MIN_SECONDS&&value<=MAX_SECONDS?'':'Chọn từ 0,10 đến 5,00 giây');
+   });
  });
- let feedback=group.querySelector('#nhiFxCurrent');
- if(!feedback){
-   feedback=document.createElement('p');feedback.id='nhiFxCurrent';feedback.className='voice-note';
-   feedback.setAttribute('role','status');feedback.setAttribute('aria-live','polite');
-   target.append(feedback);
+ // A visible miniature stage previews whichever category the user is editing.
+ let previewTarget=group.querySelector('#nhiFxPreviewTarget');
+ if(!previewTarget){
+   const host=document.createElement('div');
+   host.className='nhi-fx-demo-wrap';
+   host.innerHTML='<label for="nhiFxPreviewTarget">Xem thử theo mục:</label>'+
+     '<select id="nhiFxPreviewTarget"></select>'+
+     '<div class="nhi-fx-demo-stage"><div id="nhiFxDemoSample" role="img" aria-label="Thẻ mẫu để xem chuyển cảnh">Nhi ✿</div></div>';
+   const previewButton=group.querySelector('#nhiFxPreview');
+   if(previewButton)previewButton.before(host);else target.after(host);
+   previewTarget=host.querySelector('#nhiFxPreviewTarget');
  }
+ previewTarget.replaceChildren(...TYPES.map(([type,label])=>option(type,label,false)));
+ previewTarget.value='navigation';
+ previewTarget.addEventListener('change',()=>previewType(previewTarget.value,false));
  const preview=group.querySelector('#nhiFxPreview');
- if(preview)preview.addEventListener('click',()=>{
-   // A slower, unmistakable live preview on the SETTINGS section itself.
-   if(reduced()||choose('settings')==='none'){feedback.textContent='Hiệu ứng đang tắt';return;}
-   if(typeof group.animate==='function'){
-     group.animate(keyframes(choose('settings'),false),{
-       duration:durationMs('settings'),easing:'cubic-bezier(.2,.72,.27,1)',fill:'none'
-     });
-   }
-   feedback.textContent='Đang xem trước: '+(OPTIONS.find(o=>o[0]===choose('settings'))?.[1]||choose('settings'));
- });
+ if(preview)preview.addEventListener('click',()=>previewType(previewTarget.value,false));
+ let previewClose=group.querySelector('#nhiFxPreviewClose');
+ if(!previewClose){
+   previewClose=document.createElement('button');
+   previewClose.id='nhiFxPreviewClose';
+   previewClose.type='button';previewClose.className='ghost';
+   previewClose.textContent='◀ Xem thử khi đóng / Lùi';
+   if(preview)preview.after(previewClose);else target.after(previewClose);
+ }
+ previewClose.addEventListener('click',()=>previewType(previewTarget.value,true));
+ if(feedback){
+   feedback.textContent=EFFECT_GROUPS.reduce((sum,g)=>sum+g.options.length,0)+
+     ' kiểu chuyển cảnh · giữ nguyên cài đặt đã lưu của bạn';
+ }
 }
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',buildSettings,{once:true});else buildSettings();
 const observer=new MutationObserver(records=>{
