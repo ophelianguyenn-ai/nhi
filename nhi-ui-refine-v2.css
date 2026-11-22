@@ -357,3 +357,61 @@ html body:not(.nhi-fx-runtime) #planBox form.nhi-editor-window-v5{
    animation:none!important;
  }
 }
+
+
+/* Per-category transition controls: effect + duration (seconds) on one row. */
+html body #setSheet #nhiTransitionSettings .nhi-fx-setting-row{
+ display:grid!important;
+ grid-template-columns:minmax(100px,1fr) minmax(140px,1.1fr) 92px!important;
+ align-items:center!important;column-gap:9px!important;row-gap:4px!important;
+ padding:7px 2px!important;min-height:48px!important;
+}
+html body #setSheet #nhiTransitionSettings .nhi-fx-setting-row>label:first-child{
+ grid-column:1!important;
+ display:block!important;min-width:0!important;
+ font-size:13px!important;line-height:1.35!important;
+}
+html body #setSheet #nhiTransitionSettings .nhi-fx-setting-row>select{
+ grid-column:2!important;min-width:0!important;width:100%!important;
+}
+html body #setSheet #nhiTransitionSettings .nhi-fx-setting-row>.nhi-fx-duration-wrap{
+ grid-column:3!important;
+ display:flex!important;flex-direction:column!important;gap:2px!important;
+ margin:0!important;color:#416c70!important;font-size:10px!important;
+ font-weight:700!important;line-height:1.2!important;
+ text-align:center!important;min-width:0!important;
+}
+html body #setSheet #nhiTransitionSettings .nhi-fx-duration-wrap>input{
+ display:block!important;box-sizing:border-box!important;
+ width:100%!important;min-width:0!important;height:38px!important;
+ min-height:38px!important;max-height:38px!important;
+ margin:0!important;padding:6px 5px!important;text-align:center!important;
+ border:1px solid #a8d9d5!important;border-radius:10px!important;
+ background:#fff!important;color:#173f4a!important;
+ font:750 13px/1.25 var(--ui,system-ui)!important;
+}
+html body #setSheet #nhiTransitionSettings .nhi-fx-duration-wrap>input:focus-visible{
+ outline:2px solid #35a6b0!important;outline-offset:1px!important;
+}
+@media(max-width:475px){
+ html body #setSheet #nhiTransitionSettings .nhi-fx-setting-row{
+  grid-template-columns:minmax(0,1fr) 88px!important;
+  grid-template-rows:auto auto!important;
+  gap:6px!important;padding:9px 2px!important;
+ }
+ html body #setSheet #nhiTransitionSettings .nhi-fx-setting-row>label:first-child{
+  grid-column:1!important;grid-row:1!important;font-size:12px!important;
+ }
+ html body #setSheet #nhiTransitionSettings .nhi-fx-setting-row>select{
+  grid-column:1!important;grid-row:2!important;min-height:38px!important;
+ }
+ html body #setSheet #nhiTransitionSettings .nhi-fx-setting-row>.nhi-fx-duration-wrap{
+  grid-column:2!important;grid-row:1 / span 2!important;align-self:end!important;
+ }
+}
+/* Reduced motion remains authoritative, even if durations were customized. */
+@media(prefers-reduced-motion:reduce){
+ html body #setSheet #nhiTransitionSettings .nhi-fx-setting-row{
+  transition:none!important;
+ }
+}
