@@ -203,3 +203,30 @@ html body #planBox form.nhi-editor-window-v5 label.nhi-english-edit-field>textar
 html body #planBox form.nhi-editor-window-v5{
   animation:none!important;transform-origin:center center!important;
 }
+
+
+/* Visible rich text control, not the hidden English textarea. */
+html body #planBox form.nhi-editor-window-v5 .nhi-english-edit-field
+  > .nhi-rich-field[data-language="en"],
+html body #planBox form.nhi-editor-window-v5 .nhi-ipa-edit-field
+  > input[name="ipa"]{
+ display:block!important;
+ box-sizing:border-box!important;
+ block-size:44px!important;min-block-size:44px!important;max-block-size:44px!important;
+ height:44px!important;min-height:44px!important;max-height:44px!important;
+ padding:8px 11px!important;line-height:24px!important;
+ align-self:stretch!important;overflow-wrap:normal!important;
+ width:100%!important;min-width:0!important;
+}
+html body #planBox form.nhi-editor-window-v5 .nhi-english-edit-field
+  > .nhi-rich-field[data-language="en"]{
+ white-space:pre!important;overflow-x:auto!important;
+ overflow-y:hidden!important;resize:none!important;
+}
+/* The old theme's tinted Hán–Hàn container must never reappear. */
+html body #planBox .pcard form.nhi-editor-window-v5
+  > .nhi-optional-hanja-editor.nhi-hanja-editor-inline{
+ background:transparent!important;background-color:transparent!important;
+ border-width:0!important;border-style:none!important;
+ box-shadow:none!important;padding:0!important;
+}
