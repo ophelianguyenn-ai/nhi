@@ -124,7 +124,25 @@ function editor(form,fields,saved,options={}){
  function charsToRanges(chars){const ranges=[];for(let i=0;i<chars.length;i++){if(!Object.keys(chars[i]).length)continue;const last=ranges.at(-1),key=JSON.stringify(chars[i]);if(last&&last.end===i&&last.key===key)last.end++;else ranges.push({start:i,end:i+1,...chars[i],key});}return ranges.map(({key,...r})=>r);}
  function remember(){if(painting)return;const sel=getSelection(),view=views[active];if(!sel?.rangeCount||!view.contains(sel.anchorNode)||!view.contains(sel.focusNode))return;const r=sel.getRangeAt(0),before=r.cloneRange();before.selectNodeContents(view);before.setEnd(r.startContainer,r.startOffset);selection={start:before.toString().length,end:before.toString().length+r.toString().length};refresh();}
  function restore(){const view=views[active],walker=document.createTreeWalker(view,NodeFilter.SHOW_TEXT);let n,pos=0,start=null,end=null;while((n=walker.nextNode())){if(!start&&selection.start<=pos+n.length)start=[n,Math.max(0,selection.start-pos)];if(selection.end<=pos+n.length){end=[n,Math.max(0,selection.end-pos)];break;}pos+=n.length;}view.focus();if(start&&end){const r=document.createRange();r.setStart(...start);r.setEnd(...end);const sel=getSelection();sel.removeAllRanges();sel.addRange(r);}}
- function paint(lang,keep){painting=true;views[lang].textContent=fields[lang].value;formatText(views[lang],draft,lang);if(keep)restore();painting=false;refresh();}
+ let englishResizeFrame=0;
+ function resizeEnglishField(){
+  const box=views.en;
+  if(!box||!box.isConnected)return;
+  box.style.setProperty('height','auto','important');
+  const fit=Math.max(44,Math.ceil(box.scrollHeight));
+  box.style.setProperty('height',fit+'px','important');
+  box.style.setProperty('min-height','44px','important');
+ }
+ function queueEnglishResize(){
+  if(englishResizeFrame)cancelAnimationFrame(englishResizeFrame);
+  englishResizeFrame=requestAnimationFrame(()=>{englishResizeFrame=0;resizeEnglishField();});
+ }
+ function paint(lang,keep){
+  painting=true;views[lang].textContent=fields[lang].value;
+  formatText(views[lang],draft,lang);
+  if(lang==='en')queueEnglishResize();
+  if(keep)restore();painting=false;refresh();
+ }
  function toggle(prop,value){remember();const a=selection.start,b=selection.end;if(a===b){if(active==='note'&&prop==='color'&&options.noteColor){options.noteColor.value=options.noteColor.value===value?'#ffffff':value;views.note.style.backgroundColor=options.noteColor.value;}restore();return;}const chars=rangesToChars(active),remove=chars.slice(a,b).every(c=>c[prop]===value);for(let i=a;i<b;i++){if(remove)delete chars[i][prop];else chars[i][prop]=value;}draft[active]=charsToRanges(chars);paint(active,true);}
  const bold=button('B',()=>toggle('bold',true));bold.title='In đậm / bỏ in đậm';bold.setAttribute('aria-label',bold.title);bold.style.fontWeight='800';
  const underline=button('U',()=>toggle('underline',true));underline.title='Gạch chân / bỏ gạch chân';underline.setAttribute('aria-label',underline.title);underline.style.textDecoration='underline';tools.append(bold,underline);
@@ -152,22 +170,30 @@ function editor(form,fields,saved,options={}){
   const view=make('div','field nhi-rich-field');views[lang]=view;view.contentEditable='true';view.setAttribute('role','textbox');view.setAttribute('aria-multiline','true');view.setAttribute('aria-label',labels[lang]);view.dataset.language=lang;view.lang=lang==='note'?'ko':lang;view.spellcheck=false;
   field.hidden=true;field.setAttribute('aria-hidden','true');field.after(view);
   if(lang==='en'){
-    // The visible English editor is contenteditable, not the hidden textarea.
-    // Preserve rich-text selection while matching the outer height of IPA.
-    for(const prop of ['height','min-height','max-height','block-size','min-block-size','max-block-size'])
-      view.style.setProperty(prop,'44px','important');
+    // Allow natural line wrapping; short English remains 44px high.
+    view.style.setProperty('min-height','44px','important');
+    view.style.setProperty('max-height','none','important');
+    view.style.setProperty('max-block-size','none','important');
+    view.style.setProperty('height','auto','important');
+    view.style.setProperty('block-size','auto','important');
     view.style.setProperty('box-sizing','border-box','important');
-    view.style.setProperty('overflow-x','auto','important');
+    view.style.setProperty('overflow-x','hidden','important');
     view.style.setProperty('overflow-y','hidden','important');
-    view.style.setProperty('white-space','pre','important');
-    view.style.setProperty('overflow-wrap','normal','important');
+    view.style.setProperty('white-space','pre-wrap','important');
+    view.style.setProperty('overflow-wrap','anywhere','important');
+    view.style.setProperty('word-break','normal','important');
     view.style.setProperty('padding','8px 11px','important');
     view.style.setProperty('line-height','24px','important');
     view.style.setProperty('resize','none','important');
+    requestAnimationFrame(queueEnglishResize);
+    if(view.parentElement&&typeof ResizeObserver!=='undefined'){
+      const observer=new ResizeObserver(queueEnglishResize);
+      observer.observe(view.parentElement);
+    }
   }
   view.addEventListener('focus',()=>{if(active!==lang){active=lang;selection={start:0,end:0};}refresh();});
   view.addEventListener('keyup',remember);view.addEventListener('pointerup',remember);
-  view.addEventListener('input',()=>{active=lang;const old=field.value,text=view.textContent.replace(/\r/g,'');let prefix=0;while(prefix<old.length&&prefix<text.length&&old[prefix]===text[prefix])prefix++;let suffix=0;while(suffix<old.length-prefix&&suffix<text.length-prefix&&old[old.length-1-suffix]===text[text.length-1-suffix])suffix++;const chars=rangesToChars(lang),insert=text.length-prefix-suffix,style=chars[Math.max(0,prefix-1)]||{};chars.splice(prefix,old.length-prefix-suffix,...Array.from({length:insert},()=>({...style})));draft[lang]=charsToRanges(chars);field.value=text;remember();});
+  view.addEventListener('input',()=>{active=lang;const old=field.value,text=view.textContent.replace(/\r/g,'');let prefix=0;while(prefix<old.length&&prefix<text.length&&old[prefix]===text[prefix])prefix++;let suffix=0;while(suffix<old.length-prefix&&suffix<text.length-prefix&&old[old.length-1-suffix]===text[text.length-1-suffix])suffix++;const chars=rangesToChars(lang),insert=text.length-prefix-suffix,style=chars[Math.max(0,prefix-1)]||{};chars.splice(prefix,old.length-prefix-suffix,...Array.from({length:insert},()=>({...style})));draft[lang]=charsToRanges(chars);field.value=text;if(lang==='en')queueEnglishResize();remember();});
   view.addEventListener('keydown',e=>{
     if((e.ctrlKey||e.metaKey)&&['b','u'].includes(e.key.toLowerCase())){
       e.preventDefault();remember();toggle(e.key.toLowerCase()==='b'?'bold':'underline',true);
