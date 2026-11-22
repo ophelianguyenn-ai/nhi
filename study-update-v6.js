@@ -3,7 +3,7 @@
 'use strict';
 const make=(tag,cls,text)=>{const n=document.createElement(tag);if(cls)n.className=cls;if(text!==undefined)n.textContent=text;return n;};
 function button(text,fn){const b=make('button','ghost',text);b.type='button';b.onclick=fn;return b;}
-const palettes=[['#dbeefe','Xanh biển'],['#fce1ed','Hồng'],['#fff3c4','Vàng'],['#ffe4cc','Cam'],['#ffdddd','Đỏ nhạt'],['#e6e0fa','Tím'],['#ddf4e4','Xanh lá']];
+const palettes=[['#e8f5ff','Xanh biển'],['#fce1ed','Hồng'],['#fff3c4','Vàng'],['#ffe4cc','Cam'],['#ffe7e7','Đỏ nhạt'],['#e6e0fa','Tím'],['#ddf4e4','Xanh lá']];
 function icon(kind){
  const svg=kind==='headphones'?'<path d="M8 32v-7a24 24 0 0 1 48 0v7M13 25h5v29h-5a7 7 0 0 1-7-7V32a7 7 0 0 1 7-7zm38 0h-5v29h5a7 7 0 0 0 7-7V32a7 7 0 0 0-7-7z" fill="none" stroke="#00bda5" stroke-width="4"/><path d="M11 22a21 21 0 0 1 42 0" fill="none" stroke="#12bafa" stroke-width="3"/>':'<g stroke="#171717" stroke-width="3" stroke-linejoin="round"><path d="M9 45L44 10l12 12-35 35-16 4z" fill="#ffd343"/><path d="M44 10l4-4q4-4 8 0l6 6q4 4 0 8l-6 4z" fill="#ed493b"/><path d="M9 45l12 12-16 4z" fill="#f4cd7e"/><path d="M6 54l6 5-7 2z" fill="#4e4f55"/><path d="M15 48l34-34M20 53l34-34" fill="none"/></g>';
  return '<svg viewBox="0 0 68 68" aria-hidden="true" focusable="false">'+svg+'</svg>';
@@ -265,7 +265,7 @@ function init(){
      field.append(caption,choice);defaultGroup.append(field);
    }
    const boldRow=make('div','setrow nhi-global-font-row');
-   const boldLabel=make('label',null,'In đậm toàn bộ thẻ (trừ thẻ chỉnh riêng)');
+   const boldLabel=make('label',null,'In đậm chữ tiếng Anh trên tất cả thẻ');
    const boldBox=make('input');boldBox.type='checkbox';boldBox.id='nhiAllFontBold';
    boldBox.checked=globalTypography.bold;
    boldBox.addEventListener('change',()=>{
