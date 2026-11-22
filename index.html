@@ -7977,7 +7977,7 @@ function buildSettings(){
        row.appendChild(wrap);
      }
      seconds.type='number';seconds.min=String(MIN_SECONDS);seconds.max=String(MAX_SECONDS);
-     seconds.step='.05';seconds.inputMode='decimal';
+     seconds.step='.01';seconds.inputMode='decimal';
      seconds.setAttribute('aria-label','Thời gian '+label+' (giây)');
      seconds.value=durationSeconds(type).toFixed(2);
      seconds.addEventListener('change',()=>{
