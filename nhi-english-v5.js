@@ -307,8 +307,16 @@ function applyEnglishFont(box){
  const chosen=local>=12&&local<=72&&(!globalUpdated||localUpdated>globalUpdated)?local:globalSize;
  // Explicit inline important size wins over old CSS and nested note styles.
  translation.style.setProperty('font-size',chosen+'px','important');
+ // Global English bold must be reversible, including selectable word spans.
+ // Explicit !important styles win over legacy CSS in both toggle states.
+ const englishWeight=document.body.classList.contains('nhi-global-card-bold')?'800':'400';
+ translation.style.setProperty('font-weight',englishWeight,'important');
  translation.querySelectorAll('.nhi-en-word').forEach(word=>{
    word.style.setProperty('font-size','inherit','important');
+   word.style.setProperty('font-weight',englishWeight,'important');
+ });
+ box.querySelectorAll('.nhi-comparison-choice-text,.nhi-comparison-choice-text .nhi-en-word').forEach(node=>{
+   node.style.setProperty('font-weight',englishWeight,'important');
  });
  box.style.setProperty('--nhi-comparison-english-size',chosen+'px');
  box.dataset.nhiEnglishFontPx=String(chosen);
