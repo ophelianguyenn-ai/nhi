@@ -6099,7 +6099,17 @@ html body #planBox .sdone .pstatus{
     function open(focusCard) {
       document.body.classList.add('ai-open'); $('aiPanel').setAttribute('aria-hidden', 'false'); $('aiBtn').setAttribute('aria-pressed', 'true');
       paintCtx(); paintQuick(); paintLog(); paintSetup(!key());
-      if (focusCard !== 'hotkey' && (!focusCard || window.innerWidth > 700)) setTimeout(function () { try { $('aiInput').focus(); } catch (e) { } }, 60);
+      if(focusCard==='hotkey'){
+        // Retain keyboard focus outside the sidebar so a second A closes it.
+        // Clicking inside a text field later restores normal typing.
+        var studyCard=document.querySelector('#planBox .pcard');
+        if(studyCard){
+          studyCard.tabIndex=-1;
+          try{studyCard.focus({preventScroll:true});}catch(e){studyCard.focus();}
+        }
+      } else if(!focusCard || window.innerWidth > 700){
+        setTimeout(function () { try { $('aiInput').focus(); } catch (e) { } }, 60);
+      }
     }
     function close() { document.body.classList.remove('ai-open'); $('aiPanel').setAttribute('aria-hidden', 'true'); $('aiBtn').setAttribute('aria-pressed', 'false'); }
      function toggle(mode) { if (isOpen()) close(); else open(mode || 'hotkey'); }
