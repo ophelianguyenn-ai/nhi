@@ -452,6 +452,9 @@ function fitEnglishWidth(box){
    const fittedFont=Math.max(12,Math.floor(Math.min(preferredFont,
      preferredFont*freeWidth/Math.max(1,naturalMeaning))));
    box.style.setProperty('--nhi-three-word-font',fittedFont+'px');
+   // applyEnglishFont uses inline !important; the fitted temporary size must
+   // be inline too, without modifying this device's saved font preference.
+   t.style.setProperty('font-size',fittedFont+'px','important');
    meaning=naturalMeaning*fittedFont/Math.max(1,preferredFont);
  }else box.style.removeProperty('--nhi-three-word-font');
  const singleMeaning=meaning+actionsWidth+horizontalPadding;
