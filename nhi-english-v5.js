@@ -431,8 +431,13 @@ function fitEnglishWidth(box){
  const imageCard=!!box.closest('.pfront.nhi-with-image');
  // Allow the note to grow for longer English instead of wrapping even though
  // the parent has ample free space; never overflow the actual left-hand lane.
- const available=Math.max(172,(lane?.clientWidth||440)-8);
- const cap=Math.min(available,imageCard?590:620);
+ const card=box.closest('.pcard');
+ // Without a photo, use the full visible card width rather than a historical
+ // 390–460px cap. With a photo, keep the English note inside its own column.
+ const laneWidth=(lane?.getBoundingClientRect().width||lane?.clientWidth||440);
+ const cardWidth=(card?.getBoundingClientRect().width||card?.clientWidth||laneWidth);
+ const available=Math.max(172,(imageCard?laneWidth:Math.max(laneWidth,cardWidth-28))-8);
+ const cap=Math.min(available,imageCard?650:960);
  const horizontalPadding=34;
  const singleMeaning=meaning+actionsWidth+horizontalPadding;
  const singleIPA=transcription+actionsWidth+horizontalPadding;
@@ -449,7 +454,7 @@ function fitEnglishWidth(box){
  const desired=Math.max(175,Math.min(cap,Math.ceil(natural)));
  const manual=box.style.getPropertyValue('--nhi-en-width').trim();
  const chosen=/^\\d+(?:\\.\\d+)?px$/.test(manual)?
-   Math.max(175,Math.min(cap,parseFloat(manual))):desired;
+   Math.max(desired,Math.min(cap,parseFloat(manual))):desired;
  box.style.setProperty('--nhi-en-auto-width',chosen+'px');
  box.style.setProperty('width',chosen+'px','important');
  box.style.setProperty('max-width',cap+'px','important');
