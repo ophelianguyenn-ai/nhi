@@ -5303,7 +5303,28 @@ html body #planBox .sdone .pstatus{
           toast('Đã lưu ảnh minh họa vào thẻ.');
         }, function () { s.imagePicker = false; render(); }));
       }
-      if(s.editing){var scrim=el('div','nhi-edit-scrim');scrim.setAttribute('aria-hidden','true');scrim.addEventListener('click',function(){var ed=c.querySelector('form.editbox');if(ed&&ed.nhiClose)ed.nhiClose();});c.appendChild(scrim);c.appendChild(editForm(it));}
+      if(s.editing){
+        var scrim=el('div','nhi-edit-scrim');
+        scrim.setAttribute('aria-hidden','true');
+        scrim.addEventListener('click',function(){
+          var ed=c.querySelector('form.editbox');
+          if(ed&&ed.nhiClose)ed.nhiClose();
+        });
+        c.appendChild(scrim);
+        var editorWindow=editForm(it);
+        c.appendChild(editorWindow);
+        // Guaranteed opening effect even when the observer missed this insert.
+        requestAnimationFrame(function(){
+          if(!editorWindow.isConnected||!window.NHI_WINDOW_FX||editorWindow.dataset.nhiFxOpened)return;
+          editorWindow.dataset.nhiFxOpened='true';
+          window.NHI_WINDOW_FX.open(editorWindow,'editor');
+        });
+        if(!reduceMotion()&&typeof scrim.animate==='function'){
+          scrim.animate([{opacity:0},{opacity:1}],{
+            duration:290,easing:'cubic-bezier(.2,.72,.27,1)',fill:'both'
+          });
+        }
+      }
       wrap.appendChild(c); v.appendChild(wrap);
       if(s.flipped && f.classList.contains('nhi-with-image')){
         requestAnimationFrame(function(){
