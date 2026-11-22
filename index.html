@@ -1517,7 +1517,7 @@ html body #planBox .sdone .pstatus{
     <div class="setgroup" id="nhiCardFontSettings"><h3>Cỡ chữ trên thẻ</h3></div>
     <div class="setgroup" id="nhiReviewMilestoneSettings">
       <h3>Chỉnh sửa 5 mốc học và ôn bài</h3>
-      <p class="voice-note">Mốc 1 tính từ ngày của bài học. Mốc 2–5 tính từ ngày bạn hoàn thành lượt đầu tiên. Thay đổi lịch không xóa các lượt đã học.</p>
+      <p class="voice-note">Đây là lịch chung mặc định. Bạn cũng có thể chỉnh riêng 5 mốc trong “⚙ Cài đặt bài”. Mốc 1 từ ngày học phần; mốc 2–5 từ lượt học đầu tiên. Không xóa các lượt đã học.</p>
       <div id="nhiReviewMilestoneRows" class="nhi-review-milestone-rows"></div>
       <div class="btnrow">
         <button type="button" class="primary" id="nhiReviewMilestoneSave">Lưu 5 mốc</button>
@@ -3485,7 +3485,7 @@ html body #planBox .sdone .pstatus{
       var previousOffsets=normalizedOffsets(JSON.parse(lsGet(REVIEW_OFFSET_KEY)||'null'));
       if(previousOffsets)OFFSETS=previousOffsets;
     }catch(_e){}
-    var SECS = ['done', 'known', 'hard', 'del', 'rate', 'hl', 'hl2', 'hlc', 'ed', 'hj', 'img', 'note', 'fmt', 'enHard', 'merged'];
+    var SECS = ['done', 'known', 'hard', 'del', 'rate', 'hl', 'hl2', 'hlc', 'ed', 'hj', 'img', 'note', 'fmt', 'enHard', 'merged', 'reviewOffsets'];
     var RATE_NAME = { known: 'Biết rồi', hard: 'Khó', mid: 'Bình thường' };
     var ST_ICON = { done: '✓', today: '●', late: '!', next: '○', future: '○' };
     // every colour here is dark enough for white text; no reds or oranges, so a day never looks "overdue"
@@ -3754,6 +3754,39 @@ html body #planBox .sdone .pstatus{
       form.appendChild(head);
       form.appendChild(el('p', 'listinfo', vn(L.date, true) + ' · ' + titleMain(L)));
       form.appendChild(btn('ghost', '✏️ Sửa tên và ngày học', function () { dlg.close(); openDailyEditor(L); }));
+      form.appendChild(el('h3',null,'5 mốc học và ôn của bài này'));
+      form.appendChild(el('p','listinfo',
+        'Các mốc tính bằng số ngày. Mốc 1 từ ngày của bài; mốc 2–5 từ lượt học đầu tiên. Không làm mất lịch sử đã học.'));
+      var reviewRows=el('div','nhi-review-milestone-rows'),reviewInputs=[];
+      var currentReview=normalizedOffsets(val('reviewOffsets',L.id))||OFFSETS;
+      STEP.forEach(function(stage,i){
+        var label=el('label','nhi-review-milestone-row');
+        label.appendChild(el('span',null,(i+1)+'. '+stage));
+        var input=el('input','field small');input.type='number';input.min='0';input.max='3650';input.step='1';
+        input.value=String(currentReview[i]);
+        input.setAttribute('aria-label','Mốc '+(i+1)+' '+stage+' của '+titleMain(L));
+        label.appendChild(input);label.appendChild(el('span','dim','ngày'));
+        reviewRows.appendChild(label);reviewInputs.push(input);
+      });
+      form.appendChild(reviewRows);
+      var reviewStatus=el('p','listinfo');reviewStatus.setAttribute('role','status');
+      var reviewActions=el('div','btnrow');
+      reviewActions.appendChild(btn('primary','Lưu 5 mốc của bài',function(){
+        var next=normalizedOffsets(reviewInputs.map(function(input){
+          return input.value.trim()===''?NaN:Number(input.value);
+        }));
+        if(!next){reviewStatus.textContent='Hãy nhập đủ 5 số ngày tăng dần, từ 0 đến 3650.';return;}
+        put('reviewOffsets',L.id,next);
+        reviewStatus.textContent='Đã lưu lịch ôn riêng cho bài này; không xóa lượt đã học.';
+        render();
+      }));
+      reviewActions.appendChild(btn('ghost','Dùng lịch chung',function(){
+        put('reviewOffsets',L.id,null);
+        reviewInputs.forEach(function(input,i){input.value=String(OFFSETS[i]);});
+        reviewStatus.textContent='Bài đã dùng lại 5 mốc chung.';
+        render();
+      }));
+      form.appendChild(reviewActions);form.appendChild(reviewStatus);
       var separator = el('hr'); form.appendChild(separator);
       form.appendChild(el('h3', null, 'Gộp bài học'));
       var select = el('select', 'field'); select.setAttribute('aria-label', 'Chọn bài nhận thẻ');
@@ -3868,7 +3901,8 @@ html body #planBox .sdone .pstatus{
     setupReviewSettings();
     function schedule(L) {
       var done = val('done', L.id) || [], base = done[0] || L.plan, T = today();
-      return OFFSETS.map(function (off, i) {
+      var lessonOffsets=normalizedOffsets(val('reviewOffsets',L.id))||OFFSETS;
+      return lessonOffsets.map(function (off, i) {
         var due = i === 0 ? addDays(L.plan, off) : addDays(base, off), st;
         if (i < done.length) st = 'done';
         // Reviews 2–5 only become applicable after the learner actually
