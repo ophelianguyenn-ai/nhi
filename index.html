@@ -7478,5 +7478,25 @@ html body #planBox form.nhi-editor-window-v5 .nhi-optional-hanja-editor .diction
 html body #planBox form.nhi-editor-window-v5 .nhi-optional-hanja-editor .hint{
   font:400 12px/1.45 var(--ui)!important;margin-top:8px!important;
 }
+
+/* Legible Like icon without encroaching on toolbar controls. */
+html body #planBox .pcard>.card-top {
+  min-height:53px!important;align-items:center!important;
+}
+html body #planBox .pcard>.card-top>.cmeta {
+  flex:0 0 50px!important;min-width:50px!important;width:50px!important;
+  max-width:50px!important;min-height:48px!important;
+  padding:0!important;margin:0!important;
+}
+html body #planBox .pcard>.card-top>.cmeta>.nhi-last-hard-icon,
+html body #planBox .pcard>.card-top>.cmeta>.nhi-last-hard-fallback {
+  display:block!important;flex:0 0 48px!important;
+  width:48px!important;height:48px!important;max-width:48px!important;
+  max-height:48px!important;object-fit:contain!important;
+}
+html body #planBox .pcard>.card-top>.cicons {
+  flex:1 1 auto!important;max-width:calc(100% - 56px)!important;
+  gap:4px!important;justify-content:flex-end!important;
+}
 </style>
 </body></html>
