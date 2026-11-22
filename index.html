@@ -4268,11 +4268,10 @@ html body #planBox .sdone .pstatus{
     function home(keepRoute) { if (sess) leave(); if (location.hash && !keepRoute) { history.replaceState(null, '', location.pathname + location.search); } page = null; document.body.classList.remove('plan-page'); if (state.mode === 'plan') render(); }
     function navigatePlanView(name) {
       var href={home:'#/hom-nay',days:'#/lich-hoc',topics:'#/lich-hoc/chu-de',months:'#/lich-hoc/thang',overdue:'#/den-han'}[name];
-      if(!href)return;view=name;
-      if(location.hash===href){
-        if(state.mode!=='plan'||$('view-plan').hidden)route();
-        else home(true);
-      }else location.hash=href;
+      if(!href)return;
+      // Change the visible content immediately, even when the URL is unchanged.
+      setViewV2(name);
+      if(location.hash!==href)location.hash=href;
     }
 
     /* ---- views ---- */
@@ -5888,7 +5887,21 @@ html body #planBox .sdone .pstatus{
         active:!!sess,session:sess?{lesson:sess.L&&sess.L.id,kind:sess.kind,pos:sess.pos,total:sess.queue.length}:null,
         syncEnabled:!!SYNC.cfg()};
     }
-    function setViewV2(name){if(['home','days','topics','months','overdue'].indexOf(name)<0)return;view=name;home(true);}
+    function setViewV2(name){
+      if(['home','days','topics','months','overdue'].indexOf(name)<0)return false;
+      // The old implementation only called home(true), which does not render
+      // when Cards/Quiz is still the saved mode. Do not rely on "hidden" alone.
+      if(sess)leave(); // Save in-progress learning before leaving the card.
+      view=name;page=null;
+      document.body.classList.remove('plan-page');
+      if(state.mode!=='plan'||$('view-plan').hidden){
+        state.mode='plan';saveUi();renderMode();
+      }else{
+        $('view-plan').hidden=false;
+        render();
+      }
+      return true;
+    }
     return {
       render: render, merge: merge, extras: applyExtras, follow: follow, active: function () { return !!sess; }, load: load, leave: function () { if (!page) leave(); }, route: route,
       home: home,setView:setViewV2,snapshot:snapshotV2,startLessonById:function(id){var L=BY_LESSON[id];if(L)startLesson(L);},startPractice:function(ids,title){start('free',ids,title||'Luyện tập');},openDailyCreator: openDailyCreator, summary: summary, onData: function (fn) { dataCb = fn; },
@@ -6362,9 +6375,11 @@ html body #planBox .sdone .pstatus{
       }
       $('brandBtn').addEventListener('click', function () {
         menu(false);SHELL.cover(false);
-        if(location.hash==='#/lich-hoc'){
-          state.mode='plan';saveUi();renderMode();
-        }else location.hash='#/lich-hoc';
+        // Always show the DAY CALENDAR, never simply re-render the previous
+        // "Hôm nay" or flashcard view when the URL is already #/lich-hoc.
+        PLAN.setView('days');
+        if(window.NHI_V2_NAVIGATE)window.NHI_V2_NAVIGATE('calendar');
+        else if(location.hash!=='#/lich-hoc')location.hash='#/lich-hoc';
         window.scrollTo({top:0,behavior:'smooth'});
       });
       window.NHI_COVER={open:function(){cover(true);},close:function(){cover(false);}};
@@ -6862,7 +6877,7 @@ html body #planBox .sdone .pstatus{
 <script src="nhi-card-controls-v8.js?v=20261122-per-device-height"></script>
 <script src="nhi-kitten-meow-v1.js?v=20261120-user-meow"></script>
 <script src="nhi-card-no-overlap-v1.js?v=20261115-safe-v1"></script>
-<script src="nhi-corner-v2.js?v=20261121-numbered-example-plus-v2"></script>
+<script src="nhi-corner-v2.js?v=20261122-calendar-nav-fixed-v1"></script>
 <!-- NHI PATCH 22-11: dán nguyên khối này NGAY TRƯỚC </body> trong index.html -->
 <style id="nhi-patch-compact-v2">
 /* 1. Ảnh gần nội dung hơn, không phá layout một cột ở màn hình hẹp */
