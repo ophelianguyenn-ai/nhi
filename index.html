@@ -596,7 +596,7 @@ section:not([hidden]) > .quiz, section:not([hidden]) > #cardWrap, .list > .row:n
 }
 </style>
 
-<script src="nhi-chat-voice-v1.js?v=20261117"></script><script src="hanja-v9.js?v=12"></script><script src="hanja-extra-v12.js"></script><script src="card-images-v11.js?v=20261122-image-layout-notify-v8"></script><script src="nhi-google-images-v1.js?v=20261114-study-v7"></script><script src="nhi-hard-minimal-v1.js?v=20261120-in-card-v2"></script><script src="nhi-verified-pairs-20261117.js?v=1"></script><script src="nhi-daily-pairs.js?v=20261119-micro-v1"></script><script src="nhi-all-lesson-pairs-v6.js?v=20261121-refined-51"></script><script src="nhi-phrases-v5.js?v=20261121-refined"></script><script src="nhi-english-data-v6.js?v=20261113-reviewed-173"></script><script src="nhi-english-v5.js?v=20261122-English-live-refit-v19"></script><script src="recorded-voices-v11.js?v=20261119-banmai-injoon-daily"></script>
+<script src="nhi-chat-voice-v1.js?v=20261117"></script><script src="hanja-v9.js?v=12"></script><script src="hanja-extra-v12.js"></script><script src="card-images-v11.js?v=20261122-image-layout-notify-v8"></script><script src="nhi-google-images-v1.js?v=20261114-study-v7"></script><script src="nhi-hard-minimal-v1.js?v=20261120-in-card-v2"></script><script src="nhi-verified-pairs-20261117.js?v=1"></script><script src="nhi-daily-pairs.js?v=20261119-micro-v1"></script><script src="nhi-all-lesson-pairs-v6.js?v=20261121-refined-51"></script><script src="nhi-phrases-v5.js?v=20261121-refined"></script><script src="nhi-english-data-v6.js?v=20261113-reviewed-173"></script><script src="nhi-english-v5.js?v=20261122-seven-ui-ipa-font-v20"></script><script src="recorded-voices-v11.js?v=20261119-banmai-injoon-daily"></script>
 <script src="qrcode.js" defer></script>
 <link rel="stylesheet" href="nhi-seven-fixes-20261117.css?v=1"><link rel="stylesheet" href="refresh-v9.css?v=13"><link rel="stylesheet" href="study-enhancements-v13.css?v=14"><link rel="stylesheet" href="nhi-updates-v1.css?v=1"><link rel="stylesheet" href="nhi-ai-resize-v2.css?v=1"><link rel="stylesheet" href="nhi-study-motion-v3.css?v=3"><link rel="stylesheet" href="nhi-interface-v4.css?v=4"><link rel="stylesheet" href="nhi-interface-v5.css?v=20261113-rollback-stable-v1"><link rel="stylesheet" href="nhi-seasons-v1.css?v=20261113-cartoon-soft-1">
 <link rel="stylesheet" href="nhi-living-garden-v1.css?v=20261113-cartoon-butterflies-v1">
@@ -1086,8 +1086,8 @@ body.nhi-in-study #nhiV2TopNav,body.nhi-in-study .nhi-hide-while-flipping,body.n
 /* Approved VI–KO highlights: seven reference colors + a transparent no-fill state.
    Red is softened, and pink matches the sample image. No black or white highlights. */
 :root{
-  --nhi-pair-1:#f48f92;--nhi-pair-2:#fb99cb;--nhi-pair-3:#fefb6a;--nhi-pair-4:#febd69;
-  --nhi-pair-5:#a7f5ac;--nhi-pair-6:#70d4fc;--nhi-pair-7:#e1b5f4;
+  --nhi-pair-1:#ffe1e3;--nhi-pair-2:#fb99cb;--nhi-pair-3:#fefb6a;--nhi-pair-4:#febd69;
+  --nhi-pair-5:#a7f5ac;--nhi-pair-6:#d5efff;--nhi-pair-7:#e1b5f4;
 }
 .ph.nhi-phrase-selected{
   /* Dark lettering stays readable over all seven approved color highlights. */
@@ -4679,8 +4679,12 @@ html body #planBox .sdone .pstatus{
       if(!it||!['ko','vi','viFront','en'].includes(lang)){toast('Hãy mở thẻ cần chỉnh cỡ chữ.');return;}
       if(!Number.isFinite(size)||size<12||size>72)return;
       var existing=val('fmt',it.id)||{};
-      var next=Object.assign({},existing,{_sizes:Object.assign({},existing._sizes||{})});
+      var next=Object.assign({},existing,{
+        _sizes:Object.assign({},existing._sizes||{}),
+        _sizeEditedAt:Object.assign({},existing._sizeEditedAt||{})
+      });
       next._sizes[lang]=size;
+      if(lang==='en')next._sizeEditedAt.en=Date.now();
       put('fmt',it.id,next);
       render();
       toast('Đã lưu cỡ chữ riêng cho thẻ này.');
@@ -4835,7 +4839,7 @@ html body #planBox .sdone .pstatus{
        if(last==='hard'){
          var lastHardIcon=el('img','nhi-last-hard-icon');
          lastHardIcon.alt='Lần trước: Khó';lastHardIcon.title='Lần trước: Khó';
-         lastHardIcon.src='data:image/webp;base64,UklGRuoFAABXRUJQVlA4IN4FAACQHQCdASqAAIAAPq1SokwmJKMiqhGp0MAViWMA1WkR1hRy7b3pA26vPOaa1vRN+gdu9er4gd6PxeTdk0u/K1I/AfLM+CLQA/mH9+/6HqH5+nqb2Ev1z63hgtWodnIa6XZAwI1hwTotIyOCMC3Zjaar3OwGeUloTZ2SKftVowtCxyRDsQZtU+DStwmhoq2hlyxHymX9uTg+54NLKi9YO8dSIaBIlEZbCyX6d3zINp1jhA7ZspheKvfz0B+15BS0bIC18NnwNamGhes5fhPtB5N+9KItIdmsYgh+4fsXmEy8xHnEwl8P6GE4cLo6LYq78fllllfPAAD++BAMyyS16uBrwovgMopp6UxalxP+kMK1a4L7tt/Quq9JuZTOJdd2+G/M/+jCc5H9ju3cJD7Z3dSfpKCWdEIsWHpzqnZdg7UBSnb9C04+w26xWYG5xSfpOt3hxTkqwUSdSs7NW0aX/68AEYBAke/fZ6REAFjGkAozUG+ypnE6YlB4648XoKGvDainXa5NvtT8JgDkaOxJnRHLNm2NqpLpBRbAK+i7aXsVasGNz2WMmFpmw4tgEpcA/gGOlndFIp/f1h+hvughZDJ0tve1Rhauh99v7tFEW+OC5CjNHbd5y0jcc7lP5GOuaYr0+m6PcrsTHi7NTmfeGGQrFXTAc3sI9Bka96G6KRa0bB9xNiSeb0lXpvyAEl4+R/Ud1Baj7eDXb1b1o83mK7hLRZPYCdLTt85fNt7318fweX5rKS+phZa1vfmcloKVNmDP3vys7eRrx4kyZtSHxg+WLFBsV1rw7ctHOHiFKKFOuS/b0B4IuFW6CzB1WEOHRV7nn/5UF/W87HP3PZ/2r1woM4CmVXQoQxrDpPK7H31S9cZknzSPCF+JuEHsGkBLx3uqgqVsjQv36S342/JytpioqrqTbq4TTxfZzBXH4z1+U02VlJ7KlXL6sKSOsgrIN6SXDFyVHFXghHGUTjBsugF8xd7hKu1rhZGOgjgP+lppa3zJ0R/2QvfgkyM+LY7GACHHdBlIrT2PxxTPUIEDWZ8MznHT4bGKcvaWXwsfCmB7SM50q1mgfLjhridGlUELm+sfi8K5vHTmdgoAJyia6t2a+h9jBfYUIFSoaunTowqDKBaVZW103UXNtGrEHX+vJnib0xbBnAkjx33okl6Mht0z576xZH3hR9u366av2OoWTK69hU3EFK7aKGV9sxC30be7s3cY5RxmuvdInYvDw9egIJZBBwDMJPyIkbxWc1sj5OhEQQauBN5pN4XYC7nWcHSeWW2bp9yXsV+5vdbwOYDSemXXAondKYkMzhChYZbU/0m+2hHat5ZjtxHKTn4IdbqsnY4MWkAjYCYrqJxXy4OykgzyHwWGG4mRrIhu6dun0tVWDaWw75LNzyQP/ZJSTioswz2lt9AQXsT6+D5KCjIPrtQgaF9vHb+eg1pejpIQFDXee2LvpE0URoNSlT+5NgckX3abwkal0zjO2NjeM/ThTF/BNKyBlGX4QOlED+95rZHO4w4VPiXI3qXMNOT5sngeqc/hdWJCcRqoS3zOltXUi0gLPDwqv/c86BxY+7nbwu4mTH5N5PsJE1CcSApG7X+NyhH8yS0HGsXK2Iqr70/YNCHK3LAqj0LGnGMuklH1QkiTJzfozfWqiSoIi1s6PmqXES5lk3CLPhb+R4cAdaGwTGv+oK9xUGWESkydnv+OY0XOQd1IBJa/dNrGMGtH2jb9d/YRZi5Fszyh8bdeRVE2Sr4Kus9ri00T6KgHt9AmvsPZL9LpnsvUcLyAFoj2nfVk9w7lG2BX88Ekc7beu6FeTwTVk6IPf5VxU0POG/jHcusD9+2u4Lev10AtDzf9eLw+eKxs18+s84doXiN9UqG7ZCbXDNBRmqHNSLnq9K2a25BbjsDfSomj+EATF4BvErcALrfy4lLnbnVhYURJnjkSrtSJotZ0nvhhXIqD9belqZFtj5TTJo0eohHvXgXn1BOg1RlwRbkRKKQAAAAAAA==';
+         lastHardIcon.src='nhi-last-hard-question-v1.svg';
          cm.appendChild(lastHardIcon);
        } else if(last && RATE_NAME[last]) cm.appendChild(el('span','ptag r-'+last,'Lần trước: '+RATE_NAME[last]));
       var ci = el('div', 'cicons');
@@ -4863,7 +4867,7 @@ html body #planBox .sdone .pstatus{
       var hj = null;
       if (it.type === 'w') { try { hj = lookupHanja(it.ko, it.id); if(hj&&(!hj[0]||!hj[1]))hj=null; } catch(hanjaErr) { console.warn('Nhi Hanja unavailable for this card', hanjaErr); } }
       // The redundant 漢 toolbar icon is intentionally hidden; Hán tự remains editable.
-      m.appendChild(ci); c.appendChild(m); c.appendChild(cm);
+      m.appendChild(cm);m.appendChild(ci);c.appendChild(m);
       if (legendOpen) c.appendChild(legendPop());
       c.dataset.nhiCardId=it.id;
       var cardSizes=((val('fmt',it.id)||{})._sizes)||{};
@@ -5425,10 +5429,21 @@ html body #planBox .sdone .pstatus{
       if (page && (!sess.L || sess.L.id !== page)) return;
       if (e.target && (e.target.isContentEditable || /INPUT|TEXTAREA|SELECT/.test(e.target.tagName))) { if (e.key === 'Escape' && sess.editing) { var ed=document.querySelector('#planBox form.editbox');if(ed&&ed.nhiSave)ed.nhiSave();sess.editing = false; render(); } return; }
       if(e.key==='Escape'&&sess.editing){e.preventDefault();var ed=document.querySelector('#planBox form.editbox');if(ed&&ed.nhiSave)ed.nhiSave();sess.editing=false;render();return;}
+      if((e.key==='c'||e.key==='C')&&!e.repeat&&!document.querySelector('dialog[open]')&&$('cover').hidden&&$('setSheet').hidden){
+        e.preventDefault();e.stopImmediatePropagation();
+        if(sess.editing){
+          var currentEditor=document.querySelector('#planBox form.editbox');
+          if(currentEditor&&currentEditor.nhiSave)currentEditor.nhiSave();
+          sess.editing=false;
+        }else{
+          sess.editing=true;sess.imagePicker=false;legendOpen=false;
+        }
+        render();return;
+      }
       if (document.querySelector('dialog[open]') || !$('cover').hidden || !$('setSheet').hidden || sess.editing) return;
       if (e.key === 'Escape') { if (legendOpen) { legendOpen = false; render(); } else if (document.body.classList.contains('focus')) { setFocus(false); render(); } return; }
       if (sess.pos >= sess.queue.length) { if (e.key === 'ArrowLeft') { e.preventDefault(); go(-1); } return; }
-      if (['ArrowRight','ArrowLeft','Enter',' ','s','S','2','f','F','a','A','Delete','Backspace'].indexOf(e.key)>=0)e.stopImmediatePropagation();
+      if (['ArrowRight','ArrowLeft','Enter',' ','s','S','2','f','F','a','A','c','C','Delete','Backspace'].indexOf(e.key)>=0)e.stopImmediatePropagation();
       if (e.key === 'ArrowRight') { e.preventDefault(); go(1); }
       else if (e.key === 'ArrowLeft') { e.preventDefault(); go(-1); }
       else if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); flip(); }
@@ -6405,14 +6420,14 @@ html body #planBox .sdone .pstatus{
 <script src="backup-portable-v1.js"></script>
 <script src="nhi-ai-resize-v2.js?v=20261114-study-v7"></script>
 <script src="nhi-fireworks-v3.js?v=3"></script>
-<script src="study-update-v6.js?v=20261122-five-ui-fixes-v6"></script>
+<script src="study-update-v6.js?v=20261122-seven-ui-font-v7"></script>
 <script src="nhi-longpress-dictionary-v1.js?v=20261117"></script>
 <script src="nhi-interface-v5.js?v=20261114"></script>
 <script src="nhi-november-v15.js?v=20261114-ux-v17"></script>
 <script src="nhi-seasons-v1.js?v=20261113-original-garden-v2"></script>
 <script src="nhi-living-garden-v1.js?v=20261113-cartoon-butterflies-v1"></script>
 <script src="nhi-late-2026.js?v=20261115-v9-compact-pairs"></script>
-<script src="nhi-stage-move-v1.js?v=20261116-desktop-paired-highlight-v1"></script>
+<script src="nhi-stage-move-v1.js?v=20261122-vertical-drag-v2"></script>
 <script src="nhi-card-controls-v8.js?v=20261121-per-card-v9"></script>
 <script src="nhi-kitten-meow-v1.js?v=20261120-user-meow"></script>
 <script src="nhi-card-no-overlap-v1.js?v=20261115-safe-v1"></script>
@@ -6969,36 +6984,108 @@ html body #planBox .pcard:has(.pfront.nhi-with-image)>.prate.nhi-rating-v3{
 
 <link rel="stylesheet" href="nhi-card-fit-fixes-20261121.css?v=20261122-five-ui-fixes-v7">
 
-<style id="nhi-five-ui-fixes-20261122">
-/* Last-time "Khó": compact image in the top-left corner, not a text badge. */
-html body #planBox .pcard .nhi-last-hard-icon{
-  position:absolute!important;top:7px!important;left:9px!important;
-  width:43px!important;height:43px!important;object-fit:contain!important;
-  display:block!important;pointer-events:none!important;z-index:4!important;
-  border-radius:8px!important;
+<style id="nhi-seven-ui-fixes-20261122">
+/* Place the cropped difficult-card illustration in its own toolbar lane. */
+html body #planBox .pcard>.card-top {
+  display:flex!important;flex-direction:row!important;
+  justify-content:space-between!important;align-items:center!important;
+  gap:8px!important;min-height:42px!important;
 }
-/* Keep Khó – Lùi – Tiến – Hoàn tác aligned on one row. */
-html body #planBox .pcard>.prate.nhi-rating-v3{flex-wrap:nowrap!important;align-items:center!important;}
-html body #planBox .pcard>.prate.nhi-rating-v3>.hard{order:0!important;flex:1 1 70px!important;min-width:58px!important;}
-html body #planBox .pcard>.prate.nhi-rating-v3>.nhi-prev-v3,
-html body #planBox .pcard>.prate.nhi-rating-v3>.nhi-next-v3{
-  flex:0 0 48px!important;width:48px!important;min-width:48px!important;height:50px!important;
+html body #planBox .pcard>.card-top>.cmeta {
+  display:inline-flex!important;position:static!important;order:0!important;
+  align-items:center!important;justify-content:flex-start!important;
+  flex:0 0 auto!important;min-height:40px!important;
+  min-width:0!important;max-width:35%!important;margin:0!important;
 }
-html body #planBox .pcard>.prate.nhi-rating-v3>.pundo{
-  order:3!important;flex:0 0 84px!important;width:84px!important;
-  max-width:84px!important;min-width:76px!important;
+html body #planBox .pcard>.card-top>.cicons {
+  order:1!important;margin-left:auto!important;flex:0 1 auto!important;
+  justify-content:flex-end!important;
+}
+html body #planBox .pcard .nhi-last-hard-icon {
+  display:block!important;position:static!important;transform:none!important;
+  width:39px!important;height:36px!important;max-width:39px!important;
+  max-height:36px!important;object-fit:contain!important;flex:none!important;
+  margin:0!important;padding:0!important;pointer-events:none!important;
+  border:0!important;box-shadow:none!important;background:transparent!important;
+}
+/* Four controls, one continuous row in the requested order, even with a photo. */
+html body #planBox .pcard>.prate.nhi-rating-v3:has(>.pundo) {
+  display:grid!important;grid-template-columns:minmax(0,1fr) 46px 46px 90px!important;
+  grid-template-rows:50px!important;gap:6px!important;
+  flex-wrap:nowrap!important;align-items:stretch!important;justify-content:center!important;
+  box-sizing:border-box!important;min-width:0!important;
+}
+html body #planBox .pcard>.prate.nhi-rating-v3:has(>.pundo)>.hard {
+  grid-column:1!important;grid-row:1!important;
+  width:100%!important;max-width:none!important;min-width:0!important;
+  min-height:50px!important;height:50px!important;
+  flex:none!important;order:0!important;
+}
+html body #planBox .pcard>.prate.nhi-rating-v3:has(>.pundo)>.nhi-prev-v3 {
+  grid-column:2!important;grid-row:1!important;
+}
+html body #planBox .pcard>.prate.nhi-rating-v3:has(>.pundo)>.nhi-next-v3 {
+  grid-column:3!important;grid-row:1!important;
+}
+html body #planBox .pcard>.prate.nhi-rating-v3:has(>.pundo)>.pundo {
+  grid-column:4!important;grid-row:1!important;order:3!important;
+  flex:none!important;width:100%!important;max-width:none!important;min-width:0!important;
   height:50px!important;min-height:50px!important;max-height:50px!important;
-  align-self:center!important;display:inline-flex!important;flex-direction:row!important;
-  box-sizing:border-box!important;white-space:nowrap!important;padding:0 5px!important;
-  font-size:12px!important;line-height:1.1!important;
+  padding:0 5px!important;white-space:nowrap!important;
+  display:flex!important;flex-direction:row!important;align-items:center!important;
+  justify-content:center!important;font-size:12px!important;line-height:1!important;
   color:var(--ink)!important;background:var(--surface)!important;
   border-color:var(--line)!important;box-shadow:0 4px 0 var(--edge)!important;
 }
+html body #planBox .pcard>.prate.nhi-rating-v3:has(>.pundo)>.nhi-prev-v3,
+html body #planBox .pcard>.prate.nhi-rating-v3:has(>.pundo)>.nhi-next-v3 {
+  min-width:0!important;width:100%!important;max-width:none!important;
+  flex:none!important;height:50px!important;
+}
 @media(max-width:420px){
-  html body #planBox .pcard>.prate.nhi-rating-v3{gap:5px!important;}
-  html body #planBox .pcard>.prate.nhi-rating-v3>.nhi-prev-v3,
-  html body #planBox .pcard>.prate.nhi-rating-v3>.nhi-next-v3{flex-basis:42px!important;width:42px!important;min-width:42px!important;}
-  html body #planBox .pcard>.prate.nhi-rating-v3>.pundo{flex-basis:76px!important;width:76px!important;font-size:11px!important;}
+  html body #planBox .pcard>.prate.nhi-rating-v3:has(>.pundo){
+    grid-template-columns:minmax(0,1fr) 40px 40px 77px!important;gap:4px!important;
+  }
+  html body #planBox .pcard>.prate.nhi-rating-v3:has(>.pundo)>.pundo{font-size:11px!important;}
+}
+/* Distinct spacing for short IPA, separate line for 3+ English words. */
+html body #planBox .pcard .nhi-english-v5>.nhi-en-head>.nhi-en-main {
+  display:flex!important;flex-direction:row!important;flex-wrap:wrap!important;
+  align-items:baseline!important;justify-content:flex-start!important;
+  column-gap:14px!important;row-gap:8px!important;
+}
+html body #planBox .pcard .nhi-english-v5.nhi-ipa-below>.nhi-en-head>.nhi-en-main {
+  flex-direction:column!important;flex-wrap:nowrap!important;
+  align-items:flex-start!important;row-gap:9px!important;
+}
+html body #planBox .pcard .nhi-english-v5 .nhi-en-main>.nhi-en-translation,
+html body #planBox .pcard .nhi-english-v5 .nhi-en-main>.nhi-en-ipa:not([hidden]) {
+  flex:0 1 auto!important;display:block!important;
+  width:auto!important;max-width:100%!important;
+  padding:0!important;margin:0!important;
+  text-align:left!important;line-height:1.32!important;
+}
+html body #planBox .pcard .nhi-english-v5 .nhi-en-translation {
+  font-size:var(--nhi-effective-en,22px)!important;
+}
+html body #planBox .pcard .nhi-english-v5 .nhi-en-translation .nhi-en-word {
+  font-size:inherit!important;
+}
+html body #planBox .pcard .nhi-english-v5 .nhi-en-choices>.nhi-en-choice,
+html body #planBox .pcard .nhi-english-v5 .nhi-en-choices .nhi-comparison-choice-text{
+  font-size:var(--nhi-comparison-english-size,var(--nhi-effective-en,22px))!important;
+}
+/* Visible vertical drag of the Vietnamese meaning on the back. */
+html body #planBox .pcard .pfront>.vi-under[data-nhi-movable="vietnamese"] {
+  transform:translate3d(var(--nhi-move-x,0px),var(--nhi-move-y,0px),0)!important;
+  translate:none!important;touch-action:none!important;cursor:grab!important;
+  will-change:transform!important;
+}
+html body #planBox .pcard:has(.pfront.nhi-with-image) .pfront>.vi-under[data-nhi-movable="vietnamese"] {
+  transform:translate3d(0,var(--nhi-move-y,0px),0)!important;
+}
+html body #planBox .pcard .pfront>.vi-under[data-nhi-movable="vietnamese"].nhi-is-moving {
+  cursor:grabbing!important;
 }
 </style>
 </body></html>
