@@ -4865,8 +4865,10 @@ html body #planBox .sdone .pstatus{
     });
     function editForm(it) {
       var f = el('form', 'editbox nhi-editor-window-v5');
-      // Old CSS animations must not compete with the shared Settings transition.
-      f.style.setProperty('animation','none','important');
+      // Web Animations own the modal when available; otherwise use CSS fallback.
+      if(window.NHI_WINDOW_FX)f.style.setProperty('animation','none','important');
+      f.dataset.nhiFxEffect=window.NHI_WINDOW_FX?.choose?.('settings')||'soft-pop';
+      f.dataset.nhiFxOperation='open';
       f.appendChild(ibtn('iconbtn sm nhi-editor-close-v5','x',function(){closeEditor();},'Đóng và tự lưu chỉnh sửa thẻ'));
       var savedHj = val('hj', it.id), initialHj = lookupHanja(it.ko, it.id);
       var hanInput,readingInput,hanToggle,hanjaLinks,hanjaInputGrid,section=null,syncHanjaEditor=function(){};
@@ -5078,9 +5080,9 @@ html body #planBox .sdone .pstatus{
         else if(!reduceMotion()&&typeof f.animate==='function'){
           f.style.setProperty('animation','none','important');
           var exit=f.animate([
-            {opacity:1,translate:'0 0',scale:'1',filter:'blur(0px)'},
-            {opacity:.08,translate:'clamp(80px,25vw,220px) -24dvh',scale:'.16',filter:'blur(2px)'}
-          ],{duration:300,easing:'cubic-bezier(.55,0,.85,.5)',fill:'forwards'});
+            {opacity:1,scale:'1'},
+            {opacity:.2,scale:'.90'}
+          ],{duration:290,easing:'cubic-bezier(.42,0,.8,.3)',fill:'forwards'});
           exit.onfinish=finish;exit.oncancel=finish;
         }else finish();
       }
@@ -7689,7 +7691,7 @@ html body #planBox .pcard>.card-top>.cicons {
   gap:4px!important;justify-content:flex-end!important;
 }
 </style>
-<link rel="stylesheet" href="nhi-ui-refine-v2.css?v=20261122-inline-effects-english-autogrow-v5">
+<link rel="stylesheet" href="nhi-ui-refine-v2.css?v=20261122-static-controls-fallback-v6">
 <script id="nhiFxInlineV5">
 /* Nhi's Learning Corner: selectable window/card transitions. */
 (function(){
