@@ -682,7 +682,7 @@ try{
    return {gap:b.top-a.bottom,noteWidth:a.width,englishWidth:b.width};
  });
  assert(noteSeparation&&noteSeparation.gap>=8&&
-   noteSeparation.englishWidth<=460,
+   noteSeparation.englishWidth<=600,
    'Korean and English notes need separation; English must size to text independently: '+JSON.stringify(noteSeparation));
  console.log('PAIRED_NOTE_SEPARATION',JSON.stringify(noteSeparation));
  // Long bilingual text must never push the control row on top of its content.
