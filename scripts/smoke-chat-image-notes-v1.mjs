@@ -571,6 +571,33 @@ try{
  assert(fit && fit.short<=fit.before && fit.short<470,
   'Short English must be compact, regardless of Korean note width: '+JSON.stringify(fit));
  console.log('ENGLISH_CONTENT_WIDTH',JSON.stringify(fit));
+ // Regression for the phrase that previously wrapped although the card had
+ // room: at 38px the meaning itself must stay on ONE line and the note grow.
+ const connectedPhrase=await page.evaluate(async()=>{
+   const front=document.querySelector('#planBox .pfront.nhi-with-image');
+   const host=document.createElement('div');host.className='nhi-card-details';
+   front.appendChild(host);
+   try{
+     const id='connected-inline-regression',vi='kết nối theo cách này',ko='이런 방식으로 연결됨';
+     window.NHI_ENGLISH.saveEntry(id,vi,ko,{
+       en:'connected in this way',ipa:'kəˈnektɪd ɪn ðɪs weɪ',
+       source:'manual',format:{_sizes:{en:38}}
+     });
+     const box=window.NHI_ENGLISH.mount(host,id,vi,ko,{format:{_sizes:{en:38}}});
+     await new Promise(ok=>setTimeout(ok,460));
+     const word=box.querySelector('.nhi-en-translation');
+     const font=parseFloat(getComputedStyle(word).fontSize)||38;
+     return {width:box.getBoundingClientRect().width,
+       meaningHeight:word.getBoundingClientRect().height,
+       font,ipaVisible:!box.querySelector('.nhi-en-ipa')?.hidden,
+       space:host.getBoundingClientRect().width};
+   }finally{host.remove();}
+ });
+ assert(connectedPhrase.width>330&&connectedPhrase.width<=600 &&
+   connectedPhrase.meaningHeight<connectedPhrase.font*1.8,
+   'Connected-in-this-way must fit its English meaning on one line when space is available: '+
+   JSON.stringify(connectedPhrase));
+ console.log('CONNECTED_PHRASE_WIDTH',JSON.stringify(connectedPhrase));
  // Verify that each actual comparison row keeps the English sentence
  // immediately beside its Vietnamese/Korean flag, not centered elsewhere.
  const comparisonGeometry=await page.evaluate(async()=>{
