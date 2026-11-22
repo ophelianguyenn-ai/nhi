@@ -151,6 +151,8 @@ observer.observe(document.documentElement,{subtree:true,childList:true,attribute
 document.addEventListener('change',e=>{
  const target=e.target;
  if(!(target instanceof Element))return;
+ // Avoid overlaying the 260ms reveal/collapse of the Hán–Hàn fields.
+ if(target.matches('input[name="hanjaEnabled"]'))return;
  const editor=target.closest('form.nhi-editor-window-v5');
  if(editor && target.matches('input[type=checkbox],select'))play(editor.querySelector('.nhi-hanja-input-grid')||editor,'change',false);
  else if(target.closest('#planBox')&&target.matches('select,input[type=checkbox]')){
