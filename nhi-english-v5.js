@@ -457,5 +457,5 @@ function mount(parent,id,vi,ko,options){
  }else if(!verifiedEntry(id,vi,ko))resolveAutomatic(id,vi,ko,box);
  return box;
 }
-window.NHI_ENGLISH={mount,load,speakEnglish,entry:(id,vi,ko)=>choices[entryKey(vi,ko)]||verifiedEntry(id,vi,ko)||{},saveEntry:(id,vi,ko,entry)=>{cacheEntry(id,vi,ko,entry);delete choices[entryKey(vi,ko)];try{localStorage.setItem(CHOICE_KEY,JSON.stringify(choices));}catch(e){}}};
+window.NHI_ENGLISH={mount,load,speakEnglish,refit:()=>document.querySelectorAll('#planBox .nhi-english-v5').forEach(fitEnglishWidth),entry:(id,vi,ko)=>choices[entryKey(vi,ko)]||verifiedEntry(id,vi,ko)||{},saveEntry:(id,vi,ko,entry)=>{cacheEntry(id,vi,ko,entry);delete choices[entryKey(vi,ko)];try{localStorage.setItem(CHOICE_KEY,JSON.stringify(choices));}catch(e){}}};
 })();
