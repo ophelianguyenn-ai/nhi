@@ -4755,7 +4755,7 @@ html body #planBox .sdone .pstatus{
       var f = el('form', 'editbox nhi-editor-window-v5');
       f.appendChild(ibtn('iconbtn sm nhi-editor-close-v5','x',function(){closeEditor();},'Đóng và tự lưu chỉnh sửa thẻ'));
       var savedHj = val('hj', it.id), initialHj = lookupHanja(it.ko, it.id);
-      var hanInput,readingInput,hanToggle,hanjaLinks,section=null;
+      var hanInput,readingInput,hanToggle,hanjaLinks,section=null,syncHanjaEditor=function(){};
       {
         section=el('fieldset','hanja-editor nhi-optional-hanja-editor');
         section.appendChild(el('legend',null,'Hán–Hàn (Hán tự và âm Hán–Việt)'));
@@ -4775,7 +4775,7 @@ html body #planBox .sdone .pstatus{
         hanInput.addEventListener('input',function(){vietLink.href='https://hvdic.thivien.net/whv/'+encodeURIComponent(hanInput.value);});
         section.appendChild(links);hanjaLinks=links;
         section.appendChild(el('p','hint','Nếu thẻ không có Hán tự, bỏ chọn. Bạn có thể bật lại và tự điền sau.'));
-        function syncHanjaEditor(){
+        syncHanjaEditor=function(){
           var enabled=hanToggle.checked;
           hanInput.parentElement.hidden=!enabled;
           readingInput.parentElement.hidden=!enabled;
