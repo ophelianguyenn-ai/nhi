@@ -297,21 +297,28 @@ async function showShortPhraseIPA(box,english,revision){
 function applyEnglishFont(box){
  const translation=box?.querySelector('.nhi-en-translation');
  if(!translation)return;
- const local=Number(box._format?._sizes?.en);
- const localUpdated=Number(box._format?._sizeEditedAt?.en||0);
+ const source=box._format||{},entrySource=box._entryFormat||{};
+ const local=Number(source._sizes?.en||entrySource._sizes?.en);
+ const localUpdated=Number(source._sizeEditedAt?.en||entrySource._sizeEditedAt?.en||0);
  let globalUpdated=0;
  try{globalUpdated=Number(localStorage.getItem('nhi-card-global-en-revision-v1')||0);}catch(e){}
- // New global choices override older individual English sizes, while later
- // individual edits remain possible on the currently selected card.
- translation.style.removeProperty('font-size');
- if(local>=12&&local<=72&&(!globalUpdated||localUpdated>globalUpdated))
-   translation.style.setProperty('font-size',local+'px','important');
+ const rootSize=parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--nhi-effective-en'));
+ const globalSize=Number.isFinite(rootSize)&&rootSize>=12?rootSize:22;
+ const chosen=local>=12&&local<=72&&(!globalUpdated||localUpdated>globalUpdated)?local:globalSize;
+ // Explicit inline important size wins over old CSS and nested note styles.
+ translation.style.setProperty('font-size',chosen+'px','important');
+ translation.querySelectorAll('.nhi-en-word').forEach(word=>{
+   word.style.setProperty('font-size','inherit','important');
+ });
+ box.style.setProperty('--nhi-comparison-english-size',chosen+'px');
+ box.dataset.nhiEnglishFontPx=String(chosen);
 }
 function display(box,entry,id,vi,ko){
  // Cards are constructed off-DOM, then appended; populate immediately.
  // isConnected is false during the first render, even though the box is valid.
  if(!box)return;
  entry=choices[entryKey(vi,ko)]||entry;
+ box._entryFormat=(entry&&entry.format)||{};
  const en=clean(entry&&entry.en),ipa=clean(entry&&entry.ipa);
  const translation=box.querySelector('.nhi-en-translation');translation.textContent=en||'Đang chuẩn bị bản dịch tiếng Anh…';if(en&&window.NHI_STUDY){window.NHI_STUDY.wordElements(translation,en);window.NHI_STUDY.formatText(translation,{
   ...(entry?.format||{}),...(box._format||{}),
