@@ -37877,6 +37877,38 @@
           "Vốn định làm vách chắn vào ngày mai. Do không biết ngày mai công ty nghỉ nên chưa kịp báo.",
           "원래 내일 안전 차단벽을 설치할 예정이었어요. 내일 회사가 휴무인 줄 몰라서 미리 말씀드리지 못했어요.",
           1
+        ],
+        [
+          "nhi22110006",
+          "w",
+          "Thiết bị & sản xuất",
+          "mở máy móc/thiết bị ra để kiểm tra",
+          "설비를 열어 점검하다",
+          1
+        ],
+        [
+          "nhi22110007",
+          "w",
+          "Thiết bị & sản xuất",
+          "chỉ mất vài tiếng là xong",
+          "몇 시간밖에 걸리지 않다",
+          1
+        ],
+        [
+          "nhi22110008",
+          "w",
+          "Thiết bị & sản xuất",
+          "không ảnh hưởng đến sản xuất",
+          "생산에 지장이 없다",
+          1
+        ],
+        [
+          "nhi22110009",
+          "s",
+          "Thiết bị & sản xuất",
+          "Anh Thọ hỏi hôm nay có thể mở thiết bị ra để kiểm tra không. Việc này chỉ mất vài tiếng và không ảnh hưởng đến sản xuất.",
+          "Thọ 씨가 오늘 설비를 열어 점검해 봐도 되는지 물어봤습니다. 몇 시간밖에 걸리지 않고 생산에는 지장이 없다고 합니다.",
+          1
         ]
       ]
     }
