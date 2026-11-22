@@ -56,10 +56,17 @@ function showRoute(name){
  if(name==='chat'){setPanel('');window.NLC_AI?.open();setActiveNav('chat');return;}
  if(name==='today'||name==='calendar'){
   setPanel('');
-  const plan=$('#tab-plan');if(plan&&$('#view-plan')?.hidden)plan.click();
   const hash=location.hash;
   const view=name==='today'?'home':hash==='#/lich-hoc/chu-de'?'topics':hash==='#/lich-hoc/thang'?'months':'days';
-  P()?.setView?.(view);setActiveNav(name);return;
+  // Never infer the active mode solely from #view-plan.hidden: the old route
+  // could select the tab without actually replacing the Home or Cards content.
+  const api=P();
+  if(api&&api.setView){
+   api.setView(view);
+  }else{
+   const plan=$('#tab-plan');if(plan)plan.click();
+  }
+  setActiveNav(name);return;
  }
  if(['notebook','errors','progress','search','practice','speak','settings','listen','threads','quiz','write'].includes(name)){
   setPanel(name);setActiveNav(name);return;
@@ -89,6 +96,8 @@ function route(next){
   location.hash=href;
  }else applyHashRoute();
 }
+// Allow the main brand/logo to use the exact same navigation path as the tabs.
+window.NHI_V2_NAVIGATE=route;
 function goBack(){
  const current=location.hash;
  // Always return from lesson details to the calendar, regardless of history.
