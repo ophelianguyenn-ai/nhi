@@ -230,3 +230,111 @@ html body #planBox .pcard form.nhi-editor-window-v5
  border-width:0!important;border-style:none!important;
  box-shadow:none!important;padding:0!important;
 }
+
+
+/* 2026-11-22 — actual visible rich English field grows with wrapped lines. */
+html body #planBox form.nhi-editor-window-v5
+ .nhi-english-edit-field>.nhi-rich-field[data-language="en"]{
+  min-height:44px!important;max-height:none!important;
+  min-block-size:44px!important;max-block-size:none!important;
+  height:auto;block-size:auto;
+  box-sizing:border-box!important;
+  overflow-wrap:anywhere!important;word-break:normal!important;
+  white-space:pre-wrap!important;
+  overflow-x:hidden!important;overflow-y:hidden!important;
+  padding:8px 11px!important;line-height:24px!important;
+  transition:height .22s cubic-bezier(.2,.8,.3,1),border-color .2s ease!important;
+}
+html body #planBox form.nhi-editor-window-v5
+ .nhi-ipa-edit-field>input[name="ipa"]{
+  height:44px!important;min-height:44px!important;max-height:44px!important;
+}
+/* A softly rounded, accessible standalone Hán–Hàn toggle. */
+html body #planBox .pcard form.nhi-editor-window-v5
+ .nhi-hanja-editor-inline>.nhi-hanja-checkbox-original{
+ width:43px!important;min-width:43px!important;
+ height:44px!important;display:flex!important;justify-content:center!important;
+ align-items:center!important;margin:0!important;padding:0!important;
+ background:transparent!important;border:0!important;box-shadow:none!important;
+ cursor:pointer!important;
+}
+html body #planBox .pcard form.nhi-editor-window-v5
+ .nhi-hanja-editor-inline>.nhi-hanja-checkbox-original>input[type=checkbox]{
+ appearance:none!important;-webkit-appearance:none!important;
+ width:34px!important;height:34px!important;
+ min-width:34px!important;min-height:34px!important;
+ border:3px solid #128784!important;border-radius:12px!important;
+ background:#f4fcfa!important;box-shadow:inset 0 0 0 2px #fff,0 2px 7px #0b71631a!important;
+ cursor:pointer!important;
+ transition:background-color .22s ease,box-shadow .22s ease,transform .18s ease,border-color .22s ease!important;
+}
+html body #planBox .pcard form.nhi-editor-window-v5
+ .nhi-hanja-editor-inline>.nhi-hanja-checkbox-original>input[type=checkbox]:checked{
+ background:#72d2cd!important;border-color:#0e8581!important;
+ box-shadow:inset 0 0 0 2px #fff,0 3px 10px #0b71632a!important;
+}
+html body #planBox .pcard form.nhi-editor-window-v5
+ .nhi-hanja-editor-inline>.nhi-hanja-checkbox-original>input[type=checkbox]:active{
+ transform:scale(.92)!important;
+}
+html body #planBox .pcard form.nhi-editor-window-v5
+ .nhi-hanja-editor-inline>.nhi-hanja-checkbox-original>input[type=checkbox]:focus-visible{
+ outline:3px solid #49a7c8!important;outline-offset:3px!important;
+}
+html body #planBox .pcard form.nhi-editor-window-v5
+ .nhi-hanja-editor-inline>.nhi-hanja-checkbox-original>input[type=checkbox]:checked::after{
+ content:"✓"!important;color:#fff!important;font:900 25px/1 system-ui!important;
+ text-shadow:0 1px 0 #128784!important;
+}
+html body #planBox .pcard form.nhi-editor-window-v5
+ .nhi-hanja-editor-inline>.nhi-hanja-heading{
+ font-size:17px!important;font-weight:800!important;letter-spacing:0!important;
+ margin:0 0 4px!important;line-height:1.4!important;
+}
+/* Main settings: always-visible effect controls, not buried below long voice settings. */
+html body #setSheet .sheetbox>#nhiTransitionSettings{
+ display:block!important;margin:12px 0 15px!important;
+ padding:15px!important;border-radius:16px!important;
+ border:1.5px solid #b6e8e3!important;
+ background:#f2fcfb!important;color:#173e49!important;
+ box-shadow:0 6px 18px #0b80731a!important;
+}
+html body #setSheet #nhiTransitionTitle{
+ font:800 19px/1.3 var(--ui,system-ui)!important;color:#124851!important;
+ margin:0 0 5px!important;
+}
+html body #setSheet #nhiTransitionOptions{
+ display:grid!important;grid-template-columns:1fr!important;gap:5px!important;
+ padding-top:5px!important;
+}
+html body #setSheet .nhi-fx-setting-row{
+ display:grid!important;grid-template-columns:minmax(0,1fr) minmax(125px,195px)!important;
+ gap:9px!important;align-items:center!important;
+ min-height:44px!important;margin:0!important;padding:5px 2px!important;
+ border-bottom:1px solid #c5e6e280!important;
+}
+html body #setSheet .nhi-fx-setting-row>label{
+ font:600 13px/1.4 var(--ui,system-ui)!important;color:#335c66!important;
+ min-width:0!important;overflow-wrap:anywhere!important;
+}
+html body #setSheet .nhi-fx-setting-row>select{
+ display:block!important;width:100%!important;max-width:none!important;
+ height:38px!important;min-height:38px!important;
+ border-radius:10px!important;border:1px solid #a8d9d5!important;
+ background:white!important;color:#194452!important;
+ padding:6px 10px!important;font-size:13px!important;
+}
+html body #setSheet .nhi-fx-setting-row>select:disabled{
+ background:#e2f1ef!important;color:#71838a!important;cursor:not-allowed!important;
+}
+html body #setSheet #nhiFxPreview{
+ min-height:38px!important;padding:7px 14px!important;
+ border-radius:11px!important;margin-top:9px!important;
+ background:#d9f6f2!important;border:1px solid #95d9d2!important;
+ font-weight:750!important;color:#0f7775!important;
+}
+@media(max-width:410px){
+ html body #setSheet .nhi-fx-setting-row{grid-template-columns:minmax(0,1fr) minmax(112px,45%)!important;gap:6px!important;}
+ html body #setSheet .nhi-fx-setting-row>label{font-size:12px!important;}
+ html body #setSheet .nhi-fx-setting-row>select{font-size:12px!important;padding:6px!important;}
+}
