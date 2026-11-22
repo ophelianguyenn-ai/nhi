@@ -111,3 +111,95 @@ html body #planBox form.nhi-editor-window-v5 .field,
 html body #planBox .nhi-english-v5{
  transition:background-color .24s ease,border-color .24s ease,box-shadow .24s ease,opacity .24s ease;
 }
+
+
+/* Nov 22 correction: preserve the original bold teal checkbox and Hán–Hàn
+   heading. Remove only the long checkbox text and the enclosing panel. */
+html body #planBox .pcard form.nhi-editor-window-v5 > .nhi-hanja-editor-inline.nhi-editor-hanja-last{
+  display:grid!important;
+  grid-template-columns:42px minmax(0,1fr)!important;
+  grid-template-rows:auto auto!important;
+  row-gap:8px!important;column-gap:8px!important;
+  width:100%!important;max-width:none!important;min-width:0!important;
+  margin:12px 0 3px!important;padding:0!important;
+  background:transparent!important;border:0!important;
+  box-shadow:none!important;border-radius:0!important;
+}
+html body #planBox .pcard form.nhi-editor-window-v5 .nhi-hanja-editor-inline>.nhi-hanja-heading{
+  display:block!important;grid-column:1/-1!important;grid-row:1!important;
+  font-family:var(--ui,system-ui)!important;font-size:16px!important;
+  font-weight:800!important;line-height:1.4!important;letter-spacing:0!important;
+  color:var(--ink)!important;margin:0 0 1px!important;padding:0!important;
+  text-align:left!important;
+}
+html body #planBox .pcard form.nhi-editor-window-v5 .nhi-hanja-editor-inline>.nhi-hanja-checkbox-original{
+  grid-column:1!important;grid-row:2!important;
+  width:38px!important;min-width:38px!important;height:44px!important;
+  min-height:44px!important;max-height:44px!important;
+  display:flex!important;align-items:center!important;justify-content:flex-start!important;
+  padding:0!important;margin:0!important;
+  border:0!important;border-radius:0!important;
+  background:transparent!important;box-shadow:none!important;cursor:pointer!important;
+}
+html body #planBox .pcard form.nhi-editor-window-v5 .nhi-hanja-editor-inline>.nhi-hanja-checkbox-original>input[type=checkbox]{
+  appearance:none!important;-webkit-appearance:none!important;
+  display:grid!important;place-items:center!important;
+  flex:0 0 35px!important;width:35px!important;height:35px!important;
+  min-width:35px!important;min-height:35px!important;max-width:35px!important;max-height:35px!important;
+  margin:0!important;padding:0!important;
+  border:4px solid #117e7d!important;border-radius:11px!important;
+  background:var(--surface,#fff)!important;
+  box-shadow:inset 0 0 0 3px #fff,0 0 0 1px #a8e8e4!important;
+}
+html body #planBox .pcard form.nhi-editor-window-v5 .nhi-hanja-editor-inline>.nhi-hanja-checkbox-original>input[type=checkbox]:checked{
+  background:#81d8d5!important;border-color:#0b7877!important;
+  box-shadow:inset 0 0 0 3px #fff,0 0 0 1px #bcece8!important;
+}
+html body #planBox .pcard form.nhi-editor-window-v5 .nhi-hanja-editor-inline>.nhi-hanja-checkbox-original>input[type=checkbox]:checked::after{
+  content:"✓"!important;display:block!important;
+  font:900 25px/1 system-ui,sans-serif!important;color:white!important;
+  text-shadow:0 1px 0 #148b87!important;
+}
+html body #planBox .pcard form.nhi-editor-window-v5 .nhi-hanja-editor-inline>.nhi-hanja-input-grid{
+  grid-column:2!important;grid-row:2!important;
+  display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;
+  align-items:end!important;gap:10px!important;max-width:none!important;
+  margin:0!important;padding:0!important;width:100%!important;min-width:0!important;
+}
+html body #planBox .pcard form.nhi-editor-window-v5 .nhi-hanja-editor-inline>.nhi-hanja-input-grid[hidden]{
+  display:none!important;
+}
+html body #planBox .pcard form.nhi-editor-window-v5 .nhi-hanja-editor-inline .nhi-hanja-field{
+  display:flex!important;flex-direction:column!important;gap:5px!important;
+  min-width:0!important;width:100%!important;margin:0!important;
+}
+html body #planBox .pcard form.nhi-editor-window-v5 .nhi-hanja-editor-inline .nhi-hanja-field>input{
+  height:44px!important;min-height:44px!important;max-height:44px!important;
+  width:100%!important;min-width:0!important;box-sizing:border-box!important;
+}
+@media(max-width:440px){
+  html body #planBox .pcard form.nhi-editor-window-v5 > .nhi-hanja-editor-inline.nhi-editor-hanja-last{
+    grid-template-columns:38px minmax(0,1fr)!important;column-gap:7px!important;
+  }
+  html body #planBox .pcard form.nhi-editor-window-v5 .nhi-hanja-editor-inline>.nhi-hanja-input-grid{
+    gap:7px!important;
+  }
+}
+/* English and IPA edit controls are exactly the same 44px tall, even when
+   the English sentence is long. Keep text editable with horizontal scrolling. */
+html body #planBox form.nhi-editor-window-v5 label.nhi-english-edit-field>textarea,
+html body #planBox form.nhi-editor-window-v5 label.nhi-ipa-edit-field>input{
+  box-sizing:border-box!important;height:44px!important;
+  min-height:44px!important;max-height:44px!important;
+  padding:9px 11px!important;line-height:24px!important;
+  border-radius:11px!important;vertical-align:middle!important;
+}
+html body #planBox form.nhi-editor-window-v5 label.nhi-english-edit-field>textarea{
+  resize:none!important;white-space:pre!important;
+  overflow-x:auto!important;overflow-y:hidden!important;
+}
+/* The chosen window transition owns animation for both editor and settings.
+   Old CSS keyframes must not play at the same time. */
+html body #planBox form.nhi-editor-window-v5{
+  animation:none!important;transform-origin:center center!important;
+}
