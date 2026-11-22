@@ -4866,7 +4866,7 @@ html body #planBox .sdone .pstatus{
         Object.keys(sectionLayout).forEach(function(k){
           section.style.setProperty(k.replace(/[A-Z]/g,function(t){return '-'+t.toLowerCase();}),sectionLayout[k],'important');
         });
-        var heading=el('h3','nhi-hanja-heading','Hán–Hàn (Hán tự và âm Hán–Việt)');
+        var heading=el('h3','nhi-hanja-heading','Hán–Hàn');
         heading.style.setProperty('grid-column','1 / -1','important');
         heading.style.setProperty('grid-row','1','important');
         section.appendChild(heading);
@@ -4911,15 +4911,49 @@ html body #planBox .sdone .pstatus{
         hanInput.addEventListener('input',function(){vietLink.href='https://hvdic.thivien.net/whv/'+encodeURIComponent(hanInput.value);});
         section.appendChild(links);hanjaLinks=links;
         section.appendChild(el('p','hint','Nếu thẻ không có Hán tự, bỏ chọn. Bạn có thể bật lại và tự điền sau.'));
-        syncHanjaEditor=function(){
+        var hanjaAnimation=null;
+        syncHanjaEditor=function(animate){
           var enabled=hanToggle.checked;
-          hanjaInputGrid.hidden=!enabled;
-          hanjaInputGrid.style.setProperty('display',enabled?'grid':'none','important');
+          if(hanjaAnimation){
+            hanjaAnimation.onfinish=null;
+            hanjaAnimation.cancel();
+            hanjaAnimation=null;
+          }
+          function show(){
+            hanjaInputGrid.hidden=false;
+            hanjaInputGrid.style.setProperty('display','grid','important');
+          }
+          function hide(){
+            hanjaInputGrid.hidden=true;
+            hanjaInputGrid.style.setProperty('display','none','important');
+          }
+          if(enabled)show();
           hanjaLinks.hidden=!enabled;
           section.classList.toggle('nhi-hanja-enabled',enabled);
-        }
-        hanToggle.addEventListener('change',syncHanjaEditor);
-        syncHanjaEditor();
+          hanToggle.setAttribute('aria-expanded',String(enabled));
+          var wantsMotion=!!animate&&typeof hanjaInputGrid.animate==='function'&&
+            !window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches;
+          if(!wantsMotion){
+            if(!enabled)hide();
+            return;
+          }
+          var frames=enabled?[
+            {opacity:0,translate:'-12px 0',scale:'.97'},
+            {opacity:1,translate:'0 0',scale:'1'}
+          ]:[
+            {opacity:1,translate:'0 0',scale:'1'},
+            {opacity:0,translate:'-12px 0',scale:'.97'}
+          ];
+          hanjaAnimation=hanjaInputGrid.animate(frames,{
+            duration:260,easing:'cubic-bezier(.2,.75,.28,1)',fill:'both'
+          });
+          hanjaAnimation.onfinish=function(){
+            hanjaAnimation=null;
+            if(!hanToggle.checked)hide();
+          };
+        };
+        hanToggle.addEventListener('change',function(){syncHanjaEditor(true);});
+        syncHanjaEditor(false);
       }
       var l1 = el('label', 'flabel'); l1.appendChild(el('span', null, 'Tiếng Hàn')); var ko = el('textarea', 'field'); ko.rows = 2; ko.lang = 'ko'; ko.value = it.ko; ko.name = 'ko'; l1.appendChild(ko); f.appendChild(l1);
       var l2 = el('label', 'flabel'); l2.appendChild(el('span', null, 'Nghĩa tiếng Việt')); var vi = el('textarea', 'field'); vi.rows = 2; vi.value = it.vi; vi.name = 'vi'; l2.appendChild(vi); f.appendChild(l2);
@@ -4944,7 +4978,7 @@ html body #planBox .sdone .pstatus{
         }
         if(hanToggle&&pendingDraft.kind==='none')hanToggle.checked=false;
         if(hanToggle&&pendingDraft.kind==='han')hanToggle.checked=true;
-        if(hanToggle)syncHanjaEditor();
+        if(hanToggle)syncHanjaEditor(false);
       }
       var savedFormat=Object.assign({},val('fmt',it.id)||{});if(enEntry.format){savedFormat.en=enEntry.format.en||savedFormat.en;savedFormat._sizes=Object.assign({},savedFormat._sizes||{},Number((enEntry.format._sizes||{}).en)?{en:enEntry.format._sizes.en}:{});}
       var formatting=window.NHI_STUDY?window.NHI_STUDY.editor(f,{ko:ko,vi:vi,note:notes,en:en},savedFormat,{noteColor:nc}):null;
@@ -6737,7 +6771,7 @@ html body #planBox .sdone .pstatus{
 <script src="backup-portable-v1.js"></script>
 <script src="nhi-ai-resize-v2.js?v=20261114-study-v7"></script>
 <script src="nhi-fireworks-v3.js?v=3"></script>
-<script src="study-update-v6.js?v=20261122-rich-english-compact-v4"></script>
+<script src="study-update-v6.js?v=20261122-english-autogrow-v5"></script>
 <script src="nhi-longpress-dictionary-v1.js?v=20261117"></script>
 <script src="nhi-interface-v5.js?v=20261114"></script>
 <script src="nhi-november-v15.js?v=20261114-ux-v17"></script>
@@ -7617,6 +7651,6 @@ html body #planBox .pcard>.card-top>.cicons {
   gap:4px!important;justify-content:flex-end!important;
 }
 </style>
-<link rel="stylesheet" href="nhi-ui-refine-v2.css?v=20261122-three-corrections-v3">
-<script src="nhi-ui-refine-v2.js?v=20261122-three-corrections-v3"></script>
+<link rel="stylesheet" href="nhi-ui-refine-v2.css?v=20261122-english-auto-effects-visible-v4">
+<script src="nhi-ui-refine-v2.js?v=20261122-english-auto-effects-visible-v4"></script>
 </body></html>
