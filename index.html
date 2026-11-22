@@ -7775,6 +7775,7 @@ function play(node,type,closing,after){
 }
 const api={open:(node,type)=>play(node,type,false),close:(node,type,after)=>play(node,type,true,after),choose,get:()=>({...prefs})};
 window.NHI_WINDOW_FX=api;
+document.body?.classList.add('nhi-fx-runtime');
 function buildSettings(){
  let group=document.getElementById('nhiTransitionSettings');
  if(!group){
