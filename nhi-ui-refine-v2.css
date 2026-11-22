@@ -338,3 +338,22 @@ html body #setSheet #nhiFxPreview{
  html body #setSheet .nhi-fx-setting-row>label{font-size:12px!important;}
  html body #setSheet .nhi-fx-setting-row>select{font-size:12px!important;padding:6px!important;}
 }
+
+
+/* Identical animated opening for both windows if effects runtime is unavailable. */
+@keyframes nhi-shared-modal-pop-in{
+  0%{opacity:0;scale:.90}
+  72%{opacity:1;scale:1.025}
+  100%{opacity:1;scale:1}
+}
+html body:not(.nhi-fx-runtime) #setSheet:not([hidden]) .sheetbox,
+html body:not(.nhi-fx-runtime) #planBox form.nhi-editor-window-v5{
+  animation:nhi-shared-modal-pop-in .29s cubic-bezier(.2,.72,.27,1) both!important;
+  transform-origin:center center!important;
+}
+@media(prefers-reduced-motion:reduce){
+ html body:not(.nhi-fx-runtime) #setSheet:not([hidden]) .sheetbox,
+ html body:not(.nhi-fx-runtime) #planBox form.nhi-editor-window-v5{
+   animation:none!important;
+ }
+}
