@@ -57,7 +57,7 @@
   if(size&&!size.querySelector('#nhiV8-front')){
    const sub=document.createElement('h4');sub.textContent='Riêng nghĩa tiếng Việt';sub.className='nhi-v8-heading';size.append(sub);
    selectRow(size,'front','Tiếng Việt — mặt trước','Luôn căn giữa; có thể giữ và kéo sang trái/phải ngay trên thẻ.');
-   selectRow(size,'back','Tiếng Việt — mặt sau','Muốn kéo nghĩa tiếng Việt: chạm/nhấp hai lần, giữ ở lần thứ hai rồi kéo.');
+   selectRow(size,'back','Tiếng Việt — mặt sau','Nhấn giữ vào chữ Việt mặt sau rồi kéo lên/xuống hoặc sang trái/phải.');
   }
   const settings=size?.parentElement;
   if(settings&&!document.getElementById('nhiV8-height')){
