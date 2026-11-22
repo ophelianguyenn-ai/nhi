@@ -590,99 +590,144 @@ const api={
 window.NHI_WINDOW_FX=api;
 document.body?.classList.add('nhi-fx-runtime');
 function buildSettings(){
- let group=document.getElementById('nhiTransitionSettings');
- if(!group){
-   const anchor=document.getElementById('nhiCardFontSettings');if(!anchor)return;
-   group=document.createElement('section');group.id='nhiTransitionSettings';
-   group.className='setgroup nhi-transitions-settings';
-   group.innerHTML='<h3>✨ Hiệu ứng chuyển cảnh</h3><div id="nhiTransitionOptions"></div>';
-   anchor.parentNode.insertBefore(group,anchor);
- }
+ const group=document.getElementById('nhiTransitionSettings');
+ if(!group)return;
  if(group.dataset.nhiFxReady==='true')return;
  group.dataset.nhiFxReady='true';
  const target=group.querySelector('#nhiTransitionOptions')||group;
+ const feedback=group.querySelector('#nhiFxCurrent');
+ const selectMap={};
+ const allowed=(type,id)=>id==='inherit'?type!=='default':
+   id==='classic'?(type==='card'||type==='navigation'):
+   OPTIONS.some(option=>option[0]===id);
+ const option=(value,title,selected)=>new Option(title,value,false,selected);
+ function prepareSelect(select,type){
+   const selected=allowed(type,prefs[type])?prefs[type]:
+     type==='default'?FALLBACK.default:FALLBACK[type];
+   // Use real native optgroups so 60+ choices remain easy to browse.
+   const frag=document.createDocumentFragment();
+   if(type==='editor'){
+     frag.appendChild(option('inherit','Theo Cài đặt tổng',true));
+     select.replaceChildren(frag);
+     select.value='inherit';select.disabled=true;
+     select.title='Kiểu mở/đóng giống Cài đặt tổng; thời gian chỉnh riêng';
+     return;
+   }
+   if(type!=='default')frag.appendChild(option('inherit','Theo mặc định',false));
+   if(type==='card'||type==='navigation')frag.appendChild(option('classic','★ Hiệu ứng gốc',false));
+   EFFECT_GROUPS.forEach(groupInfo=>{
+     const optgroup=document.createElement('optgroup');
+     optgroup.label=groupInfo.label;
+     groupInfo.options.forEach(([id,label])=>optgroup.appendChild(option(id,label,false)));
+     frag.appendChild(optgroup);
+   });
+   frag.appendChild(option('none','Tắt hiệu ứng',false));
+   select.replaceChildren(frag);
+   select.disabled=false;
+   select.value=selected;
+ }
+ function previewType(type,closing){
+   const tile=group.querySelector('#nhiFxDemoSample');
+   if(!tile)return;
+   if(reduced()){
+     if(feedback)feedback.textContent='Thiết bị đang bật Giảm chuyển động, hiệu ứng được tắt để bảo đảm dễ sử dụng.';
+     return;
+   }
+   const effect=choose(type);
+   if(effect==='none'){
+     if(feedback)feedback.textContent='Đã chọn Tắt hiệu ứng cho '+(TYPES.find(x=>x[0]===type)?.[1]||type);
+     return;
+   }
+   const direction=type==='navigation'?(closing?-1:1):undefined;
+   play(tile,type,Boolean(closing),null,direction);
+   if(feedback)feedback.textContent=(closing?'Đóng thử: ':'Xem thử: ')+
+      (OPTIONS.find(x=>x[0]===effect)?.[1]||effect)+' · '+
+      durationSeconds(type).toFixed(2)+' giây';
+ }
  TYPES.forEach(([type,label])=>{
-   // Prefer the seven static selectors in index.html so the menu is visible
-   // even before JavaScript loads, and never append a duplicate row.
    let select=target.querySelector('#nhi-fx-'+type);
    if(!select){
-     const row=document.createElement('div');row.className='setrow nhi-fx-setting-row';
-     const name=document.createElement('label');name.textContent=label;name.htmlFor='nhi-fx-'+type;
-     select=document.createElement('select');select.id='nhi-fx-'+type;
-     select.setAttribute('aria-label',label);
-     OPTIONS.filter(o=>(type!=='default'||o[0]!=='inherit')&&(o[0]!=='classic'||type==='card'||type==='navigation')).forEach(([value,title])=>{
-       const opt=document.createElement('option');opt.value=value;opt.textContent=title;select.append(opt);
-     });
-     row.append(name,select);target.append(row);
+     const row=document.createElement('div');
+     row.className='setrow nhi-fx-setting-row';
+     const name=document.createElement('label');
+     name.htmlFor='nhi-fx-'+type;name.textContent=label;
+     select=document.createElement('select');
+     select.id='nhi-fx-'+type;
+     row.append(name,select);
+     target.appendChild(row);
    }
-   if(type==='editor'){
-     select.replaceChildren(new Option('Theo Cài đặt tổng','inherit'));
-     select.value='inherit';select.disabled=true;
-     select.title='Kiểu chuyển cảnh giống Cài đặt tổng; thời gian chỉnh riêng';
-   }else{
-     select.disabled=false;
-     select.value=prefs[type]||(type==='default'?'fade':FALLBACK[type]);
-   }
+   select.setAttribute('aria-label','Kiểu hiệu ứng: '+label);
+   prepareSelect(select,type);
+   selectMap[type]=select;
    select.addEventListener('change',()=>{
      prefs[type]=select.value;
      saveSettings();
-     const feedback=group.querySelector('#nhiFxCurrent');
-     if(feedback)feedback.textContent='Đã lưu hiệu ứng '+label.toLowerCase();
-     play(group,'change',false);
+     const previewSelect=group.querySelector('#nhiFxPreviewTarget');
+     if(previewSelect)previewSelect.value=type;
+     previewType(type,false);
    });
-   // Every effect, including the editor linked to Settings, has its own seconds.
    const row=select.closest('.nhi-fx-setting-row');
-   if(row){
-     let seconds=row.querySelector('#nhi-fx-duration-'+type);
-     if(!seconds){
-       const wrap=document.createElement('label');
-       wrap.className='nhi-fx-duration-wrap';
-       wrap.textContent='Giây';
-       seconds=document.createElement('input');
-       seconds.className='nhi-fx-duration';
-       seconds.id='nhi-fx-duration-'+type;
-       wrap.appendChild(seconds);
-       row.appendChild(wrap);
+   if(!row)return;
+   let seconds=row.querySelector('#nhi-fx-duration-'+type);
+   if(!seconds){
+     const wrap=document.createElement('label');
+     wrap.className='nhi-fx-duration-wrap';
+     wrap.htmlFor='nhi-fx-duration-'+type;
+     wrap.appendChild(document.createTextNode('Giây'));
+     seconds=document.createElement('input');
+     seconds.id='nhi-fx-duration-'+type;seconds.className='nhi-fx-duration';
+     wrap.appendChild(seconds);row.append(wrap);
+   }
+   seconds.type='number';seconds.min=String(MIN_SECONDS);seconds.max=String(MAX_SECONDS);
+   seconds.step='.01';seconds.inputMode='decimal';
+   seconds.setAttribute('aria-label','Thời gian '+label+' (giây)');
+   seconds.value=durationSeconds(type).toFixed(2);
+   seconds.addEventListener('change',()=>{
+     const value=Number(seconds.value);
+     if(!Number.isFinite(value)||value<MIN_SECONDS||value>MAX_SECONDS){
+       seconds.setCustomValidity('Chọn từ 0,10 đến 5,00 giây');
+       seconds.reportValidity();return;
      }
-     seconds.type='number';seconds.min=String(MIN_SECONDS);seconds.max=String(MAX_SECONDS);
-     seconds.step='.01';seconds.inputMode='decimal';
-     seconds.setAttribute('aria-label','Thời gian '+label+' (giây)');
-     seconds.value=durationSeconds(type).toFixed(2);
-     seconds.addEventListener('change',()=>{
-       const val=Number(seconds.value);
-       if(!Number.isFinite(val)||val<MIN_SECONDS||val>MAX_SECONDS){
-         seconds.setCustomValidity('Chọn từ 0,1 đến 5 giây');
-         seconds.reportValidity();return;
-       }
-       seconds.setCustomValidity('');
-       prefs.durations=Object.assign({},prefs.durations||{},{[type]:val});
-       saveSettings();
-       const feedback=group.querySelector('#nhiFxCurrent');
-       if(feedback)feedback.textContent='Đã lưu '+label.toLowerCase()+': '+val+' giây';
-     });
-     seconds.addEventListener('input',()=>{
-       const val=Number(seconds.value);
-       seconds.setCustomValidity(val>=MIN_SECONDS&&val<=MAX_SECONDS?'':'Chọn từ 0,1 đến 5 giây');
-     });
-   }
+     seconds.setCustomValidity('');
+     prefs.durations=Object.assign({},prefs.durations||{},{[type]:value});
+     saveSettings();
+     previewType(type,false);
+   });
+   seconds.addEventListener('input',()=>{
+     const value=Number(seconds.value);
+     seconds.setCustomValidity(value>=MIN_SECONDS&&value<=MAX_SECONDS?'':'Chọn từ 0,10 đến 5,00 giây');
+   });
  });
- let feedback=group.querySelector('#nhiFxCurrent');
- if(!feedback){
-   feedback=document.createElement('p');feedback.id='nhiFxCurrent';feedback.className='voice-note';
-   feedback.setAttribute('role','status');feedback.setAttribute('aria-live','polite');
-   target.append(feedback);
+ // A visible miniature stage previews whichever category the user is editing.
+ let previewTarget=group.querySelector('#nhiFxPreviewTarget');
+ if(!previewTarget){
+   const host=document.createElement('div');
+   host.className='nhi-fx-demo-wrap';
+   host.innerHTML='<label for="nhiFxPreviewTarget">Xem thử theo mục:</label>'+
+     '<select id="nhiFxPreviewTarget"></select>'+
+     '<div class="nhi-fx-demo-stage"><div id="nhiFxDemoSample" role="img" aria-label="Thẻ mẫu để xem chuyển cảnh">Nhi ✿</div></div>';
+   const previewButton=group.querySelector('#nhiFxPreview');
+   if(previewButton)previewButton.before(host);else target.after(host);
+   previewTarget=host.querySelector('#nhiFxPreviewTarget');
  }
+ previewTarget.replaceChildren(...TYPES.map(([type,label])=>option(type,label,false)));
+ previewTarget.value='navigation';
+ previewTarget.addEventListener('change',()=>previewType(previewTarget.value,false));
  const preview=group.querySelector('#nhiFxPreview');
- if(preview)preview.addEventListener('click',()=>{
-   // A slower, unmistakable live preview on the SETTINGS section itself.
-   if(reduced()||choose('settings')==='none'){feedback.textContent='Hiệu ứng đang tắt';return;}
-   if(typeof group.animate==='function'){
-     group.animate(keyframes(choose('settings'),false),{
-       duration:durationMs('settings'),easing:'cubic-bezier(.2,.72,.27,1)',fill:'none'
-     });
-   }
-   feedback.textContent='Đang xem trước: '+(OPTIONS.find(o=>o[0]===choose('settings'))?.[1]||choose('settings'));
- });
+ if(preview)preview.addEventListener('click',()=>previewType(previewTarget.value,false));
+ let previewClose=group.querySelector('#nhiFxPreviewClose');
+ if(!previewClose){
+   previewClose=document.createElement('button');
+   previewClose.id='nhiFxPreviewClose';
+   previewClose.type='button';previewClose.className='ghost';
+   previewClose.textContent='◀ Xem thử khi đóng / Lùi';
+   if(preview)preview.after(previewClose);else target.after(previewClose);
+ }
+ previewClose.addEventListener('click',()=>previewType(previewTarget.value,true));
+ if(feedback){
+   feedback.textContent=EFFECT_GROUPS.reduce((sum,g)=>sum+g.options.length,0)+
+     ' kiểu chuyển cảnh · giữ nguyên cài đặt đã lưu của bạn';
+ }
 }
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',buildSettings,{once:true});else buildSettings();
 const observer=new MutationObserver(records=>{
