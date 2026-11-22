@@ -459,7 +459,14 @@ function fitEnglishWidth(box){
  }else box.style.removeProperty('--nhi-three-word-font');
  const singleMeaning=meaning+actionsWidth+horizontalPadding;
  const singleIPA=transcription+actionsWidth+horizontalPadding;
- const together=meaning+(transcription?transcription+12:0)+actionsWidth+horizontalPadding;
+ // Exactly two ordinary U+0020 spaces between English and IPA on one row.
+ const ipaStyle=ipa?getComputedStyle(ipa):null;
+ ctx.font=ipaStyle?.font||'16px sans-serif';
+ const twoSpaceWidth=ctx.measureText('  ').width;
+ const together=meaning+(transcription?transcription+twoSpaceWidth:0)+actionsWidth+horizontalPadding;
+ const sameLine=Boolean(transcription)&&
+   !box.classList.contains('nhi-ipa-below')&&together<=cap;
+ box.classList.toggle('nhi-en-inline-two-spaces',sameLine);
  let natural=Math.max(175,Math.ceil(singleMeaning),Math.ceil(singleIPA),Math.ceil(reviewWidth+24));
  // Keep English and IPA on one row when both fit, otherwise let IPA wrap.
  if(together<=cap&&!box.classList.contains('nhi-ipa-below')) natural=Math.max(natural,Math.ceil(together));
