@@ -5736,10 +5736,10 @@ html body #planBox .sdone .pstatus{
           var r = rem[k], l = ps[sec][k];
           if (!r || typeof r !== 'object') return;
           if (sec === 'del' && l && l.v && !r.v) return; // deletion cannot be undone by stale remote data
-           if (!l || (r.t || 0) > (l.t || 0)) { var v = r.v; if ((sec === 'done' || sec === 'hl') && v && typeof v === 'object' && !Array.isArray(v)) v = Object.keys(v).map(function (x) { return v[x]; }); ps[sec][k] = { v: v === undefined ? null : v, t: r.t || 0 }; changed = true; if (sec === 'ed') edits.push(k); }
-          else if ((l.t || 0) > (r.t || 0)) SYNC.queue('L/' + sec + '/' + k, l);
+           if (!l || (r.t || 0) > (l.t || 0)) { var v = r.v; if ((sec === 'done' || sec === 'hl') && v && typeof v === 'object' && !Array.isArray(v)) v = Object.keys(v).map(function (x) { return v[x]; }); ps[sec][k] = { v: sec==='fmt'?formatWithoutDeviceFonts(v):(v===undefined?null:v), t: r.t || 0 }; changed = true; if (sec === 'ed') edits.push(k); }
+          else if ((l.t || 0) > (r.t || 0)) SYNC.queue('L/' + sec + '/' + k,sec==='fmt'?{v:formatWithoutDeviceFonts(l.v),t:l.t}:l);
         });
-        if (full) Object.keys(ps[sec]).forEach(function (k) { if (!rem[k]) SYNC.queue('L/' + sec + '/' + k, ps[sec][k]); });
+        if (full) Object.keys(ps[sec]).forEach(function (k) { if (!rem[k]) {var rec=ps[sec][k]; SYNC.queue('L/' + sec + '/' + k,sec==='fmt'?{v:formatWithoutDeviceFonts(rec.v),t:rec.t}:rec);} });
       });
       edits.forEach(applyEd);
       if (changed) { applyMergedLessons(); save(); onData(); if (state.mode === 'plan' && !sess) render(); }
@@ -6701,7 +6701,7 @@ html body #planBox .sdone .pstatus{
 <script src="backup-portable-v1.js"></script>
 <script src="nhi-ai-resize-v2.js?v=20261114-study-v7"></script>
 <script src="nhi-fireworks-v3.js?v=3"></script>
-<script src="study-update-v6.js?v=20261122-color-refinements-v9"></script>
+<script src="study-update-v6.js?v=20261122-per-device-typography"></script>
 <script src="nhi-longpress-dictionary-v1.js?v=20261117"></script>
 <script src="nhi-interface-v5.js?v=20261114"></script>
 <script src="nhi-november-v15.js?v=20261114-ux-v17"></script>
@@ -6709,7 +6709,7 @@ html body #planBox .sdone .pstatus{
 <script src="nhi-living-garden-v1.js?v=20261113-cartoon-butterflies-v1"></script>
 <script src="nhi-late-2026.js?v=20261115-v9-compact-pairs"></script>
 <script src="nhi-stage-move-v1.js?v=20261122-vertical-drag-v2"></script>
-<script src="nhi-card-controls-v8.js?v=20261122-back-vertical-drag-v10"></script>
+<script src="nhi-card-controls-v8.js?v=20261122-per-device-height"></script>
 <script src="nhi-kitten-meow-v1.js?v=20261120-user-meow"></script>
 <script src="nhi-card-no-overlap-v1.js?v=20261115-safe-v1"></script>
 <script src="nhi-corner-v2.js?v=20261121-numbered-example-plus-v2"></script>
