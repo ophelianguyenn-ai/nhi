@@ -1,6 +1,6 @@
 {
   "v": 2,
-  "generated": "2026-11-21",
+  "generated": "2026-11-22",
   "lessons": [
     {
       "id": "2026-10-23",
@@ -37820,6 +37820,62 @@
           "Giao tiếp công việc",
           "Luân gửi qua Grab rồi.",
           "루언 씨가 이미 그랩으로 보냈어요.",
+          1
+        ]
+      ]
+    },
+    {
+      "id": "daily-2026-11-22-nhi-extracted",
+      "date": "2026-11-22",
+      "plan": "2026-11-22",
+      "title": "Bài ngày 22.11 · Nhận bàn giao, ngữ pháp và an toàn thi công",
+      "items": [
+        [
+          "nhi22110000",
+          "w",
+          "Nhận hàng & bàn giao",
+          "nhận, nhận được (hàng hóa, tài liệu)",
+          "수령하다",
+          1
+        ],
+        [
+          "nhi22110001",
+          "w",
+          "Nhận hàng & bàn giao",
+          "tiếp nhận, nhận bàn giao",
+          "인수하다",
+          1
+        ],
+        [
+          "nhi22110002",
+          "w",
+          "Ngữ pháp",
+          "trợ từ chỉ nơi thực hiện hành động hoặc tổ chức thực hiện",
+          "에서",
+          1
+        ],
+        [
+          "nhi22110003",
+          "w",
+          "Ngữ pháp",
+          "trợ từ chủ đề (sau phụ âm / nguyên âm)",
+          "은/는",
+          1
+        ],
+        [
+          "nhi22110004",
+          "w",
+          "Ngữ pháp",
+          "trợ từ chủ ngữ (sau phụ âm / nguyên âm)",
+          "이/가",
+          1
+        ],
+        [
+          "nhi22110005",
+          "s",
+          "Xây dựng & an toàn",
+          "Vốn định làm vách chắn vào ngày mai. Do không biết ngày mai công ty nghỉ nên chưa kịp báo.",
+          "원래 내일 안전 차단벽을 설치할 예정이었어요. 내일 회사가 휴무인 줄 몰라서 미리 말씀드리지 못했어요.",
           1
         ]
       ]
