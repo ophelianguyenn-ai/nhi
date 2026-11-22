@@ -4855,8 +4855,27 @@ html body #planBox .sdone .pstatus{
       var hanInput,readingInput,hanToggle,hanjaLinks,hanjaInputGrid,section=null,syncHanjaEditor=function(){};
       {
         section=el('div','hanja-editor nhi-optional-hanja-editor nhi-hanja-editor-inline');
-        section.appendChild(el('h3','nhi-hanja-heading','Hán–Hàn (Hán tự và âm Hán–Việt)'));
+        // Inline-important layout avoids legacy mint panel / stacked-field CSS.
+        var sectionLayout={
+          display:'grid',gridTemplateColumns:'42px minmax(0,1fr)',
+          gridTemplateRows:'auto auto',columnGap:'8px',rowGap:'8px',
+          background:'transparent',backgroundColor:'transparent',
+          border:'0',boxShadow:'none',padding:'0',borderRadius:'0',
+          width:'100%',maxWidth:'100%',minWidth:'0',margin:'10px 0 2px'
+        };
+        Object.keys(sectionLayout).forEach(function(k){
+          section.style.setProperty(k.replace(/[A-Z]/g,function(t){return '-'+t.toLowerCase();}),sectionLayout[k],'important');
+        });
+        var heading=el('h3','nhi-hanja-heading','Hán–Hàn (Hán tự và âm Hán–Việt)');
+        heading.style.setProperty('grid-column','1 / -1','important');
+        heading.style.setProperty('grid-row','1','important');
+        section.appendChild(heading);
         var toggleRow=el('label','nhi-hanja-toggle-compact nhi-hanja-checkbox-original');
+        toggleRow.style.setProperty('grid-column','1','important');
+        toggleRow.style.setProperty('grid-row','2','important');
+        toggleRow.style.setProperty('background','transparent','important');
+        toggleRow.style.setProperty('border','0','important');
+        toggleRow.style.setProperty('box-shadow','none','important');
         toggleRow.title='Có hoặc không có Hán–Hàn';toggleRow.setAttribute('aria-label','Thẻ có phần Hán–Hàn');
         hanToggle=el('input');hanToggle.type='checkbox';hanToggle.name='hanjaEnabled';
         hanToggle.setAttribute('aria-label','Thẻ có phần Hán–Hàn');
@@ -4864,8 +4883,18 @@ html body #planBox .sdone .pstatus{
         toggleRow.appendChild(hanToggle);
         section.appendChild(toggleRow);
         hanjaInputGrid=el('div','nhi-hanja-input-grid');
+        hanjaInputGrid.style.setProperty('grid-column','2','important');
+        hanjaInputGrid.style.setProperty('grid-row','2','important');
+        hanjaInputGrid.style.setProperty('grid-template-columns','repeat(2,minmax(0,1fr))','important');
+        hanjaInputGrid.style.setProperty('gap','10px','important');
+        hanjaInputGrid.style.setProperty('width','100%','important');
+        hanjaInputGrid.style.setProperty('min-width','0','important');
         function field(label, name, value) {
           var l=el('label','flabel nhi-hanja-field');
+          l.style.setProperty('grid-column',name==='hanja'?'1':'2','important');
+          l.style.setProperty('grid-row','1','important');
+          l.style.setProperty('width','100%','important');
+          l.style.setProperty('min-width','0','important');
           l.appendChild(el('span',null,label));
           var i=el('input','field');i.type='text';i.name=name;i.value=value||'';
           i.maxLength=200;i.autocomplete='off';l.appendChild(i);
@@ -4885,6 +4914,7 @@ html body #planBox .sdone .pstatus{
         syncHanjaEditor=function(){
           var enabled=hanToggle.checked;
           hanjaInputGrid.hidden=!enabled;
+          hanjaInputGrid.style.setProperty('display',enabled?'grid':'none','important');
           hanjaLinks.hidden=!enabled;
           section.classList.toggle('nhi-hanja-enabled',enabled);
         }
@@ -6707,7 +6737,7 @@ html body #planBox .sdone .pstatus{
 <script src="backup-portable-v1.js"></script>
 <script src="nhi-ai-resize-v2.js?v=20261114-study-v7"></script>
 <script src="nhi-fireworks-v3.js?v=3"></script>
-<script src="study-update-v6.js?v=20261122-per-device-typography"></script>
+<script src="study-update-v6.js?v=20261122-rich-english-compact-v4"></script>
 <script src="nhi-longpress-dictionary-v1.js?v=20261117"></script>
 <script src="nhi-interface-v5.js?v=20261114"></script>
 <script src="nhi-november-v15.js?v=20261114-ux-v17"></script>
