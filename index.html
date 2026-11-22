@@ -4755,9 +4755,16 @@ html body #planBox .sdone .pstatus{
       var f = el('form', 'editbox nhi-editor-window-v5');
       f.appendChild(ibtn('iconbtn sm nhi-editor-close-v5','x',function(){closeEditor();},'Đóng và tự lưu chỉnh sửa thẻ'));
       var savedHj = val('hj', it.id), initialHj = lookupHanja(it.ko, it.id);
-      var hanInput, readingInput, section=null;
-      if (it.type === 'w') {
-        var section = el('fieldset', 'hanja-editor'); section.appendChild(el('legend', null, 'Chữ Hán & âm Hán–Việt'));
+      var hanInput,readingInput,hanToggle,hanjaLinks,section=null;
+      {
+        section=el('fieldset','hanja-editor nhi-optional-hanja-editor');
+        section.appendChild(el('legend',null,'Hán–Hàn (Hán tự và âm Hán–Việt)'));
+        var toggleRow=el('label','check nhi-hanja-toggle');
+        hanToggle=el('input');hanToggle.type='checkbox';hanToggle.name='hanjaEnabled';
+        hanToggle.checked=!!(initialHj&&initialHj[0]&&initialHj[1]);
+        toggleRow.appendChild(hanToggle);
+        toggleRow.appendChild(el('span',null,'Thẻ này có phần Hán–Hàn'));
+        section.appendChild(toggleRow);
         function field(label, name, value) { var l = el('label', 'flabel'); l.appendChild(el('span', null, label)); var i = el('input', 'field'); i.type = 'text'; i.name = name; i.value = value || ''; i.maxLength = 200; l.appendChild(i); section.appendChild(l); return i; }
         hanInput = field('Chữ Hán', 'hanja', initialHj ? initialHj[0] : ''); readingInput = field('Âm Hán–Việt', 'hanviet', initialHj ? initialHj[1] : '');
         var links=el('div','dictionary-links');
@@ -4766,7 +4773,16 @@ html body #planBox .sdone .pstatus{
         dictionaryLink('1. Tra Naver Hàn', 'https://korean.dict.naver.com/koendict/#/search?range=korean&query='+encodeURIComponent(it.ko));
         var vietLink=dictionaryLink('2. Tra Thi Viện', 'https://hvdic.thivien.net/whv/'+encodeURIComponent(hanInput.value || ''));
         hanInput.addEventListener('input',function(){vietLink.href='https://hvdic.thivien.net/whv/'+encodeURIComponent(hanInput.value);});
-        section.appendChild(links);section.appendChild(el('p','hint','Có thể để trống nếu từ không có chữ Hán.'));
+        section.appendChild(links);hanjaLinks=links;
+        section.appendChild(el('p','hint','Nếu thẻ không có Hán tự, bỏ chọn. Bạn có thể bật lại và tự điền sau.'));
+        function syncHanjaEditor(){
+          var enabled=hanToggle.checked;
+          hanInput.parentElement.hidden=!enabled;
+          readingInput.parentElement.hidden=!enabled;
+          hanjaLinks.hidden=!enabled;
+        }
+        hanToggle.addEventListener('change',syncHanjaEditor);
+        syncHanjaEditor();
       }
       var l1 = el('label', 'flabel'); l1.appendChild(el('span', null, 'Tiếng Hàn')); var ko = el('textarea', 'field'); ko.rows = 2; ko.lang = 'ko'; ko.value = it.ko; ko.name = 'ko'; l1.appendChild(ko); f.appendChild(l1);
       var l2 = el('label', 'flabel'); l2.appendChild(el('span', null, 'Nghĩa tiếng Việt')); var vi = el('textarea', 'field'); vi.rows = 2; vi.value = it.vi; vi.name = 'vi'; l2.appendChild(vi); f.appendChild(l2);
@@ -4789,6 +4805,9 @@ html body #planBox .sdone .pstatus{
           if(typeof pendingDraft.hanviet==='string')readingInput.value=pendingDraft.hanviet;
 
         }
+        if(hanToggle&&pendingDraft.kind==='none')hanToggle.checked=false;
+        if(hanToggle&&pendingDraft.kind==='han')hanToggle.checked=true;
+        if(hanToggle)syncHanjaEditor();
       }
       var savedFormat=Object.assign({},val('fmt',it.id)||{});if(enEntry.format){savedFormat.en=enEntry.format.en||savedFormat.en;savedFormat._sizes=Object.assign({},savedFormat._sizes||{},Number((enEntry.format._sizes||{}).en)?{en:enEntry.format._sizes.en}:{});}
       var formatting=window.NHI_STUDY?window.NHI_STUDY.editor(f,{ko:ko,vi:vi,note:notes,en:en},savedFormat,{noteColor:nc}):null;
@@ -4807,7 +4826,7 @@ html body #planBox .sdone .pstatus{
         return {ko:ko.value,vi:vi.value,en:en.value,ipa:ipaInput.value,
           note:notes.value,noteColor:nc.value,pairs:pairs.value,
           hanja:hanInput?hanInput.value:'',hanviet:readingInput?readingInput.value:'',
-          kind:hanInput&&hanInput.value.trim()&&readingInput.value.trim()?'han':'auto'};
+          kind:hanToggle&&hanToggle.checked?'han':'none'};
       }
       function stash(){lsSet(draftKey,JSON.stringify(snapshot()));}
       function persistEditor(){
@@ -4823,8 +4842,13 @@ html body #planBox .sdone .pstatus{
         put('ed',it.id,{vi:w,ko:k,pairs:list});
         if(hanInput){
           var han=hanInput.value.trim(),reading=readingInput.value.trim();
-          if(han&&reading)put('hj',it.id,{kind:'han',han:han,reading:reading});
-          else if(savedHj)put('hj',it.id,null);
+          if(hanToggle.checked){
+            if(han&&reading)put('hj',it.id,{kind:'han',han:han,reading:reading});
+          }else if(initialHj||savedHj){
+            put('hj',it.id,{kind:'none'});
+          }else{
+            put('hj',it.id,null);
+          }
         }
         if(window.NHI_ENGLISH&&(en.value.trim()||enEntry.en))window.NHI_ENGLISH.saveEntry(it.id,it.vi,it.ko,
           Object.assign({},enEntry,{en:en.value.trim()||enEntry.en,ipa:ipaInput.value.trim().replace(/^\//,'').replace(/\/$/,''),
@@ -4927,7 +4951,10 @@ html body #planBox .sdone .pstatus{
       var bk = ibtn('iconbtn sm', 'book', function () { legendOpen = !legendOpen; render(); }, 'Chú giải phím tắt và thao tác'); bk.setAttribute('aria-expanded', String(legendOpen)); ci.appendChild(bk);
       ci.appendChild(ibtn('iconbtn sm', 'vol', function () { toggleSpeech(s.flipped ? it.ko : it.vi, s.flipped ? 'ko-KR' : 'vi-VN'); }, 'Phát âm / Dừng mặt thẻ hiện tại'));
       var hj = null;
-      if (it.type === 'w') { try { hj = lookupHanja(it.ko, it.id); if(hj&&(!hj[0]||!hj[1]))hj=null; } catch(hanjaErr) { console.warn('Nhi Hanja unavailable for this card', hanjaErr); } }
+      if (it.type === 'w' || (val('hj',it.id)&&val('hj',it.id).kind==='han')) {
+        try {hj=lookupHanja(it.ko,it.id);if(hj&&(!hj[0]||!hj[1]))hj=null;}
+        catch(hanjaErr){console.warn('Nhi Hanja unavailable for this card',hanjaErr);}
+      }
       // The redundant 漢 toolbar icon is intentionally hidden; Hán tự remains editable.
       m.appendChild(cm);m.appendChild(ci);c.appendChild(m);
       if (legendOpen) c.appendChild(legendPop());
