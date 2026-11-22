@@ -182,10 +182,34 @@ function init(){
  const defaults={ko:36,vi:26,en:22};
  const controls={};
  const globalKey='nhi-card-global-font-scale-v1';
+ const globalTypographyKey='nhi-card-global-language-fonts-v1';
  const allowable=[.75,.85,1,1.1,1.2,1.3,1.5];
  let globalScale=1;
  try{const value=Number(localStorage.getItem(globalKey));if(allowable.includes(value))globalScale=value;}catch(e){}
- const applyGlobal=()=>document.documentElement.style.setProperty('--nhi-global-font-scale',String(globalScale));
+ const globalTypography={ko:36,viFront:26,viBack:22,en:22,bold:false};
+ try{
+   const stored=JSON.parse(localStorage.getItem(globalTypographyKey)||'{}');
+   for(const key of ['ko','viFront','viBack','en']){
+     const n=Number(stored[key]);if(Number.isFinite(n)&&n>=12&&n<=72)globalTypography[key]=n;
+   }
+   globalTypography.bold=stored.bold===true;
+ }catch(e){}
+ const applyGlobal=()=>{
+   const root=document.documentElement;
+   root.style.setProperty('--nhi-global-font-scale',String(globalScale));
+   const sizes={
+     ko:globalTypography.ko,viFront:globalTypography.viFront,
+     viBack:globalTypography.viBack,en:globalTypography.en
+   };
+   for(const [key,val] of Object.entries(sizes)){
+     const prop={ko:'--nhi-effective-ko',viFront:'--nhi-effective-vi-front',
+       viBack:'--nhi-effective-vi-back',en:'--nhi-effective-en'}[key];
+     root.style.setProperty(prop,Math.round(val*globalScale*10)/10+'px');
+   }
+   root.style.setProperty('--nhi-effective-ipa',
+     Math.round(globalTypography.en*globalScale*.86*10)/10+'px');
+   document.body.classList.toggle('nhi-global-card-bold',globalTypography.bold);
+ };
  applyGlobal();
  if(settings){
    const h=settings.querySelector('h3');
@@ -210,8 +234,45 @@ function init(){
    });
    row.append(label,select);settings.prepend(row);
    const globalHint=make('p','voice-note',
-     'Áp dụng cho thẻ chưa chỉnh cỡ chữ riêng; thẻ có kích thước tùy chỉnh sẽ được giữ nguyên.');
+     'Các mức chữ chung áp dụng cho thẻ chưa chỉnh riêng. Thẻ đã tùy chỉnh giữ nguyên cỡ chữ.');
    row.after(globalHint);
+   const defaultGroup=make('div','nhi-global-language-sizes');
+   defaultGroup.append(make('h4','nhi-v8-heading','Cỡ chữ mặc định theo ngôn ngữ'));
+   const specs=[
+     ['ko','Tiếng Hàn'],['viFront','Tiếng Việt — mặt trước'],
+     ['viBack','Tiếng Việt — mặt sau'],['en','Tiếng Anh (gồm Đối chiếu)']
+   ];
+   for(const [key,name] of specs){
+     const field=make('div','setrow nhi-global-font-row');
+     const caption=make('label',null,name);
+     const choice=make('select','field small');
+     choice.id='nhiAllFont-'+key;
+     caption.htmlFor=choice.id;
+     choice.setAttribute('aria-label','Cỡ chữ chung: '+name);
+     for(let n=12;n<=72;n+=2){
+       const o=make('option',null,n+' px');o.value=String(n);choice.append(o);
+     }
+     choice.value=String(globalTypography[key]);
+     choice.addEventListener('change',()=>{
+       globalTypography[key]=Number(choice.value);
+       try{localStorage.setItem(globalTypographyKey,JSON.stringify(globalTypography));}catch(e){}
+       applyGlobal();
+       document.dispatchEvent(new Event('nhi:card-font-selected'));
+     });
+     field.append(caption,choice);defaultGroup.append(field);
+   }
+   const boldRow=make('div','setrow nhi-global-font-row');
+   const boldLabel=make('label',null,'In đậm toàn bộ thẻ (trừ thẻ chỉnh riêng)');
+   const boldBox=make('input');boldBox.type='checkbox';boldBox.id='nhiAllFontBold';
+   boldBox.checked=globalTypography.bold;
+   boldBox.addEventListener('change',()=>{
+     globalTypography.bold=boldBox.checked;
+     try{localStorage.setItem(globalTypographyKey,JSON.stringify(globalTypography));}catch(e){}
+     applyGlobal();
+   });
+   boldLabel.htmlFor=boldBox.id;boldRow.append(boldLabel,boldBox);
+   defaultGroup.append(boldRow);
+   globalHint.after(defaultGroup);
  }
  for(const [lang,label] of [['ko','Tiếng Hàn'],['vi','Tiếng Việt'],['en','Tiếng Anh']]){
    const row=make('div','setrow'),lab=make('label',null,label),select=make('select');
