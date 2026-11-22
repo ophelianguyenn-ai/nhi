@@ -4791,13 +4791,13 @@ html body #planBox .sdone .pstatus{
       var savedHj = val('hj', it.id), initialHj = lookupHanja(it.ko, it.id);
       var hanInput,readingInput,hanToggle,hanjaLinks,hanjaInputGrid,section=null,syncHanjaEditor=function(){};
       {
-        section=el('fieldset','hanja-editor nhi-optional-hanja-editor');
-        section.appendChild(el('legend',null,'Hán–Hàn (Hán tự và âm Hán–Việt)'));
-        var toggleRow=el('label','check nhi-hanja-toggle');
+        section=el('div','hanja-editor nhi-optional-hanja-editor nhi-hanja-editor-inline');
+        var toggleRow=el('label','nhi-hanja-toggle-compact');
+        toggleRow.title='Có hoặc không có Hán–Hàn';toggleRow.setAttribute('aria-label','Thẻ có phần Hán–Hàn');
         hanToggle=el('input');hanToggle.type='checkbox';hanToggle.name='hanjaEnabled';
+        hanToggle.setAttribute('aria-label','Thẻ có phần Hán–Hàn');
         hanToggle.checked=!!(initialHj&&initialHj[0]&&initialHj[1]);
         toggleRow.appendChild(hanToggle);
-        toggleRow.appendChild(el('span',null,'Thẻ này có phần Hán–Hàn'));
         section.appendChild(toggleRow);
         hanjaInputGrid=el('div','nhi-hanja-input-grid');
         function field(label, name, value) {
@@ -4829,8 +4829,8 @@ html body #planBox .sdone .pstatus{
       }
       var l1 = el('label', 'flabel'); l1.appendChild(el('span', null, 'Tiếng Hàn')); var ko = el('textarea', 'field'); ko.rows = 2; ko.lang = 'ko'; ko.value = it.ko; ko.name = 'ko'; l1.appendChild(ko); f.appendChild(l1);
       var l2 = el('label', 'flabel'); l2.appendChild(el('span', null, 'Nghĩa tiếng Việt')); var vi = el('textarea', 'field'); vi.rows = 2; vi.value = it.vi; vi.name = 'vi'; l2.appendChild(vi); f.appendChild(l2);
-      var enLabel=el('label','flabel');enLabel.appendChild(el('span',null,'Tiếng Anh'));var en=el('textarea','field');en.name='en';en.lang='en';en.rows=2;var enEntry=window.NHI_ENGLISH?window.NHI_ENGLISH.entry(it.id,it.vi,it.ko):{};en.value=enEntry.en||'';enLabel.appendChild(en);f.appendChild(enLabel);
-       var ipaLabel=el('label','flabel');ipaLabel.appendChild(el('span',null,'Phiên âm IPA tiếng Anh (có thể chỉnh sửa)'));var ipaInput=el('input','field');ipaInput.name='ipa';ipaInput.type='text';ipaInput.lang='en';ipaInput.autocomplete='off';ipaInput.value=String(enEntry.ipa||'').replace(/^\//,'').replace(/\/$/,'');ipaLabel.appendChild(ipaInput);f.appendChild(ipaLabel);
+      var enLabel=el('label','flabel nhi-english-edit-field');enLabel.appendChild(el('span',null,'Tiếng Anh'));var en=el('textarea','field');en.name='en';en.lang='en';en.rows=1;var enEntry=window.NHI_ENGLISH?window.NHI_ENGLISH.entry(it.id,it.vi,it.ko):{};en.value=enEntry.en||'';enLabel.appendChild(en);f.appendChild(enLabel);
+       var ipaLabel=el('label','flabel nhi-ipa-edit-field');ipaLabel.appendChild(el('span',null,'Phiên âm IPA'));var ipaInput=el('input','field');ipaInput.name='ipa';ipaInput.type='text';ipaInput.lang='en';ipaInput.autocomplete='off';ipaInput.value=String(enEntry.ipa||'').replace(/^\//,'').replace(/\/$/,'');ipaLabel.appendChild(ipaInput);f.appendChild(ipaLabel);
       var nl=el('label','flabel nhi-editor-note');nl.appendChild(el('span',null,'Ghi chú tiếng Hàn'));var notes=el('textarea','field');notes.name='note';notes.rows=3;notes.value=(val('note',it.id)||{}).text||it.note||'';nl.appendChild(notes);f.appendChild(nl);
       var nc=el('input');nc.type='hidden';nc.name='noteColor';nc.value=(val('note',it.id)||{}).color||'#dbeefe';f.appendChild(nc);
       vi.parentElement.after(nl);
@@ -4858,6 +4858,13 @@ html body #planBox .sdone .pstatus{
       var editorMain=el('div','nhi-editor-main-grid');
       [l1,l2,enLabel,ipaLabel].forEach(function(field){editorMain.appendChild(field);});
       f.insertBefore(editorMain,pl);
+      function fitEnglishEditorHeight(){
+        if(!en.isConnected)return;
+        en.style.height='44px';
+        en.style.height=Math.max(44,Math.min(210,en.scrollHeight))+'px';
+      }
+      en.addEventListener('input',fitEnglishEditorHeight);
+      requestAnimationFrame(fitEnglishEditorHeight);
       // Translation + IPA share one row; paired segmentation + Korean note share the next.
       var editorBottom=el('div','nhi-editor-notes-grid');
       f.insertBefore(editorBottom,pl);
@@ -4919,7 +4926,8 @@ html body #planBox .sdone .pstatus{
           flushEditor();
           if(sess){sess.editing=false;render();}
         }
-        if(!reduceMotion()&&typeof f.animate==='function'){
+        if(window.NHI_WINDOW_FX){window.NHI_WINDOW_FX.close(f,'editor',finish);}
+        else if(!reduceMotion()&&typeof f.animate==='function'){
           f.style.setProperty('animation','none','important');
           var exit=f.animate([
             {opacity:1,translate:'0 0',scale:'1',filter:'blur(0px)'},
@@ -4938,14 +4946,6 @@ html body #planBox .sdone .pstatus{
       f.addEventListener('keydown',function(e){
         if(e.key==='Escape'){e.preventDefault();e.stopPropagation();closeEditor();}
       });
-      var row=el('div','btnrow'),ok=el('button','primary','Đã tự lưu · Đóng');ok.type='submit';row.appendChild(ok);
-      row.appendChild(btn('ghost','Đóng',closeEditor));
-      if(it.edited||savedHj)row.appendChild(btn('ghost','Về bản gốc',function(){
-        clearTimeout(autoTimer);lsSet(draftKey,'');
-        put('ed',it.id,null);put('hj',it.id,null);applyEd(it.id);
-        sess.editing=false;render();toast('Đã trả về bản dịch gốc.');
-      }));
-      f.appendChild(row);
       f.addEventListener('submit',function(e){
         e.preventDefault();
         if(!flushEditor()){toast('Bản nháp đã được giữ lại. Cần có cả tiếng Hàn và tiếng Việt để áp dụng.');return;}
@@ -5125,7 +5125,13 @@ html body #planBox .sdone .pstatus{
         r.appendChild(undoButton);r.classList.add('nhi-rate-undo-inline');
         // Inline-important grid overrides historical flex wrap and order rules.
         r.style.setProperty('display','grid','important');
-        r.style.setProperty('grid-template-columns','minmax(0,1fr) minmax(32px,44px) minmax(32px,44px) minmax(68px,88px)','important');
+        r.style.setProperty('grid-template-columns','minmax(60px,1fr) 44px 44px 94px','important');
+        r.style.setProperty('width','min(calc(100% - 12px),480px)','important');
+        r.style.setProperty('max-width','480px','important');
+        r.style.setProperty('margin','12px auto 14px','important');
+        r.style.setProperty('position','relative','important');
+        r.style.setProperty('inset','auto','important');
+        r.style.setProperty('transform','none','important');
         r.style.setProperty('grid-template-rows','50px','important');
         r.style.setProperty('gap','4px','important');
         r.style.setProperty('flex-wrap','nowrap','important');
@@ -5140,6 +5146,8 @@ html body #planBox .sdone .pstatus{
           button.style.setProperty('min-height','50px','important');
           button.style.setProperty('max-height','50px','important');
           button.style.setProperty('flex','none','important');
+          button.style.setProperty('position','static','important');
+          button.style.setProperty('transform','none','important');
         });
         undoButton.style.setProperty('white-space','nowrap','important');
         undoButton.style.setProperty('font-size','clamp(10px,2.8vw,12px)','important');
@@ -5168,7 +5176,9 @@ html body #planBox .sdone .pstatus{
       }
       if(s.editing){var rich=c.querySelector('[data-language=vi]');if(rich)rich.focus();}
       if (window.NHI_HARD_MASCOT && window.NHI_HARD_MASCOT.sync) window.NHI_HARD_MASCOT.sync(c);
-      if (c.animate && !reduceMotion() && prefs.fx && anim) {
+      if (c.animate && !reduceMotion() && prefs.fx && anim && window.NHI_WINDOW_FX) {
+        window.NHI_WINDOW_FX.open(c,'card');
+      } else if (c.animate && !reduceMotion() && prefs.fx && anim) {
         var ease = 'cubic-bezier(.16,.78,.23,1)';
         if (anim === 'flip') {
           c.animate([
@@ -6093,8 +6103,14 @@ html body #planBox .sdone .pstatus{
       $('menuBtn').setAttribute('aria-expanded', String(!!open));
     }
     function sheet(open) {
-      $('setSheet').hidden = !open; document.body.classList.toggle('modal-open', !!open);
-      if (open) { paintSettings(); paintVoiceStatus(); paintSyncPanel(); }
+      var shell=$('setSheet'),panel=shell.querySelector('.sheetbox');
+      function commit(){shell.hidden=!open;document.body.classList.toggle('modal-open',!!open);}
+      if(open){
+        commit();paintSettings();paintVoiceStatus();paintSyncPanel();
+        if(window.NHI_WINDOW_FX)window.NHI_WINDOW_FX.open(panel,'settings');
+      }else if(window.NHI_WINDOW_FX&&!shell.hidden){
+        window.NHI_WINDOW_FX.close(panel,'settings',commit);
+      }else commit();
     }
     function paintSettings() {
       Array.prototype.forEach.call(document.querySelectorAll('[data-theme-set]'), function (b) { b.setAttribute('aria-pressed', String(b.dataset.themeSet === prefs.theme)); });
@@ -6313,6 +6329,7 @@ html body #planBox .sdone .pstatus{
     function open(focusCard) {
       document.body.classList.add('ai-open'); $('aiPanel').setAttribute('aria-hidden', 'false'); $('aiBtn').setAttribute('aria-pressed', 'true');
       paintCtx(); paintQuick(); paintLog(); paintSetup(!key());
+      if(window.NHI_WINDOW_FX)window.NHI_WINDOW_FX.open($('aiPanel'),'ai');
       if(focusCard==='hotkey'){
         // Retain keyboard focus outside the sidebar so a second A closes it.
         // Clicking inside a text field later restores normal typing.
@@ -6325,7 +6342,11 @@ html body #planBox .sdone .pstatus{
         setTimeout(function () { try { $('aiInput').focus(); } catch (e) { } }, 60);
       }
     }
-    function close() { document.body.classList.remove('ai-open'); $('aiPanel').setAttribute('aria-hidden', 'true'); $('aiBtn').setAttribute('aria-pressed', 'false'); }
+    function close() {
+      function commit(){document.body.classList.remove('ai-open');$('aiPanel').setAttribute('aria-hidden','true');$('aiBtn').setAttribute('aria-pressed','false');}
+      if(window.NHI_WINDOW_FX&&document.body.classList.contains('ai-open'))window.NHI_WINDOW_FX.close($('aiPanel'),'ai',commit);
+      else commit();
+    }
      function toggle(mode) { if (isOpen()) close(); else open(mode || 'hotkey'); }
     function call(msgs) {
       var p = cfg.p, k = key(), m = model();
@@ -7499,4 +7520,6 @@ html body #planBox .pcard>.card-top>.cicons {
   gap:4px!important;justify-content:flex-end!important;
 }
 </style>
+<link rel="stylesheet" href="nhi-ui-refine-v2.css?v=20261122-live-v2">
+<script src="nhi-ui-refine-v2.js?v=20261122-live-v2"></script>
 </body></html>
