@@ -7776,10 +7776,8 @@ window.NHI_WINDOW_FX=api;
 function buildSettings(){
  let group=document.getElementById('nhiTransitionSettings');
  if(!group){
-   const anchor=document.getElementById('nhiCardFontSettings');
-   if(!anchor)return;
-   group=document.createElement('section');
-   group.id='nhiTransitionSettings';
+   const anchor=document.getElementById('nhiCardFontSettings');if(!anchor)return;
+   group=document.createElement('section');group.id='nhiTransitionSettings';
    group.className='setgroup nhi-transitions-settings';
    group.innerHTML='<h3>✨ Hiệu ứng chuyển cảnh</h3><div id="nhiTransitionOptions"></div>';
    anchor.parentNode.insertBefore(group,anchor);
@@ -7788,32 +7786,52 @@ function buildSettings(){
  group.dataset.nhiFxReady='true';
  const target=group.querySelector('#nhiTransitionOptions')||group;
  TYPES.forEach(([type,label])=>{
-   const row=document.createElement('div');row.className='setrow nhi-fx-setting-row';
-   const name=document.createElement('label');name.textContent=label;name.htmlFor='nhi-fx-'+type;
-   const select=document.createElement('select');select.id='nhi-fx-'+type;
-   select.setAttribute('aria-label',label);
-   OPTIONS.filter(o=>type!=='default'||o[0]!=='inherit').forEach(([value,title])=>{
-     const option=document.createElement('option');option.value=value;option.textContent=title;select.appendChild(option);
-   });
-   select.value=prefs[type]||(type==='default'?FALLBACK.default:'inherit');
+   // Prefer the seven static selectors in index.html so the menu is visible
+   // even before JavaScript loads, and never append a duplicate row.
+   let select=target.querySelector('#nhi-fx-'+type);
+   if(!select){
+     const row=document.createElement('div');row.className='setrow nhi-fx-setting-row';
+     const name=document.createElement('label');name.textContent=label;name.htmlFor='nhi-fx-'+type;
+     select=document.createElement('select');select.id='nhi-fx-'+type;
+     select.setAttribute('aria-label',label);
+     OPTIONS.filter(o=>type!=='default'||o[0]!=='inherit').forEach(([value,title])=>{
+       const opt=document.createElement('option');opt.value=value;opt.textContent=title;select.append(opt);
+     });
+     row.append(name,select);target.append(row);
+   }
    if(type==='editor'){
-     const linked=document.createElement('option');linked.value='inherit';linked.textContent='Theo Cài đặt tổng';
-     select.replaceChildren(linked);select.value='inherit';select.disabled=true;
-     select.title='Mở và đóng giống Cài đặt tổng';
+     select.replaceChildren(new Option('Theo Cài đặt tổng','inherit'));
+     select.value='inherit';select.disabled=true;
+     select.title='Mở và đóng giống cửa sổ Cài đặt tổng';
+   }else{
+     select.disabled=false;
+     select.value=prefs[type]||(type==='default'?'fade':FALLBACK[type]);
    }
    select.addEventListener('change',()=>{
-     prefs[type]=select.value;try{localStorage.setItem(STORAGE,JSON.stringify(prefs));}catch(_){}
+     prefs[type]=select.value;
+     try{localStorage.setItem(STORAGE,JSON.stringify(prefs));}catch(_){}
      const feedback=group.querySelector('#nhiFxCurrent');
      if(feedback)feedback.textContent='Đã lưu hiệu ứng '+label.toLowerCase();
-     if(type!=='editor')play(group,'change',false);
+     play(group,'change',false);
    });
-   row.append(name,select);target.appendChild(row);
  });
- const feedback=document.createElement('p');feedback.id='nhiFxCurrent';feedback.className='voice-note';
- feedback.setAttribute('role','status');feedback.setAttribute('aria-live','polite');
- target.appendChild(feedback);
+ let feedback=group.querySelector('#nhiFxCurrent');
+ if(!feedback){
+   feedback=document.createElement('p');feedback.id='nhiFxCurrent';feedback.className='voice-note';
+   feedback.setAttribute('role','status');feedback.setAttribute('aria-live','polite');
+   target.append(feedback);
+ }
  const preview=group.querySelector('#nhiFxPreview');
- if(preview)preview.addEventListener('click',()=>play(group,'settings',false));
+ if(preview)preview.addEventListener('click',()=>{
+   // A slower, unmistakable live preview on the SETTINGS section itself.
+   if(reduced()||choose('settings')==='none'){feedback.textContent='Hiệu ứng đang tắt';return;}
+   if(typeof group.animate==='function'){
+     group.animate(keyframes(choose('settings'),false),{
+       duration:650,easing:'cubic-bezier(.2,.72,.27,1)',fill:'none'
+     });
+   }
+   feedback.textContent='Đang xem trước: '+(OPTIONS.find(o=>o[0]===choose('settings'))?.[1]||choose('settings'));
+ });
 }
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',buildSettings,{once:true});else buildSettings();
 const observer=new MutationObserver(records=>{
