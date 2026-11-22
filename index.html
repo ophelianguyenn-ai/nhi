@@ -4248,10 +4248,11 @@ html body #planBox .sdone .pstatus{
       // Restore Plan view for ALL schedule links, not only #/bai links.
       // Old behavior silently left the calendar hidden when a device last
       // saved Cards/Quiz as its active mode.
+      // Save an in-progress lesson safely, then show the requested calendar.
+      if(calendarRoute&&sess)leave();
       if((page||calendarRoute)&&(state.mode!=='plan'||$('view-plan').hidden)){
         state.mode='plan';saveUi();renderMode();return;
       }
-      if(calendarRoute&&sess)leave();
       if(state.mode==='plan'){
         $('view-plan').hidden=false;
         render();
@@ -4817,8 +4818,11 @@ html body #planBox .sdone .pstatus{
         // Do not hijack another learning mode while old lesson data is loading.
         // On a slow connection, the user may already have selected "Thẻ ghi nhớ".
         // Recover the deep-link only while the active mode is actually "Lịch học".
-        if (sess.L && state.mode === 'plan' && !/^#\/bai\//.test(location.hash)) {
-          history.replaceState(null, '', location.pathname + location.search + '#/bai/' + sess.L.id);
+        // Explicit schedule links should not be replaced by an old session.
+        // Only resume the lesson deep-link when no schedule URL was requested.
+        if(sess.L&&state.mode==='plan'&&
+          (!location.hash||location.hash==='#/'||location.hash==='#/bia')){
+          history.replaceState(null,'',location.pathname+location.search+'#/bai/'+sess.L.id);
         }
       } catch (e) { sess = null; }
     }
@@ -6338,7 +6342,13 @@ html body #planBox .sdone .pstatus{
       $('menuDaily').addEventListener('click', function () { menu(false); PLAN.openDailyCreator(); });
       $('menuCover').addEventListener('click', function () { menu(false); location.hash='#/bia'; cover(true); });
       $('brandFaceBtn').addEventListener('click', function () { menu(false); location.hash='#/bia'; cover(true); });
-      $('brandBtn').addEventListener('click', function () { menu(false); SHELL.cover(false); location.hash='#/lich-hoc'; window.scrollTo({top:0,behavior:'smooth'}); });
+      $('brandBtn').addEventListener('click', function () {
+        menu(false);SHELL.cover(false);
+        if(location.hash==='#/lich-hoc'){
+          state.mode='plan';saveUi();renderMode();
+        }else location.hash='#/lich-hoc';
+        window.scrollTo({top:0,behavior:'smooth'});
+      });
       window.NHI_COVER={open:function(){cover(true);},close:function(){cover(false);}};
       $('coverGo').addEventListener('click', function () { haptic(14); cover(false); location.hash='#/hom-nay'; });
       $('setBtn').addEventListener('click', function () { menu(false); sheet(true); });
