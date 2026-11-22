@@ -630,8 +630,9 @@ try{
    row.lineStartOffsets.every(offset=>Math.abs(offset)<5)),
    'Every WRAPPED line of compared English must begin directly after flag: '+
    JSON.stringify(comparisonGeometry));
- assert(comparisonGeometry.every(row=>row.panelWidth<=372&&row.blankBottom>=0&&row.blankBottom<22),
-   'English panel with photo must hug content (no excessive width or empty height): '+
+ assert(comparisonGeometry.every(row=>row.panelWidth>410&&row.panelWidth<=600&&
+   row.blankBottom>=0&&row.blankBottom<22),
+   'English panel with long text should expand without empty height, while staying inside the image-side lane: '+
    JSON.stringify(comparisonGeometry));
  console.log('COMPARISON_FLAG_ALIGNMENT',JSON.stringify(comparisonGeometry));
  // The real complaint concerns the BLUE SELECTED option and its font following
@@ -736,6 +737,48 @@ try{
    Math.abs(globalFont.customBefore-globalFont.customAfter)<.1,
    'Master font must resize non-custom cards but never affect custom cards: '+JSON.stringify(globalFont));
  console.log('MASTER_FONT_CUSTOM_EXEMPT',JSON.stringify(globalFont));
+ // Check the four new DEFAULT language sizes and overall bold toggle,
+ // and that the study card no longer shows its kind/topic pill.
+ const defaultFonts=await page.evaluate(()=>{
+   const card=document.querySelector('#planBox .pcard');
+   const fields=['ko','viFront','viBack','en'].map(k=>document.getElementById('nhiAllFont-'+k));
+   const bold=document.getElementById('nhiAllFontBold');
+   if(!card||fields.some(x=>!x)||!bold)return {available:false};
+   const saved=fields.map(x=>x.value),wasBold=bold.checked;
+   const defaultCustom=card.dataset.nhiFontCustom;
+   try{
+     card.dataset.nhiFontCustom='false';
+     const settings=[40,34,30,28];
+     fields.forEach((field,i)=>{
+       field.value=String(settings[i]);field.dispatchEvent(new Event('change',{bubbles:true}));
+     });
+     bold.checked=true;bold.dispatchEvent(new Event('change',{bubbles:true}));
+     const root=getComputedStyle(document.documentElement);
+     const koFont=parseFloat(root.getPropertyValue('--nhi-effective-ko'));
+     const viFrontFont=parseFloat(root.getPropertyValue('--nhi-effective-vi-front'));
+     const viBackFont=parseFloat(root.getPropertyValue('--nhi-effective-vi-back'));
+     const enFont=parseFloat(root.getPropertyValue('--nhi-effective-en'));
+     const enabled=document.body.classList.contains('nhi-global-card-bold');
+     card.dataset.nhiFontCustom='true';
+     const customFont=parseFloat(getComputedStyle(card).getPropertyValue('--nhi-effective-ko'));
+     return {available:true,koFont,viFrontFont,viBackFont,enFont,enabled,customFont,
+       kindTags:card.querySelectorAll(':scope .card-top>.kind').length,
+       topicPills:card.querySelectorAll(':scope .card-top .cmeta>.ttag').length};
+   }finally{
+     fields.forEach((field,i)=>{
+       field.value=saved[i];field.dispatchEvent(new Event('change',{bubbles:true}));
+     });
+     bold.checked=wasBold;bold.dispatchEvent(new Event('change',{bubbles:true}));
+     if(defaultCustom===undefined)card.removeAttribute('data-nhi-font-custom');
+     else card.dataset.nhiFontCustom=defaultCustom;
+   }
+ });
+ assert(defaultFonts.available&&defaultFonts.koFont===40&&defaultFonts.viFrontFont===34&&
+   defaultFonts.viBackFont===30&&defaultFonts.enFont===28&&defaultFonts.enabled&&
+   defaultFonts.customFont===36&&defaultFonts.kindTags===0&&defaultFonts.topicPills===0,
+   'Per-language global fonts/bold, custom exemption and hidden card labels must all work: '+
+   JSON.stringify(defaultFonts));
+ console.log('GLOBAL_TYPO_AND_CARD_LABELS',JSON.stringify(defaultFonts));
  // Test the REAL translation helper with a mocked provider response; no
  // personal AI credentials and no live network calls are used by this test.
  const translated=await page.evaluate(async()=>{
