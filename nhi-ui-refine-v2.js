@@ -8,7 +8,8 @@ const TYPES=[
   ['settings','Cửa sổ Cài đặt'],
   ['ai','Cửa sổ chat AI'],
   ['dialog','Hộp thoại và cửa sổ khác'],
-  ['card','Chuyển / lật thẻ'],
+  ['card','Lật thẻ (mặt trước / sau)'],
+  ['navigation','Tiến / Lùi giữa các thẻ'],
   ['change','Thay đổi nội dung / tùy chọn']
 ];
 const OPTIONS=[
@@ -21,10 +22,19 @@ const OPTIONS=[
   ['soft-pop','Bật mềm'],
   ['none','Không hiệu ứng']
 ];
-const FALLBACK={default:'fade',editor:'icon',settings:'soft-pop',ai:'slide-side',dialog:'zoom',card:'slide-side',change:'fade'};
+const FALLBACK={default:'fade',editor:'icon',settings:'soft-pop',ai:'slide-side',dialog:'zoom',card:'slide-side',navigation:'slide-side',change:'fade'};
+const DEFAULT_DURATION={default:.29,editor:.29,settings:.29,ai:.29,dialog:.29,card:.31,navigation:.42,change:.19};
+const MIN_SECONDS=.1,MAX_SECONDS=5;
 let prefs={};try{prefs=JSON.parse(localStorage.getItem(STORAGE)||'{}')||{};}catch(_){}
 if(!prefs||typeof prefs!=='object')prefs={};
 const running=new WeakMap();
+const durationSeconds=type=>{
+  const value=Number(prefs.durations?.[type]);
+  return Number.isFinite(value)&&value>=MIN_SECONDS&&value<=MAX_SECONDS?value:DEFAULT_DURATION[type]??DEFAULT_DURATION.default;
+};
+const durationMs=type=>Math.round(durationSeconds(type)*1000);
+const saveSettings=()=>{try{localStorage.setItem(STORAGE,JSON.stringify(prefs));}catch(_){}};
+
 const reduced=()=>window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches;
 const choose=type=>{
   // Editor must use exactly the same effect as the main Settings window.
@@ -34,7 +44,7 @@ const choose=type=>{
   if(category!=='default' && prefs.default && prefs.default!=='inherit')return prefs.default;
   return FALLBACK[category]||FALLBACK.default;
 };
-function keyframes(name,out) {
+function keyframes(name,out,direction) {
   let frames;
   switch(name){
    case 'icon':
@@ -44,7 +54,7 @@ function keyframes(name,out) {
    case 'slide-up':
      frames=[{opacity:0,translate:'0 23px'},{opacity:1,translate:'0 0'}];break;
    case 'slide-side':
-     frames=[{opacity:.12,translate:'42px 0'},{opacity:1,translate:'0 0'}];break;
+     frames=[{opacity:.12,translate:(direction===-1?'-42px':'42px')+' 0'},{opacity:1,translate:'0 0'}];break;
    case 'soft-pop':
      frames=[{opacity:0,scale:'.90'},{offset:.72,opacity:1,scale:'1.025'},{opacity:1,scale:'1'}];break;
    default:
@@ -52,7 +62,7 @@ function keyframes(name,out) {
   }
   return out?frames.slice().reverse():frames;
 }
-function play(node,type,closing,after){
+function play(node,type,closing,after,direction){
   const done=typeof after==='function'?after:()=>{};
   if(!node||!node.isConnected){done();return;}
   if(type==='editor')node.style.setProperty('animation','none','important');
@@ -61,7 +71,7 @@ function play(node,type,closing,after){
  const effect=choose(type);
   const old=running.get(node);if(old){try{old.cancel();}catch(_){ }running.delete(node);}
   if(reduced()||effect==='none'||!node.animate){done();return;}
-  const frames=keyframes(effect,closing);
+  const frames=keyframes(effect,closing,direction);
   let finished=false;
   const finish=()=>{
     if(finished)return;finished=true;
@@ -70,15 +80,19 @@ function play(node,type,closing,after){
   };
   let animation;
   try{
-    // Settings and the card editor share duration, easing and keyframes.
-    const duration=type==='change'?190:type==='card'?310:290;
-    animation=node.animate(frames,{duration,easing:closing?'cubic-bezier(.42,0,.8,.3)':'cubic-bezier(.2,.72,.27,1)',fill:'both'});
+    // Each transition category has its own user-configurable duration.
+    animation=node.animate(frames,{duration:durationMs(type),easing:closing?'cubic-bezier(.42,0,.8,.3)':'cubic-bezier(.2,.72,.27,1)',fill:'both'});
     running.set(node,animation);
     animation.onfinish=finish;
     animation.oncancel=()=>{if(running.get(node)===animation)running.delete(node);};
   }catch(_){done();}
 }
-const api={open:(node,type)=>play(node,type,false),close:(node,type,after)=>play(node,type,true,after),choose,get:()=>({...prefs})};
+const api={
+ open:(node,type)=>play(node,type,false),
+ close:(node,type,after)=>play(node,type,true,after),
+ navigate:(node,direction)=>play(node,'navigation',false,null,direction<0?-1:1),
+ duration:durationMs,durationSeconds,choose,get:()=>({...prefs})
+};
 window.NHI_WINDOW_FX=api;
 document.body?.classList.add('nhi-fx-runtime');
 function buildSettings(){
@@ -110,18 +124,53 @@ function buildSettings(){
    if(type==='editor'){
      select.replaceChildren(new Option('Theo Cài đặt tổng','inherit'));
      select.value='inherit';select.disabled=true;
-     select.title='Mở và đóng giống cửa sổ Cài đặt tổng';
+     select.title='Kiểu chuyển cảnh giống Cài đặt tổng; thời gian chỉnh riêng';
    }else{
      select.disabled=false;
      select.value=prefs[type]||(type==='default'?'fade':FALLBACK[type]);
    }
    select.addEventListener('change',()=>{
      prefs[type]=select.value;
-     try{localStorage.setItem(STORAGE,JSON.stringify(prefs));}catch(_){}
+     saveSettings();
      const feedback=group.querySelector('#nhiFxCurrent');
      if(feedback)feedback.textContent='Đã lưu hiệu ứng '+label.toLowerCase();
      play(group,'change',false);
    });
+   // Every effect, including the editor linked to Settings, has its own seconds.
+   const row=select.closest('.nhi-fx-setting-row');
+   if(row){
+     let seconds=row.querySelector('#nhi-fx-duration-'+type);
+     if(!seconds){
+       const wrap=document.createElement('label');
+       wrap.className='nhi-fx-duration-wrap';
+       wrap.textContent='Giây';
+       seconds=document.createElement('input');
+       seconds.className='nhi-fx-duration';
+       seconds.id='nhi-fx-duration-'+type;
+       wrap.appendChild(seconds);
+       row.appendChild(wrap);
+     }
+     seconds.type='number';seconds.min=String(MIN_SECONDS);seconds.max=String(MAX_SECONDS);
+     seconds.step='.05';seconds.inputMode='decimal';
+     seconds.setAttribute('aria-label','Thời gian '+label+' (giây)');
+     seconds.value=durationSeconds(type).toFixed(2);
+     seconds.addEventListener('change',()=>{
+       const val=Number(seconds.value);
+       if(!Number.isFinite(val)||val<MIN_SECONDS||val>MAX_SECONDS){
+         seconds.setCustomValidity('Chọn từ 0,1 đến 5 giây');
+         seconds.reportValidity();return;
+       }
+       seconds.setCustomValidity('');
+       prefs.durations=Object.assign({},prefs.durations||{},{[type]:val});
+       saveSettings();
+       const feedback=group.querySelector('#nhiFxCurrent');
+       if(feedback)feedback.textContent='Đã lưu '+label.toLowerCase()+': '+val+' giây';
+     });
+     seconds.addEventListener('input',()=>{
+       const val=Number(seconds.value);
+       seconds.setCustomValidity(val>=MIN_SECONDS&&val<=MAX_SECONDS?'':'Chọn từ 0,1 đến 5 giây');
+     });
+   }
  });
  let feedback=group.querySelector('#nhiFxCurrent');
  if(!feedback){
@@ -135,7 +184,7 @@ function buildSettings(){
    if(reduced()||choose('settings')==='none'){feedback.textContent='Hiệu ứng đang tắt';return;}
    if(typeof group.animate==='function'){
      group.animate(keyframes(choose('settings'),false),{
-       duration:650,easing:'cubic-bezier(.2,.72,.27,1)',fill:'none'
+       duration:durationMs('settings'),easing:'cubic-bezier(.2,.72,.27,1)',fill:'none'
      });
    }
    feedback.textContent='Đang xem trước: '+(OPTIONS.find(o=>o[0]===choose('settings'))?.[1]||choose('settings'));
