@@ -4412,8 +4412,11 @@ html body #planBox .sdone .pstatus{
       if(name){var link=el('a','ptitle',name);link.href='#/bai/'+L.id;link.title=L.title;content.appendChild(link);}
       content.appendChild(topicTags(L,3));
       p.appendChild(content);
-      var rs=(resume[L.id]||[]).filter(alive),saved=resumeFull[L.id];
-      var continuing=!!(saved&&saved.pos>0)||!!rs.length;
+      // Older local or synced progress can have a malformed resume value.
+      // Ignore its shape for display without erasing the stored record.
+      var rawResume=resume[L.id],rs=(Array.isArray(rawResume)?rawResume:[]).filter(alive);
+      var saved=resumeFull[L.id];
+      var continuing=!!(saved&&typeof saved==='object'&&Number(saved.pos)>0)||!!rs.length;
       p.appendChild(btn('primary',continuing?'Tiếp tục':'Mở bài',function(){openLesson(L.id);}));
       var footer=el('div','nhi-next-review'),completed=doneSteps(L);
       if(completed>=OFFSETS.length){
@@ -4425,7 +4428,9 @@ html body #planBox .sdone .pstatus{
       }else{
         // Show the NEXT REQUIRED stage, not a hypothetical later stage.
         // A rollback from Ôn 2 returns to Ôn 2; no completions returns to Học mới.
-        var round=completed+1,nextDate=schedule(L)[completed].due;
+        var round=completed+1,entries=schedule(L),nextEntry=entries[completed];
+        // A malformed old review record must not hide the lesson.
+        var nextDate=nextEntry&&typeof nextEntry.due==='string'?nextEntry.due:(L.plan||L.date);
         footer.appendChild(el('span','nhi-review-round nhi-review-round-'+round,String(round)));
         var time=el('time',null,vn(nextDate,true));time.dateTime=nextDate;footer.appendChild(time);
         var description='Lượt '+round+'/5 · '+(completed?STEP[completed]:'Học mới')+' · '+vn(nextDate,true);
@@ -4655,10 +4660,27 @@ html body #planBox .sdone .pstatus{
             catch(err){
               calendarWarnings++;
               console.warn('Nhi calendar recovered one lesson row',L&&L.id,err);
-              var backup=el('article','plesson nhi-lesson-white');
-              var link=el('a','ptitle',String(L.title||'Bài học'));
-              link.href='#/bai/'+encodeURIComponent(L.id);
-              backup.appendChild(link);
+              // Match the regular card grid even when one record fails.
+              // A lone link landed in the tiny progress-ring column and
+              // wrapped each word vertically (as shown on 13 November).
+              var backup=el('article','plesson nhi-lesson-white nhi-lesson-recovered');
+              backup.dataset.lessonId=L.id;
+              backup.style.setProperty('--day',dayColor(L.date));
+              var fallbackRing=el('span','ring nhi-recovered-ring');
+              fallbackRing.appendChild(el('b',null,'•'));
+              backup.appendChild(fallbackRing);
+              var copy=el('div','nhi-compact-copy'),rawTitle=String(L.title||'Bài học');
+              var cleanTitle=rawTitle.replace(/^Bài ngày\s+\d{1,2}[.\/]\d{1,2}(?:[.\/]\d{4})?\s*(?:[·–—-]\s*)?/i,'').trim();
+              var link=el('a','ptitle',cleanTitle||rawTitle);
+              link.href='#/bai/'+encodeURIComponent(L.id);link.title=rawTitle;
+              copy.appendChild(link);
+              copy.appendChild(el('span','listinfo','Bài học ngày '+vn(L.date,true)));
+              backup.appendChild(copy);
+              backup.appendChild(btn('primary','Mở bài',function(){openLesson(L.id);}));
+              var footer=el('div','nhi-next-review');
+              footer.appendChild(el('span','nhi-review-symbol','○'));
+              footer.appendChild(el('span',null,'Bấm Mở bài để tiếp tục học'));
+              backup.appendChild(footer);
               lessonRows.appendChild(backup);
             }
           });
