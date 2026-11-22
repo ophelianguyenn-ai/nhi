@@ -209,6 +209,9 @@ function init(){
    root.style.setProperty('--nhi-effective-ipa',
      Math.round(globalTypography.en*globalScale*.86*10)/10+'px');
    document.body.classList.toggle('nhi-global-card-bold',globalTypography.bold);
+   // Recalculate the English card and both comparison choices immediately
+   // after a GLOBAL font change; otherwise they keep their previous pixel width.
+   if(window.NHI_ENGLISH?.refit)window.NHI_ENGLISH.refit();
  };
  applyGlobal();
  if(settings){
