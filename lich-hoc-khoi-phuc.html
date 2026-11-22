@@ -1,0 +1,152 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#e9faf5">
+<title>Lịch học · Nhi’s Learning Corner</title>
+<style>
+:root{color-scheme:light;--ink:#173540;--muted:#58737c;--teal:#0e8983;--line:#bce7df;--paper:#fff;--bg:#f2fbf8}
+*{box-sizing:border-box}
+body{margin:0;background:linear-gradient(160deg,#effbf6,#f8fcff 65%,#fff);color:var(--ink);font:16px/1.5 system-ui,-apple-system,"Segoe UI",Arial,sans-serif}
+a{color:inherit}button,input{font:inherit}
+header{background:#fffdfd;border-bottom:1px solid var(--line);position:sticky;top:0;z-index:10}
+.bar{max-width:1150px;margin:auto;padding:13px 17px;display:flex;align-items:center;gap:15px;justify-content:space-between;flex-wrap:wrap}
+.logo{font-weight:900;font-size:18px;text-decoration:none;letter-spacing:-.025em}
+.logo span{color:var(--teal)}
+.home{border:1px solid var(--line);padding:9px 13px;border-radius:11px;text-decoration:none;font-weight:650;background:#ecfaf7}
+main{max-width:1150px;margin:0 auto;padding:23px 18px 50px}
+h1{font-size:clamp(26px,4vw,38px);margin:0 0 5px;letter-spacing:-.04em}
+.sub{color:var(--muted);margin:0 0 18px}
+.tools{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin:16px 0}
+.search{flex:1 1 260px;min-width:170px;border:1px solid var(--line);border-radius:12px;background:#fff;padding:11px 13px;color:var(--ink)}
+.mode{display:flex;gap:4px;background:#e5f6f2;border-radius:12px;padding:4px}
+.mode button{border:0;background:transparent;color:#32626a;border-radius:9px;padding:9px 15px;cursor:pointer}
+.mode button[aria-pressed=true]{background:#fff;color:#087e77;box-shadow:0 1px 5px #1d6a5923;font-weight:750}
+.notice{background:#e9f7f3;border:1px solid var(--line);padding:11px 14px;border-radius:12px;font-size:14px;color:#2d646b;margin:0 0 18px}
+.stats{font-weight:650;color:var(--muted);margin:13px 0}
+.month{margin:26px 0 14px}
+.month h2{font-size:21px;margin:0 0 12px}
+.month-summary{color:var(--muted);font-size:14px}
+.calendar{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:6px;background:#fff;border:1px solid var(--line);padding:13px;border-radius:17px}
+.weekday{text-align:center;font-size:12px;font-weight:750;color:#6a8487;padding-bottom:4px}
+.day{min-height:80px;border-radius:10px;border:1px solid #e1ebe9;background:#fbfdfc;padding:7px;display:flex;flex-direction:column;gap:5px}
+.day.blank{border:0;background:none}
+.date{font-weight:750;font-size:13px;color:#547078}
+.day.has{background:#eaf8f4;border-color:#9fdbd3}
+.day.has .date{color:#0a8179}
+.day .count{font-size:12px;color:#396c71}
+.day a{display:block;font-size:12px;color:#076b68;line-height:1.25;text-decoration:none;overflow-wrap:anywhere;font-weight:650}
+.day a:hover{text-decoration:underline}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px}
+.card{background:#fff;border:1px solid var(--line);border-radius:14px;padding:15px;box-shadow:0 3px 12px #174f3d0b}
+.card time{display:block;color:#0b8079;font-size:13px;font-weight:800}
+.card h3{font-size:16px;line-height:1.4;margin:7px 0;overflow-wrap:anywhere}
+.card p{font-size:13px;color:var(--muted);margin:0 0 14px}
+.card a{display:inline-block;padding:8px 12px;background:#107f7a;color:white;border-radius:10px;text-decoration:none;font-size:13px;font-weight:750}
+.card a:hover{background:#096963}
+.error{padding:22px;background:#fff5f5;border:1px solid #f5c6c6;border-radius:12px}
+[hidden]{display:none!important}
+@media(max-width:600px){.bar{padding:11px 13px}.logo{font-size:16px}main{padding:18px 12px}.calendar{gap:3px;padding:5px}.day{padding:4px;min-height:66px}.day a{font-size:10px}.day .count{font-size:10px}.date{font-size:12px}.weekday{font-size:10px}}
+</style>
+</head>
+<body>
+<header><div class="bar"><a class="logo" href="./?nhi_force_calendar=1#/lich-hoc">Nhi’s <span>LEARNING CORNER</span></a><a class="home" href="./?nhi_force_calendar=1#/lich-hoc">↗ Mở lịch trong ứng dụng chính</a></div></header>
+<main>
+<h1>🗓 Lịch học</h1>
+<p class="sub">Danh sách bài học theo ngày và theo tháng</p>
+<div class="notice">Trang lịch dự phòng này đọc trực tiếp từ dữ liệu bài học gốc. Không chỉnh sửa, đặt lại hoặc xóa tiến độ học của bạn. Mở từng bài để tiếp tục học trong ứng dụng chính.</div>
+<div class="tools">
+<input id="search" class="search" type="search" placeholder="Tìm bài học hoặc chủ đề..." aria-label="Tìm bài học">
+<div class="mode" aria-label="Kiểu hiển thị">
+<button id="monthBtn" type="button" aria-pressed="true">Theo tháng</button>
+<button id="listBtn" type="button" aria-pressed="false">Theo ngày</button>
+</div>
+</div>
+<p class="stats" id="stats" role="status">Đang tải lịch học…</p>
+<section id="calendarView" aria-label="Lịch theo tháng"></section>
+<section id="listView" aria-label="Lịch theo ngày" hidden></section>
+</main>
+<script>
+(function(){
+'use strict';
+var data=[],mode='month';
+var search=document.getElementById('search'),stats=document.getElementById('stats');
+var monthView=document.getElementById('calendarView'),listView=document.getElementById('listView');
+function el(tag,cls,txt){var node=document.createElement(tag);if(cls)node.className=cls;if(txt!==undefined)node.textContent=txt;return node;}
+function title(l){return String(l.title||('Bài ngày '+(l.date||'')));}
+function validDate(s){return /^\d{4}-\d{2}-\d{2}$/.test(s||'');}
+function openLesson(l){return './?nhi_force_calendar=1#/bai/'+encodeURIComponent(l.id);}
+function aggregate(arr){
+  var output={words:0,sentences:0};
+  arr.forEach(function(l){(l.items||[]).forEach(function(it){if(Array.isArray(it)){if(it[1]==='w')output.words++;else output.sentences++;}});});
+  return output;
+}
+function entryLink(l){
+ var a=el('a',null,title(l));a.href=openLesson(l);a.title='Mở bài '+(l.date||'');return a;
+}
+function renderMonth(key,lessons){
+ var parts=key.split('-'),year=Number(parts[0]),month=Number(parts[1]);
+ var head=el('section','month');
+ var h=el('h2',null,'Tháng '+month+'/'+year);head.append(h);
+ var total=aggregate(lessons);head.append(el('div','month-summary',lessons.length+' bài · '+total.words+' từ vựng · '+total.sentences+' câu'));
+ var grid=el('div','calendar');
+ ['T2','T3','T4','T5','T6','T7','CN'].forEach(function(d){grid.append(el('div','weekday',d));});
+ var start=new Date(year,month-1,1).getDay();var pad=(start+6)%7;
+ for(var i=0;i<pad;i++)grid.append(el('div','day blank'));
+ var byDate={};lessons.forEach(function(l){(byDate[l.date]=byDate[l.date]||[]).push(l);});
+ var days=new Date(year,month,0).getDate();
+ for(var day=1;day<=days;day++){
+  var iso=key+'-'+String(day).padStart(2,'0'),ls=byDate[iso]||[],box=el('div','day'+(ls.length?' has':''));
+  box.append(el('span','date',String(day)));
+  if(ls.length){
+   box.append(el('span','count',ls.length+' bài'));
+   ls.forEach(function(l){box.append(entryLink(l));});
+  }
+  grid.append(box);
+ }
+ head.append(grid);return head;
+}
+function renderList(arr){
+ var grid=el('div','cards');
+ arr.forEach(function(l){
+  var card=el('article','card');card.append(el('time',null,l.date||''));
+  card.append(el('h3',null,title(l)));
+  var total=aggregate([l]);card.append(el('p',null,total.words+' từ vựng · '+total.sentences+' câu'));
+  var link=el('a',null,'Mở bài học');link.href=openLesson(l);card.append(link);grid.append(card);
+ });
+ return grid;
+}
+function render(){
+ var q=search.value.trim().toLocaleLowerCase('vi');
+ var filtered=data.filter(function(l){
+  return !q||(title(l)+' '+l.date+' '+(l.items||[]).map(function(it){return Array.isArray(it)?it[2]:'';}).join(' ')).toLocaleLowerCase('vi').includes(q);
+ });
+ stats.textContent=filtered.length+' / '+data.length+' bài học';
+ monthView.replaceChildren();listView.replaceChildren();
+ var groups={};filtered.forEach(function(l){var m=l.date.slice(0,7);(groups[m]=groups[m]||[]).push(l);});
+ Object.keys(groups).sort().reverse().forEach(function(k){monthView.append(renderMonth(k,groups[k]));});
+ listView.append(renderList(filtered));
+ monthView.hidden=mode!=='month';listView.hidden=mode!=='list';
+ document.getElementById('monthBtn').setAttribute('aria-pressed',String(mode==='month'));
+ document.getElementById('listBtn').setAttribute('aria-pressed',String(mode==='list'));
+ if(!filtered.length)monthView.append(el('p','notice','Không có bài học phù hợp.'));
+}
+document.getElementById('monthBtn').addEventListener('click',function(){mode='month';render();});
+document.getElementById('listBtn').addEventListener('click',function(){mode='list';render();});
+search.addEventListener('input',render);
+fetch('./lessons.json?calendar-recovery=20261122',{cache:'no-store'})
+.then(function(res){if(!res.ok)throw Error('HTTP '+res.status);return res.json();})
+.then(function(payload){
+  data=(payload.lessons||[]).filter(function(l){return l&&l.id&&validDate(l.date);})
+  .sort(function(a,b){return b.date.localeCompare(a.date);});
+  render();
+})
+.catch(function(err){
+  stats.textContent='Không tải được lịch học';
+  monthView.replaceChildren(el('div','error','Không đọc được lessons.json ('+err.message+'). Hãy kiểm tra kết nối mạng và thử mở lại trang.'));
+});
+})();
+</script>
+</body>
+</html>
