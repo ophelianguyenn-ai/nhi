@@ -3989,7 +3989,10 @@ html body #planBox .sdone .pstatus{
     }
     setupReviewSettings();
     function schedule(L) {
-      var done = val('done', L.id) || [], base = done[0] || L.plan, T = today();
+      // Older sync records can contain a malformed completion value. Do not
+      // let one corrupt record prevent the entire calendar from rendering.
+      var rawDone=val('done',L.id);
+      var done=Array.isArray(rawDone)?rawDone:[],base=done[0]||L.plan,T=today();
       var lessonOffsets=normalizedOffsets(val('reviewOffsets',L.id))||OFFSETS;
       return lessonOffsets.map(function (off, i) {
         var due = i === 0 ? addDays(L.plan, off) : addDays(base, off), st;
@@ -4009,7 +4012,10 @@ html body #planBox .sdone .pstatus{
       return schedule(L).filter(function (s) { return s.st === 'today' || s.st === 'late'; });
     }
     function current(L) { var s = schedule(L); for (var i = 0; i < s.length; i++) if (s[i].st !== 'done') return s[i]; return null; }
-    function doneSteps(L) { return Math.min(OFFSETS.length, (val('done', L.id) || []).length); }
+    function doneSteps(L) {
+      var done=val('done',L.id);
+      return Math.min(OFFSETS.length,Array.isArray(done)?done.length:0);
+    }
     function markLessonNotStudied(L){
       if(!L)return;
       var before=(val('done',L.id)||[]).slice();
@@ -4330,6 +4336,31 @@ html body #planBox .sdone .pstatus{
           rates.appendChild(btn('ghost','Khó',function(){rate('hard');}));
           backup.appendChild(rates);
           v.appendChild(backup);
+        } else if(!page&&!sess&&view!=='home'){
+          // NEVER replace a requested calendar with stale Home DOM. Preserve
+          // access even if the advanced calendar widgets throw.
+          var safe=el('section','nhi-calendar-safe');
+          safe.appendChild(el('h2',null,'🗓 Lịch học'));
+          safe.appendChild(el('p','listinfo','Lịch đã chuyển sang chế độ dự phòng để tránh lỗi hiển thị. Các bài học vẫn được giữ nguyên.'));
+          var entries=el('div','days-grid');
+          try{
+            visibleLessons().slice().sort(function(a,b){return String(b.date||'').localeCompare(String(a.date||''));})
+              .forEach(function(L){
+                var row=el('article','plesson nhi-lesson-white');
+                var link=el('a','ptitle',String(L.title||'Bài ngày '+(L.date||'')));
+                link.href='#/bai/'+encodeURIComponent(L.id);
+                var date=el('span','listinfo',String(L.date||''));
+                row.appendChild(date);row.appendChild(link);entries.appendChild(row);
+              });
+          }catch(safeError){
+            console.error('Nhi calendar emergency renderer',safeError);
+            safe.appendChild(el('p','notice','Dữ liệu lịch đang gặp lỗi. Hãy sử dụng liên kết Lịch dự phòng trong menu.'));
+          }
+          safe.appendChild(entries);v.appendChild(safe);
+          var technical=el('details','listinfo');
+          technical.appendChild(el('summary',null,'Chi tiết lỗi lịch (để sửa)'));
+          technical.appendChild(el('code',null,String(renderErr&&renderErr.message||renderErr)));
+          v.appendChild(technical);
         } else if (oldCard.childNodes.length) v.appendChild(oldCard);
         else v.appendChild(el('p','notice','Đã xảy ra lỗi hiển thị. Hãy tải lại trang để tiếp tục học; tiến độ không bị xoá.'));
       }
@@ -4591,16 +4622,21 @@ html body #planBox .sdone .pstatus{
     function renderDays(v) {
       // Show a lesson in Cần học only on its review due date or when overdue.
       var active=[],waiting=[],threshold=today();
-      var notYetScheduled=0;
+      var notYetScheduled=0,calendarWarnings=0;
       visibleLessons().forEach(function(L){
-        var counts=liveCount(L.ids);
-        if(!counts[0]&&!counts[1])return;
-        var next=current(L);
-        if(next && next.due<=threshold) active.push(L);
-        else if(doneSteps(L)>0) waiting.push(L);
-        // A new, never-opened lesson is not an "already studied" lesson.
-        // It appears in Cần học on its first scheduled day.
-        else notYetScheduled++;
+        // One malformed legacy lesson must not make the entire calendar
+        // disappear and restore the "Hôm nay" dashboard.
+        try{
+          var counts=liveCount(Array.isArray(L.ids)?L.ids:[]);
+          if(!counts[0]&&!counts[1])return;
+          var next=current(L);
+          if(next && next.due<=threshold) active.push(L);
+          else if(doneSteps(L)>0) waiting.push(L);
+          else notYetScheduled++;
+        }catch(e){
+          calendarWarnings++;
+          console.warn('Nhi calendar skipped malformed lesson',L&&L.id,e);
+        }
       });
       function groupedCards(target,entries) {
         var by={};entries.forEach(function(L){(by[L.date]=by[L.date]||[]).push(L);});
@@ -4614,7 +4650,18 @@ html body #planBox .sdone .pstatus{
           label.appendChild(el('span',null,c[0]+' từ vựng · '+c[1]+' câu'));
           group.appendChild(label);
           var lessonRows=el('div','nhi-day-lessons');
-          ls.forEach(function(L){lessonRows.appendChild(lessonCard(L));});
+          ls.forEach(function(L){
+            try{lessonRows.appendChild(lessonCard(L));}
+            catch(err){
+              calendarWarnings++;
+              console.warn('Nhi calendar recovered one lesson row',L&&L.id,err);
+              var backup=el('article','plesson nhi-lesson-white');
+              var link=el('a','ptitle',String(L.title||'Bài học'));
+              link.href='#/bai/'+encodeURIComponent(L.id);
+              backup.appendChild(link);
+              lessonRows.appendChild(backup);
+            }
+          });
           group.appendChild(lessonRows);
           target.appendChild(group);
         });
@@ -4634,6 +4681,10 @@ html body #planBox .sdone .pstatus{
       details.appendChild(el('summary',null,'Xem '+waiting.length+' học phần đang chờ'));
       var waitingGrid=el('div','days-grid');groupedCards(waitingGrid,waiting);
       details.appendChild(waitingGrid);archived.appendChild(details);v.appendChild(archived);
+      if(calendarWarnings){
+        v.appendChild(el('p','listinfo','Đã khôi phục lịch học; '+calendarWarnings+
+          ' bài có dữ liệu hiển thị chưa hợp lệ. Các bài khác vẫn xem được.'));
+      }
     }
     function renderTopics(v) {
       var g = el('div', 'tgrid');
