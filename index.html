@@ -4853,7 +4853,8 @@ html body #planBox .sdone .pstatus{
       var hanInput,readingInput,hanToggle,hanjaLinks,hanjaInputGrid,section=null,syncHanjaEditor=function(){};
       {
         section=el('div','hanja-editor nhi-optional-hanja-editor nhi-hanja-editor-inline');
-        var toggleRow=el('label','nhi-hanja-toggle-compact');
+        section.appendChild(el('h3','nhi-hanja-heading','Hán–Hàn (Hán tự và âm Hán–Việt)'));
+        var toggleRow=el('label','nhi-hanja-toggle-compact nhi-hanja-checkbox-original');
         toggleRow.title='Có hoặc không có Hán–Hàn';toggleRow.setAttribute('aria-label','Thẻ có phần Hán–Hàn');
         hanToggle=el('input');hanToggle.type='checkbox';hanToggle.name='hanjaEnabled';
         hanToggle.setAttribute('aria-label','Thẻ có phần Hán–Hàn');
@@ -4919,13 +4920,16 @@ html body #planBox .sdone .pstatus{
       var editorMain=el('div','nhi-editor-main-grid');
       [l1,l2,enLabel,ipaLabel].forEach(function(field){editorMain.appendChild(field);});
       f.insertBefore(editorMain,pl);
-      function fitEnglishEditorHeight(){
-        if(!en.isConnected)return;
-        en.style.height='44px';
-        en.style.height=Math.max(44,Math.min(210,en.scrollHeight))+'px';
+      // Match the exact visible height of the IPA field on any screen.
+      // Long translations scroll horizontally instead of expanding the editor.
+      for(var prop of ['height','min-height','max-height']){
+        en.style.setProperty(prop,'44px','important');
+        ipaInput.style.setProperty(prop,'44px','important');
       }
-      en.addEventListener('input',fitEnglishEditorHeight);
-      requestAnimationFrame(fitEnglishEditorHeight);
+      en.style.setProperty('resize','none','important');
+      en.style.setProperty('white-space','pre','important');
+      en.style.setProperty('overflow-x','auto','important');
+      en.style.setProperty('overflow-y','hidden','important');
       // Translation + IPA share one row; paired segmentation + Korean note share the next.
       var editorBottom=el('div','nhi-editor-notes-grid');
       f.insertBefore(editorBottom,pl);
@@ -7581,6 +7585,6 @@ html body #planBox .pcard>.card-top>.cicons {
   gap:4px!important;justify-content:flex-end!important;
 }
 </style>
-<link rel="stylesheet" href="nhi-ui-refine-v2.css?v=20261122-live-v2">
-<script src="nhi-ui-refine-v2.js?v=20261122-live-v2"></script>
+<link rel="stylesheet" href="nhi-ui-refine-v2.css?v=20261122-three-corrections-v3">
+<script src="nhi-ui-refine-v2.js?v=20261122-three-corrections-v3"></script>
 </body></html>
