@@ -187,7 +187,15 @@ function editor(form,fields,saved,options={}){
     view.style.setProperty('resize','none','important');
     requestAnimationFrame(queueEnglishResize);
     if(view.parentElement&&typeof ResizeObserver!=='undefined'){
-      const observer=new ResizeObserver(queueEnglishResize);
+      let previousWidth=0;
+      const observer=new ResizeObserver(entries=>{
+        const width=Math.round(entries[0]?.contentRect?.width||0);
+        // Observe width changes only, not the height caused by our own resize.
+        if(width>0&&width!==previousWidth){
+          previousWidth=width;
+          queueEnglishResize();
+        }
+      });
       observer.observe(view.parentElement);
     }
   }
