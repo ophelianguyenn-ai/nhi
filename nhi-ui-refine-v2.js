@@ -56,6 +56,8 @@ function play(node,type,closing,after){
   const done=typeof after==='function'?after:()=>{};
   if(!node||!node.isConnected){done();return;}
   if(type==='editor')node.style.setProperty('animation','none','important');
+ node.dataset.nhiFxEffect=choose(type);
+ node.dataset.nhiFxOperation=closing?'close':'open';
  const effect=choose(type);
   const old=running.get(node);if(old){try{old.cancel();}catch(_){ }running.delete(node);}
   if(reduced()||effect==='none'||!node.animate){done();return;}
@@ -79,36 +81,46 @@ function play(node,type,closing,after){
 const api={open:(node,type)=>play(node,type,false),close:(node,type,after)=>play(node,type,true,after),choose,get:()=>({...prefs})};
 window.NHI_WINDOW_FX=api;
 function buildSettings(){
- const anchor=document.getElementById('nhiCardFontSettings');
- if(!anchor||document.getElementById('nhiTransitionSettings'))return;
- const group=document.createElement('section');group.className='setgroup nhi-transitions-settings';group.id='nhiTransitionSettings';
- const title=document.createElement('h3');title.textContent='Hiệu ứng chuyển cảnh';group.appendChild(title);
- const info=document.createElement('p');info.className='voice-note';
- info.textContent='Chọn hiệu ứng mặc định hoặc riêng cho từng cửa sổ. Thay đổi được lưu trên thiết bị này.';
- group.appendChild(info);
+ let group=document.getElementById('nhiTransitionSettings');
+ if(!group){
+   const anchor=document.getElementById('nhiCardFontSettings');
+   if(!anchor)return;
+   group=document.createElement('section');
+   group.id='nhiTransitionSettings';
+   group.className='setgroup nhi-transitions-settings';
+   group.innerHTML='<h3>✨ Hiệu ứng chuyển cảnh</h3><div id="nhiTransitionOptions"></div>';
+   anchor.parentNode.insertBefore(group,anchor);
+ }
+ if(group.dataset.nhiFxReady==='true')return;
+ group.dataset.nhiFxReady='true';
+ const target=group.querySelector('#nhiTransitionOptions')||group;
  TYPES.forEach(([type,label])=>{
    const row=document.createElement('div');row.className='setrow nhi-fx-setting-row';
    const name=document.createElement('label');name.textContent=label;name.htmlFor='nhi-fx-'+type;
-   const select=document.createElement('select');select.id='nhi-fx-'+type;select.setAttribute('aria-label',label);
-   OPTIONS.filter(o=>type!=='default'||o[0]!=='inherit').forEach(([value,text])=>{
-     const option=document.createElement('option');option.value=value;option.textContent=text;select.appendChild(option);
+   const select=document.createElement('select');select.id='nhi-fx-'+type;
+   select.setAttribute('aria-label',label);
+   OPTIONS.filter(o=>type!=='default'||o[0]!=='inherit').forEach(([value,title])=>{
+     const option=document.createElement('option');option.value=value;option.textContent=title;select.appendChild(option);
    });
    select.value=prefs[type]||(type==='default'?FALLBACK.default:'inherit');
    if(type==='editor'){
-     select.replaceChildren(new Option('Giống cửa sổ Cài đặt tổng','inherit'));
-     select.value='inherit';select.disabled=true;
-     select.title='Hiệu ứng đóng/mở giống cửa sổ Cài đặt tổng';
+     const linked=document.createElement('option');linked.value='inherit';linked.textContent='Theo Cài đặt tổng';
+     select.replaceChildren(linked);select.value='inherit';select.disabled=true;
+     select.title='Mở và đóng giống Cài đặt tổng';
    }
    select.addEventListener('change',()=>{
      prefs[type]=select.value;try{localStorage.setItem(STORAGE,JSON.stringify(prefs));}catch(_){}
-     play(group,'change',false);
+     const feedback=group.querySelector('#nhiFxCurrent');
+     if(feedback)feedback.textContent='Đã lưu hiệu ứng '+label.toLowerCase();
+     if(type!=='editor')play(group,'change',false);
    });
-   row.append(name,select);group.appendChild(row);
+   row.append(name,select);target.appendChild(row);
  });
- const note=document.createElement('p');note.className='voice-note';
- note.textContent='Cài đặt “Giảm chuyển động” của hệ điều hành luôn được ưu tiên.';
- group.appendChild(note);
- anchor.parentNode.insertBefore(group,anchor);
+ const feedback=document.createElement('p');feedback.id='nhiFxCurrent';feedback.className='voice-note';
+ feedback.setAttribute('role','status');feedback.setAttribute('aria-live','polite');
+ target.appendChild(feedback);
+ const preview=group.querySelector('#nhiFxPreview');
+ if(preview)preview.addEventListener('click',()=>play(group,'settings',false));
 }
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',buildSettings,{once:true});else buildSettings();
 const observer=new MutationObserver(records=>{
@@ -116,12 +128,18 @@ const observer=new MutationObserver(records=>{
     if(rec.type==='childList'){
       rec.addedNodes.forEach(node=>{
         if(node.nodeType!==1)return;
-        if(node.matches?.('form.nhi-editor-window-v5'))api.open(node,'editor');
+        if(node.matches?.('form.nhi-editor-window-v5')&&!node.dataset.nhiFxOpened){
+          node.dataset.nhiFxOpened='true';
+          api.open(node,'editor');
+        }
         if(node.matches?.('dialog[open]'))api.open(node,'dialog');
         if(node.matches?.('.legendpop'))api.open(node,'dialog');
         node.querySelectorAll?.('form.nhi-editor-window-v5,dialog[open],.legendpop').forEach(el=>{
           const type=el.matches('form.nhi-editor-window-v5')?'editor':'dialog';
-          api.open(el,type);
+          if(type!=='editor'||!el.dataset.nhiFxOpened){
+            if(type==='editor')el.dataset.nhiFxOpened='true';
+            api.open(el,type);
+          }
         });
       });
     }else if(rec.type==='attributes' && rec.attributeName==='open'&&rec.target.matches?.('dialog[open]')){
