@@ -294,6 +294,19 @@ async function showShortPhraseIPA(box,english,revision){
   label.hidden=false;
  }catch(_e){/* Offline: keep transcription blank instead of guessing. */}
 }
+function applyEnglishFont(box){
+ const translation=box?.querySelector('.nhi-en-translation');
+ if(!translation)return;
+ const local=Number(box._format?._sizes?.en);
+ const localUpdated=Number(box._format?._sizeEditedAt?.en||0);
+ let globalUpdated=0;
+ try{globalUpdated=Number(localStorage.getItem('nhi-card-global-en-revision-v1')||0);}catch(e){}
+ // New global choices override older individual English sizes, while later
+ // individual edits remain possible on the currently selected card.
+ translation.style.removeProperty('font-size');
+ if(local>=12&&local<=72&&(!globalUpdated||localUpdated>globalUpdated))
+   translation.style.setProperty('font-size',local+'px','important');
+}
 function display(box,entry,id,vi,ko){
  // Cards are constructed off-DOM, then appended; populate immediately.
  // isConnected is false during the first render, even though the box is valid.
@@ -304,6 +317,8 @@ function display(box,entry,id,vi,ko){
   ...(entry?.format||{}),...(box._format||{}),
   _sizes:{...((entry?.format||{})._sizes||{}),...((box._format||{})._sizes||{})}
  },'en');}
+ applyEnglishFont(box);
+ box.classList.toggle('nhi-ipa-below',englishTokens(en).length>=3);
   // IPA eligibility is checked from word count every time a card rerenders.
   const span=box.querySelector('.nhi-en-ipa');
   const eligible=eligibleForIPA(en);
@@ -457,5 +472,5 @@ function mount(parent,id,vi,ko,options){
  }else if(!verifiedEntry(id,vi,ko))resolveAutomatic(id,vi,ko,box);
  return box;
 }
-window.NHI_ENGLISH={mount,load,speakEnglish,refit:()=>document.querySelectorAll('#planBox .nhi-english-v5').forEach(fitEnglishWidth),entry:(id,vi,ko)=>choices[entryKey(vi,ko)]||verifiedEntry(id,vi,ko)||{},saveEntry:(id,vi,ko,entry)=>{cacheEntry(id,vi,ko,entry);delete choices[entryKey(vi,ko)];try{localStorage.setItem(CHOICE_KEY,JSON.stringify(choices));}catch(e){}}};
+window.NHI_ENGLISH={mount,load,speakEnglish,refit:()=>document.querySelectorAll('#planBox .nhi-english-v5').forEach(box=>{applyEnglishFont(box);fitEnglishWidth(box);}),entry:(id,vi,ko)=>choices[entryKey(vi,ko)]||verifiedEntry(id,vi,ko)||{},saveEntry:(id,vi,ko,entry)=>{cacheEntry(id,vi,ko,entry);delete choices[entryKey(vi,ko)];try{localStorage.setItem(CHOICE_KEY,JSON.stringify(choices));}catch(e){}}};
 })();
