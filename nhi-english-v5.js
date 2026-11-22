@@ -333,7 +333,10 @@ function display(box,entry,id,vi,ko){
   _sizes:{...((entry?.format||{})._sizes||{}),...((box._format||{})._sizes||{})}
  },'en');}
  applyEnglishFont(box);
- box.classList.toggle('nhi-ipa-below',englishTokens(en).length>=3);
+ const englishWordCount=englishTokens(en).length;
+ box.classList.toggle('nhi-ipa-below',englishWordCount>=3);
+ // Preserve an unbroken line for English meanings of exactly three words.
+ box.classList.toggle('nhi-en-three-words',englishWordCount===3);
   // IPA eligibility is checked from word count every time a card rerenders.
   const span=box.querySelector('.nhi-en-ipa');
   const eligible=eligibleForIPA(en);
@@ -422,7 +425,7 @@ function fitEnglishWidth(box){
  }
  const status=box.querySelector('.nhi-en-status');
  const transcription=ipa&&!ipa.hidden?measure(ipa):0;
- const meaning=measure(t);
+ let meaning=measure(t);
  const actions=box.querySelector('.nhi-en-head-actions');
  const actionsWidth=actions?.getBoundingClientRect().width||36;
  const review=box.querySelector('.nhi-en-review');
@@ -439,6 +442,18 @@ function fitEnglishWidth(box){
  const available=Math.max(172,(imageCard?laneWidth:Math.max(laneWidth,cardWidth-28))-8);
  const cap=Math.min(available,imageCard?650:960);
  const horizontalPadding=34;
+ if(box.classList.contains('nhi-en-three-words')&&t){
+   const shownFont=parseFloat(getComputedStyle(t).fontSize)||22;
+   const preferredFont=Number(box.dataset.nhiEnglishFontPx)||shownFont;
+   const naturalMeaning=meaning*preferredFont/Math.max(1,shownFont);
+   const freeWidth=Math.max(100,cap-actionsWidth-horizontalPadding-6);
+   // Expand the English note first; scale only if the real viewport is too narrow.
+   // The chosen font-size preference remains unchanged in device settings.
+   const fittedFont=Math.max(12,Math.floor(Math.min(preferredFont,
+     preferredFont*freeWidth/Math.max(1,naturalMeaning))));
+   box.style.setProperty('--nhi-three-word-font',fittedFont+'px');
+   meaning=naturalMeaning*fittedFont/Math.max(1,preferredFont);
+ }else box.style.removeProperty('--nhi-three-word-font');
  const singleMeaning=meaning+actionsWidth+horizontalPadding;
  const singleIPA=transcription+actionsWidth+horizontalPadding;
  const together=meaning+(transcription?transcription+12:0)+actionsWidth+horizontalPadding;
