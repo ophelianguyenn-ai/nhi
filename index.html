@@ -4981,8 +4981,20 @@ html body #planBox .sdone .pstatus{
          lastHardIcon.loading='eager';
          lastHardIcon.decoding='async';
          lastHardIcon.onerror=function(){
-           var fallback=el('span','nhi-last-hard-fallback','🤔');
+           var fallback=el('span','nhi-last-hard-fallback');
            fallback.title='Lần trước: Khó';fallback.setAttribute('aria-label','Lần trước: Khó');
+           // Inline vector fallback avoids missing remote assets, unsupported WebP,
+           // and emoji differences across operating systems.
+           fallback.innerHTML='<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 80 74" role="img" aria-hidden="true">'+
+             '<circle cx="36" cy="40" r="29" fill="#92e7eb"/>'+
+             '<circle cx="32" cy="39" r="27" fill="#ffad2e" stroke="#6a4a40" stroke-width="3"/>'+
+             '<path d="M14 32q7-7 13 0M37 29q8-7 13-1" fill="none" stroke="#755347" stroke-width="3.5" stroke-linecap="round"/>'+
+             '<circle cx="24" cy="39" r="3.2" fill="#66493e"/><circle cx="43" cy="39" r="3.2" fill="#66493e"/>'+
+             '<path d="M28 50h15" stroke="#66493e" stroke-width="3.5" stroke-linecap="round"/>'+
+             '<path d="M22 60q8-1 11-12l6 1-4 17-10 1z" fill="#f8a72d" stroke="#6a4a40" stroke-width="2.5"/>'+
+             '<path d="M42 23c0-12 9-19 21-19s17 10 13 21c-2 7-11 13-19 13H50l-9 7 3-12z" fill="#32b8f2" stroke="#6a4a40" stroke-width="3"/>'+
+             '<text x="60" y="31" font-family="Arial,sans-serif" text-anchor="middle" font-size="29" font-weight="900" fill="#ffa52b" stroke="#6a4a40" stroke-width=".8">?</text>'+
+             '</svg>';
            if(lastHardIcon.isConnected)lastHardIcon.replaceWith(fallback);
          };
          cm.appendChild(lastHardIcon);
@@ -7333,5 +7345,9 @@ html body #planBox .nhi-optional-hanja-editor .nhi-hanja-toggle {
   gap:8px;align-items:center;min-width:0;
 }
 .nhi-review-milestone-row input{width:90px!important;min-width:0!important;box-sizing:border-box!important;}
+html body #planBox .pcard .nhi-last-hard-fallback svg {
+  width:100%!important;height:100%!important;display:block!important;
+  overflow:visible!important;pointer-events:none!important;
+}
 </style>
 </body></html>
