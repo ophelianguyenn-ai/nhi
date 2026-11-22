@@ -424,7 +424,7 @@ function fitEnglishWidth(box){
  const together=meaning+(transcription?transcription+12:0)+actionsWidth+horizontalPadding;
  let natural=Math.max(175,Math.ceil(singleMeaning),Math.ceil(singleIPA),Math.ceil(reviewWidth+24));
  // Keep English and IPA on one row when both fit, otherwise let IPA wrap.
- if(together<=cap) natural=Math.max(natural,Math.ceil(together));
+ if(together<=cap&&!box.classList.contains('nhi-ipa-below')) natural=Math.max(natural,Math.ceil(together));
  const compare=box.querySelector('.nhi-en-choices:not(:empty)');
  if(compare){
    const choiceLengths=[...compare.querySelectorAll('.nhi-comparison-choice-text')]
