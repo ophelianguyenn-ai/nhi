@@ -4227,7 +4227,14 @@ html body #planBox .sdone .pstatus{
     /* ---- routing: #/bai/<id> opens a lesson as its own page ---- */
     function route() {
       var hash=location.hash||'',m=/^#\/bai\/([\w-]+)$/.exec(hash);
-      page = m && BY_LESSON[m[1]] ? (mergeDestination(m[1]) || m[1]) : null;
+      // Accept legacy calendar URLs while keeping the canonical route.
+      if(hash==='#/lich'||hash==='#/calendar'){
+        hash='#/lich-hoc';
+        history.replaceState(null,'',location.pathname+location.search+hash);
+      }
+      var calendarRoute=hash==='#/lich-hoc'||hash==='#/lich-hoc/chu-de'||
+        hash==='#/lich-hoc/thang'||hash==='#/hom-nay'||hash==='#/den-han';
+      page=m&&BY_LESSON[m[1]]?(mergeDestination(m[1])||m[1]):null;
       if(!m){
         if(hash==='#/hom-nay')view='home';
         else if(hash==='#/den-han')view='overdue';
@@ -4235,16 +4242,18 @@ html body #planBox .sdone .pstatus{
         else if(hash==='#/lich-hoc/thang')view='months';
         else if(hash==='#/lich-hoc')view='days';
       }
-      if (m && page && page !== m[1]) history.replaceState(null, '', location.pathname + location.search + '#/bai/' + page);
-      document.body.classList.toggle('plan-page', !!page);
-      // A saved lesson deep link must always have the visible "plan" section.
-      // The older route could leave .plan-page on the body while #view-plan was hidden,
-      // producing a completely blank mint page with only the header visible.
-      if (page && (state.mode !== 'plan' || $('view-plan').hidden)) {
-        state.mode = 'plan'; saveUi(); renderMode(); return;
+      if(m&&page&&page!==m[1])
+        history.replaceState(null,'',location.pathname+location.search+'#/bai/'+page);
+      document.body.classList.toggle('plan-page',!!page);
+      // Restore Plan view for ALL schedule links, not only #/bai links.
+      // Old behavior silently left the calendar hidden when a device last
+      // saved Cards/Quiz as its active mode.
+      if((page||calendarRoute)&&(state.mode!=='plan'||$('view-plan').hidden)){
+        state.mode='plan';saveUi();renderMode();return;
       }
-      if (state.mode === 'plan') {
-        $('view-plan').hidden = false;
+      if(calendarRoute&&sess)leave();
+      if(state.mode==='plan'){
+        $('view-plan').hidden=false;
         render();
       }
     }
@@ -4254,7 +4263,10 @@ html body #planBox .sdone .pstatus{
     function navigatePlanView(name) {
       var href={home:'#/hom-nay',days:'#/lich-hoc',topics:'#/lich-hoc/chu-de',months:'#/lich-hoc/thang',overdue:'#/den-han'}[name];
       if(!href)return;view=name;
-      if(location.hash===href)home(true);else location.hash=href;
+      if(location.hash===href){
+        if(state.mode!=='plan'||$('view-plan').hidden)route();
+        else home(true);
+      }else location.hash=href;
     }
 
     /* ---- views ---- */
