@@ -4,7 +4,7 @@
 const STORAGE='nhi-window-transition-settings-v1';
 const TYPES=[
   ['default','Mặc định cho tất cả'],
-  ['editor','Cửa sổ chỉnh sửa thẻ'],
+  ['editor','Cửa sổ chỉnh sửa thẻ (giống Cài đặt tổng)'],
   ['settings','Cửa sổ Cài đặt'],
   ['ai','Cửa sổ chat AI'],
   ['dialog','Hộp thoại và cửa sổ khác'],
@@ -27,24 +27,26 @@ if(!prefs||typeof prefs!=='object')prefs={};
 const running=new WeakMap();
 const reduced=()=>window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches;
 const choose=type=>{
-  const selected=prefs[type];
+  // Editor must use exactly the same effect as the main Settings window.
+  const category=type==='editor'?'settings':type;
+  const selected=prefs[category];
   if(selected && OPTIONS.some(x=>x[0]===selected) && selected!=='inherit')return selected;
-  if(type!=='default' && prefs.default && prefs.default!=='inherit')return prefs.default;
-  return FALLBACK[type]||FALLBACK.default;
+  if(category!=='default' && prefs.default && prefs.default!=='inherit')return prefs.default;
+  return FALLBACK[category]||FALLBACK.default;
 };
 function keyframes(name,out) {
   let frames;
   switch(name){
    case 'icon':
-     frames=[{opacity:.12,transform:'translate(38%,-30%) scale(.18)',filter:'blur(2px)'},{opacity:1,transform:'translate(0,0) scale(1)',filter:'blur(0px)'}];break;
+     frames=[{opacity:.12,translate:'38% -30%',scale:'.18',filter:'blur(2px)'},{opacity:1,translate:'0 0',scale:'1',filter:'blur(0px)'}];break;
    case 'zoom':
-     frames=[{opacity:.12,transform:'scale(.87)'},{opacity:1,transform:'scale(1)'}];break;
+     frames=[{opacity:.12,scale:'.87'},{opacity:1,scale:'1'}];break;
    case 'slide-up':
-     frames=[{opacity:0,transform:'translateY(23px)'},{opacity:1,transform:'translateY(0px)'}];break;
+     frames=[{opacity:0,translate:'0 23px'},{opacity:1,translate:'0 0'}];break;
    case 'slide-side':
-     frames=[{opacity:.12,transform:'translateX(42px)'},{opacity:1,transform:'translateX(0)'}];break;
+     frames=[{opacity:.12,translate:'42px 0'},{opacity:1,translate:'0 0'}];break;
    case 'soft-pop':
-     frames=[{opacity:0,transform:'scale(.90)'},{offset:.72,opacity:1,transform:'scale(1.025)'},{opacity:1,transform:'scale(1)'}];break;
+     frames=[{opacity:0,scale:'.90'},{offset:.72,opacity:1,scale:'1.025'},{opacity:1,scale:'1'}];break;
    default:
      frames=[{opacity:0},{opacity:1}];
   }
@@ -53,7 +55,8 @@ function keyframes(name,out) {
 function play(node,type,closing,after){
   const done=typeof after==='function'?after:()=>{};
   if(!node||!node.isConnected){done();return;}
-  const effect=choose(type);
+  if(type==='editor')node.style.setProperty('animation','none','important');
+ const effect=choose(type);
   const old=running.get(node);if(old){try{old.cancel();}catch(_){ }running.delete(node);}
   if(reduced()||effect==='none'||!node.animate){done();return;}
   const frames=keyframes(effect,closing);
@@ -65,7 +68,8 @@ function play(node,type,closing,after){
   };
   let animation;
   try{
-    const duration=type==='change'?190:type==='card'?310:type==='editor'?340:290;
+    // Settings and the card editor share duration, easing and keyframes.
+    const duration=type==='change'?190:type==='card'?310:290;
     animation=node.animate(frames,{duration,easing:closing?'cubic-bezier(.42,0,.8,.3)':'cubic-bezier(.2,.72,.27,1)',fill:'both'});
     running.set(node,animation);
     animation.onfinish=finish;
@@ -90,6 +94,11 @@ function buildSettings(){
      const option=document.createElement('option');option.value=value;option.textContent=text;select.appendChild(option);
    });
    select.value=prefs[type]||(type==='default'?FALLBACK.default:'inherit');
+   if(type==='editor'){
+     select.replaceChildren(new Option('Giống cửa sổ Cài đặt tổng','inherit'));
+     select.value='inherit';select.disabled=true;
+     select.title='Hiệu ứng đóng/mở giống cửa sổ Cài đặt tổng';
+   }
    select.addEventListener('change',()=>{
      prefs[type]=select.value;try{localStorage.setItem(STORAGE,JSON.stringify(prefs));}catch(_){}
      play(group,'change',false);
