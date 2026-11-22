@@ -14,6 +14,7 @@ const TYPES=[
 ];
 const OPTIONS=[
   ['inherit','Theo mặc định'],
+  ['classic','Hiệu ứng gốc (khuyến nghị)'],
   ['icon','Phóng từ biểu tượng'],
   ['fade','Mờ dần'],
   ['zoom','Phóng nhẹ'],
@@ -22,11 +23,19 @@ const OPTIONS=[
   ['soft-pop','Bật mềm'],
   ['none','Không hiệu ứng']
 ];
-const FALLBACK={default:'fade',editor:'icon',settings:'soft-pop',ai:'slide-side',dialog:'zoom',card:'slide-side',navigation:'slide-side',change:'fade'};
-const DEFAULT_DURATION={default:.29,editor:.29,settings:.29,ai:.29,dialog:.29,card:.31,navigation:.42,change:.19};
+const FALLBACK={default:'fade',editor:'icon',settings:'soft-pop',ai:'slide-side',dialog:'zoom',card:'classic',navigation:'classic',change:'fade'};
+const DEFAULT_DURATION={default:.29,editor:.29,settings:.29,ai:.29,dialog:.29,card:.35,navigation:.62,change:.19};
 const MIN_SECONDS=.1,MAX_SECONDS=5;
 let prefs={};try{prefs=JSON.parse(localStorage.getItem(STORAGE)||'{}')||{};}catch(_){}
 if(!prefs||typeof prefs!=='object')prefs={};
+// Restore the original card motions for existing installations exactly once.
+// Preserve all user-entered durations and all unrelated transition preferences.
+if(!prefs.classicCardMotionRestoredV108){
+  prefs.card='classic';
+  prefs.navigation='classic';
+  prefs.classicCardMotionRestoredV108=true;
+  try{localStorage.setItem(STORAGE,JSON.stringify(prefs));}catch(_){}
+}
 const running=new WeakMap();
 const durationSeconds=type=>{
   const value=Number(prefs.durations?.[type]);
@@ -47,6 +56,22 @@ const choose=type=>{
 function keyframes(name,out,direction) {
   let frames;
   switch(name){
+   case 'classic':
+     if(direction===1||direction===-1){
+       const sign=direction===-1?-1:1;
+       frames=[
+         {opacity:.08,transform:'perspective(1100px) translateX('+(sign*54)+'px) rotateY('+(sign*-7)+'deg) scale(.947)',filter:'blur(2px)'},
+         {offset:.72,opacity:1,transform:'perspective(1100px) translateX('+(sign*-5)+'px) rotateY('+(sign*.8)+'deg) scale(1.008)',filter:'blur(0)'},
+         {opacity:1,transform:'perspective(1100px) translateX(0) rotateY(0deg) scale(1)',filter:'blur(0)'}
+       ];
+     }else{
+       // Original post-flip reveal.
+       frames=[
+         {opacity:.2,transform:'perspective(1100px) translateY(12px) scale(.982)'},
+         {opacity:1,transform:'perspective(1100px) translateY(0) scale(1)'}
+       ];
+     }
+     break;
    case 'icon':
      frames=[{opacity:.12,translate:'38% -30%',scale:'.18',filter:'blur(2px)'},{opacity:1,translate:'0 0',scale:'1',filter:'blur(0px)'}];break;
    case 'zoom':
@@ -116,7 +141,7 @@ function buildSettings(){
      const name=document.createElement('label');name.textContent=label;name.htmlFor='nhi-fx-'+type;
      select=document.createElement('select');select.id='nhi-fx-'+type;
      select.setAttribute('aria-label',label);
-     OPTIONS.filter(o=>type!=='default'||o[0]!=='inherit').forEach(([value,title])=>{
+     OPTIONS.filter(o=>(type!=='default'||o[0]!=='inherit')&&(o[0]!=='classic'||type==='card'||type==='navigation')).forEach(([value,title])=>{
        const opt=document.createElement('option');opt.value=value;opt.textContent=title;select.append(opt);
      });
      row.append(name,select);target.append(row);
