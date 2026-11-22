@@ -4867,8 +4867,26 @@ html body #planBox .sdone .pstatus{
         autoTimer=setTimeout(persistEditor,350);
       }
       function flushEditor(){clearTimeout(autoTimer);return persistEditor();}
-      function closeEditor(){flushEditor();sess.editing=false;render();}
+      function closeEditor(){
+        if(f.dataset.nhiClosing==='true')return;
+        f.dataset.nhiClosing='true';
+        var done=false;
+        function finish(){
+          if(done)return;done=true;
+          flushEditor();
+          if(sess){sess.editing=false;render();}
+        }
+        if(!reduceMotion()&&typeof f.animate==='function'){
+          f.style.setProperty('animation','none','important');
+          var exit=f.animate([
+            {opacity:1,translate:'0 0',scale:'1'},
+            {opacity:0,translate:'0 -26px',scale:'.965'}
+          ],{duration:490,easing:'cubic-bezier(.3,0,.7,1)',fill:'forwards'});
+          exit.onfinish=finish;exit.oncancel=finish;
+        }else finish();
+      }
       f.nhiSave=flushEditor;
+      f.nhiClose=closeEditor;
       f.addEventListener('input',scheduleAuto);
       f.addEventListener('change',scheduleAuto);
       f.addEventListener('click',function(e){
@@ -4888,7 +4906,7 @@ html body #planBox .sdone .pstatus{
       f.addEventListener('submit',function(e){
         e.preventDefault();
         if(!flushEditor()){toast('Bản nháp đã được giữ lại. Cần có cả tiếng Hàn và tiếng Việt để áp dụng.');return;}
-        sess.editing=false;render();toast('Đã tự lưu bản sửa.');
+        closeEditor();toast('Đã tự lưu bản sửa.');
       });
       f.addEventListener('click', function (e) { e.stopPropagation(); });
       return f;
@@ -4947,7 +4965,13 @@ html body #planBox .sdone .pstatus{
           legendOpen = false; render();
         }, 280);
       }, 'Một lần: thêm ảnh · Hai lần: tìm hình theo từ tiếng Hàn'));
-      ci.appendChild(ibtn('iconbtn sm', 'edit', function () { s.editing = !s.editing; legendOpen = false; render(); }, 'Sửa thẻ, chữ Hán và hình ảnh (C để mở / đóng)'));
+      ci.appendChild(ibtn('iconbtn sm', 'edit', function () {
+        if(s.editing){
+          var opened=document.querySelector('#planBox form.nhi-editor-window-v5');
+          if(opened&&opened.nhiClose){opened.nhiClose();return;}
+        }
+        s.editing=!s.editing;legendOpen=false;render();
+      }, 'Sửa thẻ, chữ Hán và hình ảnh (C để mở / đóng)'));
       var bk = ibtn('iconbtn sm', 'book', function () { legendOpen = !legendOpen; render(); }, 'Chú giải phím tắt và thao tác'); bk.setAttribute('aria-expanded', String(legendOpen)); ci.appendChild(bk);
       ci.appendChild(ibtn('iconbtn sm', 'vol', function () { toggleSpeech(s.flipped ? it.ko : it.vi, s.flipped ? 'ko-KR' : 'vi-VN'); }, 'Phát âm / Dừng mặt thẻ hiện tại'));
       var hj = null;
@@ -5046,7 +5070,7 @@ html body #planBox .sdone .pstatus{
           toast('Đã lưu ảnh minh họa vào thẻ.');
         }, function () { s.imagePicker = false; render(); }));
       }
-      if(s.editing){var scrim=el('div','nhi-edit-scrim');scrim.setAttribute('aria-hidden','true');scrim.addEventListener('click',function(){var ed=c.querySelector('form.editbox');if(ed&&ed.nhiSave)ed.nhiSave();s.editing=false;render();});c.appendChild(scrim);c.appendChild(editForm(it));}
+      if(s.editing){var scrim=el('div','nhi-edit-scrim');scrim.setAttribute('aria-hidden','true');scrim.addEventListener('click',function(){var ed=c.querySelector('form.editbox');if(ed&&ed.nhiClose)ed.nhiClose();});c.appendChild(scrim);c.appendChild(editForm(it));}
       wrap.appendChild(c); v.appendChild(wrap);
       if(s.flipped && f.classList.contains('nhi-with-image')){
         requestAnimationFrame(function(){
@@ -5516,13 +5540,13 @@ html body #planBox .sdone .pstatus{
       }
       if (sess.imagePicker) { if (e.key === 'Escape') { e.preventDefault(); sess.imagePicker = false; render(); } return; }
       if (page && (!sess.L || sess.L.id !== page)) return;
-      if (e.target && (e.target.isContentEditable || /INPUT|TEXTAREA|SELECT/.test(e.target.tagName))) { if (e.key === 'Escape' && sess.editing) { var ed=document.querySelector('#planBox form.editbox');if(ed&&ed.nhiSave)ed.nhiSave();sess.editing = false; render(); } return; }
-      if(e.key==='Escape'&&sess.editing){e.preventDefault();var ed=document.querySelector('#planBox form.editbox');if(ed&&ed.nhiSave)ed.nhiSave();sess.editing=false;render();return;}
+      if (e.target && (e.target.isContentEditable || /INPUT|TEXTAREA|SELECT/.test(e.target.tagName))) { if (e.key === 'Escape' && sess.editing) { var ed=document.querySelector('#planBox form.editbox');if(ed&&ed.nhiClose)ed.nhiClose(); } return; }
+      if(e.key==='Escape'&&sess.editing){e.preventDefault();var ed=document.querySelector('#planBox form.editbox');if(ed&&ed.nhiClose)ed.nhiClose();return;}
       if((e.key==='c'||e.key==='C')&&!e.repeat&&!document.querySelector('dialog[open]')&&$('cover').hidden&&$('setSheet').hidden){
         e.preventDefault();e.stopImmediatePropagation();
         if(sess.editing){
           var currentEditor=document.querySelector('#planBox form.editbox');
-          if(currentEditor&&currentEditor.nhiSave)currentEditor.nhiSave();
+          if(currentEditor&&currentEditor.nhiClose){currentEditor.nhiClose();return;}
           sess.editing=false;
         }else{
           sess.editing=true;sess.imagePicker=false;legendOpen=false;
