@@ -64,7 +64,7 @@
    const box=document.createElement('div');box.className='setgroup nhi-v8-height-settings';
    const h=document.createElement('h3');h.textContent='Kích thước thẻ';box.append(h);
    selectRow(box,'height','Chiều dài (chiều cao) thẻ',
-    'Các khối bên trong tự giãn cách và xuống dòng; nội dung dài sẽ làm thẻ cao thêm thay vì bị che.');
+    'Chiều cao thẻ được lưu riêng trên thiết bị này. Bạn có thể đặt chiều cao khác trên điện thoại và laptop; nội dung dài vẫn tự giãn để không bị che.');
    size.after(box);
   }
  }
