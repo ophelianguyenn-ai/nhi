@@ -29,7 +29,7 @@
   --m-bg: #E0F2FE; --m-ink: #075985; --m-edge: #7DD3FC; --m-solid: #0369A1; --solid-ink: #FFFFFF;
   --p-done: #15803D; --p-done-s: #DCFCE7; --p-today: #B45309; --p-today-s: #FEF3C7; --p-late: #B91C1C; --p-late-s: #FEE2E2; --p-next: #1D4ED8; --p-next-s: #DBEAFE; --p-fut: #5F7682; --p-fut-s: #EEF4F7;
   --x: #C2410C; --x-soft: #FFEDD5; --hard: #B91C1C; --hard-soft: #FEE2E2; --med: #A16207; --med-soft: #FEF3C7; --easy: #15803D; --easy-soft: #DCFCE7; --new: #A9C3CF;
-  --hl1: #FFE066; --hl2: #ECF9FF; --hl3: #FFF0F1; --hl4: #B2F2BB;
+  --hl1: #FFE066; --hl2: #8EDCFB; --hl3: #F7A8AD; --hl4: #B2F2BB;
   --s1: 4px; --s2: 8px; --s3: 12px; --s4: 16px; --s5: 24px; --s6: 32px;
   --r-sm: 10px; --r: 16px; --r-lg: 22px; --r-pill: 999px;
   --sh-1: 0 4px 0 var(--edge); --sh-2: 0 18px 40px rgb(20 50 63 / .16);
@@ -1086,8 +1086,8 @@ body.nhi-in-study #nhiV2TopNav,body.nhi-in-study .nhi-hide-while-flipping,body.n
 /* Approved VI–KO highlights: seven reference colors + a transparent no-fill state.
    Red is softened, and pink matches the sample image. No black or white highlights. */
 :root{
-  --nhi-pair-1:#fff0f1;--nhi-pair-2:#fb99cb;--nhi-pair-3:#fefb6a;--nhi-pair-4:#febd69;
-  --nhi-pair-5:#a7f5ac;--nhi-pair-6:#ecf9ff;--nhi-pair-7:#e1b5f4;
+  --nhi-pair-1:#f7a8ad;--nhi-pair-2:#fb99cb;--nhi-pair-3:#fefb6a;--nhi-pair-4:#febd69;
+  --nhi-pair-5:#a7f5ac;--nhi-pair-6:#8edcfb;--nhi-pair-7:#e1b5f4;
 }
 .ph.nhi-phrase-selected{
   /* Dark lettering stays readable over all seven approved color highlights. */
@@ -4922,9 +4922,9 @@ html body #planBox .sdone .pstatus{
         if(!reduceMotion()&&typeof f.animate==='function'){
           f.style.setProperty('animation','none','important');
           var exit=f.animate([
-            {opacity:1,translate:'0 0',scale:'1'},
-            {opacity:0,translate:'0 -26px',scale:'.965'}
-          ],{duration:490,easing:'cubic-bezier(.3,0,.7,1)',fill:'forwards'});
+            {opacity:1,translate:'0 0',scale:'1',filter:'blur(0px)'},
+            {opacity:.08,translate:'clamp(80px,25vw,220px) -24dvh',scale:'.16',filter:'blur(2px)'}
+          ],{duration:300,easing:'cubic-bezier(.55,0,.85,.5)',fill:'forwards'});
           exit.onfinish=finish;exit.oncancel=finish;
         }else finish();
       }
@@ -7357,6 +7357,126 @@ html body #planBox .nhi-optional-hanja-editor .nhi-hanja-toggle {
 html body #planBox .pcard .nhi-last-hard-fallback svg {
   width:100%!important;height:100%!important;display:block!important;
   overflow:visible!important;pointer-events:none!important;
+}
+</style>
+
+<style id="nhi-six-refinements-20261122">
+/* Grow the editor smoothly from the small top-right edit icon. */
+@keyframes nhi-editor-icon-expand {
+  0% {opacity:.12;translate:clamp(80px,25vw,220px) -24dvh;scale:.16;filter:blur(2px);}
+  65% {opacity:1;translate:-5px 5px;scale:1.015;filter:blur(0);}
+  100% {opacity:1;translate:0 0;scale:1;filter:blur(0);}
+}
+html body #planBox form.nhi-editor-window-v5 {
+  transform-origin:90% 0!important;
+  animation:nhi-editor-icon-expand .36s cubic-bezier(.2,.75,.3,1) both!important;
+  will-change:opacity,translate,scale!important;
+}
+@media(prefers-reduced-motion:reduce){
+ html body #planBox form.nhi-editor-window-v5 {animation:none!important;}
+}
+/* An aligned block of four controls: Khó, Lùi, Tiến, Hoàn tác. */
+html body #planBox .pcard>.prate.nhi-rating-v3.nhi-rate-undo-inline,
+html body #planBox .pcard:has(>.pfront.nhi-with-image)>.prate.nhi-rating-v3.nhi-rate-undo-inline{
+  position:relative!important;display:grid!important;
+  grid-template-rows:50px!important;
+  grid-template-columns:minmax(0,1fr) minmax(34px,44px) minmax(34px,44px) minmax(69px,88px)!important;
+  column-gap:5px!important;row-gap:0!important;
+  width:min(calc(100% - 14px),460px)!important;max-width:460px!important;
+  min-width:0!important;margin:12px auto 12px!important;padding:0!important;
+  transform:none!important;translate:none!important;
+  align-items:end!important;justify-items:stretch!important;
+  flex-wrap:nowrap!important;background:transparent!important;
+}
+html body #planBox .pcard>.prate.nhi-rate-undo-inline>button {
+  position:static!important;top:auto!important;bottom:auto!important;
+  display:flex!important;align-items:center!important;justify-content:center!important;
+  height:50px!important;min-height:50px!important;max-height:50px!important;
+  margin:0!important;padding:0 4px!important;align-self:end!important;
+  box-sizing:border-box!important;transform:none!important;translate:none!important;
+}
+html body #planBox .pcard>.prate.nhi-rate-undo-inline>.pundo {
+  grid-column:4!important;grid-row:1!important;order:3!important;
+  width:100%!important;min-width:0!important;max-width:none!important;
+  flex:0 0 auto!important;flex-basis:auto!important;
+  flex-direction:row!important;white-space:nowrap!important;
+  border-radius:12px!important;
+}
+@media(max-width:390px){
+ html body #planBox .pcard>.prate.nhi-rating-v3.nhi-rate-undo-inline {
+   grid-template-columns:minmax(0,1fr) 36px 36px 72px!important;column-gap:4px!important;
+ }
+ html body #planBox .pcard>.prate.nhi-rate-undo-inline>.pundo {font-size:10px!important;}
+}
+/* Compact Hán-Hàn panel, matching the card editor typography and spacing. */
+html body #planBox form.nhi-editor-window-v5 fieldset.nhi-optional-hanja-editor {
+  display:block!important;width:100%!important;min-width:0!important;
+  box-sizing:border-box!important;margin:12px 0 4px!important;
+  padding:12px 14px 14px!important;
+  border:1.5px solid var(--line)!important;
+  border-radius:15px!important;background:var(--surface)!important;
+  font-family:var(--ui)!important;box-shadow:none!important;
+}
+html body #planBox form.nhi-editor-window-v5 fieldset.nhi-optional-hanja-editor>legend {
+  padding:0 7px!important;margin:0 0 2px!important;
+  top:0!important;position:static!important;
+  font-family:var(--ui)!important;font-size:15px!important;
+  line-height:1.35!important;font-weight:800!important;letter-spacing:0!important;
+  color:var(--ink)!important;text-align:left!important;
+}
+html body #planBox form.nhi-editor-window-v5 .nhi-hanja-toggle {
+  display:inline-flex!important;flex-direction:row!important;
+  align-items:center!important;justify-content:flex-start!important;
+  width:auto!important;max-width:100%!important;min-height:38px!important;
+  gap:10px!important;margin:1px 0 12px!important;padding:7px 12px!important;
+  border:1px solid var(--line)!important;border-radius:12px!important;
+  background:var(--sunk)!important;color:var(--ink)!important;
+  font-family:var(--ui)!important;font-size:13px!important;font-weight:650!important;
+  line-height:1.3!important;text-transform:none!important;cursor:pointer!important;
+}
+html body #planBox form.nhi-editor-window-v5 .nhi-hanja-toggle>input[type=checkbox] {
+  appearance:none!important;-webkit-appearance:none!important;
+  display:inline-grid!important;place-content:center!important;
+  width:21px!important;height:21px!important;min-width:21px!important;
+  max-width:21px!important;min-height:21px!important;flex:0 0 21px!important;
+  margin:0!important;padding:0!important;
+  border:2px solid var(--muted)!important;border-radius:6px!important;
+  background:var(--surface)!important;box-shadow:none!important;cursor:pointer!important;
+}
+html body #planBox form.nhi-editor-window-v5 .nhi-hanja-toggle>input[type=checkbox]:checked {
+  border-color:var(--accent-d)!important;background:var(--accent-d)!important;
+}
+html body #planBox form.nhi-editor-window-v5 .nhi-hanja-toggle>input[type=checkbox]:checked::after{
+  content:"✓";font-family:system-ui!important;font-size:15px!important;font-weight:900!important;
+  color:#fff!important;line-height:1!important;
+}
+html body #planBox form.nhi-editor-window-v5 .nhi-hanja-input-grid {
+  display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;
+  gap:12px!important;align-items:start!important;width:100%!important;min-width:0!important;
+}
+html body #planBox form.nhi-editor-window-v5 .nhi-hanja-input-grid[hidden] {
+  display:none!important;
+}
+html body #planBox form.nhi-editor-window-v5 .nhi-hanja-input-grid>.nhi-hanja-field {
+  display:flex!important;flex-direction:column!important;min-width:0!important;
+  width:100%!important;max-width:none!important;gap:5px!important;
+  font-size:13px!important;line-height:1.35!important;
+  font-family:var(--ui)!important;color:var(--muted)!important;
+}
+html body #planBox form.nhi-editor-window-v5 .nhi-hanja-input-grid>.nhi-hanja-field>span {
+  font-size:13px!important;font-weight:700!important;line-height:1.35!important;
+}
+html body #planBox form.nhi-editor-window-v5 .nhi-hanja-input-grid>.nhi-hanja-field>input {
+  display:block!important;min-width:0!important;width:100%!important;max-width:none!important;
+  min-height:42px!important;padding:8px 10px!important;box-sizing:border-box!important;
+  font-size:16px!important;line-height:1.25!important;
+  border-radius:11px!important;font-family:var(--ui)!important;
+}
+html body #planBox form.nhi-editor-window-v5 .nhi-optional-hanja-editor .dictionary-links{
+  margin-top:10px!important;gap:7px!important;flex-wrap:wrap!important;
+}
+html body #planBox form.nhi-editor-window-v5 .nhi-optional-hanja-editor .hint{
+  font:400 12px/1.45 var(--ui)!important;margin-top:8px!important;
 }
 </style>
 </body></html>
