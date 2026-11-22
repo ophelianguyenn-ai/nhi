@@ -3533,10 +3533,77 @@ html body #planBox .sdone .pstatus{
     var LESSONS = [], BY_LESSON = {}, ITEMS = {}, DATES = [], loaded = false, loadErr = '';
     var ps = {}, resume = {}, resumeFull = {};
     SECS.forEach(function (k) { ps[k] = {}; });
-    try { var raw = JSON.parse(lsGet(KEY) || '{}'); SECS.forEach(function (k) { if (raw[k] && typeof raw[k] === 'object') ps[k] = raw[k]; }); if (raw.resume) resume = raw.resume; if (raw.resumeFull && typeof raw.resumeFull === 'object') resumeFull = raw.resumeFull; } catch (e) { }
+    try { var raw = JSON.parse(lsGet(KEY) || '{}'); SECS.forEach(function (k) { if (raw[k] && typeof raw[k] === 'object') ps[k] = raw[k]; }); if (raw.resume) resume = raw.resume; if (raw.resumeFull && typeof raw.resumeFull === 'object') resumeFull = raw.resume; } catch (e) { }
+    // Card font sizes belong to this device, not the synchronized card data.
+    // Keep all text styling/selection ranges synchronized as before.
+    var DEVICE_CARD_FONT_KEY='nhi-device-card-fonts-v1';
+    var DEVICE_CARD_FONT_MIGRATION='nhi-device-card-fonts-migrated-v1';
+    var deviceCardFonts={};
+    try{
+      var savedDeviceFonts=JSON.parse(lsGet(DEVICE_CARD_FONT_KEY)||'{}');
+      if(savedDeviceFonts&&typeof savedDeviceFonts==='object'&&!Array.isArray(savedDeviceFonts))deviceCardFonts=savedDeviceFonts;
+    }catch(_e){}
+    function cleanFontSize(v){var n=Number(v);return Number.isFinite(n)&&n>=12&&n<=72?n:null;}
+    function storeDeviceFonts(){lsSet(DEVICE_CARD_FONT_KEY,JSON.stringify(deviceCardFonts));}
+    function formatWithoutDeviceFonts(fmt){
+      if(!fmt||typeof fmt!=='object')return fmt;
+      var obj=Object.assign({},fmt);delete obj._sizes;delete obj._sizeEditedAt;return obj;
+    }
+    function rememberDeviceFonts(id,fmt){
+      if(!fmt||typeof fmt!=='object'||!fmt._sizes)return false;
+      var sizes={},timestamps={};
+      Object.keys(fmt._sizes).forEach(function(lang){
+        var size=cleanFontSize(fmt._sizes[lang]);
+        if(size!==null){
+          sizes[lang]=size;
+          if(fmt._sizeEditedAt)timestamps[lang]=Number(fmt._sizeEditedAt[lang])||0;
+        }
+      });
+      if(!Object.keys(sizes).length)return false;
+      var old=deviceCardFonts[id]||{};
+      deviceCardFonts[id]={
+        _sizes:Object.assign({},old._sizes||{},sizes),
+        _sizeEditedAt:Object.assign({},old._sizeEditedAt||{},timestamps)
+      };
+      storeDeviceFonts();return true;
+    }
+    // One-time migration of the sizes currently displayed on this device.
+    if(lsGet(DEVICE_CARD_FONT_MIGRATION)!=='yes'){
+      Object.keys(ps.fmt||{}).forEach(function(id){
+        var row=ps.fmt[id];
+        if(!deviceCardFonts[id]&&row&&row.v)rememberDeviceFonts(id,row.v);
+      });
+      lsSet(DEVICE_CARD_FONT_MIGRATION,'yes');
+    }
+    function setDeviceCardFont(id,lang,size){
+      var px=cleanFontSize(size);
+      if(px===null||['ko','vi','viFront','en','note'].indexOf(lang)<0)return false;
+      var next=Object.assign({},deviceCardFonts[id]||{});
+      next._sizes=Object.assign({},next._sizes||{});
+      next._sizeEditedAt=Object.assign({},next._sizeEditedAt||{});
+      next._sizes[lang]=px;next._sizeEditedAt[lang]=Date.now();
+      deviceCardFonts[id]=next;storeDeviceFonts();return true;
+    }
     function save() { var o = { resume: resume, resumeFull: resumeFull }; SECS.forEach(function (k) { o[k] = ps[k]; }); lsSet(KEY, JSON.stringify(o)); }
-    function val(sec, k) { var e = ps[sec][k]; return e ? e.v : null; }
-    function put(sec, k, v) { var e = { v: v, t: Date.now() }; ps[sec][k] = e; save(); SYNC.queue('L/' + sec + '/' + k, e); }
+    function val(sec, k) {
+      var e=ps[sec]&&ps[sec][k],stored=e?e.v:null;
+      if(sec!=='fmt')return stored;
+      var fmt=Object.assign({},formatWithoutDeviceFonts(stored)||{});
+      var local=deviceCardFonts[k];
+      if(local){
+        if(local._sizes)fmt._sizes=Object.assign({},local._sizes);
+        if(local._sizeEditedAt)fmt._sizeEditedAt=Object.assign({},local._sizeEditedAt);
+      }
+      return fmt;
+    }
+    function put(sec, k, v) {
+      if(sec==='fmt'){
+        rememberDeviceFonts(k,v);
+        v=formatWithoutDeviceFonts(v);
+      }
+      var e={v:v,t:Date.now()};ps[sec][k]=e;save();
+      SYNC.queue('L/'+sec+'/'+k,e);
+    }
     var view = 'home', sess = null, page = null;
     var lastHighlightedPair=null; // Last phrase the learner tapped in a daily lesson/card.
     var lastKey = '', anim = '', flipping = false, legendOpen = false, query = '', topicSel = '';
@@ -4774,16 +4841,10 @@ html body #planBox .sdone .pstatus{
       var it=curItem(),lang=e.detail&&e.detail.lang,size=Number(e.detail&&e.detail.size);
       if(!it||!['ko','vi','viFront','en'].includes(lang)){toast('Hãy mở thẻ cần chỉnh cỡ chữ.');return;}
       if(!Number.isFinite(size)||size<12||size>72)return;
-      var existing=val('fmt',it.id)||{};
-      var next=Object.assign({},existing,{
-        _sizes:Object.assign({},existing._sizes||{}),
-        _sizeEditedAt:Object.assign({},existing._sizeEditedAt||{})
-      });
-      next._sizes[lang]=size;
-      if(lang==='en')next._sizeEditedAt.en=Date.now();
-      put('fmt',it.id,next);
+      // Never send a font-only change to Firebase. This is device UI state.
+      setDeviceCardFont(it.id,lang,size);
       render();
-      toast('Đã lưu cỡ chữ riêng cho thẻ này.');
+      toast('Đã lưu cỡ chữ riêng trên thiết bị này.');
     });
     function editForm(it) {
       var f = el('form', 'editbox nhi-editor-window-v5');
