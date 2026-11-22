@@ -29,7 +29,7 @@
   --m-bg: #E0F2FE; --m-ink: #075985; --m-edge: #7DD3FC; --m-solid: #0369A1; --solid-ink: #FFFFFF;
   --p-done: #15803D; --p-done-s: #DCFCE7; --p-today: #B45309; --p-today-s: #FEF3C7; --p-late: #B91C1C; --p-late-s: #FEE2E2; --p-next: #1D4ED8; --p-next-s: #DBEAFE; --p-fut: #5F7682; --p-fut-s: #EEF4F7;
   --x: #C2410C; --x-soft: #FFEDD5; --hard: #B91C1C; --hard-soft: #FEE2E2; --med: #A16207; --med-soft: #FEF3C7; --easy: #15803D; --easy-soft: #DCFCE7; --new: #A9C3CF;
-  --hl1: #FFE066; --hl2: #CBE9FF; --hl3: #FFDDE3; --hl4: #B2F2BB;
+  --hl1: #FFE066; --hl2: #ECF9FF; --hl3: #FFF0F1; --hl4: #B2F2BB;
   --s1: 4px; --s2: 8px; --s3: 12px; --s4: 16px; --s5: 24px; --s6: 32px;
   --r-sm: 10px; --r: 16px; --r-lg: 22px; --r-pill: 999px;
   --sh-1: 0 4px 0 var(--edge); --sh-2: 0 18px 40px rgb(20 50 63 / .16);
@@ -1086,8 +1086,8 @@ body.nhi-in-study #nhiV2TopNav,body.nhi-in-study .nhi-hide-while-flipping,body.n
 /* Approved VI–KO highlights: seven reference colors + a transparent no-fill state.
    Red is softened, and pink matches the sample image. No black or white highlights. */
 :root{
-  --nhi-pair-1:#ffe1e3;--nhi-pair-2:#fb99cb;--nhi-pair-3:#fefb6a;--nhi-pair-4:#febd69;
-  --nhi-pair-5:#a7f5ac;--nhi-pair-6:#d5efff;--nhi-pair-7:#e1b5f4;
+  --nhi-pair-1:#fff0f1;--nhi-pair-2:#fb99cb;--nhi-pair-3:#fefb6a;--nhi-pair-4:#febd69;
+  --nhi-pair-5:#a7f5ac;--nhi-pair-6:#ecf9ff;--nhi-pair-7:#e1b5f4;
 }
 .ph.nhi-phrase-selected{
   /* Dark lettering stays readable over all seven approved color highlights. */
@@ -4943,7 +4943,14 @@ html body #planBox .sdone .pstatus{
        if(last==='hard'){
          var lastHardIcon=el('img','nhi-last-hard-icon');
          lastHardIcon.alt='Lần trước: Khó';lastHardIcon.title='Lần trước: Khó';
-         lastHardIcon.src='nhi-last-hard-question-v1.webp';
+         lastHardIcon.src='nhi-last-hard-question-v1.webp?v=20261122-repaired-v2';
+         lastHardIcon.loading='eager';
+         lastHardIcon.decoding='async';
+         lastHardIcon.onerror=function(){
+           var fallback=el('span','nhi-last-hard-fallback','🤔');
+           fallback.title='Lần trước: Khó';fallback.setAttribute('aria-label','Lần trước: Khó');
+           if(lastHardIcon.isConnected)lastHardIcon.replaceWith(fallback);
+         };
          cm.appendChild(lastHardIcon);
        } else if(last && RATE_NAME[last]) cm.appendChild(el('span','ptag r-'+last,'Lần trước: '+RATE_NAME[last]));
       var ci = el('div', 'cicons');
@@ -5057,7 +5064,31 @@ html body #planBox .sdone .pstatus{
       r.appendChild(hard);
       var nx = ibtn('parrow nhi-next-v3', 'right', function () { go(1); }, 'Thẻ sau (→)');
       nx.setAttribute('aria-label','Thẻ sau');r.appendChild(nx);
-      if (undoHistory.length) r.appendChild(btn('pundo','↶ Hoàn tác',undoDelete,undoHistory[undoHistory.length-1].type==='image'?'Khôi phục hình vừa xóa (Ctrl+Z)':'Khôi phục thẻ vừa xóa (Ctrl+Z)'));
+      if(undoHistory.length){
+        var undoButton=btn('pundo','↶ Hoàn tác',undoDelete,
+          undoHistory[undoHistory.length-1].type==='image'?'Khôi phục hình vừa xóa (Ctrl+Z)':'Khôi phục thẻ vừa xóa (Ctrl+Z)');
+        r.appendChild(undoButton);r.classList.add('nhi-rate-undo-inline');
+        // Inline-important grid overrides historical flex wrap and order rules.
+        r.style.setProperty('display','grid','important');
+        r.style.setProperty('grid-template-columns','minmax(0,1fr) minmax(32px,44px) minmax(32px,44px) minmax(68px,88px)','important');
+        r.style.setProperty('grid-template-rows','50px','important');
+        r.style.setProperty('gap','4px','important');
+        r.style.setProperty('flex-wrap','nowrap','important');
+        [[hard,1],[pv,2],[nx,3],[undoButton,4]].forEach(function(pair){
+          var button=pair[0];
+          button.style.setProperty('grid-column',String(pair[1]),'important');
+          button.style.setProperty('grid-row','1','important');
+          button.style.setProperty('min-width','0','important');
+          button.style.setProperty('max-width','none','important');
+          button.style.setProperty('width','100%','important');
+          button.style.setProperty('height','50px','important');
+          button.style.setProperty('min-height','50px','important');
+          button.style.setProperty('max-height','50px','important');
+          button.style.setProperty('flex','none','important');
+        });
+        undoButton.style.setProperty('white-space','nowrap','important');
+        undoButton.style.setProperty('font-size','clamp(10px,2.8vw,12px)','important');
+      }
       c.appendChild(r);
       // Measure the available lane after mounting: here c.clientWidth is zero.
       c.appendChild(ibtn('pdel nhi-card-corner-trash', 'trash', function () { del(it.id); anim = 'next'; saveSess(); render(); }, 'Xoá từ này khỏi danh sách (Delete)'));
@@ -7207,5 +7238,66 @@ html body #planBox .pcard:has(.pfront.nhi-with-image) .pfront>.vi-under[data-nhi
 html body #planBox .pcard .pfront>.vi-under[data-nhi-movable="vietnamese"].nhi-is-moving {
   cursor:grabbing!important;
 }
+</style>
+
+<style id="nhi-eight-ui-followup-20261122">
+@keyframes nhi-editor-slow-rise {
+  0% {opacity:0;translate:0 34px;scale:.965}
+  65% {opacity:1;translate:0 -3px;scale:1.006}
+  100% {opacity:1;translate:0 0;scale:1}
+}
+html body #planBox form.nhi-editor-window-v5 {
+  animation:nhi-editor-slow-rise .68s cubic-bezier(.19,.72,.25,1) both!important;
+  transform-origin:center top!important;
+}
+@media(prefers-reduced-motion:reduce){
+ html body #planBox form.nhi-editor-window-v5{animation:none!important;}
+}
+html body #planBox .pcard>.prate.nhi-rating-v3.nhi-rate-undo-inline {
+  display:grid!important;grid-auto-flow:column!important;
+  align-items:stretch!important;justify-items:stretch!important;
+  flex-wrap:nowrap!important;box-sizing:border-box!important;
+}
+html body #planBox .pcard .nhi-last-hard-icon,
+html body #planBox .pcard .nhi-last-hard-fallback {
+  position:static!important;transform:none!important;translate:none!important;
+  display:inline-flex!important;align-items:center!important;justify-content:center!important;
+  width:39px!important;height:36px!important;max-width:39px!important;
+  flex:0 0 39px!important;margin:0!important;padding:0!important;
+  object-fit:contain!important;border:0!important;box-shadow:none!important;
+  background:transparent!important;pointer-events:none!important;
+  font-size:25px!important;line-height:1!important;
+}
+html body #planBox .pcard>.card-top>.cmeta {
+  display:flex!important;flex:0 0 39px!important;min-width:39px!important;
+  width:39px!important;max-width:39px!important;min-height:36px!important;
+  order:0!important;align-items:center!important;justify-content:center!important;
+  position:static!important;padding:0!important;margin:0!important;
+}
+html body #planBox .pcard>.card-top>.cicons {
+  flex:1 1 auto!important;min-width:0!important;max-width:calc(100% - 45px)!important;
+  margin-left:auto!important;align-items:center!important;justify-content:flex-end!important;
+}
+html body #planBox .nhi-editor-window-v5 .nhi-rich-field,
+html body #planBox .nhi-editor-window-v5 .nhi-editor-note .nhi-rich-field {
+  white-space:pre-wrap!important;overflow-wrap:anywhere!important;
+  min-height:80px!important;line-height:1.5!important;
+}
+html body #planBox .nhi-optional-hanja-editor {
+  width:100%!important;max-width:100%!important;min-width:0!important;
+  border:1px solid var(--line)!important;border-radius:12px!important;
+  padding:12px!important;box-sizing:border-box!important;
+}
+html body #planBox .nhi-optional-hanja-editor [hidden] {display:none!important;}
+html body #planBox .nhi-optional-hanja-editor .nhi-hanja-toggle {
+  display:flex!important;align-items:center!important;gap:8px!important;
+  cursor:pointer!important;
+}
+.nhi-review-milestone-rows {display:grid;gap:7px;margin:10px 0;}
+.nhi-review-milestone-row {
+  display:grid;grid-template-columns:minmax(0,1fr) 90px 38px;
+  gap:8px;align-items:center;min-width:0;
+}
+.nhi-review-milestone-row input{width:90px!important;min-width:0!important;box-sizing:border-box!important;}
 </style>
 </body></html>
