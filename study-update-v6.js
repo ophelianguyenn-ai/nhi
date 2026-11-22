@@ -244,7 +244,7 @@ function init(){
  if(settings){
    const h=settings.querySelector('h3');
    if(h)h.textContent='Cỡ chữ của thẻ đang học';
-   const hint=make('p','voice-note','Mỗi lần chỉnh chỉ thay đổi thẻ hiện tại. Các thẻ khác giữ nguyên cỡ chữ.');
+   const hint=make('p','voice-note','Cỡ chữ của thẻ chỉ lưu trên thiết bị này. Điện thoại và laptop có thể dùng kích thước khác nhau; nội dung và tiến độ học vẫn đồng bộ.');
    settings.append(hint);
    const row=make('div','setrow nhi-global-font-row');
    const label=make('label',null,'Cỡ chữ toàn bộ thẻ (mặc định)');
@@ -264,7 +264,7 @@ function init(){
    });
    row.append(label,select);settings.prepend(row);
    const globalHint=make('p','voice-note',
-     'Chọn cỡ chữ tiếng Anh chung để áp dụng trên mọi thẻ; các chỉnh sửa riêng sau đó vẫn được giữ.');
+     'Cỡ chữ và in đậm mặc định chỉ lưu trên thiết bị này, không làm thay đổi máy khác. Các chỉnh sửa riêng sau đó vẫn được giữ.');
    row.after(globalHint);
    const defaultGroup=make('div','nhi-global-language-sizes');
    defaultGroup.append(make('h4','nhi-v8-heading','Cỡ chữ mặc định theo ngôn ngữ'));
