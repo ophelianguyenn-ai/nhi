@@ -3,7 +3,7 @@
 'use strict';
 const make=(tag,cls,text)=>{const n=document.createElement(tag);if(cls)n.className=cls;if(text!==undefined)n.textContent=text;return n;};
 function button(text,fn){const b=make('button','ghost',text);b.type='button';b.onclick=fn;return b;}
-const palettes=[['#e8f5ff','Xanh biển'],['#fce1ed','Hồng'],['#fff3c4','Vàng'],['#ffe4cc','Cam'],['#ffe7e7','Đỏ nhạt'],['#e6e0fa','Tím'],['#ddf4e4','Xanh lá']];
+const palettes=[['#f0faff','Xanh biển'],['#fce1ed','Hồng'],['#fff3c4','Vàng'],['#ffe4cc','Cam'],['#fff1f1','Đỏ nhạt'],['#e6e0fa','Tím'],['#ddf4e4','Xanh lá']];
 function icon(kind){
  const svg=kind==='headphones'?'<path d="M8 32v-7a24 24 0 0 1 48 0v7M13 25h5v29h-5a7 7 0 0 1-7-7V32a7 7 0 0 1 7-7zm38 0h-5v29h5a7 7 0 0 0 7-7V32a7 7 0 0 0-7-7z" fill="none" stroke="#00bda5" stroke-width="4"/><path d="M11 22a21 21 0 0 1 42 0" fill="none" stroke="#12bafa" stroke-width="3"/>':'<g stroke="#171717" stroke-width="3" stroke-linejoin="round"><path d="M9 45L44 10l12 12-35 35-16 4z" fill="#ffd343"/><path d="M44 10l4-4q4-4 8 0l6 6q4 4 0 8l-6 4z" fill="#ed493b"/><path d="M9 45l12 12-16 4z" fill="#f4cd7e"/><path d="M6 54l6 5-7 2z" fill="#4e4f55"/><path d="M15 48l34-34M20 53l34-34" fill="none"/></g>';
  return '<svg viewBox="0 0 68 68" aria-hidden="true" focusable="false">'+svg+'</svg>';
@@ -116,7 +116,7 @@ function markText(root,ranges){
 function formatText(root,format,lang){markText(root,format[lang]||[]);const size=Number((format._sizes||{})[lang]);if(size>=12&&size<=72)root.style.setProperty('font-size',size+'px','important');}
 /* One toolbar, one directly editable surface per language; plain text remains the storage format. */
 function editor(form,fields,saved,options={}){
- const draft=JSON.parse(JSON.stringify(saved||{}));draft._sizes=draft._sizes||{};
+ const draft=JSON.parse(JSON.stringify(saved||{}));draft._sizes=draft._sizes||{};draft._sizeEditedAt=draft._sizeEditedAt||{};
  const tools=make('div','nhi-format-tools');tools.setAttribute('role','toolbar');tools.setAttribute('aria-label','Định dạng chữ');
  const activeLabel=make('span','nhi-format-active');tools.append(activeLabel);
  const labels={ko:'Hàn',vi:'Việt',en:'Anh',note:'Ghi chú'};const views={};let active=Object.keys(fields)[0],selection={start:0,end:0},painting=false;
@@ -128,18 +128,44 @@ function editor(form,fields,saved,options={}){
  function toggle(prop,value){remember();const a=selection.start,b=selection.end;if(a===b){if(active==='note'&&prop==='color'&&options.noteColor){options.noteColor.value=options.noteColor.value===value?'#ffffff':value;views.note.style.backgroundColor=options.noteColor.value;}restore();return;}const chars=rangesToChars(active),remove=chars.slice(a,b).every(c=>c[prop]===value);for(let i=a;i<b;i++){if(remove)delete chars[i][prop];else chars[i][prop]=value;}draft[active]=charsToRanges(chars);paint(active,true);}
  const bold=button('B',()=>toggle('bold',true));bold.title='In đậm / bỏ in đậm';bold.setAttribute('aria-label',bold.title);bold.style.fontWeight='800';
  const underline=button('U',()=>toggle('underline',true));underline.title='Gạch chân / bỏ gạch chân';underline.setAttribute('aria-label',underline.title);underline.style.textDecoration='underline';tools.append(bold,underline);
- const size=make('select');size.setAttribute('aria-label','Cỡ chữ phần đang sửa');for(let i=12;i<=72;i+=2){const o=make('option',null,i+'');o.value=i;size.append(o);}size.onchange=()=>{draft._sizes[active]=Number(size.value);paint(active,true);};tools.append(size);
+ const size=make('select');size.setAttribute('aria-label','Cỡ chữ phần đang sửa');for(let i=12;i<=72;i+=2){const o=make('option',null,i+'');o.value=i;size.append(o);}size.onchange=()=>{draft._sizes[active]=Number(size.value);if(active==='en')draft._sizeEditedAt.en=Date.now();paint(active,true);};tools.append(size);
  const colors=[];for(const [color,name] of palettes){const b=button('',()=>toggle('color',color));b.className='nhi-color-swatch';b.style.background=color;b.title=name+' / bỏ màu';b.setAttribute('aria-label',b.title);tools.append(b);colors.push([b,color]);}
  tools.addEventListener('mousedown',e=>{if(e.target.closest('button'))e.preventDefault();});
  function refresh(){activeLabel.textContent=labels[active];size.value=String(draft._sizes[active]||parseInt(getComputedStyle(document.documentElement).getPropertyValue('--nhi-card-'+active))||18);const chars=rangesToChars(active).slice(selection.start,selection.end),every=(p,v)=>chars.length>0&&chars.every(c=>c[p]===v);bold.setAttribute('aria-pressed',String(every('bold',true)));underline.setAttribute('aria-pressed',String(every('underline',true)));for(const [b,c]of colors)b.setAttribute('aria-pressed',String(every('color',c)));}
+ // Insert real newline text nodes. Notes are saved as plain text, not HTML.
+ function insertPlainText(view,text){
+   const sel=window.getSelection();
+   if(!sel)return;
+   if(!sel.rangeCount||!view.contains(sel.anchorNode)){
+     view.focus();const r=document.createRange();r.selectNodeContents(view);r.collapse(false);
+     sel.removeAllRanges();sel.addRange(r);
+   }
+   const range=sel.getRangeAt(0);
+   range.deleteContents();
+   const node=document.createTextNode(String(text).replace(/\r\n?/g,'\n'));
+   range.insertNode(node);range.setStartAfter(node);range.collapse(true);
+   sel.removeAllRanges();sel.addRange(range);
+   view.dispatchEvent(new Event('input',{bubbles:true}));
+   remember();
+ }
  for(const [lang,field]of Object.entries(fields)){
   const view=make('div','field nhi-rich-field');views[lang]=view;view.contentEditable='true';view.setAttribute('role','textbox');view.setAttribute('aria-multiline','true');view.setAttribute('aria-label',labels[lang]);view.dataset.language=lang;view.lang=lang==='note'?'ko':lang;view.spellcheck=false;
   field.hidden=true;field.setAttribute('aria-hidden','true');field.after(view);
   view.addEventListener('focus',()=>{if(active!==lang){active=lang;selection={start:0,end:0};}refresh();});
   view.addEventListener('keyup',remember);view.addEventListener('pointerup',remember);
   view.addEventListener('input',()=>{active=lang;const old=field.value,text=view.textContent.replace(/\r/g,'');let prefix=0;while(prefix<old.length&&prefix<text.length&&old[prefix]===text[prefix])prefix++;let suffix=0;while(suffix<old.length-prefix&&suffix<text.length-prefix&&old[old.length-1-suffix]===text[text.length-1-suffix])suffix++;const chars=rangesToChars(lang),insert=text.length-prefix-suffix,style=chars[Math.max(0,prefix-1)]||{};chars.splice(prefix,old.length-prefix-suffix,...Array.from({length:insert},()=>({...style})));draft[lang]=charsToRanges(chars);field.value=text;remember();});
-  view.addEventListener('keydown',e=>{if((e.ctrlKey||e.metaKey)&&['b','u'].includes(e.key.toLowerCase())){e.preventDefault();remember();toggle(e.key.toLowerCase()==='b'?'bold':'underline',true);}if(e.key==='Enter'){e.preventDefault();document.execCommand('insertText',false,'\n');}});
-  view.addEventListener('paste',e=>{e.preventDefault();document.execCommand('insertText',false,e.clipboardData.getData('text/plain'));});
+  view.addEventListener('keydown',e=>{
+    if((e.ctrlKey||e.metaKey)&&['b','u'].includes(e.key.toLowerCase())){
+      e.preventDefault();remember();toggle(e.key.toLowerCase()==='b'?'bold':'underline',true);
+    }
+    if(e.key==='Enter'){e.preventDefault();insertPlainText(view,'\n');}
+   });
+   view.addEventListener('beforeinput',e=>{
+     if(e.inputType==='insertParagraph'||e.inputType==='insertLineBreak'){
+       e.preventDefault();insertPlainText(view,'\n');
+     }
+   });
+  view.addEventListener('paste',e=>{e.preventDefault();insertPlainText(view,e.clipboardData.getData('text/plain'));});
   paint(lang,false);
  }
  if(options.noteColor&&views.note)views.note.style.backgroundColor=options.noteColor.value;
