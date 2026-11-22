@@ -161,15 +161,9 @@ html body #planBox .pcard .card-illustration:focus-within .nhi-image-move-4d{
   --nhi-effective-note:calc(15px * var(--nhi-global-font-scale));
   --nhi-card-font-multiplier:var(--nhi-global-font-scale);
 }
-html body #planBox .pcard[data-nhi-font-custom="true"]{
-  --nhi-effective-ko:36px;
-  --nhi-effective-vi-front:26px;
-  --nhi-effective-vi-back:22px;
-  --nhi-effective-en:22px;
-  --nhi-effective-ipa:19px;
-  --nhi-effective-note:15px;
-  --nhi-card-font-multiplier:1;
-}
+/* Do not reset ALL global language sizes when a card has one local override.
+   Per-item inline font sizes remain authoritative only for their own language;
+   English/global IPA continue to inherit the current global settings. */
 html body #planBox .pcard .nhi-ko-line>.answer.ko{
   font-size:var(--nhi-effective-ko)!important;
 }
@@ -439,15 +433,13 @@ html body #planBox .pcard:has(>.pfront.nhi-with-image.nhi-comparison-open)>.prat
   flex-shrink:0!important;
 }
 
-/* Nov 22 — independently adjustable GLOBAL default typography.
-   Saved per-item custom formatting always takes precedence. */
-html body.nhi-global-card-bold #planBox .pcard:not([data-nhi-font-custom="true"]) .answer.ko,
-html body.nhi-global-card-bold #planBox .pcard:not([data-nhi-font-custom="true"]) .prompt,
-html body.nhi-global-card-bold #planBox .pcard:not([data-nhi-font-custom="true"]) .vi-under,
-html body.nhi-global-card-bold #planBox .pcard:not([data-nhi-font-custom="true"]) .nhi-card-note,
-html body.nhi-global-card-bold #planBox .pcard:not([data-nhi-font-custom="true"]) .nhi-en-translation,
-html body.nhi-global-card-bold #planBox .pcard:not([data-nhi-font-custom="true"]) .nhi-comparison-choice-text,
-html body.nhi-global-card-bold #planBox .pcard:not([data-nhi-font-custom="true"]) .nhi-comparison-choice-text .nhi-en-word{
+/* The global bold switch is English-only, including the comparison choices.
+   Korean and Vietnamese retain their independently chosen weights. */
+html body.nhi-global-card-bold #planBox .pcard .nhi-english-v5 .nhi-en-translation,
+html body.nhi-global-card-bold #planBox .pcard .nhi-english-v5 .nhi-en-translation .nhi-en-word,
+html body.nhi-global-card-bold #planBox .pcard .nhi-english-v5 .nhi-en-choice,
+html body.nhi-global-card-bold #planBox .pcard .nhi-english-v5 .nhi-comparison-choice-text,
+html body.nhi-global-card-bold #planBox .pcard .nhi-english-v5 .nhi-comparison-choice-text .nhi-en-word{
   font-weight:800!important;
 }
 html body #planBox .pcard .pfront .nhi-card-details>.nhi-english-v5,
