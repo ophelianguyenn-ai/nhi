@@ -438,3 +438,34 @@ html body #planBox .pcard:has(>.pfront.nhi-with-image.nhi-comparison-open)>.prat
   position:relative!important;
   flex-shrink:0!important;
 }
+
+/* Nov 22 — independently adjustable GLOBAL default typography.
+   Saved per-item custom formatting always takes precedence. */
+html body.nhi-global-card-bold #planBox .pcard:not([data-nhi-font-custom="true"]) .answer.ko,
+html body.nhi-global-card-bold #planBox .pcard:not([data-nhi-font-custom="true"]) .prompt,
+html body.nhi-global-card-bold #planBox .pcard:not([data-nhi-font-custom="true"]) .vi-under,
+html body.nhi-global-card-bold #planBox .pcard:not([data-nhi-font-custom="true"]) .nhi-card-note,
+html body.nhi-global-card-bold #planBox .pcard:not([data-nhi-font-custom="true"]) .nhi-en-translation,
+html body.nhi-global-card-bold #planBox .pcard:not([data-nhi-font-custom="true"]) .nhi-comparison-choice-text,
+html body.nhi-global-card-bold #planBox .pcard:not([data-nhi-font-custom="true"]) .nhi-comparison-choice-text .nhi-en-word{
+  font-weight:800!important;
+}
+html body #planBox .pcard .pfront .nhi-card-details>.nhi-english-v5,
+html body #planBox .pcard .pfront>.nhi-english-v5,
+html body #planBox .pcard .pfront.nhi-with-image>.nhi-card-details>.nhi-english-v5{
+  max-width:min(100%,620px)!important;
+}
+html body #planBox .pcard .pfront.nhi-with-image .nhi-card-details>.nhi-english-v5{
+  max-width:min(100%,590px)!important;
+}
+html body #planBox .pcard .nhi-english-v5 .nhi-en-main{
+  width:auto!important;
+  min-width:0!important;
+  max-width:100%!important;
+  flex-wrap:wrap!important;
+  text-align:left!important;
+}
+html body #planBox .pcard .nhi-english-v5 .nhi-en-translation{
+  min-width:0!important;
+  max-width:100%!important;
+}
