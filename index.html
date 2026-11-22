@@ -4443,7 +4443,7 @@ html body #planBox .sdone .pstatus{
     }
 
     function startLesson(L) {
-      var cur = current(L), rs = (resume[L.id] || []).filter(alive);
+      var cur = current(L), rs = (Array.isArray(resume[L.id]) ? resume[L.id] : []).filter(alive);
       var saved = resumeFull[L.id], q, restored = null;
       if (saved && Array.isArray(saved.queue) && saved.queue.some(alive)) {
         // Preserve previously visited cards, their order and the paused index.
@@ -4794,7 +4794,7 @@ html body #planBox .sdone .pstatus{
       var row = el('div', 'prow nhi-review-stage-row'), cur = current(L);
       row.appendChild(statusLine(L));
       hd.appendChild(row);
-      var rs = (resume[L.id] || []).filter(alive);
+      var rs = (Array.isArray(resume[L.id]) ? resume[L.id] : []).filter(alive);
       var pendingSaved=resumeFull[L.id];
       var hasPending=!!(pendingSaved&&pendingSaved.recordOnDone&&!pendingSaved.recorded);
       var alreadyStudied=(val('done',L.id)||[]).length>0;
@@ -8004,4 +8004,54 @@ document.addEventListener('change',e=>{
 })();
 
 </script>
+
+<style id="nhi-nov13-calendar-and-english-space-20261122">
+/* 13 Nov: a recovered lesson must use the SAME grid slots as a full card. */
+html body #planBox .nhi-day-separated .nhi-lesson-white.nhi-lesson-recovered{
+  display:grid!important;
+  grid-template-columns:32px minmax(0,1fr) 78px!important;
+  grid-template-areas:"ring detail button" "next next next"!important;
+  gap:7px!important;
+  align-items:center!important;
+  min-height:0!important;height:auto!important;
+  width:100%!important;min-width:0!important;
+  box-sizing:border-box!important;
+}
+html body #planBox .nhi-lesson-recovered>.nhi-recovered-ring{
+  grid-area:ring!important;
+  display:flex!important;align-items:center!important;justify-content:center!important;
+  width:32px!important;height:32px!important;
+  border:2px solid #9adace!important;border-radius:50%!important;
+  background:#e7f8f2!important;color:#0c8279!important;
+}
+html body #planBox .nhi-lesson-recovered>.nhi-compact-copy{
+  grid-area:detail!important;
+  display:flex!important;flex-direction:column!important;
+  min-width:0!important;width:100%!important;
+  overflow-wrap:normal!important;word-break:normal!important;
+}
+html body #planBox .nhi-lesson-recovered>.nhi-compact-copy>.ptitle{
+  display:block!important;-webkit-line-clamp:unset!important;
+  overflow-wrap:break-word!important;word-break:normal!important;
+  max-width:100%!important;white-space:normal!important;
+}
+html body #planBox .nhi-lesson-recovered>.primary{
+  grid-area:button!important;min-width:0!important;
+  width:100%!important;padding:6px 7px!important;
+}
+html body #planBox .nhi-lesson-recovered>.nhi-next-review{
+  grid-area:next!important;min-width:0!important;width:100%!important;
+  display:flex!important;gap:8px!important;
+}
+/* Two space widths between English meaning and IPA when on one line.
+   Keep a comfortable matching visual gap if they wrap to separate lines. */
+html body #planBox .pcard .nhi-english-v5>.nhi-en-head>.nhi-en-main{
+  column-gap:2ch!important;
+  row-gap:.65em!important;
+}
+html body #planBox .pcard .nhi-english-v5.nhi-ipa-below>.nhi-en-head>.nhi-en-main{
+  column-gap:2ch!important;
+  row-gap:.65em!important;
+}
+</style>
 </body></html>
