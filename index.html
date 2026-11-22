@@ -596,7 +596,7 @@ section:not([hidden]) > .quiz, section:not([hidden]) > #cardWrap, .list > .row:n
 }
 </style>
 
-<script src="nhi-chat-voice-v1.js?v=20261117"></script><script src="hanja-v9.js?v=12"></script><script src="hanja-extra-v12.js"></script><script src="card-images-v11.js?v=20261122-image-layout-notify-v8"></script><script src="nhi-google-images-v1.js?v=20261114-study-v7"></script><script src="nhi-hard-minimal-v1.js?v=20261120-in-card-v2"></script><script src="nhi-verified-pairs-20261117.js?v=1"></script><script src="nhi-daily-pairs.js?v=20261119-micro-v1"></script><script src="nhi-all-lesson-pairs-v6.js?v=20261121-refined-51"></script><script src="nhi-phrases-v5.js?v=20261121-refined"></script><script src="nhi-english-data-v6.js?v=20261113-reviewed-173"></script><script src="nhi-english-v5.js?v=20261122-compare-font-left-v17"></script><script src="recorded-voices-v11.js?v=20261119-banmai-injoon-daily"></script>
+<script src="nhi-chat-voice-v1.js?v=20261117"></script><script src="hanja-v9.js?v=12"></script><script src="hanja-extra-v12.js"></script><script src="card-images-v11.js?v=20261122-image-layout-notify-v8"></script><script src="nhi-google-images-v1.js?v=20261114-study-v7"></script><script src="nhi-hard-minimal-v1.js?v=20261120-in-card-v2"></script><script src="nhi-verified-pairs-20261117.js?v=1"></script><script src="nhi-daily-pairs.js?v=20261119-micro-v1"></script><script src="nhi-all-lesson-pairs-v6.js?v=20261121-refined-51"></script><script src="nhi-phrases-v5.js?v=20261121-refined"></script><script src="nhi-english-data-v6.js?v=20261113-reviewed-173"></script><script src="nhi-english-v5.js?v=20261122-expand-to-text-v18"></script><script src="recorded-voices-v11.js?v=20261119-banmai-injoon-daily"></script>
 <script src="qrcode.js" defer></script>
 <link rel="stylesheet" href="nhi-seven-fixes-20261117.css?v=1"><link rel="stylesheet" href="refresh-v9.css?v=13"><link rel="stylesheet" href="study-enhancements-v13.css?v=14"><link rel="stylesheet" href="nhi-updates-v1.css?v=1"><link rel="stylesheet" href="nhi-ai-resize-v2.css?v=1"><link rel="stylesheet" href="nhi-study-motion-v3.css?v=3"><link rel="stylesheet" href="nhi-interface-v4.css?v=4"><link rel="stylesheet" href="nhi-interface-v5.css?v=20261113-rollback-stable-v1"><link rel="stylesheet" href="nhi-seasons-v1.css?v=20261113-cartoon-soft-1">
 <link rel="stylesheet" href="nhi-living-garden-v1.css?v=20261113-cartoon-butterflies-v1">
@@ -1364,7 +1364,7 @@ html body #planBox .sdone .pstatus{
         </div>
       </div>
       <p class="keys touch-keys">Vuốt trái / phải trên thẻ để chuyển thẻ · chạm chỗ trống để lật thẻ · chạm vào chữ để tô sáng</p>
-      <p class="keys desk-keys">Phím tắt: <kbd>Space</kbd> lật thẻ · <kbd>←</kbd> <kbd>→</kbd> chuyển thẻ · <kbd>1</kbd> Khó · <kbd>2</kbd> Vừa · <kbd>3</kbd> Dễ · <kbd>X</kbd> đánh dấu học lại</p>
+      <p class="keys desk-keys">Phím tắt: <kbd>Space</kbd> lật thẻ · <kbd>←</kbd> <kbd>→</kbd> chuyển thẻ · <kbd>S</kbd> Khó · <kbd>2</kbd> Vừa · <kbd>3</kbd> Dễ · <kbd>X</kbd> đánh dấu học lại</p>
     </div>
     <div class="empty" id="cardEmpty" hidden>
       <p>Không có thẻ nào khớp bộ lọc này.</p>
@@ -4809,9 +4809,7 @@ html body #planBox .sdone .pstatus{
       v.appendChild(el('p', 'stitle', s.title));
       var wrap = el('div', 'pcardwrap'), c = el('div', 'card pcard'); c.dataset.item=it.id; c.style.setProperty('--tc', topicColor(it.topic));
       var m = el('div', 'card-top'), cm = el('div', 'cmeta');
-      cm.appendChild(ttag(it.topic));
       var last = val('rate', it.id); if (last && RATE_NAME[last]) cm.appendChild(el('span', 'ptag r-' + last, 'Lần trước: ' + RATE_NAME[last]));
-      m.appendChild(el('span', 'kind', (it.type === 'w' ? 'Từ vựng' : 'Câu') + (it.type === 'w' && it.n > 1 ? ' · gặp ' + it.n + ' lần' : '') + (it.edited ? ' · đã sửa' : '')));
       var ci = el('div', 'cicons');
       ci.appendChild(ibtn('iconbtn sm ai', 'spark', function () { askAi(); }, 'Hỏi AI về thẻ này (A)'));
       var photoTapTimer = null;
@@ -5400,7 +5398,7 @@ html body #planBox .sdone .pstatus{
       if (e.key === 'ArrowRight') { e.preventDefault(); go(1); }
       else if (e.key === 'ArrowLeft') { e.preventDefault(); go(-1); }
       else if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); flip(); }
-      else if (e.key === '1') {e.preventDefault();rate('hard');}
+      else if (e.key === 's' || e.key === 'S') {e.preventDefault();rate('hard');}
       else if (e.key === '2') {e.preventDefault();rate('mid');}
       else if (e.key === 'f' || e.key === 'F') { e.preventDefault(); setFocus(!document.body.classList.contains('focus')); render(); }
       else if (e.key === 'a' || e.key === 'A') { e.preventDefault(); askAi(); }
@@ -5647,7 +5645,7 @@ html body #planBox .sdone .pstatus{
     if (e.key === ' ') { e.preventDefault(); flip(); }
     else if (e.key === 'ArrowRight') {e.preventDefault();go(1);}
     else if (e.key === 'ArrowLeft') {e.preventDefault();go(-1);}
-    else if (e.key === '1') rateCurrent('h');
+    else if (e.key === 's' || e.key === 'S') rateCurrent('h');
     else if (e.key === '2') rateCurrent('m');
     else if (e.key === '3') rateCurrent('e');
     else if (e.key === 'x' || e.key === 'X') toggleXCurrent();
@@ -6356,7 +6354,7 @@ html body #planBox .sdone .pstatus{
 <script src="backup-portable-v1.js"></script>
 <script src="nhi-ai-resize-v2.js?v=20261114-study-v7"></script>
 <script src="nhi-fireworks-v3.js?v=3"></script>
-<script src="study-update-v6.js?v=20261121-master-font-v3"></script>
+<script src="study-update-v6.js?v=20261122-global-fonts-bold-v4"></script>
 <script src="nhi-longpress-dictionary-v1.js?v=20261117"></script>
 <script src="nhi-interface-v5.js?v=20261114"></script>
 <script src="nhi-november-v15.js?v=20261114-ux-v17"></script>
@@ -6918,5 +6916,5 @@ html body #planBox .pcard:has(.pfront.nhi-with-image)>.prate.nhi-rating-v3{
 })();
 </script>
 
-<link rel="stylesheet" href="nhi-card-fit-fixes-20261121.css?v=20261122-compare-autofit-x-sync-v5">
+<link rel="stylesheet" href="nhi-card-fit-fixes-20261121.css?v=20261122-all-fonts-auto-English-v6">
 </body></html>
