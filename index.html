@@ -4848,6 +4848,8 @@ html body #planBox .sdone .pstatus{
     });
     function editForm(it) {
       var f = el('form', 'editbox nhi-editor-window-v5');
+      // Old CSS animations must not compete with the shared Settings transition.
+      f.style.setProperty('animation','none','important');
       f.appendChild(ibtn('iconbtn sm nhi-editor-close-v5','x',function(){closeEditor();},'Đóng và tự lưu chỉnh sửa thẻ'));
       var savedHj = val('hj', it.id), initialHj = lookupHanja(it.ko, it.id);
       var hanInput,readingInput,hanToggle,hanjaLinks,hanjaInputGrid,section=null,syncHanjaEditor=function(){};
