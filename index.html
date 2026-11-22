@@ -2090,6 +2090,11 @@ html body #planBox .sdone .pstatus{
   try { var savedUi = JSON.parse(lsGet(UI_KEY) || '{}'); UI_KEYS.forEach(function (k) { if (savedUi[k] !== undefined) state[k] = savedUi[k]; }); } catch (e) { }
   if (state.deck !== 'all' && !DECK_NAME[state.deck]) state.deck = 'all';
   if (MODES.indexOf(state.mode) < 0) state.mode = 'plan';
+  // Explicit schedule links win over a stale saved UI mode, without changing
+  // the underlying learning progress or synchronized content.
+  var explicitCalendarRoute=/^#\/(?:lich(?:-hoc)?(?:\/(?:chu-de|thang))?|hom-nay|den-han|calendar)$/.test(location.hash||'');
+  var forceCalendarRoute=/(?:^|[?&])nhi_force_calendar=1(?:&|$)/.test(location.search||'');
+  if(explicitCalendarRoute||forceCalendarRoute)state.mode='plan';
   if (!(state.rate in { slow: 1, mid: 1, fast: 1 })) state.rate = 'mid';
   function saveUi() { var o = {}; UI_KEYS.forEach(function (k) { o[k] = state[k]; }); lsSet(UI_KEY, JSON.stringify(o)); }
 
@@ -6342,6 +6347,19 @@ html body #planBox .sdone .pstatus{
       $('menuDaily').addEventListener('click', function () { menu(false); PLAN.openDailyCreator(); });
       $('menuCover').addEventListener('click', function () { menu(false); location.hash='#/bia'; cover(true); });
       $('brandFaceBtn').addEventListener('click', function () { menu(false); location.hash='#/bia'; cover(true); });
+      // A calendar fallback is accessible even when the main calendar has a
+      // device-specific rendering issue. Does not reset user data.
+      var recoveryLink=document.getElementById('nhiCalendarRecoveryLink');
+      if(!recoveryLink){
+        recoveryLink=document.createElement('a');
+        recoveryLink.id='nhiCalendarRecoveryLink';
+        recoveryLink.href='lich-hoc-khoi-phuc.html';
+        recoveryLink.textContent='🗓 Lịch dự phòng';
+        recoveryLink.title='Mở lịch độc lập nếu lịch học trong ứng dụng không hiển thị';
+        recoveryLink.style.cssText='display:inline-flex;align-items:center;padding:7px 10px;border:1px solid #c9e9e5;border-radius:10px;color:#177d78;background:#eefbf8;text-decoration:none;font-size:12px;font-weight:700';
+        var navigationList=$('menuList');
+        if(navigationList)navigationList.appendChild(recoveryLink);
+      }
       $('brandBtn').addEventListener('click', function () {
         menu(false);SHELL.cover(false);
         if(location.hash==='#/lich-hoc'){
