@@ -151,6 +151,20 @@ function editor(form,fields,saved,options={}){
  for(const [lang,field]of Object.entries(fields)){
   const view=make('div','field nhi-rich-field');views[lang]=view;view.contentEditable='true';view.setAttribute('role','textbox');view.setAttribute('aria-multiline','true');view.setAttribute('aria-label',labels[lang]);view.dataset.language=lang;view.lang=lang==='note'?'ko':lang;view.spellcheck=false;
   field.hidden=true;field.setAttribute('aria-hidden','true');field.after(view);
+  if(lang==='en'){
+    // The visible English editor is contenteditable, not the hidden textarea.
+    // Preserve rich-text selection while matching the outer height of IPA.
+    for(const prop of ['height','min-height','max-height','block-size','min-block-size','max-block-size'])
+      view.style.setProperty(prop,'44px','important');
+    view.style.setProperty('box-sizing','border-box','important');
+    view.style.setProperty('overflow-x','auto','important');
+    view.style.setProperty('overflow-y','hidden','important');
+    view.style.setProperty('white-space','pre','important');
+    view.style.setProperty('overflow-wrap','normal','important');
+    view.style.setProperty('padding','8px 11px','important');
+    view.style.setProperty('line-height','24px','important');
+    view.style.setProperty('resize','none','important');
+  }
   view.addEventListener('focus',()=>{if(active!==lang){active=lang;selection={start:0,end:0};}refresh();});
   view.addEventListener('keyup',remember);view.addEventListener('pointerup',remember);
   view.addEventListener('input',()=>{active=lang;const old=field.value,text=view.textContent.replace(/\r/g,'');let prefix=0;while(prefix<old.length&&prefix<text.length&&old[prefix]===text[prefix])prefix++;let suffix=0;while(suffix<old.length-prefix&&suffix<text.length-prefix&&old[old.length-1-suffix]===text[text.length-1-suffix])suffix++;const chars=rangesToChars(lang),insert=text.length-prefix-suffix,style=chars[Math.max(0,prefix-1)]||{};chars.splice(prefix,old.length-prefix-suffix,...Array.from({length:insert},()=>({...style})));draft[lang]=charsToRanges(chars);field.value=text;remember();});
