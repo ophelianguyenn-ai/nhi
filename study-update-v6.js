@@ -183,6 +183,7 @@ function init(){
  const controls={};
  const globalKey='nhi-card-global-font-scale-v1';
  const globalTypographyKey='nhi-card-global-language-fonts-v1';
+ const enRevisionKey='nhi-card-global-en-revision-v1';
  const allowable=[.75,.85,1,1.1,1.2,1.3,1.5];
  let globalScale=1;
  try{const value=Number(localStorage.getItem(globalKey));if(allowable.includes(value))globalScale=value;}catch(e){}
@@ -237,7 +238,7 @@ function init(){
    });
    row.append(label,select);settings.prepend(row);
    const globalHint=make('p','voice-note',
-     'Các mức chữ chung áp dụng cho thẻ chưa chỉnh riêng. Thẻ đã tùy chỉnh giữ nguyên cỡ chữ.');
+     'Chọn cỡ chữ tiếng Anh chung để áp dụng trên mọi thẻ; các chỉnh sửa riêng sau đó vẫn được giữ.');
    row.after(globalHint);
    const defaultGroup=make('div','nhi-global-language-sizes');
    defaultGroup.append(make('h4','nhi-v8-heading','Cỡ chữ mặc định theo ngôn ngữ'));
@@ -258,7 +259,10 @@ function init(){
      choice.value=String(globalTypography[key]);
      choice.addEventListener('change',()=>{
        globalTypography[key]=Number(choice.value);
-       try{localStorage.setItem(globalTypographyKey,JSON.stringify(globalTypography));}catch(e){}
+       try{
+         localStorage.setItem(globalTypographyKey,JSON.stringify(globalTypography));
+         if(key==='en')localStorage.setItem(enRevisionKey,String(Date.now()));
+       }catch(e){}
        applyGlobal();
        document.dispatchEvent(new Event('nhi:card-font-selected'));
      });
