@@ -5441,29 +5441,47 @@ html body #planBox .sdone .pstatus{
       }
       if(s.editing){var rich=c.querySelector('[data-language=vi]');if(rich)rich.focus();}
       if (window.NHI_HARD_MASCOT && window.NHI_HARD_MASCOT.sync) window.NHI_HARD_MASCOT.sync(c);
-      // The independent study-card animation is NOT controlled by the
-      // unrelated "Biểu cảm và pháo giấy" switch.
-      if (c.animate && !reduceMotion() && anim && window.NHI_WINDOW_FX) {
-        if((anim==='next'||anim==='prev')&&window.NHI_WINDOW_FX.navigate)
-          window.NHI_WINDOW_FX.navigate(c,anim==='prev'?-1:1);
-        else window.NHI_WINDOW_FX.open(c,'card');
-      } else if (c.animate && !reduceMotion() && anim) {
-        var ease = 'cubic-bezier(.16,.78,.23,1)';
-        if (anim === 'flip') {
-          c.animate([
-            { opacity: .2, transform: 'perspective(1100px) translateY(12px) scale(.982)' },
-            { opacity: 1, transform: 'perspective(1100px) translateY(0) scale(1)' }
-          ], { duration: 350, easing: ease });
-        } else if (anim === 'next' || anim === 'prev') {
-          var sign = anim === 'next' ? 1 : -1;
-          c.animate([
-            { opacity: .08, transform: 'perspective(1100px) translateX(' + (sign * 54) + 'px) rotateY(' + (sign * -7) + 'deg) scale(.947)', filter: 'blur(2px)' },
-            { offset: .72, opacity: 1, transform: 'perspective(1100px) translateX(' + (sign * -5) + 'px) rotateY(' + (sign * .8) + 'deg) scale(1.008)', filter: 'blur(0)' },
-            { opacity: 1, transform: 'perspective(1100px) translateX(0) rotateY(0deg) scale(1)', filter: 'blur(0)' }
-          ], { duration: 620, easing: ease });
-        }
+      // IMPORTANT: renderPage() builds its .ppage OUTSIDE the document, calls
+      // renderSession(), and only then appends .ppage to #planBox. Calling the
+      // animation here synchronously made NHI_WINDOW_FX.play() skip because
+      // c.isConnected===false. Always wait until the card is actually mounted.
+      var motionToPlay=anim;
+      anim='';
+      if(motionToPlay && !reduceMotion() && typeof c.animate==='function'){
+        requestAnimationFrame(function(){
+          // An intervening render may have replaced this card: never animate a
+          // stale detached node or cause a flash on the wrong vocabulary card.
+          if(!c.isConnected||!document.getElementById('planBox')?.contains(c))return;
+          var direction=motionToPlay==='prev'?-1:1;
+          try{
+            if(window.NHI_WINDOW_FX){
+              if((motionToPlay==='next'||motionToPlay==='prev')&&
+                 typeof window.NHI_WINDOW_FX.navigate==='function'){
+                window.NHI_WINDOW_FX.navigate(c,direction);
+              }else window.NHI_WINDOW_FX.open(c,'card');
+            }else{
+              // Preserve the original visible 3D slide as a fallback.
+              var ease='cubic-bezier(.16,.78,.23,1)';
+              if(motionToPlay==='flip'){
+                c.animate([
+                  {opacity:.2,transform:'perspective(1100px) translateY(12px) scale(.982)'},
+                  {opacity:1,transform:'perspective(1100px) translateY(0) scale(1)'}
+                ],{duration:350,easing:ease});
+              }else if(motionToPlay==='next'||motionToPlay==='prev'){
+                c.animate([
+                  {opacity:.08,transform:'perspective(1100px) translateX('+(direction*54)+'px) rotateY('+(direction*-7)+'deg) scale(.947)',filter:'blur(2px)'},
+                  {offset:.72,opacity:1,transform:'perspective(1100px) translateX('+(direction*-5)+'px) rotateY('+(direction*.8)+'deg) scale(1.008)',filter:'blur(0)'},
+                  {opacity:1,transform:'perspective(1100px) translateX(0) rotateY(0deg) scale(1)',filter:'blur(0)'}
+                ],{duration:620,easing:ease});
+              }
+            }
+            c.dataset.nhiMotionMounted='true';
+            c.dataset.nhiMotionKind=motionToPlay;
+          }catch(motionErr){
+            console.warn('Nhi: transition failed after card mount',motionErr);
+          }
+        });
       }
-      anim = '';
       if (!s.flipped && !s.editing && !s.imagePicker && s.spoken !== s.pos) { s.spoken = s.pos; speak(it.vi, 'vi-VN'); }
     }
     function flip() {
