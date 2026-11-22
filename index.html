@@ -29,7 +29,7 @@
   --m-bg: #E0F2FE; --m-ink: #075985; --m-edge: #7DD3FC; --m-solid: #0369A1; --solid-ink: #FFFFFF;
   --p-done: #15803D; --p-done-s: #DCFCE7; --p-today: #B45309; --p-today-s: #FEF3C7; --p-late: #B91C1C; --p-late-s: #FEE2E2; --p-next: #1D4ED8; --p-next-s: #DBEAFE; --p-fut: #5F7682; --p-fut-s: #EEF4F7;
   --x: #C2410C; --x-soft: #FFEDD5; --hard: #B91C1C; --hard-soft: #FEE2E2; --med: #A16207; --med-soft: #FEF3C7; --easy: #15803D; --easy-soft: #DCFCE7; --new: #A9C3CF;
-  --hl1: #FFE066; --hl2: #A5D8FF; --hl3: #FFB3D1; --hl4: #B2F2BB;
+  --hl1: #FFE066; --hl2: #CBE9FF; --hl3: #FFB3D1; --hl4: #B2F2BB;
   --s1: 4px; --s2: 8px; --s3: 12px; --s4: 16px; --s5: 24px; --s6: 32px;
   --r-sm: 10px; --r: 16px; --r-lg: 22px; --r-pill: 999px;
   --sh-1: 0 4px 0 var(--edge); --sh-2: 0 18px 40px rgb(20 50 63 / .16);
@@ -4809,7 +4809,13 @@ html body #planBox .sdone .pstatus{
       v.appendChild(el('p', 'stitle', s.title));
       var wrap = el('div', 'pcardwrap'), c = el('div', 'card pcard'); c.dataset.item=it.id; c.style.setProperty('--tc', topicColor(it.topic));
       var m = el('div', 'card-top'), cm = el('div', 'cmeta');
-      var last = val('rate', it.id); if (last && RATE_NAME[last]) cm.appendChild(el('span', 'ptag r-' + last, 'Lần trước: ' + RATE_NAME[last]));
+      var last = val('rate', it.id);
+       if(last==='hard'){
+         var lastHardIcon=el('img','nhi-last-hard-icon');
+         lastHardIcon.alt='Lần trước: Khó';lastHardIcon.title='Lần trước: Khó';
+         lastHardIcon.src='data:image/webp;base64,UklGRmwIAABXRUJQVlA4IGAIAABwJQCdASpbAIAAPp1Em0ilpCKiLLUdyLATiUAaAsqru9SqRZ4MfK2l/lfVftteen00TeZsBl7KP9ty+Odrm7nhYxGVDAC9hb1Zyj+q/6rwndQ7vJ5n3/F46Dyf2AP5t/Z//B/d/xm+Nn/n/0vn3+if/D/j/gN/Wf/m+uZ7OvRpUeAlVyIqLS2YGnPBIY/Ezats7ZUqWfTpUbNY2zHxQkuerQxQL0szacIhHM4QW1NsTcqleZCzn2gThfLC3IDghS6iC77vUl+Ljr3kCRT8+6clwYlMnjkOy7bwJjQKExWwrdadjgzzoGF5GTci69dxrD/AQDVU88GHMyw+E0Dg70SIvrlJKz+LWaauKwGD23+KHXvD18l0/hCgc0iRKjiekDtYN0gGVzdziPmqg68q8quW/QYHkAD++l4h9aGTAF06Z5wA8LLNCtb+0o22Xx/yXXloxYA/UxqD/uLzUcy2NHolP2+OcXOXtI8lIzJjhXDerw+SYhcY6DeVVLtlhK0re9RlqgdzrseWeHsUF5KfrcMt1wUdlbTQ9NIi+NkY8bGdRw3sfC9/l+lUgmH7HhQp3yTx4usXjyNur9LAVPJZ7ETk0P64mXX8MW+oBEWuPksR8lhPS866kgizv0QB5wCvc/4ng7Ac8lZjhnacnfbnUpoGC7UIrHoE24xjW463szSzHzeyeE1/A1mvlGvUrVkzo7843m1Im8uaTHZbQeAYGUGgvndLADicIufe5IqN9nw7kz71FhjgeQMKGNfTb4Hya5kzyJGh1OI3/vqp2cw0Qj/rBWB8/4uGQJbiEK5dVOgLIP5Qk9j2nUJLjFSDxw2K3XmEAoitcoeNxT/DRsfrrCdodyzMdUwjmulynNWxCmmeGHV+fIsqasBZsFMLthKXe/nkExsfnKEJdVJoaqoknSICHR3YdyfJHtMnhDLzRta/HBD3ihKNr6g9pkFMTtgrdA9pOEDtueIiJ+wzebh2x7VRODpBV9/1JK0IsaI9p59xOEPnr3susiOA+AgnyuveCSlYJr/eMRGm5rm32GIpY88hIXdGmoyk9C2DdJcCw5t2A9Gc8Z9uYgtyPc613iVa6IP8eYgD9sC4KtWCK6d0iy0kNpLhi1n0WKIuUzLCfYwVWCyBuO8c2R56BbN6VPRQZo8w5Vz3sGxu/7A4sKFtkdp/Ijt7gV/W87hbpxjKYoxsz9aaoX5Neu0kGNc3BqFSy60XBv01GEPF3/F9uf3tFTSwBIhUwTXRaV5ou4NNkGeN11Ma0Dw/NVU9W51xA0j62fSpOh8Aq1fCIWyTZ/6/+XcHhKoA3cHd+2/A0CH23f8iduK8AHuVbeoFm2auuPIGf06RI1/rjutYOlEvFlMbFmfDTIGJfrZDI0QDU2yqTM7xpdftW2Og6k1Ma60ohmM54qswKvtjnljsmvPDHYYDiFUxr4aUroXPVAse7dglRuLU7Q4DcPCILHeJ8kfCMH3BcE1g385ciF0CKCh88NWnCYl1hWH60CrCfr3GETNNPo1vX2MrcXk6RHin90QhEruZL4Kgwdk6oDz+psYWCTkcjO0qUK0iH0U0c7a4CgGCKaT2oHsokzSV1lkXdkKPMRMINQZ8rYe4VTziTq+35idZyvdc2jRrX651zS4pLvcMqICK0YIfzUUSq5CadfhonbKJrfgOm80G4XT10nTAFeR6+Xxcn1KP0yS7l41xL1/xEHPSlfZyfieVizqnK/fkum7vUw0eAOS/GCb/3NQ/NbRutfjzBXvhBqLB7nqPO4P8WWXDmTy2K89wU9snCDuao3JNcWHW4Mp78lB5ufE8HHB/G2dVyvZw7r/0wZPj7y30w22d55KXBbYces60S5bF5P5CJztFXb+h8SRTdi4wO29eMlSZdc8BSin+F7xNfk+e5T73BEQzHUfeuaCTPm+ktk85MA7UGJcDlC8P5/jXuPd4CGs5KQPxJDMkKswy+2zr9mtlbfi8vhs0odMMc1XkJGiO4yqPAIISMZRvsYYTEsQvQKvqs/Lya/0OrrwGBXEqkmekguk6Eamdy+Asg2Om8bh6duZV2PBpiI0SuJCczjL0l6Z9SWL/ihkC5SjPblD6o6LmGDvXXX6MyrNe+EQHe5YPZXqcw9VL8JpTJUGz9TePWrdwOe+ltq1LhJ4rXp3apoKL2dFaHR7Z/tPItFCrbW1m2uFS8LOa3LP2jz15OcdQd4bnlGCgO1F90keC03ajQIKrOMl93xxJldvkPZZipVpubzUncKkdlQEmz+UsxXH8E0vYElZVHA9Uw6Ni9Osf2jJkq2QXN9Y/oLlM9mxh4ZOhABsd2j6kUx20SK1/065hGkFX9IUJb07aDmsQHwrhE4jDRVp0rtwedc65YgdKGHckCMUKGoZ6spwzwwkyJ1HYV0RI+3MJSU/MUplNokdAIOFGv687tRvq2tpD8E9Owgsp3slzthHyOY7ZrusTQQFgL/KBn254rrhMOTWzHM0/bDQnSpqMPCPLoJfpQPcPylV5d64uNagqRjBk1lr3Wf9Sb+m5JPAjjuQEz2w7lgmO5twjYh4ry5rsWMfkCT4KzsDpFQS5i1l+4Yk2qdPljE5CiR7hNM79J/3rZINwoszg+dZ1rz1iBVS4jgFl3ZKK65FK7FCSGcJmVIdI6sO3VX+dbWGnW+UXC5EJdPJZKJiKEVH2onuDL8mcD1Hv5SUTd6M1kYK88wWd8afY22DHtdF0dVku4cB2TpPdxyvAQDPpncBycSGpwQcFHj7F3fwg1whwV4ZnRDScDHyhto7JoKe34sLo4nPo8LFK6JG10r/4mX3/AqJ9lV8bQUjTEBeoM/eLoZiZ9PM8A93XIaixWp8Tqh30v6L84hhSNhRNOEFAqQAAAA==';
+         cm.appendChild(lastHardIcon);
+       } else if(last && RATE_NAME[last]) cm.appendChild(el('span','ptag r-'+last,'Lần trước: '+RATE_NAME[last]));
       var ci = el('div', 'cicons');
       ci.appendChild(ibtn('iconbtn sm ai', 'spark', function () { askAi(); }, 'Hỏi AI về thẻ này (A)'));
       var photoTapTimer = null;
@@ -5401,7 +5407,7 @@ html body #planBox .sdone .pstatus{
       else if (e.key === 's' || e.key === 'S') {e.preventDefault();rate('hard');}
       else if (e.key === '2') {e.preventDefault();rate('mid');}
       else if (e.key === 'f' || e.key === 'F') { e.preventDefault(); setFocus(!document.body.classList.contains('focus')); render(); }
-      else if (e.key === 'a' || e.key === 'A') { e.preventDefault(); askAi(); }
+      else if (e.key === 'a' || e.key === 'A') { e.preventDefault(); if(window.NLC_AI) window.NLC_AI.toggle('hotkey'); }
       else if (e.key === 'Delete' || e.key === 'Backspace') { e.preventDefault(); del(sess.queue[sess.pos]); anim = 'next'; saveSess(); render(); }
     }, true);
     var tx = null;
@@ -6065,9 +6071,10 @@ html body #planBox .sdone .pstatus{
     function open(focusCard) {
       document.body.classList.add('ai-open'); $('aiPanel').setAttribute('aria-hidden', 'false'); $('aiBtn').setAttribute('aria-pressed', 'true');
       paintCtx(); paintQuick(); paintLog(); paintSetup(!key());
-      if (!focusCard || window.innerWidth > 700) setTimeout(function () { try { $('aiInput').focus(); } catch (e) { } }, 60);
+      if (focusCard !== 'hotkey' && (!focusCard || window.innerWidth > 700)) setTimeout(function () { try { $('aiInput').focus(); } catch (e) { } }, 60);
     }
     function close() { document.body.classList.remove('ai-open'); $('aiPanel').setAttribute('aria-hidden', 'true'); $('aiBtn').setAttribute('aria-pressed', 'false'); }
+     function toggle(mode) { if (isOpen()) close(); else open(mode || 'hotkey'); }
     function call(msgs) {
       var p = cfg.p, k = key(), m = model();
       if (p === 'gemini') {
@@ -6189,6 +6196,12 @@ html body #planBox .sdone .pstatus{
       }
       $('aiBtn').addEventListener('click', function () { if (isOpen()) close(); else open(); });
       $('aiClose').addEventListener('click', close);
+       // A toggles chat outside editable fields; never swallow the letter while typing.
+       document.addEventListener('keydown',function(e){
+         if(e.key.toLowerCase()!=='a'||e.ctrlKey||e.metaKey||e.altKey||e.isComposing||e.repeat||e.defaultPrevented)return;
+         if(e.target&&(e.target.isContentEditable||e.target.closest('input,textarea,select,[contenteditable="true"]')))return;
+         e.preventDefault();toggle('hotkey');
+       },true);
       $('aiCfgBtn').addEventListener('click', function () { paintSetup($('aiSetup').hidden); });
       $('aiNewBtn').title='Bắt đầu hội thoại mới (giữ lại hội thoại cũ)';$('aiNewBtn').setAttribute('aria-label','Hội thoại mới');
       $('aiNewBtn').addEventListener('click', function () { newThread(); });
@@ -6317,7 +6330,7 @@ html body #planBox .sdone .pstatus{
         log.addEventListener('scroll',function(){if(state)removeDrag();},{passive:true});
       })();
     }
-    window.NLC_AI = { open: open, close: close, ask:send, saveSelectedExample:saveSelectedExample, history:listThreads, switchThread:switchThread, newThread:newThread, renameThread:renameThread };
+    window.NLC_AI = { open: open, close: close, toggle:toggle, ask:send, saveSelectedExample:saveSelectedExample, history:listThreads, switchThread:switchThread, newThread:newThread, renameThread:renameThread };
     return { init: init, open: open, close: close };
   })();
 
@@ -6354,7 +6367,7 @@ html body #planBox .sdone .pstatus{
 <script src="backup-portable-v1.js"></script>
 <script src="nhi-ai-resize-v2.js?v=20261114-study-v7"></script>
 <script src="nhi-fireworks-v3.js?v=3"></script>
-<script src="study-update-v6.js?v=20261122-global-fonts-live-v5"></script>
+<script src="study-update-v6.js?v=20261122-five-ui-fixes-v6"></script>
 <script src="nhi-longpress-dictionary-v1.js?v=20261117"></script>
 <script src="nhi-interface-v5.js?v=20261114"></script>
 <script src="nhi-november-v15.js?v=20261114-ux-v17"></script>
@@ -6916,5 +6929,38 @@ html body #planBox .pcard:has(.pfront.nhi-with-image)>.prate.nhi-rating-v3{
 })();
 </script>
 
-<link rel="stylesheet" href="nhi-card-fit-fixes-20261121.css?v=20261122-all-fonts-auto-English-v6">
+<link rel="stylesheet" href="nhi-card-fit-fixes-20261121.css?v=20261122-five-ui-fixes-v7">
+
+<style id="nhi-five-ui-fixes-20261122">
+/* Last-time "Khó": compact image in the top-left corner, not a text badge. */
+html body #planBox .pcard .nhi-last-hard-icon{
+  position:absolute!important;top:7px!important;left:9px!important;
+  width:43px!important;height:43px!important;object-fit:contain!important;
+  display:block!important;pointer-events:none!important;z-index:4!important;
+  border-radius:8px!important;
+}
+/* Keep Khó – Lùi – Tiến – Hoàn tác aligned on one row. */
+html body #planBox .pcard>.prate.nhi-rating-v3{flex-wrap:nowrap!important;align-items:center!important;}
+html body #planBox .pcard>.prate.nhi-rating-v3>.hard{order:0!important;flex:1 1 70px!important;min-width:58px!important;}
+html body #planBox .pcard>.prate.nhi-rating-v3>.nhi-prev-v3,
+html body #planBox .pcard>.prate.nhi-rating-v3>.nhi-next-v3{
+  flex:0 0 48px!important;width:48px!important;min-width:48px!important;height:50px!important;
+}
+html body #planBox .pcard>.prate.nhi-rating-v3>.pundo{
+  order:3!important;flex:0 0 84px!important;width:84px!important;
+  max-width:84px!important;min-width:76px!important;
+  height:50px!important;min-height:50px!important;max-height:50px!important;
+  align-self:center!important;display:inline-flex!important;flex-direction:row!important;
+  box-sizing:border-box!important;white-space:nowrap!important;padding:0 5px!important;
+  font-size:12px!important;line-height:1.1!important;
+  color:var(--ink)!important;background:var(--surface)!important;
+  border-color:var(--line)!important;box-shadow:0 4px 0 var(--edge)!important;
+}
+@media(max-width:420px){
+  html body #planBox .pcard>.prate.nhi-rating-v3{gap:5px!important;}
+  html body #planBox .pcard>.prate.nhi-rating-v3>.nhi-prev-v3,
+  html body #planBox .pcard>.prate.nhi-rating-v3>.nhi-next-v3{flex-basis:42px!important;width:42px!important;min-width:42px!important;}
+  html body #planBox .pcard>.prate.nhi-rating-v3>.pundo{flex-basis:76px!important;width:76px!important;font-size:11px!important;}
+}
+</style>
 </body></html>
