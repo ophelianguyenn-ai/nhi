@@ -4789,7 +4789,7 @@ html body #planBox .sdone .pstatus{
       var f = el('form', 'editbox nhi-editor-window-v5');
       f.appendChild(ibtn('iconbtn sm nhi-editor-close-v5','x',function(){closeEditor();},'Đóng và tự lưu chỉnh sửa thẻ'));
       var savedHj = val('hj', it.id), initialHj = lookupHanja(it.ko, it.id);
-      var hanInput,readingInput,hanToggle,hanjaLinks,section=null,syncHanjaEditor=function(){};
+      var hanInput,readingInput,hanToggle,hanjaLinks,hanjaInputGrid,section=null,syncHanjaEditor=function(){};
       {
         section=el('fieldset','hanja-editor nhi-optional-hanja-editor');
         section.appendChild(el('legend',null,'Hán–Hàn (Hán tự và âm Hán–Việt)'));
@@ -4799,8 +4799,17 @@ html body #planBox .sdone .pstatus{
         toggleRow.appendChild(hanToggle);
         toggleRow.appendChild(el('span',null,'Thẻ này có phần Hán–Hàn'));
         section.appendChild(toggleRow);
-        function field(label, name, value) { var l = el('label', 'flabel'); l.appendChild(el('span', null, label)); var i = el('input', 'field'); i.type = 'text'; i.name = name; i.value = value || ''; i.maxLength = 200; l.appendChild(i); section.appendChild(l); return i; }
-        hanInput = field('Chữ Hán', 'hanja', initialHj ? initialHj[0] : ''); readingInput = field('Âm Hán–Việt', 'hanviet', initialHj ? initialHj[1] : '');
+        hanjaInputGrid=el('div','nhi-hanja-input-grid');
+        function field(label, name, value) {
+          var l=el('label','flabel nhi-hanja-field');
+          l.appendChild(el('span',null,label));
+          var i=el('input','field');i.type='text';i.name=name;i.value=value||'';
+          i.maxLength=200;i.autocomplete='off';l.appendChild(i);
+          hanjaInputGrid.appendChild(l);return i;
+        }
+        hanInput = field('Chữ Hán','hanja',initialHj ? initialHj[0] : '');
+        readingInput = field('Âm Hán–Việt','hanviet',initialHj ? initialHj[1] : '');
+        section.appendChild(hanjaInputGrid);
         var links=el('div','dictionary-links');
         function dictionaryLink(label, href) {var a=el('a','ghost',label);a.href=href;a.target='_blank';a.rel='noopener noreferrer';links.appendChild(a);return a;}
         dictionaryLink('Tra chữ Hán Naver', 'https://hanja.dict.naver.com/#/search?query='+encodeURIComponent(it.ko));
@@ -4811,9 +4820,9 @@ html body #planBox .sdone .pstatus{
         section.appendChild(el('p','hint','Nếu thẻ không có Hán tự, bỏ chọn. Bạn có thể bật lại và tự điền sau.'));
         syncHanjaEditor=function(){
           var enabled=hanToggle.checked;
-          hanInput.parentElement.hidden=!enabled;
-          readingInput.parentElement.hidden=!enabled;
+          hanjaInputGrid.hidden=!enabled;
           hanjaLinks.hidden=!enabled;
+          section.classList.toggle('nhi-hanja-enabled',enabled);
         }
         hanToggle.addEventListener('change',syncHanjaEditor);
         syncHanjaEditor();
