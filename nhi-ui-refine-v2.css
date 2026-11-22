@@ -1,0 +1,113 @@
+/* Nhi's Learning Corner — patch 2026-11-22 */
+#nhiTransitionSettings{min-width:0}
+#nhiTransitionSettings .nhi-fx-setting-row{display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap}
+#nhiTransitionSettings .nhi-fx-setting-row label{flex:1 1 155px;min-width:0;font-weight:600}
+#nhiTransitionSettings .nhi-fx-setting-row select{flex:0 1 200px;max-width:100%;min-height:38px;box-sizing:border-box}
+html body #planBox form.nhi-editor-window-v5{animation:none!important;transform-origin:92% 0!important;will-change:transform,opacity!important}
+@media(prefers-reduced-motion:reduce){html body #planBox form.nhi-editor-window-v5{animation:none!important}}
+/* No fieldset border or long Hán–Hàn label; checkbox + two matching text fields. */
+html body #planBox form.nhi-editor-window-v5 .nhi-hanja-editor-inline{
+ display:grid!important;grid-template-columns:34px minmax(0,1fr)!important;align-items:end!important;
+ gap:12px!important;width:100%!important;max-width:100%!important;
+ margin:7px 0 3px!important;padding:0!important;border:0!important;
+ border-radius:0!important;background:transparent!important;box-shadow:none!important;
+ min-width:0!important;
+}
+html body #planBox form.nhi-editor-window-v5 .nhi-hanja-editor-inline .nhi-hanja-toggle-compact{
+ grid-column:1!important;grid-row:1!important;display:flex!important;
+ align-items:center!important;justify-content:center!important;
+ width:32px!important;height:44px!important;min-height:44px!important;
+ padding:0!important;margin:0!important;border:0!important;
+ border-radius:0!important;background:transparent!important;cursor:pointer!important;
+}
+html body #planBox form.nhi-editor-window-v5 .nhi-hanja-editor-inline .nhi-hanja-toggle-compact>input[type=checkbox]{
+ appearance:none!important;-webkit-appearance:none!important;
+ width:23px!important;height:23px!important;min-width:23px!important;max-width:23px!important;
+ margin:0!important;padding:0!important;flex:0 0 23px!important;
+ border:2px solid var(--accent-d,#168882)!important;border-radius:7px!important;
+ display:grid!important;place-content:center!important;background:var(--surface,#fff)!important;
+ box-shadow:none!important;
+}
+html body #planBox form.nhi-editor-window-v5 .nhi-hanja-editor-inline .nhi-hanja-toggle-compact>input:checked{
+ background:var(--accent-d,#168882)!important;
+}
+html body #planBox form.nhi-editor-window-v5 .nhi-hanja-editor-inline .nhi-hanja-toggle-compact>input:checked::after{
+ content:"✓";font:900 16px/1 system-ui,sans-serif;color:white!important;
+}
+html body #planBox form.nhi-editor-window-v5 .nhi-hanja-editor-inline .nhi-hanja-input-grid{
+ grid-column:2!important;grid-row:1!important;
+ display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;
+ width:100%!important;min-width:0!important;gap:12px!important;align-items:end!important;
+}
+html body #planBox form.nhi-editor-window-v5 .nhi-hanja-editor-inline .nhi-hanja-input-grid[hidden]{display:none!important}
+html body #planBox form.nhi-editor-window-v5 .nhi-hanja-editor-inline .nhi-hanja-field{
+ display:flex!important;flex-direction:column!important;width:100%!important;min-width:0!important;gap:6px!important;
+ margin:0!important;font-family:var(--ui,system-ui)!important;
+}
+html body #planBox form.nhi-editor-window-v5 .nhi-hanja-editor-inline .nhi-hanja-field>span{
+ font:700 13px/1.35 var(--ui,system-ui)!important;color:var(--muted,#53717b)!important
+}
+html body #planBox form.nhi-editor-window-v5 .nhi-hanja-editor-inline .nhi-hanja-field input{
+ width:100%!important;min-height:44px!important;height:44px!important;
+ padding:8px 10px!important;box-sizing:border-box!important;border-radius:11px!important;
+ font:500 16px/1.3 var(--ui,system-ui)!important
+}
+html body #planBox form.nhi-editor-window-v5 .nhi-hanja-editor-inline .dictionary-links,
+html body #planBox form.nhi-editor-window-v5 .nhi-hanja-editor-inline .hint{display:none!important}
+/* A one-line English edit field (expands to fit additional user-entered lines). */
+html body #planBox form.nhi-editor-window-v5 label.nhi-english-edit-field textarea{
+ min-height:44px!important;height:44px;max-height:none!important;resize:vertical!important;
+ padding:10px 12px!important;line-height:1.35!important;box-sizing:border-box!important
+}
+html body #planBox form.nhi-editor-window-v5 label.nhi-ipa-edit-field input{
+ min-height:44px!important;height:44px!important;box-sizing:border-box!important;
+}
+/* Four rating actions share ONE baseline and the Undo button is fourth. */
+html body #planBox .pcard>.prate.nhi-rating-v3.nhi-rate-undo-inline,
+html body #planBox .pcard:has(.nhi-with-image)>.prate.nhi-rating-v3.nhi-rate-undo-inline{
+ display:grid!important;grid-template-columns:minmax(60px,1fr) 44px 44px 94px!important;
+ grid-template-rows:50px!important;gap:6px!important;align-items:stretch!important;
+ width:min(calc(100% - 12px),480px)!important;max-width:480px!important;
+ min-width:0!important;position:relative!important;left:auto!important;right:auto!important;
+ top:auto!important;bottom:auto!important;transform:none!important;translate:none!important;
+ margin:12px auto 14px!important;padding:0!important;flex-wrap:nowrap!important;
+}
+html body #planBox .pcard>.prate.nhi-rate-undo-inline>button{
+ position:static!important;inset:auto!important;transform:none!important;translate:none!important;
+ min-width:0!important;width:100%!important;height:50px!important;min-height:50px!important;
+ max-height:50px!important;margin:0!important;align-self:stretch!important;
+ display:flex!important;justify-content:center!important;align-items:center!important;
+ padding:0 4px!important;white-space:nowrap!important;
+}
+html body #planBox .pcard>.prate.nhi-rate-undo-inline>.hard{grid-column:1!important;grid-row:1!important}
+html body #planBox .pcard>.prate.nhi-rate-undo-inline>.nhi-prev-v3{grid-column:2!important;grid-row:1!important}
+html body #planBox .pcard>.prate.nhi-rate-undo-inline>.nhi-next-v3{grid-column:3!important;grid-row:1!important}
+html body #planBox .pcard>.prate.nhi-rate-undo-inline>.pundo{
+ grid-column:4!important;grid-row:1!important;font-size:12px!important;line-height:1!important;
+ white-space:nowrap!important;border-radius:12px!important
+}
+@media(max-width:400px){
+ html body #planBox .pcard>.prate.nhi-rating-v3.nhi-rate-undo-inline{
+ grid-template-columns:minmax(55px,1fr) 36px 36px 78px!important;gap:4px!important
+ }
+ html body #planBox .pcard>.prate.nhi-rate-undo-inline>.pundo{font-size:10px!important}
+}
+/* Grow meaning horizontally before introducing a second line, without crossing the card edge. */
+html body #planBox .pcard .pfront .nhi-english-v5,
+html body #planBox .pcard .pfront.nhi-with-image .nhi-card-details>.nhi-english-v5{
+ max-width:100%!important;min-width:0!important;box-sizing:border-box!important
+}
+html body #planBox .pcard .nhi-english-v5 .nhi-en-translation{
+ word-break:normal!important;overflow-wrap:normal!important;hyphens:none!important;
+}
+html body #planBox .pcard .nhi-english-v5 .nhi-en-main{min-width:0!important;max-width:100%!important}
+html body #planBox .pcard .nhi-english-v5 .nhi-en-translation .nhi-en-word{
+ white-space:nowrap!important
+}
+/* Softly animate highlights, shape changes and visible input state. */
+html body #planBox .pcard .ph,html body #planBox .pcard .hl,
+html body #planBox .pcard button,
+html body #planBox form.nhi-editor-window-v5 .field,
+html body #planBox .nhi-english-v5{
+ transition:background-color .24s ease,border-color .24s ease,box-shadow .24s ease,opacity .24s ease;
+}
