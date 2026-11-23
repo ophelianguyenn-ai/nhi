@@ -1,8 +1,8 @@
 // Offline support: network-first for GitHub Pages and static assets.
 // Fall back to cache only when offline. Different cache key forces eviction of earlier stale CSS/JS.
-const CACHE = 'nhi-corner-v110-expanded-fx-presets';
+const CACHE = 'nhi-corner-v111-nov23-card-controls';
 const CORE = [
-  'study-update-v6.js','study-update-v6.css','nhi-november-v15.js','nhi-november-v15.css',
+  'nhi-fixes-20261123.css','study-update-v6.js','study-update-v6.css','nhi-november-v15.js','nhi-november-v15.css',
   'nhi-late-2026.js','nhi-late-2026.css','nhi-romance-v1.js','nhi-romance-v1.css','nhi-luong-v1.svg','nhi-couple-gif-v1.js','nhi-couple-gif-v1.css',
   'nhi-romance-v2.js','nhi-romance-v2.css','nhi-controls-v3.css','nhi-bubble-effects-v3.css','nhi-luong-reference-v2.svg','nhi-luong-kiss-v2.svg','nhi-luong-demo-approved-v3.svg',
   'nhi-cover-girl-rig-v3.svg','nhi-cover-airplane-v3.js','nhi-cover-story-v3.js','nhi-cover-story-v3.css',
