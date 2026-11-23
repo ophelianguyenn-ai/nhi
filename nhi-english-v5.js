@@ -491,11 +491,13 @@ function mount(parent,id,vi,ko,options){
  if(!parent)return;
  const before=parent.querySelector('.nhi-english-v5');if(before)before.remove();
  const box=document.createElement('section');box._format=options?.format;box.className='nhi-english-v5';box.setAttribute('aria-label','Tiếng Anh');
-  // Classic English frame: same pale green on every topic, thin green top border.
-  box.style.setProperty('background','var(--nhi-english-green-bg,#eef8df)','important');
-  box.style.setProperty('border','0','important');
-  box.style.setProperty('border-top',
-    '1px solid var(--nhi-english-green-border,#739e40)','important');
+  // Match each lesson's thematic color; tint the surface lightly and use a
+  // distinctly stronger FOUR-SIDED border. --day comes from the lesson page.
+  const frameTone='var(--day,var(--tc,var(--accent)))';
+  box.style.setProperty('background',
+    'color-mix(in srgb,'+frameTone+' 13%,var(--surface) 87%)','important');
+  box.style.setProperty('border',
+    '2px solid color-mix(in srgb,'+frameTone+' 68%,var(--ink) 32%)','important');
   box.style.setProperty('border-radius','10px','important');
   box.style.setProperty('box-shadow','none','important');
  box.innerHTML='<div class="nhi-en-head"><div class="nhi-en-main"><p class="nhi-en-translation"></p><p class="nhi-en-ipa"></p></div><span class="nhi-en-head-actions"><button type="button" class="nhi-en-speak" aria-label="Nghe tiếng Anh">🎧</button></span></div><p class="nhi-en-status" aria-live="polite"></p><div class="nhi-en-tools"><button type="button" class="nhi-en-review" title="Khi bấm, nội dung tiếng Việt và tiếng Hàn sẽ được gửi đến Google Translate để đối chiếu tự động. Đây không phải kiểm duyệt chuyên gia.">Đối chiếu</button></div>';
