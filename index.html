@@ -596,7 +596,7 @@ section:not([hidden]) > .quiz, section:not([hidden]) > #cardWrap, .list > .row:n
 }
 </style>
 
-<script src="nhi-chat-voice-v1.js?v=20261117"></script><script src="hanja-v9.js?v=12"></script><script src="hanja-extra-v12.js"></script><script src="card-images-v11.js?v=20261122-image-layout-notify-v8"></script><script src="nhi-google-images-v1.js?v=20261114-study-v7"></script><script src="nhi-hard-minimal-v1.js?v=20261120-in-card-v2"></script><script src="nhi-verified-pairs-20261117.js?v=1"></script><script src="nhi-daily-pairs.js?v=20261119-micro-v1"></script><script src="nhi-all-lesson-pairs-v6.js?v=20261121-refined-51"></script><script src="nhi-lesson-20261121-segments-v1.js?v=20261122-reviewed-24"></script><script src="nhi-phrases-v5.js?v=20261121-refined"></script><script src="nhi-english-data-v6.js?v=20261113-reviewed-173"></script><script src="nhi-english-v5.js?v=20261123-colored-frame-v2"></script><script src="recorded-voices-v11.js?v=20261119-banmai-injoon-daily"></script>
+<script src="nhi-chat-voice-v1.js?v=20261117"></script><script src="hanja-v9.js?v=12"></script><script src="hanja-extra-v12.js"></script><script src="card-images-v11.js?v=20261122-image-layout-notify-v8"></script><script src="nhi-google-images-v1.js?v=20261114-study-v7"></script><script src="nhi-hard-minimal-v1.js?v=20261120-in-card-v2"></script><script src="nhi-verified-pairs-20261117.js?v=1"></script><script src="nhi-daily-pairs.js?v=20261119-micro-v1"></script><script src="nhi-all-lesson-pairs-v6.js?v=20261121-refined-51"></script><script src="nhi-lesson-20261121-segments-v1.js?v=20261122-reviewed-24"></script><script src="nhi-phrases-v5.js?v=20261121-refined"></script><script src="nhi-english-data-v6.js?v=20261113-reviewed-173"></script><script src="nhi-english-v5.js?v=20261124-topic-pastel-v3"></script><script src="recorded-voices-v11.js?v=20261119-banmai-injoon-daily"></script>
 <script src="qrcode.js" defer></script>
 <link rel="stylesheet" href="nhi-seven-fixes-20261117.css?v=1"><link rel="stylesheet" href="refresh-v9.css?v=13"><link rel="stylesheet" href="study-enhancements-v13.css?v=14"><link rel="stylesheet" href="nhi-updates-v1.css?v=1"><link rel="stylesheet" href="nhi-ai-resize-v2.css?v=1"><link rel="stylesheet" href="nhi-study-motion-v3.css?v=3"><link rel="stylesheet" href="nhi-interface-v4.css?v=4"><link rel="stylesheet" href="nhi-interface-v5.css?v=20261113-rollback-stable-v1"><link rel="stylesheet" href="nhi-seasons-v1.css?v=20261113-cartoon-soft-1">
 <link rel="stylesheet" href="nhi-living-garden-v1.css?v=20261113-cartoon-butterflies-v1">
@@ -4979,8 +4979,8 @@ html body #planBox .sdone .pstatus{
         section=el('div','hanja-editor nhi-optional-hanja-editor nhi-hanja-editor-inline');
         // Inline-important layout avoids legacy mint panel / stacked-field CSS.
         var sectionLayout={
-          display:'grid',gridTemplateColumns:'max-content 50px minmax(0,1fr)',
-          gridTemplateRows:'auto auto',columnGap:'5px',rowGap:'8px',
+          display:'grid',gridTemplateColumns:'max-content 58px minmax(0,1fr)',
+          gridTemplateRows:'auto auto',columnGap:'6px',rowGap:'8px',
           background:'transparent',backgroundColor:'transparent',
           border:'0',boxShadow:'none',padding:'0',borderRadius:'0',
           width:'100%',maxWidth:'100%',minWidth:'0',margin:'10px 0 2px'
@@ -5378,14 +5378,17 @@ html body #planBox .sdone .pstatus{
         r.appendChild(undoButton);r.classList.add('nhi-rate-undo-inline');
         // Inline-important grid overrides historical flex wrap and order rules.
         r.style.setProperty('display','grid','important');
-        r.style.setProperty('grid-template-columns','minmax(60px,1fr) 44px 44px 94px','important');
-        r.style.setProperty('width','min(calc(100% - 12px),480px)','important');
+        r.style.setProperty('grid-template-columns',
+          window.matchMedia('(max-width:600px)').matches
+          ? 'minmax(58px,.9fr) minmax(64px,1.12fr) minmax(64px,1.12fr) minmax(74px,1fr)'
+          : 'minmax(60px,1fr) 44px 44px 94px','important');
+        r.style.setProperty('width',window.matchMedia('(max-width:600px)').matches?'calc(100% - 10px)':'min(calc(100% - 12px),480px)','important');
         r.style.setProperty('max-width','480px','important');
         r.style.setProperty('margin','12px auto 14px','important');
         r.style.setProperty('position','relative','important');
         r.style.setProperty('inset','auto','important');
         r.style.setProperty('transform','none','important');
-        r.style.setProperty('grid-template-rows','50px','important');
+        r.style.setProperty('grid-template-rows',window.matchMedia('(max-width:600px)').matches?'54px':'50px','important');
         r.style.setProperty('gap','4px','important');
         r.style.setProperty('flex-wrap','nowrap','important');
         [[hard,1],[pv,2],[nx,3],[undoButton,4]].forEach(function(pair){
@@ -5395,9 +5398,9 @@ html body #planBox .sdone .pstatus{
           button.style.setProperty('min-width','0','important');
           button.style.setProperty('max-width','none','important');
           button.style.setProperty('width','100%','important');
-          button.style.setProperty('height','50px','important');
-          button.style.setProperty('min-height','50px','important');
-          button.style.setProperty('max-height','50px','important');
+          button.style.setProperty('height',window.matchMedia('(max-width:600px)').matches?'54px':'50px','important');
+          button.style.setProperty('min-height',window.matchMedia('(max-width:600px)').matches?'54px':'50px','important');
+          button.style.setProperty('max-height',window.matchMedia('(max-width:600px)').matches?'54px':'50px','important');
           button.style.setProperty('flex','none','important');
           button.style.setProperty('position','static','important');
           button.style.setProperty('transform','none','important');
@@ -8724,5 +8727,5 @@ html body #planBox .pcard .nhi-english-v5:not(.nhi-en-inline-two-spaces)
   content:none!important;
 }
 </style>
-<link rel="stylesheet" href="nhi-fixes-20261123.css?v=20261123-r2">
+<link rel="stylesheet" href="nhi-fixes-20261123.css?v=20261124-r3">
 </body></html>
