@@ -1,28 +1,15 @@
-/* 23 Nov rev2: visible English surface, compact Hán–Hàn toggle, working global Korean typography. */
-:root {
- --nhi-en-panel-from:#a0e3ff;
- --nhi-en-panel-to:#d7ccff;
- --nhi-en-panel-border:#4698c9;
- --nhi-en-panel-shadow:#5596c755;
-}
-:root[data-theme="dark"] {
- --nhi-en-panel-from:#134568;
- --nhi-en-panel-to:#453269;
- --nhi-en-panel-border:#73b9e4;
- --nhi-en-panel-shadow:#0b061a88;
-}
-/* Fallback CSS + inline-important color in nhi-english-v5.js. */
-html body #planBox .pcard .pfront .nhi-english-v5{
- background-color:#a0e3ff!important;
- background-image:linear-gradient(128deg,var(--nhi-en-panel-from),var(--nhi-en-panel-to))!important;
- border:2px solid var(--nhi-en-panel-border)!important;border-radius:15px!important;
- color:var(--ink)!important;box-shadow:0 3px 0 var(--nhi-en-panel-shadow)!important;
- background-clip:padding-box!important;
-}
-html[data-theme="dark"] body #planBox .pcard .pfront .nhi-english-v5{
- background-color:#134568!important;
- background-image:linear-gradient(128deg,var(--nhi-en-panel-from),var(--nhi-en-panel-to))!important;
- color:var(--ink)!important;
+/* 24 Nov 2026: Restore topic-based pastel English frame; cartoon Hanja toggle; mobile navigation. */
+/* The flashcard sets --tc for its topic; each English frame takes that same hue.
+   The --day fallback covers pages without a topic and works in dark mode too. */
+html body #planBox .pcard .pfront .nhi-english-v5 {
+  background-color:var(--accent-soft)!important;
+  background-image:none!important;
+  background:color-mix(in srgb,var(--tc,var(--day,var(--accent))) 23%,var(--surface) 77%)!important;
+  border:2px solid color-mix(in srgb,var(--tc,var(--day,var(--accent-d))) 45%,var(--surface))!important;
+  border-radius:15px!important;
+  color:var(--ink)!important;
+  box-shadow:0 3px 0 color-mix(in srgb,var(--tc,var(--day,var(--accent-d))) 26%,transparent),inset 0 1px 0 color-mix(in srgb,var(--surface) 60%,transparent)!important;
+  background-clip:padding-box!important;
 }
 /* Hán–Hàn label and switch: same first row; two fields below, full width. */
 html body #planBox .pcard form.nhi-editor-window-v5 > .nhi-hanja-editor-inline.nhi-editor-hanja-last{
@@ -92,4 +79,106 @@ html body #planBox .pcard .pfront .nhi-ko-line>.answer.ko{
   html body #planBox .pcard form.nhi-editor-window-v5 .nhi-hanja-checkbox-original>input[type=checkbox]::after{
     transition:none!important;
   }
+}
+
+/* Cartoon Hán–Hàn toggle: bubble track, smiling moving knob, tiny sparkles.
+   Preserve the original accessible input; 44px finger hit target. */
+html body #planBox .pcard form.nhi-editor-window-v5 .nhi-hanja-editor-inline>.nhi-hanja-checkbox-original {
+  transform:translateY(4px)!important;
+  width:58px!important;min-width:58px!important;
+  height:44px!important;min-height:44px!important;
+}
+html body #planBox .pcard form.nhi-editor-window-v5 .nhi-hanja-editor-inline>.nhi-hanja-checkbox-original>input[type=checkbox]{
+  width:53px!important;min-width:53px!important;max-width:53px!important;
+  flex:0 0 53px!important;height:31px!important;min-height:31px!important;max-height:31px!important;
+  border:2px solid #f5a5bb!important;
+  background:linear-gradient(145deg,#ffe5ee,#ffc6da)!important;
+  border-radius:999px!important;
+  box-shadow:inset 0 2px 4px #ad658a2b,0 3px 0 #f1a8be63!important;
+  overflow:visible!important;
+  transition:background .27s ease,border-color .27s ease,box-shadow .27s ease!important;
+}
+html body #planBox .pcard form.nhi-editor-window-v5 .nhi-hanja-editor-inline>.nhi-hanja-checkbox-original>input[type=checkbox]::before{
+  content:"✦"!important;position:absolute!important;right:6px!important;top:3px!important;
+  display:block!important;color:#fff!important;font:bold 14px/1 system-ui,sans-serif!important;
+  text-shadow:0 1px 2px #df8bab!important;opacity:1!important;
+  transform:rotate(-12deg)!important;transition:opacity .2s ease,transform .27s ease!important;
+}
+html body #planBox .pcard form.nhi-editor-window-v5 .nhi-hanja-editor-inline>.nhi-hanja-checkbox-original>input[type=checkbox]::after{
+  content:"•ᴗ•"!important;display:flex!important;align-items:center!important;justify-content:center!important;
+  position:absolute!important;top:2px!important;left:2px!important;
+  width:23px!important;height:23px!important;
+  background:linear-gradient(145deg,#fff,#fff5df)!important;border:1px solid #fff!important;
+  border-radius:50%!important;box-shadow:0 2px 4px #8f65795c,inset 0 -2px 0 #ffdce9!important;
+  color:#b26a82!important;font:800 8px/1 system-ui,sans-serif!important;letter-spacing:-.7px!important;
+  transform:translateX(0) rotate(-8deg)!important;
+  transition:transform .27s cubic-bezier(.2,1.5,.4,1)!important;
+}
+html body #planBox .pcard form.nhi-editor-window-v5 .nhi-hanja-editor-inline>.nhi-hanja-checkbox-original>input[type=checkbox]:checked{
+  border-color:#56c9af!important;
+  background:linear-gradient(145deg,#b8ffdf,#a5edff)!important;
+  box-shadow:inset 0 2px 3px #439a8333,0 3px 0 #57c4ab63!important;
+}
+html body #planBox .pcard form.nhi-editor-window-v5 .nhi-hanja-editor-inline>.nhi-hanja-checkbox-original>input[type=checkbox]:checked::before{
+  left:7px!important;right:auto!important;content:"✧"!important;
+  color:#fff!important;text-shadow:0 1px 2px #3b9d92!important;
+  transform:rotate(18deg)!important;
+}
+html body #planBox .pcard form.nhi-editor-window-v5 .nhi-hanja-editor-inline>.nhi-hanja-checkbox-original>input[type=checkbox]:checked::after{
+  content:"•ᴗ•"!important;color:#28967c!important;
+  transform:translateX(22px) rotate(9deg)!important;
+}
+/* The heading and toggle remain adjacent: reserve just the switch column. */
+html body #planBox .pcard form.nhi-editor-window-v5 > .nhi-hanja-editor-inline.nhi-editor-hanja-last{
+  grid-template-columns:max-content 58px minmax(0,1fr)!important;
+  column-gap:6px!important;
+}
+/* Larger, easier to touch previous/next controls specifically on narrow phones.
+   Without Undo: 3 full-width columns. With Undo: 4 proportional columns. */
+@media(max-width:600px){
+  html body #planBox .pcard>.prate.nhi-rating-v3:not(.nhi-rate-undo-inline),
+  html body #planBox .pcard:has(.pfront.nhi-with-image)>.prate.nhi-rating-v3:not(.nhi-rate-undo-inline){
+    display:grid!important;
+    grid-template-columns:minmax(58px,.95fr) minmax(70px,1.18fr) minmax(70px,1.18fr)!important;
+    grid-template-rows:minmax(54px,auto)!important;
+    gap:6px!important;
+    width:calc(100% - 10px)!important;max-width:none!important;
+    margin:9px auto 13px!important;padding:0!important;
+    align-items:stretch!important;justify-content:stretch!important;
+    transform:none!important;translate:none!important;
+  }
+  html body #planBox .pcard>.prate.nhi-rating-v3:not(.nhi-rate-undo-inline)>.hard{
+    grid-column:1!important;grid-row:1!important;
+    width:100%!important;min-width:0!important;max-width:none!important;
+    flex:none!important;order:0!important;
+  }
+  html body #planBox .pcard>.prate.nhi-rating-v3:not(.nhi-rate-undo-inline)>.nhi-prev-v3{
+    grid-column:2!important;grid-row:1!important;order:1!important;
+  }
+  html body #planBox .pcard>.prate.nhi-rating-v3:not(.nhi-rate-undo-inline)>.nhi-next-v3{
+    grid-column:3!important;grid-row:1!important;order:2!important;
+  }
+  html body #planBox .pcard>.prate.nhi-rating-v3>.nhi-prev-v3,
+  html body #planBox .pcard>.prate.nhi-rating-v3>.nhi-next-v3{
+    box-sizing:border-box!important;width:100%!important;max-width:none!important;min-width:0!important;
+    height:54px!important;min-height:54px!important;max-height:none!important;
+    flex:1 1 auto!important;padding:5px 8px!important;
+    border-radius:15px!important;
+    touch-action:manipulation!important;-webkit-tap-highlight-color:transparent;
+  }
+  html body #planBox .pcard>.prate.nhi-rating-v3>.nhi-prev-v3 svg,
+  html body #planBox .pcard>.prate.nhi-rating-v3>.nhi-next-v3 svg{
+    width:27px!important;height:27px!important;
+  }
+  /* With Undo: JS applies an inline-important mobile grid (four controls).
+     Reassert larger finger-safe height for arrow keys only. */
+  html body #planBox .pcard>.prate.nhi-rating-v3.nhi-rate-undo-inline{
+    grid-template-rows:54px!important;min-height:54px!important;
+  }
+}
+@media(prefers-reduced-motion:reduce){
+ html body #planBox .pcard form.nhi-editor-window-v5 .nhi-hanja-editor-inline>.nhi-hanja-checkbox-original>input[type=checkbox]::before,
+ html body #planBox .pcard form.nhi-editor-window-v5 .nhi-hanja-editor-inline>.nhi-hanja-checkbox-original>input[type=checkbox]::after{
+   transition:none!important;
+ }
 }
