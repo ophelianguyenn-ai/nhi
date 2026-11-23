@@ -5006,9 +5006,63 @@ html body #planBox .sdone .pstatus{
         toggleRow.appendChild(hanToggle);
         var hanjaCartoonTrack=el('span','nhi-hanja-cartoon-track');
         hanjaCartoonTrack.setAttribute('aria-hidden','true');
-        hanjaCartoonTrack.appendChild(el('span','nhi-hanja-cartoon-spark','✦'));
-        hanjaCartoonTrack.appendChild(el('span','nhi-hanja-cartoon-knob','•ᴗ•'));
+        var hanjaCartoonSpark=el('span','nhi-hanja-cartoon-spark','✦');
+        var hanjaCartoonKnob=el('span','nhi-hanja-cartoon-knob','•ᴗ•');
+        hanjaCartoonTrack.appendChild(hanjaCartoonSpark);
+        hanjaCartoonTrack.appendChild(hanjaCartoonKnob);
         toggleRow.appendChild(hanjaCartoonTrack);
+        // Critical inline styles override all legacy form/checkbox rules even if
+        // external CSS is still cached by a mobile browser.
+        function styleHanja(node,props){
+          Object.keys(props).forEach(function(key){node.style.setProperty(key,props[key],'important');});
+        }
+        styleHanja(toggleRow,{
+          'position':'relative','display':'flex','align-items':'center','justify-content':'center',
+          'width':'58px','min-width':'58px','max-width':'58px','height':'44px','min-height':'44px',
+          'padding':'0','margin':'0','border':'0','border-radius':'999px','background':'transparent',
+          'box-shadow':'none','transform':'translateY(4px)','cursor':'pointer'
+        });
+        styleHanja(hanToggle,{
+          '-webkit-appearance':'none','appearance':'none','display':'block','position':'absolute',
+          'inset':'0','z-index':'3','width':'100%','height':'100%','min-width':'0',
+          'min-height':'0','max-width':'none','max-height':'none','margin':'0',
+          'padding':'0','border':'0','background':'transparent','opacity':'0',
+          'box-shadow':'none','cursor':'pointer','touch-action':'manipulation'
+        });
+        styleHanja(hanjaCartoonTrack,{
+          'position':'relative','display':'block','box-sizing':'border-box','flex':'0 0 53px',
+          'width':'53px','height':'31px','border':'2px solid #efa9c2',
+          'border-radius':'999px','background':'linear-gradient(145deg,#ffe2ed,#ffc4d8)',
+          'box-shadow':'inset 0 1px 3px #98677b24,0 3px 0 #ebb3c461',
+          'pointer-events':'none','transition':'background .24s ease,border-color .24s ease'
+        });
+        styleHanja(hanjaCartoonSpark,{
+          'position':'absolute','right':'6px','top':'5px','color':'#fff',
+          'text-shadow':'0 1px 2px #c3789c','font':'900 13px/1 system-ui,sans-serif'
+        });
+        styleHanja(hanjaCartoonKnob,{
+          'position':'absolute','display':'flex','align-items':'center','justify-content':'center',
+          'box-sizing':'border-box','top':'2px','left':'2px','width':'23px','height':'23px',
+          'border':'1px solid #fff','border-radius':'50%',
+          'background':'linear-gradient(140deg,#fff,#fff6e5)',
+          'font':'800 8px/1 system-ui,sans-serif','letter-spacing':'-.6px',
+          'box-shadow':'0 2px 4px #72506444,inset 0 -2px 0 #ffdce9',
+          'transition':'transform .25s cubic-bezier(.2,1.5,.4,1)'
+        });
+        function paintHanjaCartoon(){
+          var on=hanToggle.checked;
+          styleHanja(hanjaCartoonTrack,{
+            'background':on?'linear-gradient(145deg,#b6fada,#9ee9f4)':'linear-gradient(145deg,#ffe2ed,#ffc4d8)',
+            'border-color':on?'#59c7ad':'#efa9c2'
+          });
+          styleHanja(hanjaCartoonKnob,{
+            'transform':on?'translateX(22px) rotate(9deg)':'translateX(0) rotate(-8deg)',
+            'color':on?'#28977d':'#bd718a'
+          });
+          styleHanja(hanjaCartoonSpark,{'left':on?'6px':'auto','right':on?'auto':'6px'});
+        }
+        hanToggle.addEventListener('change',paintHanjaCartoon);
+        paintHanjaCartoon();
         section.appendChild(toggleRow);
         hanjaInputGrid=el('div','nhi-hanja-input-grid');
         hanjaInputGrid.style.setProperty('grid-column','1 / -1','important');
@@ -8740,5 +8794,5 @@ html body #planBox .pcard .nhi-english-v5:not(.nhi-en-inline-two-spaces)
   content:none!important;
 }
 </style>
-<link rel="stylesheet" href="nhi-fixes-20261123.css?v=20261124-v115">
+<link rel="stylesheet" href="nhi-fixes-20261123.css?v=20261124-v116">
 </body></html>
