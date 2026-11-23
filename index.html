@@ -4970,7 +4970,7 @@ html body #planBox .sdone .pstatus{
         section=el('div','hanja-editor nhi-optional-hanja-editor nhi-hanja-editor-inline');
         // Inline-important layout avoids legacy mint panel / stacked-field CSS.
         var sectionLayout={
-          display:'grid',gridTemplateColumns:'42px minmax(0,1fr)',
+          display:'grid',gridTemplateColumns:'minmax(0,1fr) 56px',
           gridTemplateRows:'auto auto',columnGap:'8px',rowGap:'8px',
           background:'transparent',backgroundColor:'transparent',
           border:'0',boxShadow:'none',padding:'0',borderRadius:'0',
@@ -4979,13 +4979,13 @@ html body #planBox .sdone .pstatus{
         Object.keys(sectionLayout).forEach(function(k){
           section.style.setProperty(k.replace(/[A-Z]/g,function(t){return '-'+t.toLowerCase();}),sectionLayout[k],'important');
         });
-        var heading=el('h3','nhi-hanja-heading','Hán–Hàn');
-        heading.style.setProperty('grid-column','1 / -1','important');
+        var heading=el('h3','nhi-hanja-heading','Hán – Hàn');
+        heading.style.setProperty('grid-column','1','important');
         heading.style.setProperty('grid-row','1','important');
         section.appendChild(heading);
         var toggleRow=el('label','nhi-hanja-toggle-compact nhi-hanja-checkbox-original');
-        toggleRow.style.setProperty('grid-column','1','important');
-        toggleRow.style.setProperty('grid-row','2','important');
+        toggleRow.style.setProperty('grid-column','2','important');
+        toggleRow.style.setProperty('grid-row','1','important');
         toggleRow.style.setProperty('background','transparent','important');
         toggleRow.style.setProperty('border','0','important');
         toggleRow.style.setProperty('box-shadow','none','important');
@@ -4996,7 +4996,7 @@ html body #planBox .sdone .pstatus{
         toggleRow.appendChild(hanToggle);
         section.appendChild(toggleRow);
         hanjaInputGrid=el('div','nhi-hanja-input-grid');
-        hanjaInputGrid.style.setProperty('grid-column','2','important');
+        hanjaInputGrid.style.setProperty('grid-column','1 / -1','important');
         hanjaInputGrid.style.setProperty('grid-row','2','important');
         hanjaInputGrid.style.setProperty('grid-template-columns','repeat(2,minmax(0,1fr))','important');
         hanjaInputGrid.style.setProperty('gap','10px','important');
@@ -6968,7 +6968,7 @@ html body #planBox .sdone .pstatus{
 <script src="backup-portable-v1.js"></script>
 <script src="nhi-ai-resize-v2.js?v=20261114-study-v7"></script>
 <script src="nhi-fireworks-v3.js?v=3"></script>
-<script src="study-update-v6.js?v=20261122-english-autogrow-v6"></script>
+<script src="study-update-v6.js?v=20261123-ko-touch-size-v1"></script>
 <script src="nhi-longpress-dictionary-v1.js?v=20261117"></script>
 <script src="nhi-interface-v5.js?v=20261114"></script>
 <script src="nhi-november-v15.js?v=20261114-ux-v17"></script>
@@ -8715,4 +8715,5 @@ html body #planBox .pcard .nhi-english-v5:not(.nhi-en-inline-two-spaces)
   content:none!important;
 }
 </style>
+<link rel="stylesheet" href="nhi-fixes-20261123.css?v=20261123-r1">
 </body></html>
