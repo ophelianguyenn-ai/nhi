@@ -596,7 +596,7 @@ section:not([hidden]) > .quiz, section:not([hidden]) > #cardWrap, .list > .row:n
 }
 </style>
 
-<script src="nhi-chat-voice-v1.js?v=20261117"></script><script src="hanja-v9.js?v=12"></script><script src="hanja-extra-v12.js"></script><script src="card-images-v11.js?v=20261122-image-layout-notify-v8"></script><script src="nhi-google-images-v1.js?v=20261114-study-v7"></script><script src="nhi-hard-minimal-v1.js?v=20261120-in-card-v2"></script><script src="nhi-verified-pairs-20261117.js?v=1"></script><script src="nhi-daily-pairs.js?v=20261119-micro-v1"></script><script src="nhi-all-lesson-pairs-v6.js?v=20261121-refined-51"></script><script src="nhi-lesson-20261121-segments-v1.js?v=20261122-reviewed-24"></script><script src="nhi-phrases-v5.js?v=20261121-refined"></script><script src="nhi-english-data-v6.js?v=20261113-reviewed-173"></script><script src="nhi-english-v5.js?v=20261124-green-classic-v115"></script><script src="recorded-voices-v11.js?v=20261119-banmai-injoon-daily"></script>
+<script src="nhi-chat-voice-v1.js?v=20261117"></script><script src="hanja-v9.js?v=12"></script><script src="hanja-extra-v12.js"></script><script src="card-images-v11.js?v=20261122-image-layout-notify-v8"></script><script src="nhi-google-images-v1.js?v=20261114-study-v7"></script><script src="nhi-hard-minimal-v1.js?v=20261120-in-card-v2"></script><script src="nhi-verified-pairs-20261117.js?v=1"></script><script src="nhi-daily-pairs.js?v=20261119-micro-v1"></script><script src="nhi-all-lesson-pairs-v6.js?v=20261121-refined-51"></script><script src="nhi-lesson-20261121-segments-v1.js?v=20261122-reviewed-24"></script><script src="nhi-phrases-v5.js?v=20261121-refined"></script><script src="nhi-english-data-v6.js?v=20261113-reviewed-173"></script><script src="nhi-english-v5.js?v=20261124-lesson-colors-v117"></script><script src="recorded-voices-v11.js?v=20261119-banmai-injoon-daily"></script>
 <script src="qrcode.js" defer></script>
 <link rel="stylesheet" href="nhi-seven-fixes-20261117.css?v=1"><link rel="stylesheet" href="refresh-v9.css?v=13"><link rel="stylesheet" href="study-enhancements-v13.css?v=14"><link rel="stylesheet" href="nhi-updates-v1.css?v=1"><link rel="stylesheet" href="nhi-ai-resize-v2.css?v=1"><link rel="stylesheet" href="nhi-study-motion-v3.css?v=3"><link rel="stylesheet" href="nhi-interface-v4.css?v=4"><link rel="stylesheet" href="nhi-interface-v5.css?v=20261113-rollback-stable-v1"><link rel="stylesheet" href="nhi-seasons-v1.css?v=20261113-cartoon-soft-1">
 <link rel="stylesheet" href="nhi-living-garden-v1.css?v=20261113-cartoon-butterflies-v1">
@@ -5063,6 +5063,93 @@ html body #planBox .sdone .pstatus{
         }
         hanToggle.addEventListener('change',paintHanjaCartoon);
         paintHanjaCartoon();
+        // Hold for 420 ms, then drag the switch anywhere inside the edit form.
+        // A short tap still toggles Hán–Hàn. Offset is remembered on this device.
+        (function enableHanjaSwitchDrag(){
+          var dragKey='nhi-hanja-toggle-drag-position-v1';
+          var offset={x:0,y:0},gesture=null,suppressNextClick=false;
+          try{
+            var stored=JSON.parse(localStorage.getItem(dragKey)||'null');
+            if(stored&&Number.isFinite(Number(stored.x))&&Number.isFinite(Number(stored.y))){
+              offset.x=Math.max(-600,Math.min(600,Number(stored.x)));
+              offset.y=Math.max(-600,Math.min(600,Number(stored.y)));
+            }
+          }catch(_e){}
+          function applyOffset(){
+            toggleRow.style.setProperty('transform',
+              'translate('+Math.round(offset.x)+'px,'+Math.round(offset.y+4)+'px)','important');
+          }
+          function clamp(v,min,max){
+            return Math.max(Math.min(min,max),Math.min(max,Math.max(min,v)));
+          }
+          applyOffset();
+          toggleRow.title='Chạm: bật/tắt Hán – Hàn · Nhấn giữ rồi kéo để di chuyển';
+          toggleRow.style.setProperty('touch-action','none','important');
+          toggleRow.style.setProperty('user-select','none','important');
+          toggleRow.addEventListener('pointerdown',function(e){
+            if(gesture||e.isPrimary===false||(e.pointerType==='mouse'&&e.button!==0))return;
+            gesture={
+              id:e.pointerId, x:e.clientX,y:e.clientY,
+              initialX:offset.x,initialY:offset.y,
+              bounds:toggleRow.getBoundingClientRect(),
+              active:false,timer:null
+            };
+            var current=gesture;
+            current.timer=setTimeout(function(){
+              if(gesture!==current)return;
+              current.active=true;
+              toggleRow.dataset.nhiDragging='true';
+              try{toggleRow.setPointerCapture(current.id);}catch(_e){}
+            },420);
+          });
+          toggleRow.addEventListener('pointermove',function(e){
+            var g=gesture;if(!g||g.id!==e.pointerId)return;
+            var dx=e.clientX-g.x,dy=e.clientY-g.y;
+            if(!g.active){
+              if(Math.hypot(dx,dy)>10){
+                clearTimeout(g.timer);gesture=null;
+              }
+              return;
+            }
+            e.preventDefault();
+            var container=f.getBoundingClientRect(),rect=g.bounds;
+            var lowX=g.initialX+container.left+8-rect.left;
+            var highX=g.initialX+container.right-8-rect.right;
+            var lowY=g.initialY+container.top+8-rect.top;
+            var highY=g.initialY+container.bottom-8-rect.bottom;
+            offset.x=clamp(g.initialX+dx,lowX,highX);
+            offset.y=clamp(g.initialY+dy,lowY,highY);
+            applyOffset();
+          },{passive:false});
+          function finishDrag(e){
+            var g=gesture;if(!g||g.id!==e.pointerId)return;
+            clearTimeout(g.timer);
+            if(g.active){
+              e.preventDefault();
+              suppressNextClick=true;
+              try{localStorage.setItem(dragKey,JSON.stringify(offset));}catch(_e){}
+              try{if(toggleRow.hasPointerCapture(g.id))toggleRow.releasePointerCapture(g.id);}catch(_e){}
+            }
+            delete toggleRow.dataset.nhiDragging;
+            gesture=null;
+          }
+          toggleRow.addEventListener('pointerup',finishDrag);
+          toggleRow.addEventListener('pointercancel',finishDrag);
+          toggleRow.addEventListener('click',function(e){
+            if(!suppressNextClick)return;
+            e.preventDefault();e.stopImmediatePropagation();
+            suppressNextClick=false;
+          },true);
+          toggleRow.addEventListener('dragstart',function(e){e.preventDefault();});
+          // Keep a previously saved position inside the current editor viewport.
+          requestAnimationFrame(function(){
+            if(!toggleRow.isConnected)return;
+            var rect=toggleRow.getBoundingClientRect(),bound=f.getBoundingClientRect();
+            offset.x+=Math.max(0,bound.left+8-rect.left)-Math.max(0,rect.right-(bound.right-8));
+            offset.y+=Math.max(0,bound.top+8-rect.top)-Math.max(0,rect.bottom-(bound.bottom-8));
+            applyOffset();
+          });
+        })();
         section.appendChild(toggleRow);
         hanjaInputGrid=el('div','nhi-hanja-input-grid');
         hanjaInputGrid.style.setProperty('grid-column','1 / -1','important');
@@ -5469,6 +5556,33 @@ html body #planBox .sdone .pstatus{
         undoButton.style.setProperty('font-size','clamp(10px,2.8vw,12px)','important');
       }
       c.appendChild(r);
+      // v117: set actual width/columns on the card itself, not only a CSS
+      // media query. Old inline !important rules otherwise keep arrows narrow.
+      if(window.matchMedia('(max-width:640px)').matches){
+        r.classList.add('nhi-mobile-wide-arrows');
+        var hasUndo=!!r.querySelector('.pundo');
+        var columns=hasUndo
+          ? 'minmax(0,.63fr) minmax(0,1.24fr) minmax(0,1.24fr) minmax(0,.95fr)'
+          : 'minmax(0,.62fr) minmax(0,1.36fr) minmax(0,1.36fr)';
+        [
+          ['display','grid'],['grid-template-columns',columns],
+          ['grid-template-rows','56px'],['gap',hasUndo?'5px':'6px'],
+          ['width','calc(100% - 8px)'],['max-width','none'],['min-width','0'],
+          ['margin','9px auto 13px'],['padding','0'],
+          ['justify-content','stretch'],['align-items','stretch'],
+          ['transform','none'],['flex-wrap','nowrap']
+        ].forEach(function(item){r.style.setProperty(item[0],item[1],'important');});
+        [hard,pv,nx].concat(hasUndo?[r.querySelector('.pundo')]:[]).forEach(function(button,i){
+          if(!button)return;
+          [
+            ['grid-column',String(i+1)],['grid-row','1'],['width','100%'],
+            ['min-width','0'],['max-width','none'],['height','56px'],
+            ['min-height','56px'],['max-height','56px'],['flex','none'],
+            ['margin','0'],['padding','0 5px'],
+            ['display','flex'],['align-items','center'],['justify-content','center']
+          ].forEach(function(item){button.style.setProperty(item[0],item[1],'important');});
+        });
+      }
       // Measure the available lane after mounting: here c.clientWidth is zero.
       c.appendChild(ibtn('pdel nhi-card-corner-trash', 'trash', function () { del(it.id); anim = 'next'; saveSess(); render(); }, 'Xoá từ này khỏi danh sách (Delete)'));
       if (s.imagePicker && window.NHI_IMAGES && window.NHI_IMAGES.picker) {
@@ -7547,11 +7661,12 @@ html body #planBox .pcard:has(.pfront.nhi-with-image)>.prate.nhi-rating-v3{
           // Old style fixes the control row to 470px!important. Force measured
           // bilingual lane width to keep the controls centered after X movement.
           if(rate){
-            if(window.matchMedia('(max-width:600px)').matches){
-              // Give mobile image cards the full available navigation width.
-              ['width','max-width','margin-left','margin-right','flex-shrink'].forEach(function(key){
-                rate.style.removeProperty(key);
-              });
+            if(window.matchMedia('(max-width:640px)').matches&&rate.classList.contains('nhi-mobile-wide-arrows')){
+              // An image/resize observer must never undo the mobile-width fix.
+              rate.style.setProperty('width','calc(100% - 8px)','important');
+              rate.style.setProperty('max-width','none','important');
+              rate.style.setProperty('margin-left','auto','important');
+              rate.style.setProperty('margin-right','auto','important');
             }else{
               rate.style.setProperty('width',rateWidth+'px','important');
               rate.style.setProperty('max-width',rateWidth+'px','important');
@@ -7565,8 +7680,17 @@ html body #planBox .pcard:has(.pfront.nhi-with-image)>.prate.nhi-rating-v3{
         card.style.removeProperty('--nhi-rate-left');
         card.style.removeProperty('--nhi-rate-width');
         var normalRate=card.querySelector(':scope>.prate.nhi-rating-v3');
-        if(normalRate)for(var key of ['width','max-width','margin-left','margin-right','flex-shrink'])
-          normalRate.style.removeProperty(key);
+        if(normalRate){
+          if(window.matchMedia('(max-width:640px)').matches&&normalRate.classList.contains('nhi-mobile-wide-arrows')){
+            normalRate.style.setProperty('width','calc(100% - 8px)','important');
+            normalRate.style.setProperty('max-width','none','important');
+            normalRate.style.setProperty('margin-left','auto','important');
+            normalRate.style.setProperty('margin-right','auto','important');
+          }else{
+            for(var key of ['width','max-width','margin-left','margin-right','flex-shrink'])
+              normalRate.style.removeProperty(key);
+          }
+        }
       }
       // When Đối chiếu opens, compress empty vertical margins and automatically
       // scroll the FRONT CONTENT (never the buttons) so the English panel's
@@ -8794,5 +8918,5 @@ html body #planBox .pcard .nhi-english-v5:not(.nhi-en-inline-two-spaces)
   content:none!important;
 }
 </style>
-<link rel="stylesheet" href="nhi-fixes-20261123.css?v=20261124-v116">
+<link rel="stylesheet" href="nhi-fixes-20261123.css?v=20261124-v117">
 </body></html>
