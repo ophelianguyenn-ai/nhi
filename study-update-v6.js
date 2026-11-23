@@ -355,15 +355,39 @@ function init(){
    defaultGroup.append(boldRow);
    globalHint.after(defaultGroup);
  }
- for(const [lang,label] of [['ko','Tiếng Hàn'],['vi','Tiếng Việt'],['en','Tiếng Anh']]){
+ let koReadout=null;
+  for(const [lang,label] of [['ko','Tiếng Hàn — mặt sau'],['vi','Tiếng Việt'],['en','Tiếng Anh']]){
    const row=make('div','setrow'),lab=make('label',null,label),select=make('select');
    select.id='nhiFont-'+lang;select.setAttribute('aria-label','Cỡ chữ '+label+' của thẻ đang học');
    lab.htmlFor=select.id;
-   for(let n=12;n<=72;n+=2){const option=make('option',null,n+'');option.value=n;select.append(option);}
+   for(let n=12;n<=72;n++){const option=make('option',null,n+' px');option.value=String(n);select.append(option);}
    select.value=String(defaults[lang]);
    select.onchange=()=>document.dispatchEvent(new CustomEvent('nhi:card-font-change',
      {detail:{lang,size:Number(select.value)}}));
-   controls[lang]=select;row.append(lab,select);settings?.append(row);
+   controls[lang]=select;row.append(lab,select);
+    if(lang==='ko'){
+      row.classList.add('nhi-ko-size-setting-row');
+      const quick=make('div','nhi-ko-size-touch-controls');
+      const smaller=make('button','ghost','A−'),larger=make('button','ghost','A+');
+      smaller.type='button';larger.type='button';
+      smaller.setAttribute('aria-label','Giảm cỡ chữ tiếng Hàn ở mặt sau');
+      larger.setAttribute('aria-label','Tăng cỡ chữ tiếng Hàn ở mặt sau');
+      koReadout=make('output','nhi-ko-size-readout',select.value+' px');
+      koReadout.setAttribute('aria-live','polite');
+      const adjust=step=>{
+        const current=Number(select.value)||defaults.ko;
+        const next=Math.max(12,Math.min(72,current+step));
+        if(next===current)return;
+        select.value=String(next);
+        select.dispatchEvent(new Event('change',{bubbles:true}));
+      };
+      smaller.addEventListener('click',()=>adjust(-2));
+      larger.addEventListener('click',()=>adjust(2));
+      select.addEventListener('change',()=>{koReadout.textContent=select.value+' px';});
+      quick.append(smaller,koReadout,larger);
+      row.append(quick);
+    }
+    settings?.append(row);
  }
  const syncFontControls=()=>{
    const card=document.querySelector('#planBox .pcard[data-nhi-card-id]');
@@ -373,6 +397,7 @@ function init(){
      const value=Number(saved[lang])||
        Math.max(12,Math.min(72,Math.round(defaults[lang]*globalScale/2)*2));
      if(controls[lang].value!==String(value))controls[lang].value=String(value);
+      if(lang==='ko'&&koReadout)koReadout.textContent=value+' px';
    }
  };
  document.addEventListener('nhi:card-font-selected',syncFontControls);
