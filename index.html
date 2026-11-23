@@ -596,7 +596,7 @@ section:not([hidden]) > .quiz, section:not([hidden]) > #cardWrap, .list > .row:n
 }
 </style>
 
-<script src="nhi-chat-voice-v1.js?v=20261117"></script><script src="hanja-v9.js?v=12"></script><script src="hanja-extra-v12.js"></script><script src="card-images-v11.js?v=20261122-image-layout-notify-v8"></script><script src="nhi-google-images-v1.js?v=20261114-study-v7"></script><script src="nhi-hard-minimal-v1.js?v=20261120-in-card-v2"></script><script src="nhi-verified-pairs-20261117.js?v=1"></script><script src="nhi-daily-pairs.js?v=20261119-micro-v1"></script><script src="nhi-all-lesson-pairs-v6.js?v=20261121-refined-51"></script><script src="nhi-lesson-20261121-segments-v1.js?v=20261122-reviewed-24"></script><script src="nhi-phrases-v5.js?v=20261121-refined"></script><script src="nhi-english-data-v6.js?v=20261113-reviewed-173"></script><script src="nhi-english-v5.js?v=20261124-topic-pastel-v3"></script><script src="recorded-voices-v11.js?v=20261119-banmai-injoon-daily"></script>
+<script src="nhi-chat-voice-v1.js?v=20261117"></script><script src="hanja-v9.js?v=12"></script><script src="hanja-extra-v12.js"></script><script src="card-images-v11.js?v=20261122-image-layout-notify-v8"></script><script src="nhi-google-images-v1.js?v=20261114-study-v7"></script><script src="nhi-hard-minimal-v1.js?v=20261120-in-card-v2"></script><script src="nhi-verified-pairs-20261117.js?v=1"></script><script src="nhi-daily-pairs.js?v=20261119-micro-v1"></script><script src="nhi-all-lesson-pairs-v6.js?v=20261121-refined-51"></script><script src="nhi-lesson-20261121-segments-v1.js?v=20261122-reviewed-24"></script><script src="nhi-phrases-v5.js?v=20261121-refined"></script><script src="nhi-english-data-v6.js?v=20261113-reviewed-173"></script><script src="nhi-english-v5.js?v=20261124-pastel-11-border-v4"></script><script src="recorded-voices-v11.js?v=20261119-banmai-injoon-daily"></script>
 <script src="qrcode.js" defer></script>
 <link rel="stylesheet" href="nhi-seven-fixes-20261117.css?v=1"><link rel="stylesheet" href="refresh-v9.css?v=13"><link rel="stylesheet" href="study-enhancements-v13.css?v=14"><link rel="stylesheet" href="nhi-updates-v1.css?v=1"><link rel="stylesheet" href="nhi-ai-resize-v2.css?v=1"><link rel="stylesheet" href="nhi-study-motion-v3.css?v=3"><link rel="stylesheet" href="nhi-interface-v4.css?v=4"><link rel="stylesheet" href="nhi-interface-v5.css?v=20261113-rollback-stable-v1"><link rel="stylesheet" href="nhi-seasons-v1.css?v=20261113-cartoon-soft-1">
 <link rel="stylesheet" href="nhi-living-garden-v1.css?v=20261113-cartoon-butterflies-v1">
@@ -5367,11 +5367,11 @@ html body #planBox .sdone .pstatus{
       });
       var r = el('div', 'prate nhi-rating-v3'), picked = s.picked[s.pos];
       var pv = ibtn('parrow nhi-prev-v3', 'left', function () { go(-1); }, 'Thẻ trước (←)');
-      pv.disabled = s.pos === 0;pv.setAttribute('aria-label','Thẻ trước');r.appendChild(pv);
+      pv.disabled = s.pos === 0;pv.setAttribute('aria-label','Thẻ trước');pv.appendChild(el('span','nhi-nav-arrow-label','Lùi'));r.appendChild(pv);
       var hard = btn('hard' + (picked === 'hard' ? ' picked' : ''), 'Khó', function () { rate('hard'); });
       r.appendChild(hard);
       var nx = ibtn('parrow nhi-next-v3', 'right', function () { go(1); }, 'Thẻ sau (→)');
-      nx.setAttribute('aria-label','Thẻ sau');r.appendChild(nx);
+      nx.setAttribute('aria-label','Thẻ sau');nx.appendChild(el('span','nhi-nav-arrow-label','Tiến'));r.appendChild(nx);
       if(undoHistory.length){
         var undoButton=btn('pundo','↶ Hoàn tác',undoDelete,
           undoHistory[undoHistory.length-1].type==='image'?'Khôi phục hình vừa xóa (Ctrl+Z)':'Khôi phục thẻ vừa xóa (Ctrl+Z)');
@@ -8727,5 +8727,5 @@ html body #planBox .pcard .nhi-english-v5:not(.nhi-en-inline-two-spaces)
   content:none!important;
 }
 </style>
-<link rel="stylesheet" href="nhi-fixes-20261123.css?v=20261124-r3">
+<link rel="stylesheet" href="nhi-fixes-20261123.css?v=20261124-r4">
 </body></html>
