@@ -491,15 +491,13 @@ function mount(parent,id,vi,ko,options){
  if(!parent)return;
  const before=parent.querySelector('.nhi-english-v5');if(before)before.remove();
  const box=document.createElement('section');box._format=options?.format;box.className='nhi-english-v5';box.setAttribute('aria-label','Tiếng Anh');
-  // Very light pastel derived from the actual card topic, not a fixed hue.
-  // Restore the ORIGINAL English frame's discreet TOP BORDER (v5 stylesheet).
-  box.style.setProperty('background',
-    'color-mix(in srgb,var(--tc,var(--day,var(--accent))) 11%,var(--surface) 89%)','important');
+  // Classic English frame: same pale green on every topic, thin green top border.
+  box.style.setProperty('background','var(--nhi-english-green-bg,#eef8df)','important');
   box.style.setProperty('border','0','important');
   box.style.setProperty('border-top',
-    '1px solid color-mix(in srgb,var(--accent-d) 42%,transparent)','important');
+    '1px solid var(--nhi-english-green-border,#739e40)','important');
   box.style.setProperty('border-radius','10px','important');
-  box.style.removeProperty('box-shadow');
+  box.style.setProperty('box-shadow','none','important');
  box.innerHTML='<div class="nhi-en-head"><div class="nhi-en-main"><p class="nhi-en-translation"></p><p class="nhi-en-ipa"></p></div><span class="nhi-en-head-actions"><button type="button" class="nhi-en-speak" aria-label="Nghe tiếng Anh">🎧</button></span></div><p class="nhi-en-status" aria-live="polite"></p><div class="nhi-en-tools"><button type="button" class="nhi-en-review" title="Khi bấm, nội dung tiếng Việt và tiếng Hàn sẽ được gửi đến Google Translate để đối chiếu tự động. Đây không phải kiểm duyệt chuyên gia.">Đối chiếu</button></div>';
  if(window.NHI_STUDY){box.querySelector('.nhi-en-speak').innerHTML=window.NHI_STUDY.icon('headphones');}
  if(options?.toggle){const holder=document.createElement('span');holder.className='nhi-en-forgot';const check=document.createElement('button');check.type='button';check.className='nhi-thinking-button';check.setAttribute('aria-label','Chưa nhớ tiếng Anh');check.title='Chưa nhớ tiếng Anh';check.setAttribute('aria-pressed',String(!!options.unremembered));check.innerHTML='<span class="nhi-emoji-think" aria-hidden="true">🤔</span>';const bubble=document.createElement('span');bubble.className='nhi-forgot-bubble';bubble.hidden=true;bubble.setAttribute('role','status');check.onclick=()=>{const on=check.getAttribute('aria-pressed')!=='true';check.setAttribute('aria-pressed',String(on));options.toggle(on);bubble.textContent=on?'Mình sẽ ôn lại tiếng Anh nhé!':'Đã nhớ tiếng Anh rồi!';bubble.hidden=false;clearTimeout(holder._timer);holder._timer=setTimeout(()=>bubble.hidden=true,2800);};holder.append(check,bubble);box.querySelector('.nhi-en-head-actions').append(holder);}
