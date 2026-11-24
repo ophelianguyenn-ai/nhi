@@ -46,6 +46,8 @@ jobs:
             nhi-demo-pixel-cover-v5-2.js nhi-demo-pixel-cover-v5-2.css
             nhi-solo-cover-v7.css nhi-card-polish-v8.css nhi-card-polish-v9.css nhi-card-polish-v10.css nhi-cover-palette-v12.css nhi-card-controls-v8.js
             nhi-luong-articulated-v4.svg nhi-romance-art-v4.css nhi-polish-20261115.css nhi-stage-move-v1.js nhi-refine-20261115.css nhi-celebration-cat-v1.svg nhi-final-tight-v1.css nhi-kitten-lifelike-v2.svg nhi-kitten-meow-v1.js nhi-card-no-overlap-v1.js nhi-kitten-photo-v3.svg nhi-chat-voice-v1.js nhi-chat-image-notes-v1.css nhi-corner-v2.js nhi-corner-v2.css nhi-chat-note-card-v2.css nhi-cat-phu-ba-20261117-v2.svg nhi-original-gif-review-v1.css nhi-cat-original-8frames-20261117.gif
+            nhi-action-layout-v122.js nhi-fixes-20261123.css lich-hoc-khoi-phuc.html nhi-lesson-20261121-segments-v1.js
+            nhi-ui-refine-v2.js nhi-ui-refine-v2.css nhi-last-hard-question-v1.webp nhi-layout-20261121-v1.css nhi-card-fit-fixes-20261121.css
             index.html nhi-neck-options.html sw.js manifest.webmanifest
             lessons.json technical-images.json audio-manifest.json
             qrcode.js garden-v10.js
@@ -80,6 +82,10 @@ jobs:
           mkdir -p _site/assets/romantic-demo
           cp -- assets/romantic-demo/*.png _site/assets/romantic-demo/
           python3 scripts/build_cover_gif_frames.py --output _site/assets/cover-gif
+          python3 scripts/build_cover_icons.py --output _site
+          for size in 32 180 192 512; do
+            test -s "_site/nhi-cover-icon-${size}.png"
+          done
           touch _site/.nojekyll
 
           test -s _site/index.html
