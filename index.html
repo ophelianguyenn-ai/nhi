@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<script src="nhi-action-layout-v122.js?v=20261124-v122"></script>
+<script src="nhi-action-layout-v122.js?v=20261124-v123"></script>
 <title>Nhi’s Learning Corner</title>
 <meta name="description" content="Góc học tiếng Hàn của Nhi: bài học theo ngày, thẻ ghi nhớ, ôn lặp lại ngắt quãng Việt–Hàn.">
 <meta name="theme-color" content="#7C3AED">
@@ -1490,6 +1490,10 @@ html body #planBox .sdone .pstatus{
   <div class="sheetbox" role="dialog" aria-modal="true" aria-labelledby="setTitle">
     <div class="sheethead"><h2 id="setTitle">Cài đặt</h2><button type="button" class="iconbtn sm" data-close aria-label="Đóng" data-ic="x"></button></div>
 
+    <details class="setgroup nhi-action-settings-v122" id="nhiActionSettingsV122">
+      <summary style="font-size:15px;font-weight:800;cursor:pointer;padding:6px 0">🎛 Nút điều hướng thẻ</summary>
+      <div id="nhiActionSettingsBodyV122"><p class="voice-note">Đang tải tùy chỉnh Khó, Lùi, Tiến và Thùng rác…</p></div>
+    </details>
     <section class="setgroup nhi-transitions-settings" id="nhiTransitionSettings" aria-labelledby="nhiTransitionTitle">
       <h3 id="nhiTransitionTitle">✨ Hiệu ứng chuyển cảnh</h3>
       <p class="voice-note">Chọn kiểu mở/đóng cửa sổ và chuyển thẻ. Cửa sổ sửa thẻ sử dụng đúng hiệu ứng của Cài đặt tổng.</p>
@@ -6615,7 +6619,10 @@ html body #planBox .sdone .pstatus{
       var shell=$('setSheet'),panel=shell.querySelector('.sheetbox');
       function commit(){shell.hidden=!open;document.body.classList.toggle('modal-open',!!open);}
       if(open){
-        commit();paintSettings();paintVoiceStatus();paintSyncPanel();
+        commit();
+        if(window.NHI_ACTION_LAYOUT_V122)window.NHI_ACTION_LAYOUT_V122.initSettings();
+        panel.scrollTop=0;
+        paintSettings();paintVoiceStatus();paintSyncPanel();
         if(window.NHI_WINDOW_FX)window.NHI_WINDOW_FX.open(panel,'settings');
       }else if(window.NHI_WINDOW_FX&&!shell.hidden){
         window.NHI_WINDOW_FX.close(panel,'settings',commit);
@@ -8940,5 +8947,5 @@ html body #planBox .pcard .nhi-english-v5:not(.nhi-en-inline-two-spaces)
   content:none!important;
 }
 </style>
-<link rel="stylesheet" href="nhi-fixes-20261123.css?v=20261124-v122">
+<link rel="stylesheet" href="nhi-fixes-20261123.css?v=20261124-v123">
 </body></html>
