@@ -390,3 +390,38 @@ html body .nhi-study-topbar>.nhi-focus-toggle{
  html body #topbar .nhi-study-topbar{flex:1 0 100%!important;width:100%!important;max-width:100%!important}
  html body.focus #menuList{display:none!important}
 }
+
+/* v121: compact equal action widths; align trash with arrow bottoms. */
+html body #planBox .pcard>.prate.nhi-desktop-equal-v121{
+ display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr))!important;
+ width:min(calc(100% - 44px),385px)!important;max-width:385px!important;
+ min-width:0!important;gap:5px!important;padding:0!important;
+ justify-content:stretch!important;align-items:stretch!important;
+}
+html body #planBox .pcard>.prate.nhi-desktop-equal-v121>:is(.hard,.nhi-prev-v3,.nhi-next-v3){
+ width:100%!important;min-width:0!important;max-width:none!important;
+ height:50px!important;min-height:50px!important;max-height:50px!important;
+ margin:0!important;box-sizing:border-box!important;flex:none!important;
+ justify-self:stretch!important;align-self:stretch!important;
+}
+html body #planBox .pcard>.prate.nhi-desktop-equal-v121>.hard{grid-column:1!important;grid-row:1!important}
+html body #planBox .pcard>.prate.nhi-desktop-equal-v121>.nhi-prev-v3{grid-column:2!important;grid-row:1!important}
+html body #planBox .pcard>.prate.nhi-desktop-equal-v121>.nhi-next-v3{grid-column:3!important;grid-row:1!important}
+html body #planBox .pcard>.prate.nhi-desktop-equal-v121:not(.nhi-rate-undo-inline){grid-template-rows:50px!important}
+html body #planBox .pcard>.prate.nhi-desktop-equal-v121.nhi-rate-undo-inline{grid-template-rows:50px 38px!important}
+html body #planBox .pcard>.prate.nhi-desktop-equal-v121>.pundo{grid-column:2!important;grid-row:2!important;min-height:38px!important;max-height:38px!important;height:38px!important}
+html body #planBox .pcard>.prate.nhi-mobile-wide-arrows>.nhi-inline-trash-v119{align-self:end!important}
+html body #planBox .pcard>.prate.nhi-mobile-wide-arrows>:is(.hard,.nhi-prev-v3,.nhi-next-v3){
+ width:100%!important;min-width:0!important;max-width:none!important;justify-self:stretch!important;align-self:stretch!important;
+}
+@media(max-width:640px),(max-width:900px) and (pointer:coarse){
+ html body.focus #app{min-height:100dvh!important;justify-content:flex-start!important;padding-bottom:env(safe-area-inset-bottom,0px)!important}
+ html body.focus #planBox .nhi-study-topbar{flex:none!important;margin:0 0 10px!important;align-self:stretch!important}
+ html body.focus #planBox .pcard.nhi-focus-fill-v121{
+  display:flex!important;flex-direction:column!important;
+  min-height:var(--nhi-focus-available-height,calc(100dvh - 78px))!important;
+  height:auto!important;max-height:none!important;box-sizing:border-box!important;
+ }
+ html body.focus #planBox .pcard.nhi-focus-fill-v121>.pfront{flex:1 1 auto!important;min-height:0!important}
+ html body.focus #planBox .pcard.nhi-focus-fill-v121>.prate{flex:none!important;margin-top:auto!important}
+}
