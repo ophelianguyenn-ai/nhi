@@ -3,6 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<script src="nhi-action-layout-v122.js?v=20261124-v122"></script>
 <title>Nhi’s Learning Corner</title>
 <meta name="description" content="Góc học tiếng Hàn của Nhi: bài học theo ngày, thẻ ghi nhớ, ôn lặp lại ngắt quãng Việt–Hàn.">
 <meta name="theme-color" content="#7C3AED">
@@ -4965,7 +4966,7 @@ html body #planBox .sdone .pstatus{
       document.body.classList.toggle('focus', !!on);
       var globalBar=$('topbar');
       if(!globalBar)return;
-      if(on&&mobileStudyViewport()){
+      if(on){
         globalBar.dataset.nhiFocusHidden='1';
         globalBar.hidden=true;
         globalBar.style.setProperty('display','none','important');
@@ -5400,7 +5401,7 @@ html body #planBox .sdone .pstatus{
       [['background','color-mix(in srgb,var(--nhi-progress-color,var(--accent-t)) 57%,white 43%)'],['background-image','none'],['box-shadow','none'],['min-width','5px']].forEach(function(p){sp.style.setProperty(p[0],p[1],'important');});
       [['display','grid'],['grid-template-columns','max-content minmax(0,1fr) max-content 30px'],['gap','7px'],['align-items','center'],['min-width','0']].forEach(function(p){head.style.setProperty(p[0],p[1],'important');});
       head.appendChild(el('span', 'counter', (s.pos + 1) + ' / ' + s.queue.length));
-      var fb = ibtn('iconbtn sm nhi-focus-toggle', focus ? 'unfocus' : 'focus', function () { var oldTop=head.getBoundingClientRect().top; if(!focus&&mobileStudyViewport())window.scrollTo({top:0,behavior:'instant'}); setFocus(!focus); render(); if(!reduceMotion()){requestAnimationFrame(function(){var nextHead=document.querySelector('.nhi-study-topbar');if(!nextHead)return;var dy=oldTop-nextHead.getBoundingClientRect().top;if(Math.abs(dy)>1&&nextHead.animate)nextHead.animate([{transform:'translateY('+dy+'px)'},{transform:'translateY(0px)'}],{duration:820,easing:'cubic-bezier(.25,.65,.25,1)'});});} }, focus ? 'Thoát chế độ tập trung (Esc)' : 'Chế độ tập trung (F)'); fb.setAttribute('aria-pressed', String(focus)); [['background','var(--surface)'],['color','var(--ink)'],['border','2px solid var(--line)'],['box-shadow','0 2px 0 var(--edge)'],['filter','none']].forEach(function(p){fb.style.setProperty(p[0],p[1],'important');}); head.appendChild(fb);
+      var fb = ibtn('iconbtn sm nhi-focus-toggle', focus ? 'unfocus' : 'focus', function () { var oldTop=head.getBoundingClientRect().top; if(!focus)window.scrollTo({top:0,behavior:'instant'}); setFocus(!focus); render(); if(!reduceMotion()){requestAnimationFrame(function(){var nextHead=document.querySelector('.nhi-study-topbar');if(!nextHead)return;var dy=oldTop-nextHead.getBoundingClientRect().top;if(Math.abs(dy)>1&&nextHead.animate)nextHead.animate([{transform:'translateY('+dy+'px)'},{transform:'translateY(0px)'}],{duration:820,easing:'cubic-bezier(.25,.65,.25,1)'});});} }, focus ? 'Thoát chế độ tập trung (Esc)' : 'Chế độ tập trung (F)'); fb.setAttribute('aria-pressed', String(focus)); [['background','var(--surface)'],['color','var(--ink)'],['border','2px solid var(--line)'],['box-shadow','0 2px 0 var(--edge)'],['filter','none']].forEach(function(p){fb.style.setProperty(p[0],p[1],'important');}); head.appendChild(fb);
       head.classList.add('nhi-study-topbar');
       var topbar = $('topbar');
       // Mobile focus mode hides the entire brand/settings/menu bar, so keep
@@ -5563,135 +5564,18 @@ html body #planBox .sdone .pstatus{
       r.appendChild(hard);
       var nx = ibtn('parrow nhi-next-v3', 'right', function () { go(1); }, 'Thẻ sau (→)');
       nx.setAttribute('aria-label','Thẻ sau');r.appendChild(nx);
+      var undoButton=null;
       if(undoHistory.length){
-        var undoButton=btn('pundo','↶ Hoàn tác',undoDelete,
+        undoButton=btn('pundo','↶ Hoàn tác',undoDelete,
           undoHistory[undoHistory.length-1].type==='image'?'Khôi phục hình vừa xóa (Ctrl+Z)':'Khôi phục thẻ vừa xóa (Ctrl+Z)');
-        r.appendChild(undoButton);r.classList.add('nhi-rate-undo-inline');
-        // Inline-important grid overrides historical flex wrap and order rules.
-        r.style.setProperty('display','grid','important');
-        r.style.setProperty('grid-template-columns',
-          window.matchMedia('(max-width:600px)').matches
-          ? 'minmax(52px,.72fr) minmax(66px,1.28fr) minmax(66px,1.28fr) minmax(72px,.95fr)'
-          : 'minmax(60px,1fr) 44px 44px 94px','important');
-        r.style.setProperty('width',window.matchMedia('(max-width:600px)').matches?'calc(100% - 10px)':'min(calc(100% - 12px),480px)','important');
-        r.style.setProperty('max-width','480px','important');
-        r.style.setProperty('margin','12px auto 14px','important');
-        r.style.setProperty('position','relative','important');
-        r.style.setProperty('inset','auto','important');
-        r.style.setProperty('transform','none','important');
-        r.style.setProperty('grid-template-rows',window.matchMedia('(max-width:600px)').matches?'54px':'50px','important');
-        r.style.setProperty('gap','4px','important');
-        r.style.setProperty('flex-wrap','nowrap','important');
-        [[hard,1],[pv,2],[nx,3],[undoButton,4]].forEach(function(pair){
-          var button=pair[0];
-          button.style.setProperty('grid-column',String(pair[1]),'important');
-          button.style.setProperty('grid-row','1','important');
-          button.style.setProperty('min-width','0','important');
-          button.style.setProperty('max-width','none','important');
-          button.style.setProperty('width','100%','important');
-          button.style.setProperty('height',window.matchMedia('(max-width:600px)').matches?'54px':'50px','important');
-          button.style.setProperty('min-height',window.matchMedia('(max-width:600px)').matches?'54px':'50px','important');
-          button.style.setProperty('max-height',window.matchMedia('(max-width:600px)').matches?'54px':'50px','important');
-          button.style.setProperty('flex','none','important');
-          button.style.setProperty('position','static','important');
-          button.style.setProperty('transform','none','important');
-        });
-        undoButton.style.setProperty('white-space','nowrap','important');
-        undoButton.style.setProperty('font-size','clamp(10px,2.8vw,12px)','important');
       }
       c.appendChild(r);
-      // v117: set actual width/columns on the card itself, not only a CSS
-      // media query. Old inline !important rules otherwise keep arrows narrow.
-      if(mobileStudyViewport()){
-        r.classList.add('nhi-mobile-wide-arrows');
-        var hasUndo=!!r.querySelector('.pundo');
-        // v119: 24px side gutters, compact 5px gaps, equal three main
-        // buttons plus a separate in-flow trash column on the same row.
-        [
-          ['display','grid'],['grid-template-columns','repeat(3,minmax(0,1fr)) 30px'],
-          ['grid-template-rows',hasUndo?'52px 38px':'52px'],
-          ['column-gap','5px'],['row-gap',hasUndo?'6px':'0'],
-          ['width','calc(100% - 24px)'],['max-width','none'],['min-width','0'],
-          ['margin','10px 0 12px 24px'],['padding','0'],
-          ['justify-content','stretch'],['align-items','center'],
-          ['transform','none'],['translate','none'],['flex-wrap','nowrap']
-        ].forEach(function(item){r.style.setProperty(item[0],item[1],'important');});
-        [hard,pv,nx].forEach(function(button,i){
-          [
-            ['grid-column',String(i+1)],['grid-row','1'],['width','100%'],
-            ['min-width','0'],['max-width','none'],['height','52px'],
-            ['min-height','52px'],['max-height','52px'],['flex','none'],
-            ['margin','0'],['padding','0 3px'],['order','0'],['position','static'],
-            ['display','flex'],['align-items','center'],['justify-content','center'],
-            ['box-sizing','border-box'],['justify-self','stretch'],['align-self','stretch']
-          ].forEach(function(item){button.style.setProperty(item[0],item[1],'important');});
-        });
-        [[pv,'linear-gradient(170deg,#ffe9f2,#fbd4e5)','#9d416b','#e8a0be','#e5a2ba'],
-         [nx,'linear-gradient(170deg,#ffe9f2,#fbd4e5)','#9d416b','#e8a0be','#e5a2ba']].forEach(function(p){
-          [['background',p[1]],['color',p[2]],['border','2px solid '+p[3]],['box-shadow','0 4px 0 '+p[4]],['opacity',p[0].disabled?'.65':'1']].forEach(function(q){p[0].style.setProperty(q[0],q[1],'important');});
-        });
-        if(hasUndo){
-          var u=r.querySelector('.pundo');
-          [
-            ['grid-column','2'],['grid-row','2'],['width','100%'],
-            ['min-width','0'],['max-width','none'],['height','38px'],
-            ['min-height','38px'],['max-height','38px'],['order','0'],
-            ['padding','0 4px'],['position','static'],['margin','0']
-          ].forEach(function(item){u.style.setProperty(item[0],item[1],'important');});
-        }
-      }
-      if(!mobileStudyViewport()){
-        // Three equally sized desktop controls (125px max rather than the old
-        // 145px Hard button). Preserve the compact original spacing.
-        r.classList.add('nhi-desktop-equal-v121');
-        var desktopUndo=r.querySelector('.pundo');
-        [
-          ['display','grid'],['grid-template-columns','repeat(3,minmax(0,1fr))'],
-          ['grid-template-rows',desktopUndo?'50px 38px':'50px'],
-          ['gap','5px'],['width','min(calc(100% - 44px),385px)'],
-          ['max-width','385px'],['min-width','0'],['padding','0'],
-          ['margin','10px auto 12px'],['justify-content','stretch'],['align-items','stretch'],
-          ['box-sizing','border-box'],['transform','none'],['translate','none']
-        ].forEach(function(p){r.style.setProperty(p[0],p[1],'important');});
-        [hard,pv,nx].forEach(function(b,j){
-          [
-            ['grid-column',String(j+1)],['grid-row','1'],['width','100%'],
-            ['min-width','0'],['max-width','none'],['height','50px'],
-            ['min-height','50px'],['max-height','50px'],['flex','none'],
-            ['margin','0'],['padding','0 4px'],['position','static'],['order','0'],
-            ['display','flex'],['align-items','center'],['justify-content','center'],
-            ['align-self','stretch'],['justify-self','stretch'],['box-sizing','border-box']
-          ].forEach(function(p){b.style.setProperty(p[0],p[1],'important');});
-        });
-        if(desktopUndo){
-          [['grid-column','2'],['grid-row','2'],['width','100%'],['height','38px'],['min-height','38px'],['max-height','38px'],['position','static'],['margin','0'],['padding','0 4px']].forEach(function(p){desktopUndo.style.setProperty(p[0],p[1],'important');});
-        }
-      }
       var trash=ibtn('pdel nhi-card-corner-trash','trash',function(){del(it.id);anim='next';saveSess();render();},'Xoá từ này khỏi danh sách (Delete)');
-      [['background','transparent'],['color','#ad841e'],['border','1px solid #d8a324'],['box-shadow','none'],['opacity','1']].forEach(function(p){trash.style.setProperty(p[0],p[1],'important');});
-      if(mobileStudyViewport()){
-        trash.classList.add('nhi-inline-trash-v119');
-        [['grid-column','4'],['grid-row','1'],['position','static'],['inset','auto'],['width','30px'],['min-width','30px'],['max-width','30px'],['height','30px'],['min-height','30px'],['max-height','30px'],['margin','0'],['padding','4px'],['align-self','end'],['justify-self','end'],['display','grid'],['place-items','center'],['border-radius','9px'],['flex','none'],['order','0']].forEach(function(p){trash.style.setProperty(p[0],p[1],'important');});
-        r.appendChild(trash);
-      }else {
+      if(window.NHI_ACTION_LAYOUT_V122){
+        window.NHI_ACTION_LAYOUT_V122.mount(c,r,{hard:hard,prev:pv,next:nx},trash,undoButton);
+      }else{
+        if(undoButton)r.appendChild(undoButton);
         c.appendChild(trash);
-        // Align the corner icon with the actual bottom edge of the arrows,
-        // including photo cards and the optional second Undo row.
-        function alignDesktopTrash(){
-          if(!c.isConnected||!nx.isConnected)return;
-          var bottom=c.getBoundingClientRect().bottom-nx.getBoundingClientRect().bottom;
-          if(Number.isFinite(bottom))trash.style.setProperty('bottom',Math.max(0,bottom)+'px','important');
-        }
-        requestAnimationFrame(function(){
-          alignDesktopTrash();
-          if(typeof ResizeObserver!=='undefined'&&c.isConnected){
-            var watchTrash=new ResizeObserver(alignDesktopTrash);
-            watchTrash.observe(c);watchTrash.observe(r);
-            // Disconnect when a subsequent card replaces this card.
-            var watchRemoval=new MutationObserver(function(){if(!c.isConnected){watchTrash.disconnect();watchRemoval.disconnect();}});
-            watchRemoval.observe($('planBox'),{childList:true,subtree:true});
-          }
-        });
       }
       if (s.imagePicker && window.NHI_IMAGES && window.NHI_IMAGES.picker) {
         c.appendChild(window.NHI_IMAGES.picker(it, function (image) {
@@ -5725,15 +5609,15 @@ html body #planBox .sdone .pstatus{
         }
       }
       wrap.appendChild(c); v.appendChild(wrap);
-      if(focus&&mobileStudyViewport()){
-        c.classList.add('nhi-focus-fill-v121');
+      if(focus){
+        c.classList.add('nhi-focus-fill-v122');
         var updateFocusHeight=function(){
           if(!c.isConnected||!document.body.classList.contains('focus'))return;
           var vp=window.visualViewport;
           var viewHeight=vp?vp.height:window.innerHeight;
-          var header=document.querySelector('#planBox .nhi-study-topbar');
-          var top=(header?header.getBoundingClientRect().bottom+10:c.getBoundingClientRect().top)-(vp?vp.offsetTop:0);
-          var available=Math.max(300,Math.floor(viewHeight-Math.max(0,top)-18));
+          // Measure the card itself, independent of the animated progress header.
+          var top=c.getBoundingClientRect().top-(vp?vp.offsetTop:0);
+          var available=Math.max(300,Math.floor(viewHeight-Math.max(0,top)-10));
           c.style.setProperty('--nhi-focus-available-height',available+'px');
           c.style.setProperty('min-height',available+'px','important');
           c.style.setProperty('height','auto','important');
@@ -7837,7 +7721,7 @@ html body #planBox .pcard:has(.pfront.nhi-with-image)>.prate.nhi-rating-v3{
       var compareReady=!!expanded&&!!expanded.querySelector('.nhi-en-choice');
       front.classList.toggle('nhi-comparison-open',compareReady);
       if(compareReady&&front.classList.contains('nhi-with-image')){
-        var rateForClearance=card.querySelector(':scope>.prate.nhi-rating-v3');
+        var rateForClearance=card.querySelector(':scope>.prate');
         if(observedComparison!==expanded){
           if(comparisonResizeObserver)comparisonResizeObserver.disconnect();
           observedComparison=expanded;
@@ -9056,5 +8940,5 @@ html body #planBox .pcard .nhi-english-v5:not(.nhi-en-inline-two-spaces)
   content:none!important;
 }
 </style>
-<link rel="stylesheet" href="nhi-fixes-20261123.css?v=20261124-v121">
+<link rel="stylesheet" href="nhi-fixes-20261123.css?v=20261124-v122">
 </body></html>
