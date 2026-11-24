@@ -1,9 +1,9 @@
 // Offline support: network-first for GitHub Pages and static assets.
 // Fall back to cache only when offline. Different cache key forces eviction of earlier stale CSS/JS.
-const CACHE = 'nhi-corner-v131-cover-icon';
+const CACHE = 'nhi-corner-v132-transparent-mascot';
 const CORE = [
   'nhi-cover-icon-32.png','nhi-cover-icon-180.png','nhi-cover-icon-192.png','nhi-cover-icon-512.png',
-  'nhi-cover-icon-32.png?v=131','nhi-cover-icon-180.png?v=131','nhi-cover-icon-192.png?v=131','nhi-cover-icon-512.png?v=131','manifest.webmanifest?v=131',
+  'nhi-cover-icon-32.png?v=132','nhi-cover-icon-180.png?v=132','nhi-cover-icon-192.png?v=132','nhi-cover-icon-512.png?v=132','manifest.webmanifest?v=132',
   'nhi-action-layout-v122.js',
   'nhi-fixes-20261123.css','study-update-v6.js','study-update-v6.css','nhi-november-v15.js','nhi-november-v15.css',
   'nhi-late-2026.js','nhi-late-2026.css','nhi-romance-v1.js','nhi-romance-v1.css','nhi-luong-v1.svg','nhi-couple-gif-v1.js','nhi-couple-gif-v1.css',
