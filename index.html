@@ -1490,10 +1490,69 @@ html body #planBox .sdone .pstatus{
   <div class="sheetbox" role="dialog" aria-modal="true" aria-labelledby="setTitle">
     <div class="sheethead"><h2 id="setTitle">Cài đặt</h2><button type="button" class="iconbtn sm" data-close aria-label="Đóng" data-ic="x"></button></div>
 
+<style id="nhi-settings-drag-style-v125">
+#setSheet .sheetbox{
+  position:relative!important;left:var(--nhi-settings-x,0px)!important;top:var(--nhi-settings-y,0px)!important;
+  max-height:min(70dvh,760px)!important;overscroll-behavior:contain;
+}
+#setSheet .sheethead{cursor:grab;touch-action:none;user-select:none;-webkit-user-select:none;flex-shrink:0}
+#setSheet .sheethead::after{content:"";position:absolute;top:5px;left:50%;width:40px;height:4px;border-radius:99px;background:var(--edge,#b4d5e3);transform:translateX(-50%);pointer-events:none}
+#setSheet .sheethead button{cursor:pointer;touch-action:manipulation}
+#setSheet .sheethead.nhi-settings-dragging{cursor:grabbing}
+#setSheet>.scrim{background:rgb(20 12 40 / .06)!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important}
+@media(max-width:640px),(max-width:900px) and (pointer:coarse){
+  #setSheet .sheetbox{max-height:min(56dvh,540px)!important}
+}
+</style>
+<script id="nhi-settings-drag-v125">
+(function(){
+  'use strict';
+  const shell=document.getElementById('setSheet');
+  const panel=shell&&shell.querySelector('.sheetbox');
+  const head=panel&&panel.querySelector('.sheethead');
+  if(!head)return;
+  let x=0,y=0,drag=null;
+  function bounds(){
+    return {x:Math.max(0,(shell.clientWidth-panel.offsetWidth)/2-8),
+      y:Math.max(0,(shell.clientHeight-panel.offsetHeight)/2-8)};
+  }
+  function move(nx,ny){
+    if(shell.hidden||!panel.offsetWidth)return;
+    const b=bounds();
+    x=Math.max(-b.x,Math.min(b.x,nx));
+    y=Math.max(-b.y,Math.min(b.y,ny));
+    panel.style.setProperty('--nhi-settings-x',x+'px');
+    panel.style.setProperty('--nhi-settings-y',y+'px');
+  }
+  function stop(e){
+    if(!drag||(e&&e.pointerId!==drag.id))return;
+    const id=drag.id;drag=null;
+    head.classList.remove('nhi-settings-dragging');
+    if(head.hasPointerCapture&&head.hasPointerCapture(id))head.releasePointerCapture(id);
+  }
+  head.title='Kéo thanh này để di chuyển cửa sổ Cài đặt';
+  head.addEventListener('pointerdown',e=>{
+    if(drag||e.isPrimary===false||e.button!==0||e.target.closest('button,input,select,textarea,a,[data-close]'))return;
+    move(x,y);
+    drag={id:e.pointerId,sx:e.clientX,sy:e.clientY,x,y};
+    head.setPointerCapture(e.pointerId);
+    head.classList.add('nhi-settings-dragging');e.preventDefault();
+  });
+  head.addEventListener('pointermove',e=>{
+    if(!drag||e.pointerId!==drag.id)return;
+    move(drag.x+e.clientX-drag.sx,drag.y+e.clientY-drag.sy);
+  });
+  ['pointerup','pointercancel','lostpointercapture'].forEach(t=>head.addEventListener(t,stop));
+  head.addEventListener('dblclick',e=>{if(!e.target.closest('button'))move(0,0);});
+  window.addEventListener('resize',()=>move(x,y),{passive:true});
+  if(typeof ResizeObserver!=='undefined'){const ro=new ResizeObserver(()=>move(x,y));ro.observe(panel);}
+  if(typeof MutationObserver!=='undefined'){new MutationObserver(()=>{if(shell.hidden)stop();else requestAnimationFrame(()=>move(x,y));}).observe(shell,{attributes:true,attributeFilter:['hidden']});}
+})();
+</script>
     <details class="setgroup nhi-action-settings-v122" id="nhiActionSettingsV122">
       <summary style="font-size:15px;font-weight:800;cursor:pointer;padding:6px 0">🎛 Nút điều hướng thẻ</summary>
       <div id="nhiActionSettingsBodyV122"><p class="voice-note" role="status">Không thể mở tùy chỉnh. Hãy tải lại trang.</p></div>
-      <script id="nhi-action-layout-inline-v124">
+      <script id="nhi-action-layout-inline-v125">
 /* v122: one isolated layout owner for the four study action buttons.
    Device preferences only; never touches cards or study progress. */
 (function(){
@@ -1622,7 +1681,7 @@ function initSettings(){
  }
  if(root.dataset.ready==='1')return;
  root.replaceChildren();
- const help=document.createElement('p');help.className='voice-note';help.textContent='Mặc định ba nút bằng nhau. Chỉnh từng nút riêng; khi màn hình hẹp, chiều rộng tự co theo tỉ lệ để không chồng lên thùng rác. Màu thùng rác chỉ áp dụng cho viền và biểu tượng.';root.append(help);
+ const help=document.createElement('p');help.className='voice-note';help.textContent='Mặc định ba nút bằng nhau. Chỉnh từng nút riêng; khi màn hình hẹp, chiều rộng tự co theo tỉ lệ để không chồng lên thùng rác. Màu thùng rác chỉ áp dụng cho viền và biểu tượng. Thay đổi được áp dụng ngay trên thẻ đang mở; kéo thanh Cài đặt để nhìn rõ thẻ.';root.append(help);
  const selector=document.createElement('select');selector.className='field';selector.setAttribute('aria-label','Thiết bị cần tùy chỉnh');
  [['desktop','Máy tính'],['phone','Điện thoại']].forEach(([v,t])=>selector.add(new Option(t,v)));
  selector.value=isPhone()?'phone':'desktop';root.append(selector);
@@ -1633,7 +1692,16 @@ function initSettings(){
      const label=document.createElement('label');label.className='nhi-action-setting-field';const title=document.createElement('span');title.textContent=txt;
      const input=document.createElement('input');input.type=type;input.setAttribute('aria-label',txt);
      if(type==='number'){input.min=min;input.max=max;input.step='1';}
-     input.value=obj[key];input.addEventListener('change',()=>{obj[key]=type==='color'?validColor(input.value,obj[key]):clamp(input.value,min,max,obj[key]);input.value=obj[key];persist();});
+     input.value=obj[key];
+     function applyLive(commit){
+       const raw=input.value;
+       if(type==='number'&&!commit&&(raw.trim()===''||!Number.isFinite(Number(raw))||Number(raw)<min||Number(raw)>max))return;
+       const next=type==='color'?validColor(raw,obj[key]):raw.trim()===''?obj[key]:clamp(raw,min,max,obj[key]);
+       if(next!==obj[key]){obj[key]=next;persist();}
+       if(commit)input.value=obj[key];
+     }
+     input.addEventListener('input',()=>applyLive(false));
+     input.addEventListener('change',()=>applyLive(true));
      label.append(title,input);parent.append(label);
    }
    field(controls,'Lề hai bên nhóm nút (px)',p,'margin',0,64);field(controls,'Khoảng cách giữa các nút (px)',p,'gap',0,20);
