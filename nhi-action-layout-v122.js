@@ -31,14 +31,22 @@ function compute(mode,p,available){
  const trash=p.trash, inset=trash.margin;
  // Maintain a separate trash lane on either device; reserve the exact same
  // right and bottom inset on desktop, even with the optional Undo row.
- const side= Math.max(p.margin,inset+trash.width+p.gap);
- const left= Math.min(p.margin,Math.max(0,Math.floor((available-120)/4)));
- const right= Math.min(side,Math.max(0,Math.floor((available-120)/3)));
- const space=Math.max(3,available-left-right-2*p.gap-ids.slice(0,3).reduce((a,k)=>a+2*p[k].margin,0));
+ const right=Math.min(Math.max(p.margin,inset+trash.width+p.gap),available-3);
+ const left=Math.min(p.margin,Math.max(0,available-right-3));
+ const usable=Math.max(3,available-left-right);
+ const gap=Math.min(p.gap,Math.floor((usable-3)/2));
+ const inner=usable-2*gap;
+ const requested=ids.slice(0,3).reduce((a,k)=>a+2*p[k].margin,0);
+ const mf=requested?Math.min(1,Math.max(0,inner-3)/requested):1;
+ const margins=Object.fromEntries(ids.slice(0,3).map(k=>[k,Math.floor(p[k].margin*mf)]));
+ const space=Math.max(3,inner-ids.slice(0,3).reduce((a,k)=>a+2*margins[k],0));
  const total=p.hard.width+p.prev.width+p.next.width;
  const factor=Math.min(1,space/total);
  const widths=Object.fromEntries(ids.slice(0,3).map(k=>[k,Math.max(1,Math.floor(p[k].width*factor))]));
- return {widths,left,right,groupWidth:ids.slice(0,3).reduce((a,k)=>a+widths[k]+2*p[k].margin,0)+2*p.gap,trash:trash.width};
+ while(ids.slice(0,3).reduce((a,k)=>a+widths[k],0)>space){
+  const k=ids.slice(0,3).sort((a,b)=>widths[b]-widths[a])[0];if(widths[k]<=1)break;widths[k]--;
+ }
+ return {widths,margins,gap,left,right,groupWidth:ids.slice(0,3).reduce((a,k)=>a+widths[k]+2*margins[k],0)+2*gap,trash:trash.width};
 }
 const mounted=new Set();
 function paintButton(b,k,p,w){
@@ -67,15 +75,19 @@ function mount(card,row,buttons,trash,undo){
   if(!card.isConnected)return;
   const mode=isPhone()?'phone':'desktop',p=prefs[mode],cs=getComputedStyle(card);
   const available=Math.max(120,card.clientWidth-(parseFloat(cs.paddingLeft)||0)-(parseFloat(cs.paddingRight)||0));
-  const m=compute(mode,p,available);
+  const hasPhoto=mode==='desktop'&&card.querySelector('.pfront.nhi-with-image');
+  const photoLane=hasPhoto?parseFloat(card.style.getPropertyValue('--nhi-rate-width')):NaN;
+  const lane=Number.isFinite(photoLane)?Math.min(available,Math.max(120,photoLane)):available;
+  const m=compute(mode,p,lane);
   style(row,{'display':'flex','flex-direction':'column','align-items':'center','justify-content':'flex-end',
    'position':'relative','box-sizing':'border-box','width':'100%','min-width':'0','max-width':'none',
    'height':'auto','min-height':'0','max-height':'none','margin':'10px 0 12px','padding':'0',
    'gap':'6px','transform':'none','translate':'none','flex':'0 0 auto','overflow':'visible'});
   style(group,{'display':'grid','box-sizing':'border-box',
-   'grid-template-columns':ids.slice(0,3).map(k=>px(m.widths[k]+2*p[k].margin)).join(' '),
-   'gap':px(p.gap),'width':px(m.groupWidth),'max-width':'100%','min-width':'0',
-   'margin-left':px(m.left),'margin-right':px(m.right),'align-self':'center','align-items':'end',
+   'grid-template-columns':ids.slice(0,3).map(k=>px(m.widths[k]+2*m.margins[k])).join(' '),
+   'gap':px(m.gap),'width':px(m.groupWidth),'max-width':'100%','min-width':'0',
+   'margin-left':px(m.left+Math.max(0,(lane-m.groupWidth-m.left-m.right)/2)),
+   'margin-right':'0','align-self':'start','align-items':'end',
    'transform':'none','padding':'0','overflow':'visible'});
   ids.slice(0,3).forEach((k,i)=>{
     style(group.children[i],{'display':'flex','justify-content':'center','align-items':'end','min-width':'0','padding':'0','margin':'0'});
@@ -92,12 +104,16 @@ function mount(card,row,buttons,trash,undo){
  }
  state.layout=layout;mounted.add(state);
  requestAnimationFrame(layout);
+ if(typeof MutationObserver!=='undefined'){
+   state.mo=new MutationObserver(()=>{if(!card.isConnected){state.ro?.disconnect();state.mo.disconnect();mounted.delete(state);}});
+   const root=document.getElementById('planBox');if(root)state.mo.observe(root,{childList:true,subtree:true});
+ }
  if(typeof ResizeObserver!=='undefined'){
    state.ro=new ResizeObserver(layout);state.ro.observe(card);
  }
  return state;
 }
-function refresh(){for(const x of mounted){if(!x.card.isConnected){x.ro?.disconnect();mounted.delete(x);}else x.layout();}}
+function refresh(){for(const x of mounted){if(!x.card.isConnected){x.ro?.disconnect();x.mo?.disconnect();mounted.delete(x);}else x.layout();}}
 function persist(){try{localStorage.setItem(KEY,JSON.stringify(prefs));}catch(e){}refresh();}
 function initSettings(){
  const sheet=document.querySelector('#setSheet .sheetbox');if(!sheet||document.getElementById('nhiActionSettingsV122'))return;
