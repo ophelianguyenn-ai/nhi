@@ -477,3 +477,12 @@ html body.focus #planBox .pcard.nhi-focus-fill-v122>.pfront{
 html body.focus #planBox .pcard.nhi-focus-fill-v122>.prate{
  flex:none!important;margin-top:auto!important;
 }
+
+/* v123: permanent, easy-to-find action settings at the top of the sheet. */
+#nhiActionSettingsV122{display:block!important;flex:none!important;order:-1!important;border:1px solid var(--line);border-radius:12px;padding:10px 12px!important;background:var(--surface)}
+#nhiActionSettingsV122>summary{display:list-item!important;color:var(--ink)!important;list-style-position:inside;cursor:pointer!important}
+#nhiActionSettingsV122:not([open])>#nhiActionSettingsBodyV122{display:none!important}
+#nhiActionSettingsV122[open]>#nhiActionSettingsBodyV122{display:grid!important;gap:9px;padding-top:8px}
+#nhiActionSettingsV122 .voice-note{margin:0}
+/* Sticky settings heading always remains above the first section. */
+#setSheet .sheethead{order:-2!important}
