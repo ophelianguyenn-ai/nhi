@@ -11,10 +11,10 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Nhi’s Corner">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
-<link rel="manifest" href="manifest.webmanifest?v=132">
-<link rel="icon" type="image/png" sizes="32x32" href="nhi-cover-icon-32.png?v=132">
-<link rel="icon" type="image/png" sizes="192x192" href="nhi-cover-icon-192.png?v=132">
-<link rel="apple-touch-icon" sizes="180x180" href="nhi-cover-icon-180.png?v=132">
+<link rel="manifest" href="manifest.webmanifest?v=133">
+<link rel="icon" type="image/png" sizes="32x32" href="nhi-mascot-closeup-v133-32.png">
+<link rel="icon" type="image/png" sizes="192x192" href="nhi-mascot-closeup-v133-192.png">
+<link rel="apple-touch-icon" sizes="180x180" href="nhi-mascot-closeup-v133-180.png">
 <style>html{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -6919,7 +6919,7 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
     }
     function cover(show) {
       var c = $('cover');
-      if (show) { c.hidden = false; c.classList.remove('leave'); document.body.classList.add('cover-on', 'modal-open'); coverStats(); $('coverGo').focus(); return; }
+      if (show) { c.hidden = false; c.classList.remove('leave'); document.body.classList.add('cover-on', 'modal-open'); coverStats(); c.setAttribute('tabindex','-1'); c.focus({preventScroll:true}); return; }
       if (c.hidden) return;
       try { sessionStorage.setItem('nlc-cover-seen', '1'); } catch (e) { }
       document.body.classList.remove('cover-on', 'modal-open');
@@ -9283,5 +9283,22 @@ html body #planBox .pcard>.prate.nhi-rating-v3.nhi-classic-v127{
 html body #planBox .pcard>.prate.nhi-rating-v3.nhi-classic-v127>:is(.hard,.nhi-prev-v3,.nhi-next-v3){
  margin-left:0!important;margin-right:0!important;position:static!important;inset:auto!important;min-width:0!important;box-sizing:border-box!important;
 }
+</style>
+<style id="nhi-cover-start-button-v133">
+/* Opening the cover must not display the button's keyboard focus ring. */
+#cover[tabindex="-1"]:focus{outline:none!important}
+#cover.nhi-upper-v8 #coverGo.primary.white{
+  border:2px solid var(--nhi-cover-ui-border,#86c3e3)!important;
+  border-radius:22px!important;
+  background:var(--nhi-cover-ui-soft,#eef8ff)!important;
+  color:var(--nhi-cover-ui-ink,#1a719e)!important;
+  box-shadow:0 5px 0 var(--nhi-cover-ui-edge,#add9ef)!important;
+  outline:none!important;
+}
+#cover.nhi-upper-v8 #coverGo.primary.white:focus-visible{
+  outline:2px dashed var(--nhi-cover-ui-ink,#1a719e)!important;
+  outline-offset:4px!important;
+}
+#cover.nhi-upper-v8 #coverGo.primary.white:active{box-shadow:0 1px 0 var(--nhi-cover-ui-edge,#add9ef)!important}
 </style>
 </body></html>

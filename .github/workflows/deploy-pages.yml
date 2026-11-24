@@ -85,6 +85,7 @@ jobs:
           python3 scripts/build_cover_icons.py --output _site
           for size in 32 180 192 512; do
             test -s "_site/nhi-cover-icon-${size}.png"
+            test -s "_site/nhi-mascot-closeup-v133-${size}.png"
           done
           touch _site/.nojekyll
 
