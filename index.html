@@ -1562,8 +1562,8 @@ if(typeof MutationObserver!=='undefined')new MutationObserver(()=>{if(shell.hidd
 'use strict';
 const KEY='nhi-action-layout-v127';
 const defaults=mode=>({
- margin:mode==='phone'?6:8,gap:0,
- hard:{width:mode==='phone'?120:145,height:44,margin:mode==='phone'?9:13,color:'#eaf5ff'},
+ margin:mode==='phone'?6:8,gap:2,
+ hard:{width:mode==='phone'?120:145,height:44,margin:0,color:'#eaf5ff'},
  prev:{width:mode==='phone'?41:63,height:44,margin:0,color:'#fbd4e5'},
  next:{width:mode==='phone'?41:63,height:44,margin:0,color:'#fbd4e5'},
  trash:{width:30,height:30,margin:8,color:'#d8a324'}
@@ -1584,6 +1584,14 @@ let saved={};try{saved=JSON.parse(localStorage.getItem(KEY)||'{}')||{};}catch(e)
 let old={};try{old=JSON.parse(localStorage.getItem('nhi-action-layout-v122')||'{}')||{};}catch(e){}
 const prefs={desktop:normalize('desktop',saved.desktop||{trash:old.desktop?.trash}),phone:normalize('phone',saved.phone||{trash:old.phone?.trash})};
 const overrides={desktop:{...(saved.overrides?.desktop||{})},phone:{...(saved.overrides?.phone||{})}};
+// v129: remove legacy uneven per-button margins once; preserve all other preferences.
+if(!saved.equalActionSpacingV129){
+ for(const mode of ['desktop','phone']){
+  for(const k of ['hard','prev','next']){prefs[mode][k].margin=0;delete overrides[mode][k+'.margin'];}
+  prefs[mode].gap=2;delete overrides[mode].gap;
+ }
+ try{localStorage.setItem(KEY,JSON.stringify({...prefs,overrides,equalActionSpacingV129:true}));}catch(e){}
+}
 const fieldKey=(mode,obj,key)=>{const p=prefs[mode];if(obj===p)return key;const id=ids.find(k=>p[k]===obj);return id+'.'+key;};
 function flag(mode,obj,key){overrides[mode][fieldKey(mode,obj,key)]=true;}
 const isPhone=()=>matchMedia('(max-width:640px), (max-width:900px) and (pointer:coarse)').matches;
@@ -1677,7 +1685,7 @@ function mount(card,row,buttons,trash,undo){
  return state;
 }
 function refresh(){for(const x of mounted){if(!x.card.isConnected){x.ro?.disconnect();x.mo?.disconnect();mounted.delete(x);}else x.layout();}}
-function persist(){try{localStorage.setItem(KEY,JSON.stringify({...prefs,overrides}));}catch(e){}refresh();}
+function persist(){try{localStorage.setItem(KEY,JSON.stringify({...prefs,overrides,equalActionSpacingV129:true}));}catch(e){}refresh();}
 function initSettings(){
  const sheet=document.querySelector('#setSheet .sheetbox');if(!sheet)return;
  let root=document.getElementById('nhiActionSettingsBodyV122');
@@ -9269,6 +9277,14 @@ html body #planBox .pcard>.prate.nhi-rating-v3.nhi-classic-v127>:is(.hard,.nhi-p
 }
 @media(prefers-reduced-motion:reduce){
  html body #planBox .pcard>.prate.nhi-rating-v3.nhi-classic-v127>:is(.hard,.nhi-prev-v3,.nhi-next-v3){transition:none!important}
+}
+</style>
+<style id="nhi-equal-action-spacing-v129">
+html body #planBox .pcard>.prate.nhi-rating-v3.nhi-classic-v127{
+ gap:2px!important;
+}
+html body #planBox .pcard>.prate.nhi-rating-v3.nhi-classic-v127>:is(.hard,.nhi-prev-v3,.nhi-next-v3){
+ margin-left:0!important;margin-right:0!important;
 }
 </style>
 </body></html>
