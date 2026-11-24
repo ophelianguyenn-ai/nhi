@@ -4956,6 +4956,8 @@ html body #planBox .sdone .pstatus{
         save();
       }
       sess = null; saveSess(); setFocus(false);
+      var menuLegend=$('menuLegend');if(menuLegend){menuLegend.hidden=true;menuLegend.onclick=null;}
+      document.body.classList.remove('nhi-in-study');
     }
     function pause() { leave(); render(); }
     function mobileStudyViewport(){return window.matchMedia('(max-width:640px), (max-width:900px) and (pointer:coarse)').matches;}
