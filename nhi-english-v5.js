@@ -497,7 +497,7 @@ function mount(parent,id,vi,ko,options){
   box.style.setProperty('background',
     'color-mix(in srgb,'+frameTone+' 13%,var(--surface) 87%)','important');
   box.style.setProperty('border',
-    '2px solid color-mix(in srgb,'+frameTone+' 68%,var(--ink) 32%)','important');
+    '1px solid color-mix(in srgb,'+frameTone+' 65%,var(--ink) 35%)','important');
   box.style.setProperty('border-radius','10px','important');
   box.style.setProperty('box-shadow','none','important');
  box.innerHTML='<div class="nhi-en-head"><div class="nhi-en-main"><p class="nhi-en-translation"></p><p class="nhi-en-ipa"></p></div><span class="nhi-en-head-actions"><button type="button" class="nhi-en-speak" aria-label="Nghe tiếng Anh">🎧</button></span></div><p class="nhi-en-status" aria-live="polite"></p><div class="nhi-en-tools"><button type="button" class="nhi-en-review" title="Khi bấm, nội dung tiếng Việt và tiếng Hàn sẽ được gửi đến Google Translate để đối chiếu tự động. Đây không phải kiểm duyệt chuyên gia.">Đối chiếu</button></div>';
