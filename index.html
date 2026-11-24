@@ -738,7 +738,7 @@ button,input,select,textarea{font-family:var(--ui)}
 .nhi-lesson-settings-content .field{width:100%;min-height:44px;padding:8px 12px;border:2px solid var(--line);background:var(--surface);color:var(--ink);border-radius:12px}
 .nhi-lesson-settings-content hr{width:100%;border:0;border-top:1px solid var(--line)}
 .nhi-merge-source-row{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:8px;border-radius:10px;background:var(--sunk);font-size:13px}
-body.nhi-in-study #nhiV2TopNav,body.nhi-in-study .nhi-hide-while-flipping,body.nhi-in-study .nhi-bottom-nav,body.nhi-in-study #nhi-bottom-nav,body.nhi-in-study .bottom-navigation,body.nhi-in-study .bottom-nav{display:none!important}
+body.nhi-in-study #nhiV2TopNav,body.nhi-in-study .nhi-hide-while-flipping:not(#menuList),body.nhi-in-study .nhi-bottom-nav,body.nhi-in-study #nhi-bottom-nav,body.nhi-in-study .bottom-navigation,body.nhi-in-study .bottom-nav{display:none!important}
 @media(max-width:600px){
  #planBox .nhi-today-secondary{grid-template-columns:1fr}
  #planBox .nhi-v2-hero{padding:16px!important}
@@ -1291,6 +1291,7 @@ html body #planBox .sdone .pstatus{
   <button type="button" role="tab" data-mode="list" id="tab-list" style="--mc:#14B8A6"><span class="mi" data-ic="list"></span>Danh sách</button>
   <button type="button" role="tab" data-mode="words" id="tab-words" style="--mc:#D946EF"><span class="mi" data-ic="marker"></span>Từ đã tô</button>
   <button type="button" role="tab" data-mode="sets" id="tab-sets" style="--mc:#F97316"><span class="mi" data-ic="folder"></span>Học phần</button>
+  <button type="button" id="menuLegend" hidden style="--mc:#6479B8"><span class="mi" data-ic="book"></span>Chú giải</button>
   <button type="button" id="menuDaily" style="--mc:#7C3AED"><span class="mi" data-ic="calendar"></span>Tạo học phần theo ngày</button>
   <hr>
   <button type="button" id="menuCover" style="--mc:#C026D3"><span class="mi" data-ic="star"></span>Trang bìa</button>
@@ -4297,7 +4298,9 @@ html body #planBox .sdone .pstatus{
       var previousScroll = window.scrollY || document.documentElement.scrollTop || 0;
       document.querySelector('#topbar .nhi-study-topbar')?.remove();
       document.body.classList.toggle('nhi-in-study',!!sess);
+      var menuLegend=$('menuLegend');if(menuLegend){menuLegend.hidden=true;menuLegend.onclick=null;}
       document.querySelectorAll('nav, footer, [role="navigation"]').forEach(function (candidate) {
+        if(candidate.id==='menuList'){candidate.classList.remove('nhi-hide-while-flipping');return;}
         var s = (candidate.textContent || '').replace(/\\s+/g, ' ');
         if (/Hôm nay/.test(s) && /Lịch học/.test(s) && /Luyện tập/.test(s) && /Sổ tay/.test(s)) candidate.classList.add('nhi-hide-while-flipping');
       });
@@ -5085,8 +5088,8 @@ html body #planBox .sdone .pstatus{
           try{
             var stored=JSON.parse(localStorage.getItem(dragKey)||'null');
             if(stored&&Number.isFinite(Number(stored.x))&&Number.isFinite(Number(stored.y))){
-              offset.x=Math.max(-600,Math.min(600,Number(stored.x)));
-              offset.y=Math.max(-600,Math.min(600,Number(stored.y)));
+              offset.x=Number(stored.x);
+              offset.y=Number(stored.y);
             }
           }catch(_e){}
           function applyOffset(){
@@ -5096,12 +5099,16 @@ html body #planBox .sdone .pstatus{
           function clamp(v,min,max){
             return Math.max(Math.min(min,max),Math.min(max,Math.max(min,v)));
           }
+          function saveOffset(){
+            try{localStorage.setItem(dragKey,JSON.stringify({x:offset.x,y:offset.y}));}catch(_e){}
+          }
           applyOffset();
           toggleRow.title='Chạm: bật/tắt Hán – Hàn · Nhấn giữ rồi kéo để di chuyển';
           toggleRow.style.setProperty('touch-action','none','important');
           toggleRow.style.setProperty('user-select','none','important');
           toggleRow.addEventListener('pointerdown',function(e){
             if(gesture||e.isPrimary===false||(e.pointerType==='mouse'&&e.button!==0))return;
+            suppressNextClick=false;
             gesture={
               id:e.pointerId, x:e.clientX,y:e.clientY,
               initialX:offset.x,initialY:offset.y,
@@ -5133,7 +5140,7 @@ html body #planBox .sdone .pstatus{
             var highY=g.initialY+container.bottom-8-rect.bottom;
             offset.x=clamp(g.initialX+dx,lowX,highX);
             offset.y=clamp(g.initialY+dy,lowY,highY);
-            applyOffset();
+            applyOffset();saveOffset();
           },{passive:false});
           function finishDrag(e){
             var g=gesture;if(!g||g.id!==e.pointerId)return;
@@ -5141,7 +5148,7 @@ html body #planBox .sdone .pstatus{
             if(g.active){
               e.preventDefault();
               suppressNextClick=true;
-              try{localStorage.setItem(dragKey,JSON.stringify(offset));}catch(_e){}
+              saveOffset();
               try{if(toggleRow.hasPointerCapture(g.id))toggleRow.releasePointerCapture(g.id);}catch(_e){}
             }
             delete toggleRow.dataset.nhiDragging;
@@ -5155,14 +5162,9 @@ html body #planBox .sdone .pstatus{
             suppressNextClick=false;
           },true);
           toggleRow.addEventListener('dragstart',function(e){e.preventDefault();});
-          // Keep a previously saved position inside the current editor viewport.
-          requestAnimationFrame(function(){
-            if(!toggleRow.isConnected)return;
-            var rect=toggleRow.getBoundingClientRect(),bound=f.getBoundingClientRect();
-            offset.x+=Math.max(0,bound.left+8-rect.left)-Math.max(0,rect.right-(bound.right-8));
-            offset.y+=Math.max(0,bound.top+8-rect.top)-Math.max(0,rect.bottom-(bound.bottom-8));
-            applyOffset();
-          });
+          // Never re-clamp saved offsets during the editor's opening animation.
+          // Restoring the exact stored offset preserves the last dropped position.
+          toggleRow.addEventListener('contextmenu',function(e){e.preventDefault();});
         })();
         section.appendChild(toggleRow);
         hanjaInputGrid=el('div','nhi-hanja-input-grid');
@@ -5392,8 +5394,11 @@ html body #planBox .sdone .pstatus{
       head.appendChild(dateButton);
       var bar = el('div', 'sbar'), sp = el('span'); sp.style.width = Math.max(4, Math.min(100, s.pos / s.queue.length * 100)) + '%'; bar.appendChild(sp); head.appendChild(bar);
       head.style.setProperty('--nhi-progress-color', topicColor(it.topic));
+      [['height',mobileStudyViewport()?'9px':'12px'],['width','100%'],['min-width','0'],['margin','0'],['background','#e8edef'],['border-radius','999px']].forEach(function(p){bar.style.setProperty(p[0],p[1],'important');});
+      [['background','color-mix(in srgb,var(--nhi-progress-color,var(--accent-t)) 57%,white 43%)'],['background-image','none'],['box-shadow','none'],['min-width','5px']].forEach(function(p){sp.style.setProperty(p[0],p[1],'important');});
+      [['display','grid'],['grid-template-columns','max-content minmax(0,1fr) max-content 30px'],['gap','7px'],['align-items','center'],['min-width','0']].forEach(function(p){head.style.setProperty(p[0],p[1],'important');});
       head.appendChild(el('span', 'counter', (s.pos + 1) + ' / ' + s.queue.length));
-      var fb = ibtn('iconbtn sm nhi-focus-toggle', focus ? 'unfocus' : 'focus', function () { setFocus(!focus); render(); }, focus ? 'Thoát chế độ tập trung (Esc)' : 'Chế độ tập trung (F)'); fb.setAttribute('aria-pressed', String(focus)); [['background','var(--surface)'],['color','var(--ink)'],['border','2px solid var(--line)'],['box-shadow','0 2px 0 var(--edge)'],['filter','none']].forEach(function(p){fb.style.setProperty(p[0],p[1],'important');}); head.appendChild(fb);
+      var fb = ibtn('iconbtn sm nhi-focus-toggle', focus ? 'unfocus' : 'focus', function () { var oldTop=head.getBoundingClientRect().top; setFocus(!focus); render(); if(!reduceMotion()&&prefs.fx){requestAnimationFrame(function(){var nextHead=document.querySelector('.nhi-study-topbar');if(!nextHead)return;var dy=oldTop-nextHead.getBoundingClientRect().top;if(Math.abs(dy)>1&&nextHead.animate)nextHead.animate([{transform:'translateY('+dy+'px)'},{transform:'translateY(0px)'}],{duration:320,easing:'cubic-bezier(.2,.75,.25,1)'});});} }, focus ? 'Thoát chế độ tập trung (Esc)' : 'Chế độ tập trung (F)'); fb.setAttribute('aria-pressed', String(focus)); [['background','var(--surface)'],['color','var(--ink)'],['border','2px solid var(--line)'],['box-shadow','0 2px 0 var(--edge)'],['filter','none']].forEach(function(p){fb.style.setProperty(p[0],p[1],'important');}); head.appendChild(fb);
       head.classList.add('nhi-study-topbar');
       var topbar = $('topbar');
       // Mobile focus mode hides the entire brand/settings/menu bar, so keep
@@ -5402,7 +5407,7 @@ html body #planBox .sdone .pstatus{
       if (topbar && !focus) topbar.insertBefore(head, topbar.querySelector('.topbtns'));
       else {
         head.style.setProperty('display','grid','important');
-        head.style.setProperty('grid-template-columns','max-content minmax(0,1fr) max-content max-content','important');
+        head.style.setProperty('grid-template-columns','max-content minmax(0,1fr) max-content 30px','important');
         head.style.setProperty('gap','6px','important');
         head.style.setProperty('width','100%','important');
         head.style.setProperty('align-items','center','important');
@@ -5463,7 +5468,15 @@ html body #planBox .sdone .pstatus{
         }
         s.editing=!s.editing;legendOpen=false;render();
       }, 'Sửa thẻ, chữ Hán và hình ảnh (C để mở / đóng)'));
-      var bk = ibtn('iconbtn sm', 'book', function () { legendOpen = !legendOpen; render(); }, 'Chú giải phím tắt và thao tác'); bk.setAttribute('aria-expanded', String(legendOpen)); ci.appendChild(bk);
+      var legendEntry=$('menuLegend');
+      if(legendEntry){
+        legendEntry.hidden=false;
+        legendEntry.onclick=function(e){
+          e.stopPropagation();
+          SHELL.menu(false);
+          legendOpen=!legendOpen;render();
+        };
+      }
       ci.appendChild(ibtn('iconbtn sm', 'vol', function () { toggleSpeech(s.flipped ? it.ko : it.vi, s.flipped ? 'ko-KR' : 'vi-VN'); }, 'Phát âm / Dừng mặt thẻ hiện tại'));
       var hj = null;
       if (it.type === 'w' || (val('hj',it.id)&&val('hj',it.id).kind==='han')) {
@@ -5596,8 +5609,8 @@ html body #planBox .sdone .pstatus{
           ['display','grid'],['grid-template-columns','repeat(3,minmax(0,1fr)) 30px'],
           ['grid-template-rows',hasUndo?'52px 38px':'52px'],
           ['column-gap','5px'],['row-gap',hasUndo?'6px':'0'],
-          ['width','calc(100% - 48px)'],['max-width','none'],['min-width','0'],
-          ['margin','10px auto 12px'],['padding','0'],
+          ['width','calc(100% - 24px)'],['max-width','none'],['min-width','0'],
+          ['margin','10px 0 12px 24px'],['padding','0'],
           ['justify-content','stretch'],['align-items','center'],
           ['transform','none'],['translate','none'],['flex-wrap','nowrap']
         ].forEach(function(item){r.style.setProperty(item[0],item[1],'important');});
@@ -5611,7 +5624,7 @@ html body #planBox .sdone .pstatus{
             ['box-sizing','border-box']
           ].forEach(function(item){button.style.setProperty(item[0],item[1],'important');});
         });
-        [[pv,'linear-gradient(160deg,#e3f9d5,#b6edab)','#236d38','#62b775','#87c998'],
+        [[pv,'linear-gradient(170deg,#ffe9f2,#fbd4e5)','#9d416b','#e8a0be','#e5a2ba'],
          [nx,'linear-gradient(170deg,#ffe9f2,#fbd4e5)','#9d416b','#e8a0be','#e5a2ba']].forEach(function(p){
           [['background',p[1]],['color',p[2]],['border','2px solid '+p[3]],['box-shadow','0 4px 0 '+p[4]],['opacity',p[0].disabled?'.65':'1']].forEach(function(q){p[0].style.setProperty(q[0],q[1],'important');});
         });
@@ -5626,10 +5639,10 @@ html body #planBox .sdone .pstatus{
         }
       }
       var trash=ibtn('pdel nhi-card-corner-trash','trash',function(){del(it.id);anim='next';saveSess();render();},'Xoá từ này khỏi danh sách (Delete)');
-      [['background','#ffe68d'],['color','#856000'],['border','1px solid #d8a324'],['box-shadow','0 2px 3px #b8893044'],['opacity','1']].forEach(function(p){trash.style.setProperty(p[0],p[1],'important');});
+      [['background','transparent'],['color','#ad841e'],['border','1px solid #d8a324'],['box-shadow','none'],['opacity','1']].forEach(function(p){trash.style.setProperty(p[0],p[1],'important');});
       if(mobileStudyViewport()){
         trash.classList.add('nhi-inline-trash-v119');
-        [['grid-column','4'],['grid-row','1'],['position','static'],['inset','auto'],['width','30px'],['min-width','30px'],['max-width','30px'],['height','30px'],['min-height','30px'],['max-height','30px'],['margin','0'],['padding','4px'],['align-self','center'],['justify-self','center'],['display','grid'],['place-items','center'],['border-radius','9px'],['flex','none'],['order','0']].forEach(function(p){trash.style.setProperty(p[0],p[1],'important');});
+        [['grid-column','4'],['grid-row','1'],['position','static'],['inset','auto'],['width','30px'],['min-width','30px'],['max-width','30px'],['height','30px'],['min-height','30px'],['max-height','30px'],['margin','0'],['padding','4px'],['align-self','center'],['justify-self','end'],['display','grid'],['place-items','center'],['border-radius','9px'],['flex','none'],['order','0']].forEach(function(p){trash.style.setProperty(p[0],p[1],'important');});
         r.appendChild(trash);
       }else c.appendChild(trash);
       if (s.imagePicker && window.NHI_IMAGES && window.NHI_IMAGES.picker) {
@@ -6136,7 +6149,7 @@ html body #planBox .sdone .pstatus{
 
     /* ---- input ---- */
     document.addEventListener('click', function (e) {
-      if (legendOpen && !e.target.closest('.legendpop') && !e.target.closest('[aria-expanded]')) { legendOpen = false; var lp = document.querySelector('.legendpop'); if (lp) lp.remove(); var bk = document.querySelector('.cicons [aria-expanded]'); if (bk) bk.setAttribute('aria-expanded', 'false'); if (e.target.closest('.pfront')) { e.stopPropagation(); return; } }
+      if (legendOpen && !e.target.closest('.legendpop,#menuList') && !e.target.closest('[aria-expanded]')) { legendOpen = false; var lp = document.querySelector('.legendpop'); if (lp) lp.remove(); var bk = document.querySelector('.cicons [aria-expanded]'); if (bk) bk.setAttribute('aria-expanded', 'false'); if (e.target.closest('.pfront')) { e.stopPropagation(); return; } }
       var ph = e.target.closest('#planBox .ph.tap'); if (!ph) return;
       e.stopPropagation(); var chosen=ITEMS[ph.dataset.item].pairs[+ph.dataset.hi];if(sess&&chosen&&chosen[1])sess.selectedKo=chosen[1];
       lastHighlightedPair={id:ph.dataset.item,i:+ph.dataset.hi};
@@ -6639,7 +6652,9 @@ html body #planBox .sdone .pstatus{
   };
   var SHELL = (function () {
     function menu(open) {
-      $('menuList').hidden = !open; $('menuScrim').hidden = !open;
+      var list=$('menuList');list.classList.remove('nhi-hide-while-flipping');
+      if(open)paintIcons(list);
+      list.hidden = !open; $('menuScrim').hidden = !open;
       $('menuBtn').setAttribute('aria-expanded', String(!!open));
     }
     function sheet(open) {
@@ -7710,10 +7725,10 @@ html body #planBox .pcard:has(.pfront.nhi-with-image)>.prate.nhi-rating-v3{
           if(rate){
             if(rate.classList.contains('nhi-mobile-wide-arrows')){
               // An image/resize observer must never undo the mobile-width fix.
-              rate.style.setProperty('width','calc(100% - 48px)','important');
+              rate.style.setProperty('width','calc(100% - 24px)','important');
               rate.style.setProperty('max-width','none','important');
-              rate.style.setProperty('margin-left','auto','important');
-              rate.style.setProperty('margin-right','auto','important');
+              rate.style.setProperty('margin-left','24px','important');
+              rate.style.setProperty('margin-right','0','important');
             }else{
               rate.style.setProperty('width',rateWidth+'px','important');
               rate.style.setProperty('max-width',rateWidth+'px','important');
@@ -7729,10 +7744,10 @@ html body #planBox .pcard:has(.pfront.nhi-with-image)>.prate.nhi-rating-v3{
         var normalRate=card.querySelector(':scope>.prate.nhi-rating-v3');
         if(normalRate){
           if(normalRate.classList.contains('nhi-mobile-wide-arrows')){
-            normalRate.style.setProperty('width','calc(100% - 48px)','important');
+            normalRate.style.setProperty('width','calc(100% - 24px)','important');
             normalRate.style.setProperty('max-width','none','important');
-            normalRate.style.setProperty('margin-left','auto','important');
-            normalRate.style.setProperty('margin-right','auto','important');
+            normalRate.style.setProperty('margin-left','24px','important');
+            normalRate.style.setProperty('margin-right','0','important');
           }else{
             for(var key of ['width','max-width','margin-left','margin-right','flex-shrink'])
               normalRate.style.removeProperty(key);
@@ -8965,5 +8980,5 @@ html body #planBox .pcard .nhi-english-v5:not(.nhi-en-inline-two-spaces)
   content:none!important;
 }
 </style>
-<link rel="stylesheet" href="nhi-fixes-20261123.css?v=20261124-v119">
+<link rel="stylesheet" href="nhi-fixes-20261123.css?v=20261124-v120">
 </body></html>
