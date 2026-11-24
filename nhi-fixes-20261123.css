@@ -1,7 +1,7 @@
 /* v117 — theme-aware English frame: soft fill and clearly defined four-side border. */
 html body #planBox .pcard .pfront .nhi-english-v5{
   background:color-mix(in srgb,var(--day,var(--tc,var(--accent))) 13%,var(--surface) 87%)!important;
-  border:1px solid color-mix(in srgb,var(--day,var(--tc,var(--accent))) 65%,var(--ink) 35%)!important;
+  border:1px solid color-mix(in srgb,var(--day,var(--tc,var(--accent))) 35%,var(--surface) 65%)!important;
   border-radius:10px!important;
   box-shadow:none!important;
   color:var(--ink)!important;
@@ -291,114 +291,68 @@ html body #planBox .pcard form.nhi-editor-window-v5
     touch-action:manipulation!important;
   }
 }
-/* ===== v118 MOBILE LAYOUT REFINEMENTS ===== */
-/* Date replaces the || pause symbol without removing pause functionality. */
+/* ===== v119 UI refinements ===== */
 html body .nhi-study-topbar .nhi-study-date-label{
-  display:inline-flex!important;align-items:center!important;justify-content:center!important;
-  flex:0 0 auto!important;min-width:0!important;
-  border:0!important;background:transparent!important;box-shadow:none!important;
-  border-radius:8px!important;color:var(--ink)!important;
-  font:800 13px/1.2 var(--ui,system-ui)!important;
-  white-space:nowrap!important;padding:5px 2px!important;cursor:pointer!important;
+ display:inline-flex!important;align-items:center!important;justify-content:center!important;
+ flex:0 0 auto!important;min-width:max-content!important;max-width:none!important;
+ font:700 13px/1.5 var(--ui,system-ui)!important;color:var(--muted)!important;
+ white-space:nowrap!important;overflow:visible!important;
+ border:0!important;background:transparent!important;box-shadow:none!important;
+ padding:0!important;cursor:pointer!important;
 }
-html body .nhi-study-topbar .nhi-study-date-label:hover{
-  color:var(--accent-t)!important;
-}
-/* Focus switch remains neutral whether ON or OFF, including :hover and focus. */
 html body #topbar .nhi-study-topbar>.nhi-focus-toggle,
-html body #topbar .nhi-study-topbar>.nhi-focus-toggle[aria-pressed="true"],
-html body #planBox .nhi-study-topbar>.nhi-focus-toggle,
-html body #planBox .nhi-study-topbar>.nhi-focus-toggle[aria-pressed="true"]{
-  background:var(--surface)!important;color:var(--ink)!important;
-  border:2px solid var(--line)!important;
-  box-shadow:0 2px 0 var(--edge)!important;
-  filter:none!important;
+html body #planBox .nhi-study-topbar>.nhi-focus-toggle{
+ background:var(--surface)!important;color:var(--ink)!important;
+ border:2px solid var(--line)!important;box-shadow:0 2px 0 var(--edge)!important;
+ filter:none!important;
 }
-/* Trash icon: pastel yellow, separate from the button row. */
-html body #planBox .pcard>.pdel.nhi-card-corner-trash{
-  background:#ffe68d!important;color:#856000!important;
-  border:1px solid #d8a324!important;
-  box-shadow:0 2px 3px #b8893044!important;
+html body #topbar[data-nhi-focus-hidden="1"]{display:none!important}
+html body.focus #planBox .nhi-study-topbar{
+ display:grid!important;grid-template-columns:max-content minmax(0,1fr) max-content max-content!important;
+ width:100%!important;max-width:100%!important;align-items:center!important;
+ gap:6px!important;margin:0 0 10px!important;padding:0!important;
 }
-html body #planBox .pcard>.pdel.nhi-card-corner-trash:hover{
-  background:#ffdb64!important;color:#654800!important;
-  border-color:#bd870f!important;
+html body #planBox .pcard .pdel.nhi-card-corner-trash{
+ background:#ffe68d!important;color:#856000!important;border:1px solid #d8a324!important;
+ box-shadow:0 2px 3px #b8893044!important;
 }
-@media(max-width:640px){
-  /* Hide ONLY the global brand/girl/settings/hamburger toolbar in focus mode.
-     Study progress + date + exit focus remain inside #planBox. */
-  html body.focus #topbar,
-  html body.focus .topbar,
-  html body.focus #nhiV2TopNav,
-  html body.focus #menuList,
-  html body.focus #menuScrim{
-    display:none!important;
-  }
-  html body.focus #planBox .nhi-study-topbar{
-    display:grid!important;
-    grid-template-columns:auto minmax(0,1fr) auto auto!important;
-    align-items:center!important;
-    width:100%!important;max-width:100%!important;
-    gap:7px!important;
-    margin:0 0 10px!important;
-    padding:0 1px!important;
-  }
-  html body .nhi-study-topbar .nhi-study-date-label{
-    font-size:clamp(11px,3.1vw,13px)!important;
-  }
-  /* Same width for Khó, Lùi, Tiến; width is also enforced by JS on mount.
-     Reserve a footer lane so the yellow trash icon is NEVER underneath arrows. */
-  html body #planBox .pcard>.prate.nhi-rating-v3,
-  html body #planBox .pcard>.prate.nhi-rating-v3.nhi-rate-undo-inline,
-  html body #planBox .pcard:has(.pfront.nhi-with-image)>.prate.nhi-rating-v3{
-    display:grid!important;
-    grid-template-columns:repeat(3,minmax(0,1fr))!important;
-    column-gap:8px!important;
-    row-gap:8px!important;
-    width:calc(100% - 28px)!important;
-    max-width:none!important;min-width:0!important;
-    margin:10px auto 47px!important;padding:0!important;
-    transform:none!important;translate:none!important;
-    justify-content:stretch!important;align-items:stretch!important;
-  }
-  html body #planBox .pcard>.prate.nhi-rating-v3>.hard,
-  html body #planBox .pcard>.prate.nhi-rating-v3>.nhi-prev-v3,
-  html body #planBox .pcard>.prate.nhi-rating-v3>.nhi-next-v3{
-    box-sizing:border-box!important;
-    display:flex!important;align-items:center!important;justify-content:center!important;
-    width:100%!important;min-width:0!important;max-width:none!important;
-    height:52px!important;min-height:52px!important;max-height:52px!important;
-    flex:none!important;
-    padding:0 5px!important;margin:0!important;
-  }
-  html body #planBox .pcard>.prate.nhi-rating-v3>.hard{
-    grid-column:1!important;grid-row:1!important;
-  }
-  html body #planBox .pcard>.prate.nhi-rating-v3>.nhi-prev-v3{
-    grid-column:2!important;grid-row:1!important;
-    background:linear-gradient(160deg,#e3f9d5,#b6edab)!important;
-    color:#236d38!important;border-color:#62b775!important;
-    box-shadow:0 4px 0 #87c998!important;
-  }
-  html body #planBox .pcard>.prate.nhi-rating-v3>.nhi-prev-v3:hover:not(:disabled){
-    background:linear-gradient(160deg,#d4f5c7,#a3e996)!important;
-    color:#175b2d!important;border-color:#4ca65c!important;
-    box-shadow:0 5px 0 #73ba85!important;
-  }
-  html body #planBox .pcard>.prate.nhi-rating-v3>.nhi-next-v3{
-    grid-column:3!important;grid-row:1!important;
-  }
-  html body #planBox .pcard>.prate.nhi-rating-v3.nhi-rate-undo-inline{
-    grid-template-rows:52px 38px!important;
-  }
-  html body #planBox .pcard>.prate.nhi-rating-v3.nhi-rate-undo-inline>.pundo{
-    grid-column:2!important;grid-row:2!important;
-    width:100%!important;min-width:0!important;max-width:none!important;
-    height:38px!important;min-height:38px!important;max-height:38px!important;
-    margin:0!important;order:0!important;
-  }
-  html body #planBox .pcard>.pdel.nhi-card-corner-trash{
-    right:10px!important;bottom:10px!important;
-    z-index:6!important;
-  }
+@media (max-width:640px), (max-width:900px) and (pointer:coarse){
+ html body.focus #topbar,html body.focus #menuList,html body.focus #menuScrim,
+ html body.focus #nhiV2TopNav{display:none!important}
+ html body #planBox .pcard>.prate.nhi-rating-v3.nhi-mobile-wide-arrows{
+  display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr)) 30px!important;
+  column-gap:5px!important;row-gap:6px!important;
+  width:calc(100% - 48px)!important;max-width:none!important;min-width:0!important;
+  margin:10px auto 12px!important;padding:0!important;
+  transform:none!important;translate:none!important;align-items:center!important;
+ }
+ html body #planBox .pcard>.prate.nhi-mobile-wide-arrows>.hard,
+ html body #planBox .pcard>.prate.nhi-mobile-wide-arrows>.nhi-prev-v3,
+ html body #planBox .pcard>.prate.nhi-mobile-wide-arrows>.nhi-next-v3{
+  width:100%!important;min-width:0!important;max-width:none!important;
+  height:52px!important;min-height:52px!important;max-height:52px!important;
+  box-sizing:border-box!important;flex:none!important;margin:0!important;padding:0 3px!important;
+ }
+ html body #planBox .pcard>.prate.nhi-mobile-wide-arrows>.hard{grid-column:1!important;grid-row:1!important}
+ html body #planBox .pcard>.prate.nhi-mobile-wide-arrows>.nhi-prev-v3{
+  grid-column:2!important;grid-row:1!important;
+  background:linear-gradient(160deg,#e3f9d5,#b6edab)!important;
+  color:#236d38!important;border-color:#62b775!important;box-shadow:0 4px 0 #87c998!important;
+ }
+ html body #planBox .pcard>.prate.nhi-mobile-wide-arrows>.nhi-next-v3{
+  grid-column:3!important;grid-row:1!important;
+  background:linear-gradient(170deg,#ffe9f2,#fbd4e5)!important;
+  color:#9d416b!important;border-color:#e8a0be!important;box-shadow:0 4px 0 #e5a2ba!important;
+ }
+ html body #planBox .pcard>.prate.nhi-mobile-wide-arrows>.nhi-inline-trash-v119{
+  grid-column:4!important;grid-row:1!important;position:static!important;inset:auto!important;
+  width:30px!important;min-width:30px!important;max-width:30px!important;
+  height:30px!important;min-height:30px!important;max-height:30px!important;
+  margin:0!important;padding:4px!important;align-self:center!important;justify-self:center!important;
+  background:#ffe68d!important;color:#856000!important;border:1px solid #d8a324!important;
+  box-shadow:0 2px 3px #b8893044!important;opacity:1!important;
+ }
+ html body #planBox .pcard>.prate.nhi-mobile-wide-arrows>.nhi-inline-trash-v119 svg{width:17px!important;height:17px!important}
+ html body #planBox .pcard>.prate.nhi-mobile-wide-arrows.nhi-rate-undo-inline{grid-template-rows:52px 38px!important}
+ html body #planBox .pcard>.prate.nhi-mobile-wide-arrows>.pundo{grid-column:2!important;grid-row:2!important;height:38px!important;min-height:38px!important;max-height:38px!important}
 }
