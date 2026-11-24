@@ -5372,7 +5372,7 @@ html body #planBox .sdone .pstatus{
       var head = el('div', 'shead' + (fresh ? ' fx-in' : ''));
       // Show the actual lesson date instead of the old pause (||) icon.
       // The date remains clickable to pause, preserving the original function.
-      var shownDate=s.L&&s.L.date?vn(s.L.date,true):((String(s.title||'').match(/\\b\\d{2}\\.\\d{2}\\.\\d{4}\\b/)||[])[0]||vn(today(),true));
+      var shownDate=s.L&&s.L.date?vn(s.L.date,true):((String(s.title||'').match(/\b\d{2}\.\d{2}\.\d{4}\b/)||[])[0]||vn(today(),true));
       head.appendChild(btn('nhi-study-date-label',shownDate,pause,'Tạm dừng và về trang bài học'));
       var bar = el('div', 'sbar'), sp = el('span'); sp.style.width = Math.max(4, Math.min(100, s.pos / s.queue.length * 100)) + '%'; bar.appendChild(sp); head.appendChild(bar);
       head.style.setProperty('--nhi-progress-color', topicColor(it.topic));
