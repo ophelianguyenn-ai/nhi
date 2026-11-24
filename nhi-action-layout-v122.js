@@ -116,9 +116,16 @@ function mount(card,row,buttons,trash,undo){
 function refresh(){for(const x of mounted){if(!x.card.isConnected){x.ro?.disconnect();x.mo?.disconnect();mounted.delete(x);}else x.layout();}}
 function persist(){try{localStorage.setItem(KEY,JSON.stringify(prefs));}catch(e){}refresh();}
 function initSettings(){
- const sheet=document.querySelector('#setSheet .sheetbox');if(!sheet||document.getElementById('nhiActionSettingsV122'))return;
- const root=document.createElement('section');root.id='nhiActionSettingsV122';root.className='setgroup nhi-action-settings-v122';
- const h=document.createElement('h3');h.textContent='Nút điều hướng thẻ';root.append(h);
+ const sheet=document.querySelector('#setSheet .sheetbox');if(!sheet)return;
+ let root=document.getElementById('nhiActionSettingsBodyV122');
+ if(!root){
+  const section=document.createElement('details');section.className='setgroup nhi-action-settings-v122';section.id='nhiActionSettingsV122';
+  const summary=document.createElement('summary');summary.textContent='🎛 Nút điều hướng thẻ';summary.style.cssText='font-size:15px;font-weight:800;cursor:pointer;padding:6px 0';section.append(summary);
+  root=document.createElement('div');root.id='nhiActionSettingsBodyV122';section.append(root);
+  const head=sheet.querySelector('.sheethead');if(head)head.after(section);else sheet.prepend(section);
+ }
+ if(root.dataset.ready==='1')return;
+ root.replaceChildren();
  const help=document.createElement('p');help.className='voice-note';help.textContent='Mặc định ba nút bằng nhau. Chỉnh từng nút riêng; khi màn hình hẹp, chiều rộng tự co theo tỉ lệ để không chồng lên thùng rác. Màu thùng rác chỉ áp dụng cho viền và biểu tượng.';root.append(help);
  const selector=document.createElement('select');selector.className='field';selector.setAttribute('aria-label','Thiết bị cần tùy chỉnh');
  [['desktop','Máy tính'],['phone','Điện thoại']].forEach(([v,t])=>selector.add(new Option(t,v)));
@@ -147,9 +154,9 @@ function initSettings(){
    reset.addEventListener('click',()=>{prefs[mode]=defaults(mode);persist();draw();});controls.append(equal,reset);
  }
  selector.addEventListener('change',draw);draw();
- const target=document.getElementById('nhiTransitionSettings');if(target)target.after(root);else sheet.append(root);
+ root.dataset.ready='1';
 }
-window.NHI_ACTION_LAYOUT_V122={mount,refresh,compute,defaults,normalize};
+window.NHI_ACTION_LAYOUT_V122={mount,refresh,compute,defaults,normalize,initSettings};
 window.addEventListener('resize',refresh,{passive:true});
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',initSettings,{once:true});else initSettings();
 })();
