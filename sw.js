@@ -1,6 +1,6 @@
 // Offline support: network-first for GitHub Pages and static assets.
 // Fall back to cache only when offline. Different cache key forces eviction of earlier stale CSS/JS.
-const CACHE = 'nhi-corner-v135-large-transparent-flower';
+const CACHE = 'nhi-corner-v136-shared-card-height';
 const CORE = [
   'nhi-cover-icon-32.png','nhi-cover-icon-180.png','nhi-cover-icon-192.png','nhi-cover-icon-512.png',
   'nhi-flower-v135-32.png','nhi-flower-v135-180.png','nhi-flower-v135-192.png','nhi-flower-v135-512.png','manifest.webmanifest?v=135',

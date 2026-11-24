@@ -5801,6 +5801,19 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
         flip();
       });
       c.appendChild(f);
+      // One height preference for the whole card, independent of which face is rendered.
+      // CSS variables stay live when the settings select changes without a rerender.
+      c.dataset.nhiSharedHeight='v136';
+      c.dataset.nhiCardFace=s.flipped?'back':'front';
+      c.style.setProperty('min-height','var(--nhi-card-effective-height)','important');
+      c.style.setProperty('height',f.classList.contains('nhi-with-image')&&!s.editing&&!s.imagePicker?'var(--nhi-card-effective-height)':'auto','important');
+      c.style.setProperty('max-height','none','important');
+      // Content without pictures grows naturally; pictured cards keep the existing
+      // scrolling content area so notes/comparison never collide with the buttons.
+      f.style.setProperty('min-height','0','important');
+      f.style.setProperty('height','auto','important');
+      f.style.setProperty('max-height','none','important');
+      f.style.setProperty('flex',f.classList.contains('nhi-with-image')&&!s.editing&&!s.imagePicker?'1 1 0':'1 0 auto','important');
       // The unused background around the entire card should also flip it.
       c.addEventListener('click', function(e) {
         if(e.target.closest('.pfront,.pdel,.pundo,.legendpop,.nhi-card-dictionaries,.nhi-english-v5,figure,button,input,textarea,select,a,[contenteditable]'))return;
@@ -5895,9 +5908,8 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
           var top=c.getBoundingClientRect().top-(vp?vp.offsetTop:0);
           var available=Math.max(300,Math.floor(viewHeight-Math.max(0,top)-10));
           c.style.setProperty('--nhi-focus-available-height',available+'px');
-          c.style.setProperty('min-height',available+'px','important');
-          c.style.setProperty('height','auto','important');
-          c.style.setProperty('max-height','none','important');
+          // Keep the same live height setting in focus mode; the viewport is a lower bound.
+          c.style.setProperty('min-height','var(--nhi-card-effective-height)','important');
         };
         requestAnimationFrame(updateFocusHeight);
         var focusViewport=window.visualViewport||window;
@@ -7457,7 +7469,7 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
 <script src="nhi-living-garden-v1.js?v=20261113-cartoon-butterflies-v1"></script>
 <script src="nhi-late-2026.js?v=20261115-v9-compact-pairs"></script>
 <script src="nhi-stage-move-v1.js?v=20261122-vertical-drag-v2"></script>
-<script src="nhi-card-controls-v8.js?v=20261122-per-device-height"></script>
+<script src="nhi-card-controls-v8.js?v=20261124-v136-shared-height"></script>
 <script src="nhi-kitten-meow-v1.js?v=20261120-user-meow"></script>
 <script src="nhi-card-no-overlap-v1.js?v=20261115-safe-v1"></script>
 <script src="nhi-corner-v2.js?v=20261122-calendar-nav-fixed-v1"></script>
@@ -9300,5 +9312,25 @@ html body #planBox .pcard>.prate.nhi-rating-v3.nhi-classic-v127>:is(.hard,.nhi-p
   outline-offset:4px!important;
 }
 #cover.nhi-upper-v8 #coverGo.primary.white:active{box-shadow:0 1px 0 var(--nhi-cover-ui-edge,#add9ef)!important}
+</style>
+<style id="nhi-card-shared-height-v136">
+html body #planBox .pcard[data-nhi-shared-height="v136"]{
+ --nhi-card-effective-height:var(--nhi-v8-card-height,430px);
+ box-sizing:border-box!important;
+ display:flex!important;flex-direction:column!important;
+ min-height:var(--nhi-card-effective-height)!important;max-height:none!important;
+}
+html body.focus #planBox .pcard[data-nhi-shared-height="v136"]{
+ --nhi-card-effective-height:max(var(--nhi-v8-card-height,430px),var(--nhi-focus-available-height,300px));
+}
+html body #planBox .pcard[data-nhi-shared-height="v136"]>.pfront{
+ min-height:0!important;height:auto!important;max-height:none!important;
+}
+html body #planBox .pcard[data-nhi-shared-height="v136"]>.pfront.nhi-with-image{
+ overflow-y:auto!important;overflow-x:hidden!important;
+}
+html body #planBox .pcard[data-nhi-shared-height="v136"]:not(:has(>.pfront.nhi-with-image))>.pfront{
+ overflow:visible!important;
+}
 </style>
 </body></html>

@@ -63,8 +63,8 @@
   if(settings&&!document.getElementById('nhiV8-height')){
    const box=document.createElement('div');box.className='setgroup nhi-v8-height-settings';
    const h=document.createElement('h3');h.textContent='Kích thước thẻ';box.append(h);
-   selectRow(box,'height','Chiều dài (chiều cao) thẻ',
-    'Chiều cao thẻ được lưu riêng trên thiết bị này. Bạn có thể đặt chiều cao khác trên điện thoại và laptop; nội dung dài vẫn tự giãn để không bị che.');
+   selectRow(box,'height','Chiều cao thẻ — cả hai mặt',
+    'Áp dụng ngay cho cả mặt trước và mặt sau, kể cả thẻ có ảnh. Lưu riêng trên mỗi thiết bị. Nội dung dài tự giãn hoặc cuộn trong thẻ; chế độ tập trung vẫn lấp đầy màn hình.');
    size.after(box);
   }
  }
