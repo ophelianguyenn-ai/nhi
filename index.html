@@ -1555,17 +1555,17 @@ if(typeof MutationObserver!=='undefined')new MutationObserver(()=>{if(shell.hidd
     <details class="setgroup nhi-action-settings-v122" id="nhiActionSettingsV122">
       <summary style="font-size:15px;font-weight:800;cursor:pointer;padding:6px 0">🎛 Nút điều hướng thẻ</summary>
       <div id="nhiActionSettingsBodyV122"><p class="voice-note" role="status">Không thể mở tùy chỉnh. Hãy tải lại trang.</p></div>
-      <script id="nhi-action-layout-inline-v125">
+      <script id="nhi-action-layout-inline-v127">
 /* v122: one isolated layout owner for the four study action buttons.
    Device preferences only; never touches cards or study progress. */
 (function(){
 'use strict';
-const KEY='nhi-action-layout-v122';
+const KEY='nhi-action-layout-v127';
 const defaults=mode=>({
- margin:mode==='phone'?32:24,gap:5,
- hard:{width:mode==='phone'?112:125,height:mode==='phone'?52:50,margin:0,color:'#ddebfa'},
- prev:{width:mode==='phone'?112:125,height:mode==='phone'?52:50,margin:0,color:'#fbd4e5'},
- next:{width:mode==='phone'?112:125,height:mode==='phone'?52:50,margin:0,color:'#fbd4e5'},
+ margin:mode==='phone'?6:8,gap:0,
+ hard:{width:mode==='phone'?120:145,height:44,margin:mode==='phone'?9:13,color:'#eaf5ff'},
+ prev:{width:mode==='phone'?41:63,height:44,margin:0,color:'#fbd4e5'},
+ next:{width:mode==='phone'?41:63,height:44,margin:0,color:'#fbd4e5'},
  trash:{width:30,height:30,margin:8,color:'#d8a324'}
 });
 const ids=['hard','prev','next','trash'],labels={hard:'Khó',prev:'Lùi',next:'Tiến',trash:'Thùng rác'};
@@ -1581,7 +1581,11 @@ const normalize=(mode,x)=>{
  };});return p;
 };
 let saved={};try{saved=JSON.parse(localStorage.getItem(KEY)||'{}')||{};}catch(e){}
-const prefs={desktop:normalize('desktop',saved.desktop),phone:normalize('phone',saved.phone)};
+let old={};try{old=JSON.parse(localStorage.getItem('nhi-action-layout-v122')||'{}')||{};}catch(e){}
+const prefs={desktop:normalize('desktop',saved.desktop||{trash:old.desktop?.trash}),phone:normalize('phone',saved.phone||{trash:old.phone?.trash})};
+const overrides={desktop:{...(saved.overrides?.desktop||{})},phone:{...(saved.overrides?.phone||{})}};
+const fieldKey=(mode,obj,key)=>{const p=prefs[mode];if(obj===p)return key;const id=ids.find(k=>p[k]===obj);return id+'.'+key;};
+function flag(mode,obj,key){overrides[mode][fieldKey(mode,obj,key)]=true;}
 const isPhone=()=>matchMedia('(max-width:640px), (max-width:900px) and (pointer:coarse)').matches;
 const style=(n,p)=>Object.entries(p).forEach(([k,v])=>n.style.setProperty(k,String(v),'important'));
 const px=n=>Math.max(0,n)+'px';
@@ -1621,58 +1625,59 @@ function paintButton(b,k,p,w){
  'overflow':'hidden','white-space':'nowrap'});
 }
 function mount(card,row,buttons,trash,undo){
- const group=document.createElement('div');group.className='nhi-action-main-v122';
- row.classList.remove('nhi-rating-v3','nhi-rate-undo-inline','nhi-mobile-wide-arrows','nhi-desktop-equal-v121');
- row.classList.add('nhi-action-row-v122');
- row.replaceChildren(group);
- ids.slice(0,3).forEach(k=>{const cell=document.createElement('div');cell.className='nhi-action-cell-v122';cell.append(buttons[k]);group.append(cell);});
- if(undo)row.append(undo);
- card.append(trash);
- const state={card,row,group,buttons,trash,undo};
+ const state={card,row,buttons,trash,undo};
+ const touched=new Map();
+ function apply(n,props){
+  if(!touched.has(n))touched.set(n,new Map());
+  const map=touched.get(n);
+  for(const [key,value] of Object.entries(props)){
+   if(!map.has(key))map.set(key,[n.style.getPropertyValue(key),n.style.getPropertyPriority(key)]);
+   n.style.setProperty(key,String(value),'important');
+  }
+ }
+ function restore(){
+  for(const [n,props] of touched){for(const [k,[v,p]] of props){if(v)n.style.setProperty(k,v,p);else n.style.removeProperty(k);}}
+  touched.clear();
+ }
  function layout(){
   if(!card.isConnected)return;
-  const mode=isPhone()?'phone':'desktop',p=prefs[mode],cs=getComputedStyle(card);
-  const available=Math.max(120,card.clientWidth-(parseFloat(cs.paddingLeft)||0)-(parseFloat(cs.paddingRight)||0));
-  const hasPhoto=mode==='desktop'&&card.querySelector('.pfront.nhi-with-image');
-  const photoLane=hasPhoto?parseFloat(card.style.getPropertyValue('--nhi-rate-width')):NaN;
-  const lane=Number.isFinite(photoLane)?Math.min(available,Math.max(120,photoLane)):available;
-  const m=compute(mode,p,lane);
-  style(row,{'display':'flex','flex-direction':'column','align-items':'center','justify-content':'flex-end',
-   'position':'relative','box-sizing':'border-box','width':'100%','min-width':'0','max-width':'none',
-   'height':'auto','min-height':'0','max-height':'none','margin':'10px 0 12px','padding':'0',
-   'gap':'6px','transform':'none','translate':'none','flex':'0 0 auto','overflow':'visible'});
-  style(group,{'display':'grid','box-sizing':'border-box',
-   'grid-template-columns':ids.slice(0,3).map(k=>px(m.widths[k]+2*m.margins[k])).join(' '),
-   'gap':px(m.gap),'width':px(m.groupWidth),'max-width':'100%','min-width':'0',
-   'margin-left':px(m.left+Math.max(0,(lane-m.groupWidth-m.left-m.right)/2)),
-   'margin-right':'0','align-self':'start','align-items':'end',
-   'transform':'none','padding':'0','overflow':'visible'});
-  ids.slice(0,3).forEach((k,i)=>{
-    style(group.children[i],{'display':'flex','justify-content':'center','align-items':'end','min-width':'0','padding':'0','margin':'0'});
-    paintButton(buttons[k],k,p[k],m.widths[k]);
+  restore();
+  const mode=isPhone()?'phone':'desktop',p=prefs[mode],flags=overrides[mode];
+  const cs=getComputedStyle(card),available=Math.max(80,card.clientWidth-(parseFloat(cs.paddingLeft)||0)-(parseFloat(cs.paddingRight)||0));
+  if(flags.margin)apply(row,{'padding-left':px(p.margin),'padding-right':px(p.margin)});
+  if(flags.gap)apply(row,{'gap':px(p.gap)});
+  const customWidths=ids.slice(0,3).some(k=>flags[k+'.width']);
+  const grid=getComputedStyle(row).display==='grid';
+  if(customWidths&&grid){
+   const columns=ids.slice(0,3).map(k=>flags[k+'.width']?'minmax(0,'+px(p[k].width)+')':k==='hard'?'minmax(0,1fr)':'44px');
+   if(undo)columns.push('minmax(0,94px)');
+   apply(row,{'grid-template-columns':columns.join(' ')});
+  }
+  ids.slice(0,3).forEach(k=>{
+   const b=buttons[k],q=p[k],v={};
+   if(flags[k+'.width']&&!grid){const w=px(Math.min(q.width,Math.max(30,available-60)));Object.assign(v,{'width':w,'min-width':'0','max-width':w,'flex':'0 1 '+w});}
+   if(flags[k+'.height'])Object.assign(v,{'height':px(q.height),'min-height':px(q.height),'max-height':px(q.height)});
+   if(flags[k+'.margin'])Object.assign(v,{'margin-left':px(q.margin),'margin-right':px(q.margin)});
+   if(flags[k+'.color'])Object.assign(v,{'background':q.color,'background-image':'none','border-color':'color-mix(in srgb,'+q.color+' 65%,#68727b 35%)'});
+   apply(b,v);
   });
   paintButton(trash,'trash',p.trash,p.trash.width);
   style(trash,{'right':px(p.trash.margin),'bottom':px(p.trash.margin),'z-index':'6'});
   if(mode==='phone'){
-    // Align trash with bottom of actual arrow border, not the footer or Undo.
-    const bottom=card.getBoundingClientRect().bottom-group.getBoundingClientRect().bottom-(parseFloat(cs.borderBottomWidth)||0);
-    style(trash,{'bottom':px(bottom)});
+    const bottom=card.getBoundingClientRect().bottom-row.getBoundingClientRect().bottom-(parseFloat(cs.borderBottomWidth)||0);
+    style(trash,{'bottom':px(Math.max(p.trash.margin,bottom))});
   }
-  if(undo)style(undo,{'position':'static','inset':'auto','width':'auto','min-width':'80px','max-width':'100%','height':'38px','min-height':'38px','max-height':'38px','margin':'0','padding':'0 8px','align-self':'center'});
  }
- state.layout=layout;mounted.add(state);
- requestAnimationFrame(layout);
+ state.layout=layout;mounted.add(state);requestAnimationFrame(layout);
  if(typeof MutationObserver!=='undefined'){
-   state.mo=new MutationObserver(()=>{if(!card.isConnected){state.ro?.disconnect();state.mo.disconnect();mounted.delete(state);}});
-   const root=document.getElementById('planBox');if(root)state.mo.observe(root,{childList:true,subtree:true});
+  state.mo=new MutationObserver(()=>{if(!card.isConnected){state.ro?.disconnect();state.mo.disconnect();mounted.delete(state);}});
+  const root=document.getElementById('planBox');if(root)state.mo.observe(root,{childList:true,subtree:true});
  }
- if(typeof ResizeObserver!=='undefined'){
-   state.ro=new ResizeObserver(layout);state.ro.observe(card);
- }
+ if(typeof ResizeObserver!=='undefined'){state.ro=new ResizeObserver(layout);state.ro.observe(card);}
  return state;
 }
 function refresh(){for(const x of mounted){if(!x.card.isConnected){x.ro?.disconnect();x.mo?.disconnect();mounted.delete(x);}else x.layout();}}
-function persist(){try{localStorage.setItem(KEY,JSON.stringify(prefs));}catch(e){}refresh();}
+function persist(){try{localStorage.setItem(KEY,JSON.stringify({...prefs,overrides}));}catch(e){}refresh();}
 function initSettings(){
  const sheet=document.querySelector('#setSheet .sheetbox');if(!sheet)return;
  let root=document.getElementById('nhiActionSettingsBodyV122');
@@ -1684,7 +1689,7 @@ function initSettings(){
  }
  if(root.dataset.ready==='1')return;
  root.replaceChildren();
- const help=document.createElement('p');help.className='voice-note';help.textContent='Mặc định ba nút bằng nhau. Chỉnh từng nút riêng; khi màn hình hẹp, chiều rộng tự co theo tỉ lệ để không chồng lên thùng rác. Màu thùng rác chỉ áp dụng cho viền và biểu tượng. Thay đổi được áp dụng ngay trên thẻ đang mở; kéo thanh Cài đặt để nhìn rõ thẻ.';root.append(help);
+ const help=document.createElement('p');help.className='voice-note';help.textContent='Mặc định khôi phục hình dáng và hiệu ứng ngày 23/11. Chỉnh từng nút riêng; chỉ thông số đã chỉnh sẽ ghi đè kiểu gốc. Màu thùng rác chỉ áp dụng cho viền và biểu tượng. Thay đổi được áp dụng ngay trên thẻ đang mở; kéo thanh Cài đặt để nhìn rõ thẻ.';root.append(help);
  const selector=document.createElement('select');selector.className='field';selector.setAttribute('aria-label','Thiết bị cần tùy chỉnh');
  [['desktop','Máy tính'],['phone','Điện thoại']].forEach(([v,t])=>selector.add(new Option(t,v)));
  selector.value=isPhone()?'phone':'desktop';root.append(selector);
@@ -1700,7 +1705,7 @@ function initSettings(){
        const raw=input.value;
        if(type==='number'&&!commit&&(raw.trim()===''||!Number.isFinite(Number(raw))||Number(raw)<min||Number(raw)>max))return;
        const next=type==='color'?validColor(raw,obj[key]):raw.trim()===''?obj[key]:clamp(raw,min,max,obj[key]);
-       if(next!==obj[key]){obj[key]=next;persist();}
+       if(next!==obj[key]){obj[key]=next;flag(mode,obj,key);persist();}
        if(commit)input.value=obj[key];
      }
      input.addEventListener('input',()=>applyLive(false));
@@ -1716,9 +1721,9 @@ function initSettings(){
     field(group,k==='trash'?'Màu viền và biểu tượng':'Màu nền',p[k],'color',0,0,'color');controls.append(group);
    });
    const equal=document.createElement('button');equal.type='button';equal.className='ghost';equal.textContent='Đặt 3 nút bằng kích thước nút Khó';
-   equal.addEventListener('click',()=>{['prev','next'].forEach(k=>{p[k].width=p.hard.width;p[k].height=p.hard.height;p[k].margin=p.hard.margin;});persist();draw();});
-   const reset=document.createElement('button');reset.type='button';reset.className='ghost';reset.textContent='Khôi phục mặc định thiết bị';
-   reset.addEventListener('click',()=>{prefs[mode]=defaults(mode);persist();draw();});controls.append(equal,reset);
+   equal.addEventListener('click',()=>{['prev','next'].forEach(k=>{p[k].width=p.hard.width;p[k].height=p.hard.height;p[k].margin=p.hard.margin;['width','height','margin'].forEach(key=>flag(mode,p[k],key));});['width','height','margin'].forEach(key=>flag(mode,p.hard,key));persist();draw();});
+   const reset=document.createElement('button');reset.type='button';reset.className='ghost';reset.textContent='Khôi phục giao diện gốc ngày 23/11';
+   reset.addEventListener('click',()=>{prefs[mode]=defaults(mode);overrides[mode]={};persist();draw();});controls.append(equal,reset);
  }
  selector.addEventListener('change',draw);draw();
  root.dataset.ready='1';
@@ -5797,7 +5802,7 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
         if(s.editing || s.imagePicker || flipping)return;
         flip();
       });
-      var r = el('div', 'prate nhi-rating-v3'), picked = s.picked[s.pos];
+      var r = el('div', 'prate nhi-rating-v3 nhi-classic-v127'), picked = s.picked[s.pos];
       var pv = ibtn('parrow nhi-prev-v3', 'left', function () { go(-1); }, 'Thẻ trước (←)');
       pv.disabled = s.pos === 0;pv.setAttribute('aria-label','Thẻ trước');r.appendChild(pv);
       var hard = btn('hard' + (picked === 'hard' ? ' picked' : ''), 'Khó', function () { rate('hard'); });
@@ -5808,15 +5813,41 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
       if(undoHistory.length){
         undoButton=btn('pundo','↶ Hoàn tác',undoDelete,
           undoHistory[undoHistory.length-1].type==='image'?'Khôi phục hình vừa xóa (Ctrl+Z)':'Khôi phục thẻ vừa xóa (Ctrl+Z)');
+        r.appendChild(undoButton);r.classList.add('nhi-rate-undo-inline');
+        // Inline-important grid overrides historical flex wrap and order rules.
+        r.style.setProperty('display','grid','important');
+        r.style.setProperty('grid-template-columns','minmax(60px,1fr) 44px 44px 94px','important');
+        r.style.setProperty('width','min(calc(100% - 12px),480px)','important');
+        r.style.setProperty('max-width','480px','important');
+        r.style.setProperty('margin','12px auto 14px','important');
+        r.style.setProperty('position','relative','important');
+        r.style.setProperty('inset','auto','important');
+        r.style.setProperty('transform','none','important');
+        r.style.setProperty('grid-template-rows','50px','important');
+        r.style.setProperty('gap','4px','important');
+        r.style.setProperty('flex-wrap','nowrap','important');
+        [[hard,1],[pv,2],[nx,3],[undoButton,4]].forEach(function(pair){
+          var button=pair[0];
+          button.style.setProperty('grid-column',String(pair[1]),'important');
+          button.style.setProperty('grid-row','1','important');
+          button.style.setProperty('min-width','0','important');
+          button.style.setProperty('max-width','none','important');
+          button.style.setProperty('width','100%','important');
+          button.style.setProperty('height','50px','important');
+          button.style.setProperty('min-height','50px','important');
+          button.style.setProperty('max-height','50px','important');
+          button.style.setProperty('flex','none','important');
+          button.style.setProperty('position','static','important');
+          button.style.setProperty('transform','none','important');
+        });
+        undoButton.style.setProperty('white-space','nowrap','important');
+        undoButton.style.setProperty('font-size','clamp(10px,2.8vw,12px)','important');
       }
       c.appendChild(r);
-      var trash=ibtn('pdel nhi-card-corner-trash','trash',function(){del(it.id);anim='next';saveSess();render();},'Xoá từ này khỏi danh sách (Delete)');
-      if(window.NHI_ACTION_LAYOUT_V122){
-        window.NHI_ACTION_LAYOUT_V122.mount(c,r,{hard:hard,prev:pv,next:nx},trash,undoButton);
-      }else{
-        if(undoButton)r.appendChild(undoButton);
-        c.appendChild(trash);
-      }
+      // Measure the available lane after mounting: here c.clientWidth is zero.
+      var trash=ibtn('pdel nhi-card-corner-trash', 'trash', function () { del(it.id); anim = 'next'; saveSess(); render(); }, 'Xoá từ này khỏi danh sách (Delete)');
+      c.appendChild(trash);
+      if(window.NHI_ACTION_LAYOUT_V122)window.NHI_ACTION_LAYOUT_V122.mount(c,r,{hard:hard,prev:pv,next:nx},trash,undoButton);
       if (s.imagePicker && window.NHI_IMAGES && window.NHI_IMAGES.picker) {
         c.appendChild(window.NHI_IMAGES.picker(it, function (image) {
           var applyPicture=function(){put('img',it.id,image);s.imagePicker=false;render();};
@@ -8646,6 +8677,7 @@ if(!prefs.classicCardMotionRestoredV108){
   prefs.classicCardMotionRestoredV108=true;
   try{localStorage.setItem(STORAGE,JSON.stringify(prefs));}catch(_){}
 }
+if(!prefs.classicNavigationRestoredV127){prefs.navigation='classic';prefs.durations={...(prefs.durations||{}),navigation:.62};prefs.classicNavigationRestoredV127=true;try{localStorage.setItem(STORAGE,JSON.stringify(prefs));}catch(_){}}
 const running=new WeakMap();
 const durationSeconds=type=>{
   const value=Number(prefs.durations?.[type]);
@@ -9183,7 +9215,7 @@ html body #planBox .pcard .nhi-english-v5:not(.nhi-en-inline-two-spaces)
   content:none!important;
 }
 </style>
-<link rel="stylesheet" href="nhi-fixes-20261123.css?v=20261124-v123">
+<link rel="stylesheet" href="nhi-fixes-20261123.css?v=20261124-v127">
 <style id="nhi-settings-drag-style-v126">
 html body #setSheet>.sheetbox{box-sizing:border-box!important;width:min(560px,calc(100vw - 56px))!important;max-height:min(70dvh,760px)!important;position:relative!important;left:0!important;top:0!important;margin:0!important;overscroll-behavior:contain}
 html body #setSheet>.sheetbox.nhi-settings-floating-v126{position:absolute!important;right:auto!important;bottom:auto!important;left:var(--nhi-settings-left)!important;top:var(--nhi-settings-top)!important;transition:none!important}
