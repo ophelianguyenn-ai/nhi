@@ -256,16 +256,15 @@ function renderThreads(){
 }
 function renderSettings(){
  const d=data(),sync=d.syncEnabled;
- return pageTitle('⚙️ Cài đặt dễ dùng','Các cài đặt gốc vẫn được giữ lại; API và đồng bộ đặt trong Nâng cao.')
- +'<section class="nhi-v2-surface"><h3>🌸 Cơ bản</h3>'
- +button('open-settings','Giọng đọc, tốc độ, sáng/tối, cỡ chữ','primary')
+ return pageTitle('⚙️ Cài đặt','Tất cả tùy chỉnh trong cùng một cửa sổ.')
+ +'<section class="nhi-v2-surface">'
+ +button('open-settings','Mở Cài đặt','primary')
  +button('export-progress','Xuất tiến độ','ghost')
  +button('backup-all','Xuất toàn bộ JSON trên thiết bị','ghost')
+ +button('restore-check','Kiểm tra tệp sao lưu trước khi khôi phục')
  +'<p>✓ Tự lưu trên thiết bị hiện tại</p>'
  +'<p>'+(sync?'✓ Đã bật đồng bộ · Xem thời gian cập nhật trong bảng đồng bộ':'○ Chưa bật đồng bộ')+'</p>'
  +'<small>Tự lưu không có nghĩa là tự đồng bộ. Để dùng nhiều thiết bị, cần bật đồng bộ và thiết lập địa chỉ dữ liệu.</small></section>'
- +'<details class="nhi-v2-surface"><summary>🛠 Cài đặt nâng cao</summary><p>Cỡ chữ riêng, chiều cao thẻ, đồng bộ Firebase, khóa API, khôi phục và xử lý xung đột.</p>'
- +button('open-settings','Mở cài đặt nâng cao')+button('restore-check','Kiểm tra tệp sao lưu trước khi khôi phục')+'</details>'
  +'<p class="nhi-v2-hint">Nên xuất bản sao lưu trước khi xóa hoặc nhập đè dữ liệu. Không nên sửa đồng thời cùng một thẻ trên hai thiết bị khi chưa đồng bộ xong.</p>';
 }
 function nav(){
@@ -314,16 +313,9 @@ function updateSource(){
  if(b.textContent!==value)b.textContent=value;
 }
 function hookSettings(){
- const sheet=$('#setSheet .sheetbox');if(!sheet||$('#nhiV2SettingsTabs'))return;
- const row=document.createElement('div');row.id='nhiV2SettingsTabs';row.className='nhi-v2-pills';
- row.innerHTML='<button type="button" class="primary" data-stab="basic">🌸 Cơ bản</button><button type="button" class="ghost" data-stab="advanced">⚙️ Nâng cao</button>';
- sheet.querySelector('.sheethead')?.after(row);
- sheet.classList.add('nhi-v2-settings-basic');
- row.addEventListener('click',e=>{const b=e.target.closest('[data-stab]');if(!b)return;
-  sheet.classList.toggle('nhi-v2-settings-basic',b.dataset.stab==='basic');
-  sheet.classList.toggle('nhi-v2-settings-advanced',b.dataset.stab==='advanced');
-  row.querySelectorAll('button').forEach(x=>x.className=x===b?'primary':'ghost');
- });
+ const sheet=$('#setSheet .sheetbox');if(!sheet)return;
+ $('#nhiV2SettingsTabs')?.remove();
+ sheet.classList.remove('nhi-v2-settings-basic','nhi-v2-settings-advanced');
  const foot=$('#footNote');if(foot)foot.textContent='Tự lưu trên thiết bị này. Đồng bộ giữa các máy cần được bật và thiết lập riêng. Hãy sao lưu trước khi xóa dữ liệu.';
 }
 /* Vietnamese/Korean chat examples, including independent "Ví dụ 1/2/3"
