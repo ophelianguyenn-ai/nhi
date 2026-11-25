@@ -1,6 +1,6 @@
 // Offline support: network-first for GitHub Pages and static assets.
 // Fall back to cache only when offline. Different cache key forces eviction of earlier stale CSS/JS.
-const CACHE = 'nhi-corner-v142-lesson-meaning';
+const CACHE = 'nhi-corner-v143-calendar-reload';
 const CORE = [
   'nhi-cover-icon-32.png','nhi-cover-icon-180.png','nhi-cover-icon-192.png','nhi-cover-icon-512.png',
   'nhi-flower-v135-32.png','nhi-flower-v135-180.png','nhi-flower-v135-192.png','nhi-flower-v135-512.png','manifest.webmanifest?v=135',
@@ -57,7 +57,7 @@ self.addEventListener('fetch', function(e){
     return;
   }
   // Do not serve outdated JS/CSS as long as network works.
-  e.respondWith(fetch(req).then(function(res){
+  e.respondWith(fetch(req,{cache:req.mode==='navigate'?'no-store':'no-cache'}).then(function(res){
     if(res && res.ok){
       var copy=res.clone();
       caches.open(CACHE).then(function(c){return c.put(req,copy);}).catch(function(){});
