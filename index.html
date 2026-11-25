@@ -1709,7 +1709,23 @@ function mount(card,row,buttons,trash,undo){
      const rowBottom=card.getBoundingClientRect().bottom-row.getBoundingClientRect().bottom-(parseFloat(cs.borderBottomWidth)||0);
      bottom=Math.max(bottom,rowBottom);
    }
-   style(trash,{'position':'absolute','left':'auto','top':'auto','right':px(Math.min(p.trash.margin,maxRight)),'bottom':px(Math.min(bottom,maxBottom)),'z-index':'25','pointer-events':'auto','touch-action':'manipulation','cursor':'pointer'});
+    let right=p.trash.margin;
+    // Phone only: temporarily dock trash 10px above Undo. Desktop retains
+    // the original user-configured offsets, including when Undo is visible.
+    if(mode==='phone'&&undo&&undo.isConnected){
+      let x=0,y=0,n=undo;
+      while(n&&n!==card){x+=n.offsetLeft;y+=n.offsetTop;n=n.offsetParent;}
+      if(n===card){
+        right=card.clientWidth-(x+undo.offsetWidth/2+p.trash.width/2);
+        bottom=card.clientHeight-y+10;
+      }else{
+        const cr=card.getBoundingClientRect(),ur=undo.getBoundingClientRect();
+        const sx=cr.width/card.offsetWidth||1,sy=cr.height/card.offsetHeight||1;
+        right=(cr.right-(ur.left+ur.width/2))/sx-p.trash.width/2-(parseFloat(cs.borderRightWidth)||0);
+        bottom=(cr.bottom-ur.top)/sy+10-(parseFloat(cs.borderBottomWidth)||0);
+      }
+    }
+    style(trash,{'position':'absolute','left':'auto','top':'auto','right':px(Math.min(Math.max(0,right),maxRight)),'bottom':px(Math.min(Math.max(0,bottom),maxBottom)),'z-index':'25','pointer-events':'auto','touch-action':'manipulation','cursor':'pointer'});
  }
  state.layout=layout;mounted.add(state);requestAnimationFrame(layout);
  if(typeof MutationObserver!=='undefined'){
@@ -1907,7 +1923,7 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
     <p class="voice-note">Trang này chạy thẳng trên trình duyệt nên cần một mã API của riêng bạn để gọi AI. Mã chỉ lưu trong trình duyệt này, không đồng bộ, không gửi đi đâu ngoài nhà cung cấp AI bạn chọn.</p>
     <label class="flabel"><span>Nhà cung cấp</span><select class="field small" id="aiProv"></select></label>
     <label class="flabel"><span>Mã API</span><input class="field" id="aiKey" type="password" autocomplete="off" placeholder="Dán mã API vào đây"></label>
-    <label class="flabel"><span>Mô hình</span><input class="field" id="aiModel" type="text" autocomplete="off" list="aiModels" placeholder="gemini-3.5-flash-lite"></label>
+    <label class="flabel"><span>Mô hình</span><input class="field" id="aiModel" type="text" autocomplete="off" list="aiModels" placeholder="deepseek-chat"></label>
     <p class="voice-note" id="aiProvNote"></p>
     <datalist id="aiModels"><option value="gemini-3.5-flash-lite"></option><option value="gemini-3.1-flash-lite"></option><option value="gemini-2.5-flash-lite"></option></datalist>
     <p class="voice-note" id="aiCheckStatus" role="status" aria-live="polite"></p>
@@ -7128,7 +7144,7 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
 
   /* ================= AI side window ================= */
   var AI = (function () {
-    var KEY = 'nlc-ai-v1', LOGKEY = 'nlc-ai-log', cfg = { p: 'gemini', k: {}, m: {} }, log = [], busy = false, withCtx = true;
+    var KEY = 'nlc-ai-v1', LOGKEY = 'nlc-ai-log', cfg = { p: 'deepseek', k: {}, m: {} }, log = [], busy = false, withCtx = true;
     var THREADKEY='nhi-ai-threads-v2',threadId='',threads=[];
     try{threads=JSON.parse(localStorage.getItem(THREADKEY)||'[]');if(!Array.isArray(threads))threads=[];}catch(e){threads=[];}
     try{threadId=sessionStorage.getItem('nhi-ai-active-thread-v2')||'';}catch(e){};
@@ -7140,7 +7156,13 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
     };
     var SYSTEM = 'Bạn là trợ lý học tiếng Hàn cho một người Việt đi làm ở nhà máy, thường họp và báo cáo với sếp người Hàn. Trả lời bằng tiếng Việt, ngắn gọn, đi thẳng vào câu hỏi. Khi giải thích một từ hay câu tiếng Hàn: nêu nghĩa, tách từ vựng và ngữ pháp chính, mức độ kính ngữ, rồi cho 1–2 ví dụ ngắn kèm nghĩa. Nếu bản dịch trong thẻ chưa tự nhiên thì đề xuất cách nói tốt hơn. Không dùng bảng.';
     try { var j = JSON.parse(lsGet(KEY) || '{}'); if (j && typeof j === 'object') { if (PROV[j.p]) cfg.p = j.p; cfg.k = j.k || {}; cfg.m = j.m || {}; } } catch (e) { }
-    // Keep the saved provider; Gemini is only the initial default when nothing is saved.
+    // Migrate the old phone default once; subsequent explicit choices remain saved.
+    var aiPhone=window.matchMedia('(max-width:700px), (max-width:900px) and (pointer:coarse)');
+    var AI_PROVIDER_REV='nhi-ai-provider-default-v145';
+    if(aiPhone.matches&&!lsGet(AI_PROVIDER_REV)){
+      cfg.p='deepseek';
+      lsSet(KEY,JSON.stringify(cfg));lsSet(AI_PROVIDER_REV,'1');
+    }
     try {var thread=threads.find(function(t){return t.id===threadId;});var lj=thread?thread.messages:JSON.parse(sessionStorage.getItem(LOGKEY)||'[]');if(Array.isArray(lj))log=lj.filter(function(m){return m&&(m.r==='me'||m.r==='ai')&&typeof m.t==='string';});}catch(e){}
     function saveCfg() { lsSet(KEY, JSON.stringify(cfg)); }
     function saveLog() {
@@ -7273,14 +7295,34 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
       var sel = $('aiProv');
       if (!sel.options.length) Object.keys(PROV).forEach(function (p) { var o = document.createElement('option'); o.value = p; o.textContent = PROV[p].name; sel.appendChild(o); });
       sel.value = cfg.p; $('aiKey').value = key(); $('aiModel').value = model();
+      $('aiModel').placeholder=PROV[cfg.p].model;
+      var choices=$('aiModels');choices.replaceChildren();
+      (cfg.p==='gemini'?['gemini-3.5-flash-lite','gemini-3.1-flash-lite','gemini-2.5-flash-lite']:cfg.p==='deepseek'?['deepseek-chat','deepseek-reasoner']:[PROV[cfg.p].model]).forEach(function(name){var opt=mk('option');opt.value=name;choices.appendChild(opt);});
       $('aiCheck').hidden=cfg.p!=='gemini';
       var n = $('aiProvNote'); n.textContent = PROV[cfg.p].note + ' ';
       var a = mk('a', null, 'Mở trang lấy mã'); a.href = PROV[cfg.p].link; a.target = '_blank'; a.rel = 'noopener'; n.appendChild(a);
     }
+    var aiOpenGeneration=0;
+    function resetPhoneAI(){
+      var panel=$('aiPanel');
+      if(panel.getAnimations)panel.getAnimations().forEach(function(a){a.cancel();});
+      ['opacity','transform','filter','clip-path','perspective','visibility'].forEach(function(p){panel.style.removeProperty(p);});
+    }
+    function fitPhoneAI(){
+      if(!aiPhone.matches)return;
+      var vv=window.visualViewport;
+      if(vv){
+        $('aiPanel').style.setProperty('--nhi-phone-ai-height',Math.round(vv.height)+'px');
+        $('aiPanel').style.setProperty('--nhi-phone-ai-top',Math.round(vv.offsetTop)+'px');
+      }
+    }
+    if(window.visualViewport){window.visualViewport.addEventListener('resize',fitPhoneAI);window.visualViewport.addEventListener('scroll',fitPhoneAI);}
     function open(focusCard) {
+      var generation=++aiOpenGeneration;
+      if(aiPhone.matches){resetPhoneAI();fitPhoneAI();}
       document.body.classList.add('ai-open'); $('aiPanel').setAttribute('aria-hidden', 'false'); $('aiBtn').setAttribute('aria-pressed', 'true');
       paintCtx(); paintQuick(); paintLog(); paintSetup(!key());
-      if(window.NHI_WINDOW_FX)window.NHI_WINDOW_FX.open($('aiPanel'),'ai');
+      if(!aiPhone.matches&&window.NHI_WINDOW_FX)window.NHI_WINDOW_FX.open($('aiPanel'),'ai');
       if(focusCard==='hotkey'){
         // Retain keyboard focus outside the sidebar so a second A closes it.
         // Clicking inside a text field later restores normal typing.
@@ -7289,13 +7331,17 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
           studyCard.tabIndex=-1;
           try{studyCard.focus({preventScroll:true});}catch(e){studyCard.focus();}
         }
-      } else if(!focusCard || window.innerWidth > 700){
-        setTimeout(function () { try { $('aiInput').focus(); } catch (e) { } }, 60);
+      } else if(!aiPhone.matches&&(!focusCard || window.innerWidth > 700)){
+        setTimeout(function () { if(generation!==aiOpenGeneration||!isOpen())return;try { $('aiInput').focus(); } catch (e) { } }, 60);
       }
     }
     function close() {
-      function commit(){document.body.classList.remove('ai-open');$('aiPanel').setAttribute('aria-hidden','true');$('aiBtn').setAttribute('aria-pressed','false');}
-      if(window.NHI_WINDOW_FX&&document.body.classList.contains('ai-open'))window.NHI_WINDOW_FX.close($('aiPanel'),'ai',commit);
+      var generation=++aiOpenGeneration;
+      function commit(){if(generation!==aiOpenGeneration)return;document.body.classList.remove('ai-open');$('aiPanel').setAttribute('aria-hidden','true');$('aiBtn').setAttribute('aria-pressed','false');}
+      if(aiPhone.matches){
+        if($('aiPanel').contains(document.activeElement))document.activeElement.blur();
+        resetPhoneAI();commit();
+      }else if(window.NHI_WINDOW_FX&&document.body.classList.contains('ai-open'))window.NHI_WINDOW_FX.close($('aiPanel'),'ai',commit);
       else commit();
     }
      function toggle(mode) { if (isOpen()) close(); else open(mode || 'hotkey'); }
@@ -9708,5 +9754,28 @@ html body #planBox .pitems>li .nhi-meaning-eye-v142[aria-pressed="true"]{color:v
 <style id="nhi-trash-position-v144">
 html body #planBox .pcard>.pdel.nhi-card-corner-trash{pointer-events:auto!important;touch-action:manipulation!important;cursor:pointer!important}
 html body #planBox .pcard>.pdel.nhi-card-corner-trash svg{pointer-events:none!important}
+</style>
+<style id="nhi-mobile-ai-v145">
+@media(max-width:700px), (max-width:900px) and (pointer:coarse){
+ html body #aiPanel.aipanel{
+  position:fixed!important;inset:auto!important;left:0!important;right:0!important;
+  top:var(--nhi-phone-ai-top,0px)!important;bottom:auto!important;
+  width:100%!important;max-width:100%!important;height:100vh!important;height:var(--nhi-phone-ai-height,100dvh)!important;
+  box-sizing:border-box!important;z-index:2147483000!important;
+  background:var(--surface,#fff)!important;opacity:1!important;
+  filter:none!important;backdrop-filter:none!important;clip-path:none!important;
+  transform:none!important;transform-style:flat!important;perspective:none!important;
+  isolation:isolate!important;animation:none!important;transition:none!important;
+  overflow:hidden!important;border:0!important;box-shadow:none!important;
+ }
+ html body:not(.ai-open) #aiPanel.aipanel{visibility:hidden!important;pointer-events:none!important}
+ html body.ai-open #aiPanel.aipanel{visibility:visible!important;pointer-events:auto!important}
+ html body.ai-open #planBox,html body.ai-open #topbar,
+ html body.ai-open #nhiV2TopNav,html body.ai-open #nhiV2Workspace{visibility:hidden!important}
+ html body.ai-open{overflow:hidden!important}
+ html body #aiPanel #aiLog{flex:1 1 0!important;min-height:0!important;overflow-y:auto!important;overscroll-behavior:contain}
+ html body #aiPanel #aiSetup:not([hidden]){flex:0 1 auto;min-height:0;max-height:45%;overflow-y:auto;overscroll-behavior:contain}
+ html body #aiPanel .aihead,html body #aiPanel .aiform,html body #aiPanel .aiquick{flex-shrink:0}
+}
 </style>
 </body></html>
