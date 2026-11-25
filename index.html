@@ -9413,12 +9413,31 @@ html body #cover.nhi-upper-v8 #coverGo.primary.white{
   const stableHeight=parseFloat(cardStyle.minHeight)||Math.min(card.clientHeight,Math.max(220,innerHeight*.65));
   // Use the requested card height, not a previous auto-enlarged card, to avoid runaway sizing.
   const outside=Math.max(0,card.clientHeight-stage.clientHeight-pad);
-  const other=Math.max(0,stage.scrollHeight-el.offsetHeight);
+  // Measure occupied sibling rows, not stage.scrollHeight (which includes empty flex space).
+  let branch=el;while(branch.parentElement&&branch.parentElement!==stage&&branch!==stage)branch=branch.parentElement;
+  const stageStyle=getComputedStyle(stage),branchRect=branch.getBoundingClientRect();
+  const gap=parseFloat(stageStyle.rowGap)||parseFloat(stageStyle.gap)||0;
+  const bands=[];
+  for(const sibling of stage.children){
+   if(sibling===branch||!visible(sibling))continue;
+   const style=getComputedStyle(sibling);
+   if(style.position==='absolute'||style.position==='fixed')continue;
+   const r=sibling.getBoundingClientRect();
+   // Side-by-side pictures do not consume the text column's vertical space.
+   if(r.right<=branchRect.left+1||r.left>=branchRect.right-1)continue;
+   const top=r.top-(parseFloat(style.marginTop)||0),bottom=r.bottom+(parseFloat(style.marginBottom)||0);
+   if(bottom>top)bands.push([top,bottom]);
+  }
+  bands.sort((a,b)=>a[0]-b[0]);
+  const merged=[];
+  for(const b of bands){const last=merged[merged.length-1];if(last&&b[0]<=last[1])last[1]=Math.max(last[1],b[1]);else merged.push(b);}
+  const occupied=merged.reduce((n,b)=>n+b[1]-b[0],0)+merged.length*gap;
+  const other=occupied+Math.max(0,branch.offsetHeight-el.offsetHeight)+(parseFloat(stageStyle.paddingTop)||0)+(parseFloat(stageStyle.paddingBottom)||0);
   const budget=Math.max(48,stableHeight-pad-outside-other-12);
   const original={value:el.style.getPropertyValue('font-size'),priority:el.style.getPropertyPriority('font-size'),applied:''};
   function test(n){
    el.style.setProperty('font-size',n+'px','important');
-   return el.offsetHeight<=budget+1&&el.scrollWidth<=el.clientWidth+2;
+   return Math.max(el.offsetHeight,el.scrollHeight)<=budget+1&&el.scrollWidth<=el.clientWidth+2;
   }
   let lo=min,hi=max,best=min;
   while(lo<=hi){const mid=Math.floor((lo+hi)/2);if(test(mid)){best=mid;lo=mid+1;}else hi=mid-1;}
