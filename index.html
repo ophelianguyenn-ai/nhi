@@ -1603,7 +1603,7 @@ const defaults=mode=>({
  hard:{width:mode==='phone'?120:145,height:44,margin:0,color:'#eaf5ff'},
  prev:{width:mode==='phone'?41:63,height:44,margin:0,color:'#fbd4e5'},
  next:{width:mode==='phone'?41:63,height:44,margin:0,color:'#fbd4e5'},
- trash:{width:30,height:30,margin:8,color:'#d8a324'}
+ trash:{width:30,height:30,margin:8,bottom:8,color:'#d8a324'}
 });
 const ids=['hard','prev','next','trash'],labels={hard:'Khó',prev:'Lùi',next:'Tiến',trash:'Thùng rác'};
 const clamp=(x,lo,hi,d)=>Number.isFinite(Number(x))?Math.max(lo,Math.min(hi,Math.round(Number(x)))):d;
@@ -1614,8 +1614,8 @@ const normalize=(mode,x)=>{
  ids.forEach(k=>{const a=v[k]||{},b=d[k];p[k]={
  width:clamp(a.width,k==='trash'?22:40,k==='trash'?60:200,b.width),
  height:clamp(a.height,k==='trash'?22:36,k==='trash'?60:76,b.height),
- margin:clamp(a.margin,0,24,b.margin),color:validColor(a.color,b.color)
- };});return p;
+ margin:clamp(a.margin,0,k==='trash'?600:24,b.margin),color:validColor(a.color,b.color)
+ };if(k==='trash')p[k].bottom=clamp(a.bottom,0,1000,clamp(a.margin,0,600,b.bottom));});return p;
 };
 let saved={};try{saved=JSON.parse(localStorage.getItem(KEY)||'{}')||{};}catch(e){}
 let old={};try{old=JSON.parse(localStorage.getItem('nhi-action-layout-v122')||'{}')||{};}catch(e){}
@@ -1635,7 +1635,7 @@ const isPhone=()=>matchMedia('(max-width:640px), (max-width:900px) and (pointer:
 const style=(n,p)=>Object.entries(p).forEach(([k,v])=>n.style.setProperty(k,String(v),'important'));
 const px=n=>Math.max(0,n)+'px';
 function compute(mode,p,available){
- const trash=p.trash, inset=trash.margin;
+ const trash=p.trash, inset=Math.max(0,Math.min(trash.margin,available-trash.width));
  // Maintain a separate trash lane on either device; reserve the exact same
  // right and bottom inset on desktop, even with the optional Undo row.
  const right=Math.min(Math.max(p.margin,inset+trash.width+p.gap),available-3);
@@ -1702,11 +1702,14 @@ function mount(card,row,buttons,trash,undo){
   });
   if(undo)apply(undo,{'order':'3','position':'static','inset':'auto','width':'94px','min-width':'52px','max-width':'94px','flex':'0 1 94px','margin':'0','align-self':'center'});
   paintButton(trash,'trash',p.trash,p.trash.width);
-  style(trash,{'right':px(p.trash.margin),'bottom':px(p.trash.margin),'z-index':'6'});
-  if(mode==='phone'){
-    const bottom=card.getBoundingClientRect().bottom-row.getBoundingClientRect().bottom-(parseFloat(cs.borderBottomWidth)||0);
-    style(trash,{'bottom':px(Math.max(p.trash.margin,bottom))});
-  }
+  const maxRight=Math.max(0,card.clientWidth-p.trash.width);
+   const maxBottom=Math.max(0,card.clientHeight-p.trash.height);
+   let bottom=p.trash.bottom;
+   if(mode==='phone'&&!flags['trash.bottom']&&!flags['trash.margin']){
+     const rowBottom=card.getBoundingClientRect().bottom-row.getBoundingClientRect().bottom-(parseFloat(cs.borderBottomWidth)||0);
+     bottom=Math.max(bottom,rowBottom);
+   }
+   style(trash,{'position':'absolute','left':'auto','top':'auto','right':px(Math.min(p.trash.margin,maxRight)),'bottom':px(Math.min(bottom,maxBottom)),'z-index':'25','pointer-events':'auto','touch-action':'manipulation','cursor':'pointer'});
  }
  state.layout=layout;mounted.add(state);requestAnimationFrame(layout);
  if(typeof MutationObserver!=='undefined'){
@@ -1745,7 +1748,7 @@ function initSettings(){
        const raw=input.value;
        if(type==='number'&&!commit&&(raw.trim()===''||!Number.isFinite(Number(raw))||Number(raw)<min||Number(raw)>max))return;
        const next=type==='color'?validColor(raw,obj[key]):raw.trim()===''?obj[key]:clamp(raw,min,max,obj[key]);
-       if(next!==obj[key]){obj[key]=next;flag(mode,obj,key);persist();}
+       if(next!==obj[key]||(commit&&obj===p.trash&&!overrides[mode][fieldKey(mode,obj,key)]&&(key==='margin'||key==='bottom'))){obj[key]=next;flag(mode,obj,key);persist();}
        if(commit)input.value=obj[key];
      }
      input.addEventListener('input',()=>applyLive(false));
@@ -1757,8 +1760,11 @@ function initSettings(){
     const group=document.createElement('fieldset');const legend=document.createElement('legend');legend.textContent=labels[k];group.append(legend);
     field(group,'Chiều rộng (px)',p[k],'width',k==='trash'?22:40,k==='trash'?60:200);
     field(group,'Chiều cao (px)',p[k],'height',k==='trash'?22:36,k==='trash'?60:76);
-    field(group,k==='trash'?'Lề góc (px)':'Lề ngang riêng (px)',p[k],'margin',0,24);
-    field(group,k==='trash'?'Màu viền và biểu tượng':'Màu nền',p[k],'color',0,0,'color');controls.append(group);
+    if(k==='trash'){
+       field(group,'Ngang — cách mép phải (px)',p[k],'margin',0,600);
+       field(group,'Dọc — cách mép dưới (px)',p[k],'bottom',0,1000);
+     }else field(group,'Lề ngang riêng (px)',p[k],'margin',0,24);
+    field(group,k==='trash'?'Màu viền và biểu tượng':'Màu nền',p[k],'color',0,0,'color');if(k==='trash'){const hint=document.createElement('p');hint.className='voice-note';hint.textContent='Tăng ngang để dịch sang trái; tăng dọc để đưa lên trên. Nút luôn nằm trong thẻ.';group.append(hint);}controls.append(group);
    });
    const equal=document.createElement('button');equal.type='button';equal.className='ghost';equal.textContent='Đặt 3 nút bằng kích thước nút Khó';
    equal.addEventListener('click',()=>{['prev','next'].forEach(k=>{p[k].width=p.hard.width;p[k].height=p.hard.height;p[k].margin=p.hard.margin;['width','height','margin'].forEach(key=>flag(mode,p[k],key));});['width','height','margin'].forEach(key=>flag(mode,p.hard,key));persist();draw();});
@@ -4475,37 +4481,33 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
       toast('Đã khôi phục thẻ vừa xóa.');
     }
     function del(id) {
-      if (!ITEMS[id] || val('del', id)) return;
+      if (!ITEMS[id] || val('del', id)) return false;
       ++ratingToken; ratingPending=false; pendingRatingFinish=null;
-      stopSpeech(); if(window.NHI_HARD_MASCOT)window.NHI_HARD_MASCOT.clear();
-      // Delete immediately, but offer one-step local Undo until the next card
-      // navigation. A tombstone still remains after that window expires.
-      undoHistory=[{
-        id:id, del:val('del',id), hard:val('hard',id),
-        inSession:!!(sess&&sess.queue.includes(id)),
-        kind:sess&&sess.kind,title:sess&&sess.title,
-        pos:sess?sess.queue.indexOf(id):-1,
-        recorded:!!(sess&&sess.recorded),
-        lessonId:sess&&sess.L&&sess.L.id,
-        done:sess&&sess.L?(val('done',sess.L.id)||[]).slice():[]
-      }];
-      put('del',id,1);
-      if(val('hard',id))put('hard',id,null);
-      Object.keys(resume).forEach(function(k){resume[k]=(resume[k]||[]).filter(function(x){return x!==id;});});
-      Object.keys(resumeFull).forEach(function(k){
-        var old=resumeFull[k];if(!old||!Array.isArray(old.queue))return;
-        var before=old.queue.slice(0,old.pos||0).filter(function(x){return x!==id;}).length;
-        old.queue=old.queue.filter(function(x){return x!==id;});old.pos=Math.min(before,old.queue.length);
-      });
-      if(sess){
-        var before=sess.queue.slice(0,sess.pos).filter(function(x){return x!==id;}).length;
-        sess.queue=sess.queue.filter(function(x){return x!==id;});
-        sess.pos=Math.min(before,sess.queue.length);
-        sess.selectedKo='';sess.spoken=-1;sess.flipped=false;
+      flipping=false;legendOpen=false;anim='';
+      try{stopSpeech();}catch(e){console.warn('Nhi: audio cleanup',e);}
+      try{window.NHI_HARD_MASCOT?.clear();}catch(e){console.warn('Nhi: mascot cleanup',e);}
+      var inSession=!!(sess&&Array.isArray(sess.queue)&&sess.queue.includes(id));
+      undoHistory=[{id:id,del:val('del',id),hard:val('hard',id),inSession:inSession,kind:sess&&sess.kind,title:sess&&sess.title,pos:inSession?sess.queue.indexOf(id):-1,recorded:!!(sess&&sess.recorded),lessonId:sess&&sess.L&&sess.L.id,done:sess&&sess.L?(val('done',sess.L.id)||[]).slice():[]}];
+      function prune(snapshot){
+        if(!snapshot||!Array.isArray(snapshot.queue))return;
+        var queue=snapshot.queue,picked=snapshot.picked||{},next=[],nextPicked={};
+        var oldPos=Math.max(0,Math.min(queue.length,Number(snapshot.pos)||0)),newPos=0;
+        queue.forEach(function(item,i){if(item===id)return;if(i<oldPos)newPos++;if(Object.prototype.hasOwnProperty.call(picked,i))nextPicked[next.length]=picked[i];next.push(item);});
+        snapshot.queue=next;snapshot.pos=Math.min(newPos,next.length);snapshot.picked=nextPicked;
+        if(snapshot.again)delete snapshot.again[id];
       }
-      saveUndo();save();saveSess();undoUI();
-      toast('Đã xóa khỏi học phần · Có thể Hoàn tác trước khi sang thẻ khác');
-      render();
+      var deleted={v:1,t:Date.now()};ps.del[id]=deleted;
+      var clearHard=val('hard',id)?{v:null,t:deleted.t}:null;if(clearHard)ps.hard[id]=clearHard;
+      Object.keys(resume).forEach(function(k){if(Array.isArray(resume[k]))resume[k]=resume[k].filter(function(x){return x!==id;});});
+      Object.keys(resumeFull).forEach(function(k){prune(resumeFull[k]);});
+      if(inSession){prune(sess);sess.selectedKo='';sess.spoken=-1;sess.flipped=false;sess.hanja=false;sess.editing=false;sess.imagePicker=false;sess.celebrated=false;}
+      var old=document.querySelector('#planBox .pcard[data-nhi-card-id]');
+      if(old&&old.dataset.nhiCardId===id)old.remove();
+      document.querySelectorAll('#planBox .pitems li[data-item]').forEach(function(row){if(row.dataset.item===id)row.remove();});
+      try{saveUndo();save();saveSess();}catch(e){console.error('Nhi: delete persistence',e);}
+      try{SYNC.queue('L/del/'+id,deleted);if(clearHard)SYNC.queue('L/hard/'+id,clearHard);}catch(e){console.error('Nhi: delete sync',e);}
+      undoUI();render();toast('Đã xóa khỏi học phần · Có thể Hoàn tác trước khi sang thẻ khác',undoDelete);
+      return true;
     }
 
     /* ---- highlight: tap a Vietnamese phrase, it and its Korean match light up ---- */
@@ -5145,7 +5147,7 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
         paintMeaning();right.appendChild(eye);
       }
       if (canSpeak) right.appendChild(ibtn('picon', 'vol', function () { speak(it.ko, 'ko-KR'); }, 'Nghe tiếng Hàn'));
-      right.appendChild(ibtn('picon del', 'trash', function () { del(it.id); render(); }, 'Xoá khỏi danh sách'));
+      right.appendChild(ibtn('picon del', 'trash', function (e) { e.stopPropagation(); del(it.id); }, 'Xoá khỏi danh sách'));
       li.appendChild(right);
       return li;
     }
@@ -5989,7 +5991,7 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
       }
       c.appendChild(r);
       // Measure the available lane after mounting: here c.clientWidth is zero.
-      var trash=ibtn('pdel nhi-card-corner-trash', 'trash', function () { del(it.id); anim = 'next'; saveSess(); render(); }, 'Xoá từ này khỏi danh sách (Delete)');
+      var trash=ibtn('pdel nhi-card-corner-trash', 'trash', function (e) { e.preventDefault(); e.stopPropagation(); del(it.id); }, 'Xoá từ này khỏi danh sách (Delete)');
       c.appendChild(trash);
       if(window.NHI_ACTION_LAYOUT_V122)window.NHI_ACTION_LAYOUT_V122.mount(c,r,{hard:hard,prev:pv,next:nx},trash,undoButton);
       if (s.imagePicker && window.NHI_IMAGES && window.NHI_IMAGES.picker) {
@@ -6101,9 +6103,9 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
     function flip() {
       if(ratingPending&&pendingRatingFinish)pendingRatingFinish();
       if (!sess || sess.pos >= sess.queue.length || sess.editing || flipping) return;
-      var pos0 = sess.pos, c = document.querySelector('#planBox .pcard');
+      var pos0 = sess.pos, flipSession=sess, flipId=sess.queue[pos0], flipToken=ratingToken, c = document.querySelector('#planBox .pcard');
       stopSpeech(); haptic(8); legendOpen = false;
-      function turn() { flipping = false; if (!sess || sess.pos !== pos0) return; sess.flipped = !sess.flipped; sess.hanja = sess.flipped; if(window.NHI_HARD_MASCOT)window.NHI_HARD_MASCOT.clear(); var item=ITEMS[sess.queue[sess.pos]]; sess.spoken=sess.pos; speak(sess.flipped?item.ko:item.vi,sess.flipped?'ko-KR':'vi-VN'); anim = 'flip'; render(); }
+      function turn() { if (!sess || sess!==flipSession || sess.pos !== pos0 || sess.queue[pos0]!==flipId || ratingToken!==flipToken) return; flipping = false; sess.flipped = !sess.flipped; sess.hanja = sess.flipped; if(window.NHI_HARD_MASCOT)window.NHI_HARD_MASCOT.clear(); var item=ITEMS[sess.queue[sess.pos]]; sess.spoken=sess.pos; speak(sess.flipped?item.ko:item.vi,sess.flipped?'ko-KR':'vi-VN'); anim = 'flip'; render(); }
       // V107 suppressed the old pre-flip animation when the FX engine existed.
       // Restore the classic exit BEFORE changing sides; the new face keeps
       // the original 350ms perspective/fade entrance in renderSession().
@@ -6567,7 +6569,7 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
       else if (e.key === '2') {e.preventDefault();rate('mid');}
       else if (e.key === 'f' || e.key === 'F') { e.preventDefault(); setFocus(!document.body.classList.contains('focus')); render(); }
       else if (e.key === 'a' || e.key === 'A') { e.preventDefault(); if(window.NLC_AI) window.NLC_AI.toggle('hotkey'); }
-      else if (e.key === 'Delete' || e.key === 'Backspace') { e.preventDefault(); del(sess.queue[sess.pos]); anim = 'next'; saveSess(); render(); }
+      else if (e.key === 'Delete' || e.key === 'Backspace') { e.preventDefault(); del(sess.queue[sess.pos]); }
     }, true);
     var tx = null;
     document.addEventListener('touchstart', function (e) { if (state.mode === 'plan' && sess && !sess.editing && e.target.closest('.pfront')) tx = { x: e.touches[0].clientX, y: e.touches[0].clientY }; else tx = null; }, { passive: true });
@@ -9702,5 +9704,9 @@ html body #planBox .pitems>li .nhi-meaning-eye-v142[aria-pressed="true"]{color:v
  html body #planBox .pitems>li>.prow{gap:5px!important;justify-content:flex-end}
  html body #planBox .pitems>li>.prow>.picon{width:36px!important;height:36px!important}
 }
+</style>
+<style id="nhi-trash-position-v144">
+html body #planBox .pcard>.pdel.nhi-card-corner-trash{pointer-events:auto!important;touch-action:manipulation!important;cursor:pointer!important}
+html body #planBox .pcard>.pdel.nhi-card-corner-trash svg{pointer-events:none!important}
 </style>
 </body></html>
