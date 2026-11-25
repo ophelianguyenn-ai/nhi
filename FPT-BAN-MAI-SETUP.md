@@ -17,7 +17,7 @@ Không tiếp tục sửa secret FPT_API_KEY cũ.
 2. Chọn Get API & Start Using (hoặc Try in Playground) và kiểm tra tài khoản có quyền dùng FPT.TTS-pro, giọng std_banmai; xem điều kiện/chi phí trước khi tạo.
 3. Mở https://marketplace.fptcloud.com/en/my-account#my-api-key
 4. Chọn Create new API Key và cấp quyền cho model FPT.TTS-pro (nếu giao diện yêu cầu).
-5. Mở https://github.com/ophelianguyenn-ai/so-tay-hop-tieng-han/settings/secrets/actions
+5. Mở https://github.com/ophelia-ai/nhi-learning-corner/settings/secrets/actions
 6. Thêm secret GitHub Actions tên **FPT_MARKETPLACE_API_KEY**, giá trị là khóa mới của Marketplace. Không dùng khóa Console cũ. Không gửi khóa trong chat hay đưa vào mã nguồn.
 
 Trang tài liệu FPT Marketplace: https://marketplace.fptcloud.com/en/models/fpt-tts-pro
@@ -35,7 +35,7 @@ Workflow: .github/workflows/generate-daily-neural.yml
 - Nếu FPT trả HTTP 401/403, ngừng ngay yêu cầu FPT; vẫn lưu và Publish những MP3 InJoon đã xác thực.
 - Bài học chỉ lưu cục bộ trong trình duyệt, chưa đồng bộ về lessons.json, không nằm trong lịch tạo MP3.
 
-Xem lịch chạy và nhật ký: https://github.com/ophelianguyenn-ai/so-tay-hop-tieng-han/actions/workflows/generate-daily-neural.yml
+Xem lịch chạy và nhật ký: https://github.com/ophelia-ai/nhi-learning-corner/actions/workflows/generate-daily-neural.yml
 
 ## Tạo MP3 an toàn
 

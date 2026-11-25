@@ -265,7 +265,7 @@ function renderSettings(){
  +'<p>'+(sync?'✓ Đã bật đồng bộ · Xem thời gian cập nhật trong bảng đồng bộ':'○ Chưa bật đồng bộ')+'</p>'
  +'<small>Tự lưu không có nghĩa là tự đồng bộ. Để dùng nhiều thiết bị, cần bật đồng bộ và thiết lập địa chỉ dữ liệu.</small></section>'
  +'<details class="nhi-v2-surface"><summary>🛠 Cài đặt nâng cao</summary><p>Cỡ chữ riêng, chiều cao thẻ, đồng bộ Firebase, khóa API, khôi phục và xử lý xung đột.</p>'
- +button('open-settings','Mở cài đặt nâng cao')+button('restore-check','Kiểm tra tệp sao lưu trước khi khôi phục')+'</details>'
+ +button('open-settings','Mở cài đặt nâng cao')+button('restore-check','Kiểm tra tệp sao lưu')+button('restore-data','Nhập bản sao lưu')+'</details>'
  +'<p class="nhi-v2-hint">Nên xuất bản sao lưu trước khi xóa hoặc nhập đè dữ liệu. Không nên sửa đồng thời cùng một thẻ trên hai thiết bị khi chưa đồng bộ xong.</p>';
 }
 function nav(){
@@ -563,10 +563,17 @@ function handle(act){
  if(act==='export-progress'){$('#exportBtn')?.click();return;}
  if(act==='backup-all'){exportAll();return;}
  if(act==='restore-check'){$('#nhiV2RestoreFile')?.click();return;}
+ if(act==='restore-data'){$('#nhiV2ImportFile')?.click();return;}
 }
+function portableKeys(obj){
+ if(obj?.type==='nhi-full-local-export'&&obj?.version===2)return obj.keys;
+ if(obj?.format==='nhi-learning-corner-local-backup'&&obj?.version===1)return obj.values;
+ return null;
+}
+function safeKey(k){return /^(viko-|nlc-|nhi-)/.test(k)&&!/(key|token|secret|api|auth|credential|sync-config)/i.test(k)&&k!=='nlc-ai-v1'&&k!=='nlc-google-images-v1'&&k!=='viko-sync-v1';}
 function exportAll(){
  const selected={version:2,exported:new Date().toISOString(),type:'nhi-full-local-export',keys:{}};
- for(let i=0;i<localStorage.length;i++){const key=localStorage.key(i);if(/^(viko-|nlc-|nhi-)/.test(key)&&!/(key|token|secret|api|auth|credential|sync-config)/i.test(key))selected.keys[key]=localStorage.getItem(key);}
+ for(let i=0;i<localStorage.length;i++){const key=localStorage.key(i);if(safeKey(key))selected.keys[key]=localStorage.getItem(key);}
  const blob=new Blob([JSON.stringify(selected,null,2)],{type:'application/json'}),a=document.createElement('a');
  const url=URL.createObjectURL(blob);a.href=url;a.download='Nhi-Learning-Corner-full-'+new Date().toISOString().slice(0,10)+'.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),5000);
  status('Đã xuất dữ liệu học trên thiết bị. Khóa API và cấu hình nhạy cảm không được xuất.');
@@ -576,21 +583,40 @@ function installRestorePreview(){
  input.addEventListener('change',async()=>{
   const file=input.files[0];if(!file)return;try{
    const txt=await file.text(),obj=JSON.parse(txt);
-   const keys=obj?.keys||{},count=Object.keys(keys).length;
-   const ok=obj.type==='nhi-full-local-export'&&count>0;
+   const keys=portableKeys(obj)||{},count=Object.keys(keys).filter(k=>safeKey(k)&&typeof keys[k]==='string').length;
+   const ok=count>0;
    let checked=false;
    if(ok){
      const stamp='__nhi_v2_restore_dryrun__';
      try{
        localStorage.setItem(stamp,JSON.stringify(keys));
        const test=JSON.parse(localStorage.getItem(stamp)||'{}');
-       checked=Object.keys(test).length===count&&Object.keys(keys).every(k=>test[k]===keys[k]);
+       checked=Object.keys(test).length===Object.keys(keys).length&&Object.keys(keys).every(k=>test[k]===keys[k]);
      }finally{localStorage.removeItem(stamp);}
    }
    const msg=ok?(checked?'✓ Kiểm tra khôi phục thử thành công: ':'Tệp hợp lệ nhưng không thể thử khôi phục: ')+count+' nhóm dữ liệu. Dữ liệu thật chưa bị ghi đè.':'Tệp không đúng định dạng sao lưu đầy đủ của Nhi Learning Corner.';
    alert(msg);
   }catch(e){alert('Không đọc được JSON. Dữ liệu hiện tại không thay đổi.');}
   input.value='';
+ });
+}
+function installImport(){
+ const input=document.createElement('input');input.type='file';input.id='nhiV2ImportFile';input.accept='.json,application/json';input.hidden=true;document.body.appendChild(input);
+ input.addEventListener('change',async()=>{
+  const file=input.files?.[0];input.value='';if(!file)return;
+  if(file.size>30*1024*1024){alert('Tệp sao lưu quá lớn.');return;}
+  try{
+   const raw=portableKeys(JSON.parse(await file.text()));
+   if(!raw||Array.isArray(raw)||typeof raw!=='object')throw Error('Định dạng tệp không hợp lệ.');
+   const entries=Object.entries(raw).filter(([k,v])=>safeKey(k)&&typeof v==='string');
+   if(!entries.length)throw Error('Tệp không có dữ liệu học hợp lệ.');
+   if(!confirm('Nhập '+entries.length+' nhóm dữ liệu học từ tệp này? Dữ liệu cùng loại trên tên miền hiện tại sẽ được thay thế. Hãy xuất bản sao lưu hiện tại trước khi nhập.'))return;
+   const previous=entries.map(([k])=>[k,localStorage.getItem(k)]);
+   try{entries.forEach(([k,v])=>localStorage.setItem(k,v));}
+   catch(error){previous.forEach(([k,v])=>{try{if(v===null)localStorage.removeItem(k);else localStorage.setItem(k,v);}catch(_){}});throw error;}
+   alert('Đã nhập '+entries.length+' nhóm dữ liệu. Trang sẽ tải lại để cập nhật lịch học, ghi chú, tiến độ và cài đặt.');
+   location.reload();
+  }catch(error){alert('Không thể nhập tệp: '+(error?.message||'Lỗi không xác định'));}
  });
 }
 function installImportPreview(){
@@ -621,7 +647,7 @@ function installImportPreview(){
  },true);
 }
 function init(){
- if(!P()||!$('#app'))return;nav();hookSettings();recordLearning();installRestorePreview();installImportPreview();
+ if(!P()||!$('#app'))return;nav();hookSettings();recordLearning();installRestorePreview();installImport();installImportPreview();
  const wrap=$('#nhiV2Workspace');
  wrap.addEventListener('click',e=>{
   const b=e.target.closest('[data-v2-act]');if(!b)return;handle(b.dataset.v2Act);
