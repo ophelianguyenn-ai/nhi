@@ -1,6 +1,40 @@
 <!doctype html>
 <html lang="vi">
 <head>
+<script id="nhi-explicit-calendar-route-v143">
+(function(){
+ 'use strict';
+ var initial=location.hash;
+ if(!/^#\/(?:lich-hoc(?:\/(?:chu-de|thang))?|hom-nay|den-han)$/.test(initial))return;
+ var locked=true,originalReplace=history.replaceState.bind(history),originalPush=history.pushState.bind(history);
+ var expected=location.pathname+location.search+initial;
+ function unlock(){locked=false;}
+ window.NHI_ROUTE_INTENT=unlock;
+ function unexpected(url){
+   if(!locked||url==null)return false;
+   try{var u=new URL(url,location.href);return u.origin===location.origin&&u.pathname===location.pathname&&u.hash!==initial;}catch(e){return false;}
+ }
+ history.replaceState=function(state,title,url){if(!unexpected(url))return originalReplace(state,title,url);};
+ history.pushState=function(state,title,url){if(!unexpected(url))return originalPush(state,title,url);};
+ // Native hash assignment does not pass through History API. Repair before app routers run.
+ window.addEventListener('hashchange',function(e){
+   if(!locked||location.hash===initial)return;
+   e.stopImmediatePropagation();originalReplace(history.state,'',expected);
+   if(window.NHI_PLAN_V2?.setView){
+     var view=initial==='#/hom-nay'?'home':initial==='#/den-han'?'overdue':initial.endsWith('/chu-de')?'topics':initial.endsWith('/thang')?'months':'days';
+     window.NHI_PLAN_V2.setView(view);
+   }
+ },true);
+ // Normal links, deliberate navigation buttons, keyboard navigation, and browser Back/Forward remain usable.
+ document.addEventListener('click',function(e){
+   var t=e.target&&e.target.closest&&e.target.closest('a[href],button,[role="button"]');
+   if(e.isTrusted&&t)unlock();
+ },true);
+ document.addEventListener('keydown',function(e){if(e.isTrusted&&!e.repeat&&['Enter',' ','Escape','ArrowLeft','ArrowRight'].indexOf(e.key)>=0)unlock();},true);
+ if(window.navigation)window.navigation.addEventListener('navigate',function(e){if(e.navigationType==='traverse'||e.userInitiated)unlock();});
+})();
+</script>
+
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <!-- Action controls initialize inline immediately after their settings section. -->
@@ -4119,6 +4153,29 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
       lessonMeaningOverrides[id][item]=!state.hidden;
       return meaningState(id,item);
     }
+    // Animate only the selected language, keeping its original highlighted text.
+    var meaningAnimations=new WeakMap();
+    function animateMeaning(node,hide,animate){
+      var previous=meaningAnimations.get(node);
+      if(previous){previous.cancel();meaningAnimations.delete(node);}
+      if(!animate||!node.animate||window.matchMedia('(prefers-reduced-motion: reduce)').matches){
+        node.hidden=hide;return;
+      }
+      if(node.hidden===hide&&!previous)return;
+      var duration=260;
+      if(!hide)node.hidden=false;
+      var height=node.getBoundingClientRect().height;
+      var frames=hide?[{opacity:1,maxHeight:height+'px',transform:'translateY(0)'},{opacity:0,maxHeight:'0px',transform:'translateY(-4px)'}]:
+        [{opacity:0,maxHeight:'0px',transform:'translateY(-4px)'},{opacity:1,maxHeight:height+'px',transform:'translateY(0)'}];
+      var anim=node.animate(frames,{duration:duration,easing:'cubic-bezier(.25,.8,.25,1)',fill:'both'});
+      meaningAnimations.set(node,anim);
+      node.style.overflow='hidden';
+      anim.onfinish=function(){
+        if(meaningAnimations.get(node)!==anim)return;
+        node.hidden=hide;meaningAnimations.delete(node);anim.cancel();node.style.removeProperty('overflow');
+      };
+      anim.oncancel=function(){if(!meaningAnimations.has(node))node.style.removeProperty('overflow');};
+    }
     function meaningEye(hidden){
       return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/>'+(hidden?'<path d="m3 3 18 18"/>':'')+'</svg>';
     }
@@ -4580,11 +4637,12 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
       }
     }
     window.addEventListener('hashchange', function () { if (sess && sess.L && sess.L.id !== (location.hash.split('/')[2] || '')) leave(); route(); window.scrollTo(0, 0); });
-    function openLesson(id) { location.hash = '#/bai/' + id; }
+    function openLesson(id) { window.NHI_ROUTE_INTENT?.(); location.hash = '#/bai/' + id; }
     function home(keepRoute) { if (sess) leave(); if (location.hash && !keepRoute) { history.replaceState(null, '', location.pathname + location.search); } page = null; document.body.classList.remove('plan-page'); if (state.mode === 'plan') render(); }
     function navigatePlanView(name) {
       var href={home:'#/hom-nay',days:'#/lich-hoc',topics:'#/lich-hoc/chu-de',months:'#/lich-hoc/thang',overdue:'#/den-han'}[name];
       if(!href)return;
+      window.NHI_ROUTE_INTENT?.();
       // Change the visible content immediately, even when the URL is unchanged.
       setViewV2(name);
       if(location.hash!==href)location.hash=href;
@@ -4755,6 +4813,7 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
     }
 
     function startLesson(L) {
+      window.NHI_ROUTE_INTENT?.();
       var cur = current(L), rs = (Array.isArray(resume[L.id]) ? resume[L.id] : []).filter(alive);
       var saved = resumeFull[L.id], q, restored = null;
       if (saved && Array.isArray(saved.queue) && saved.queue.some(alive)) {
@@ -5070,20 +5129,21 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
       if (withSrc && BY_LESSON[it.lesson]) { var s = el('span', 'src'), a = el('a', null, vn(it.date) + ' · ' + it.topic); a.href = '#/bai/' + it.lesson; s.appendChild(a); t.appendChild(s); }
       li.appendChild(t);
       var right = el('span', 'prow');
+      if (it.type === 'w' && it.n > 1) right.appendChild(el('span', 'ptag cnt', '×' + it.n));
+      var rt = val('rate', it.id); if (rt && RATE_NAME[rt]) right.appendChild(el('span', 'ptag r-' + rt, RATE_NAME[rt]));
       var meaningLesson=lessonId||mergeDestination(it.lesson)||it.lesson;
       if(meaningLesson){
         li.dataset.meaningLesson=meaningLesson;
-        var eye=btn('picon nhi-meaning-eye-v142','',function(e){e.stopPropagation();toggleMeaning(meaningLesson,it.id);paintMeaning();});
-        function paintMeaning(){
+        var eye=btn('picon nhi-meaning-eye-v142','',function(e){e.stopPropagation();toggleMeaning(meaningLesson,it.id);paintMeaning(true);});
+        function paintMeaning(animate){
           var state=meaningState(meaningLesson,it.id),langName=state.lang==='ko'?'tiếng Hàn':'tiếng Việt';
-          vi.hidden=state.lang==='vi'&&state.hidden;k.hidden=state.lang==='ko'&&state.hidden;
+          animateMeaning(vi,state.lang==='vi'&&state.hidden,animate);
+          animateMeaning(k,state.lang==='ko'&&state.hidden,animate);
           eye.innerHTML=meaningEye(state.hidden);eye.title=(state.hidden?'Hiện ':'Ẩn ')+langName;
           eye.setAttribute('aria-label',eye.title);eye.setAttribute('aria-pressed',String(state.hidden));
         }
         paintMeaning();right.appendChild(eye);
       }
-      if (it.type === 'w' && it.n > 1) right.appendChild(el('span', 'ptag cnt', '×' + it.n));
-      var rt = val('rate', it.id); if (rt && RATE_NAME[rt]) right.appendChild(el('span', 'ptag r-' + rt, RATE_NAME[rt]));
       if (canSpeak) right.appendChild(ibtn('picon', 'vol', function () { speak(it.ko, 'ko-KR'); }, 'Nghe tiếng Hàn'));
       right.appendChild(ibtn('picon del', 'trash', function () { del(it.id); render(); }, 'Xoá khỏi danh sách'));
       li.appendChild(right);
@@ -7517,7 +7577,7 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
   if (canSpeak) { try { window.speechSynthesis.addEventListener('voiceschanged', paintVoiceStatus); } catch (e) { } }
   if (linkedNow) { $('footNote').textContent = 'Đã liên kết máy này với thiết bị kia. Tiến độ sẽ tự đồng bộ.'; SHELL.cover(false); }
   if (!storageOk) $('footNote').textContent = 'Trình duyệt đang chặn lưu dữ liệu (chế độ ẩn danh?). Tiến độ sẽ mất khi đóng trang.';
-  if ('serviceWorker' in navigator && /^https?:$/.test(location.protocol)) { window.addEventListener('load', function () { navigator.serviceWorker.register('sw.js').catch(function () { }); }); }
+  if ('serviceWorker' in navigator && /^https?:$/.test(location.protocol)) { window.addEventListener('load', function () { navigator.serviceWorker.register('sw.js', {updateViaCache:'none'}).then(function(reg){return reg.update();}).catch(function () { }); }); }
   $('exportBtn').addEventListener('click', exportProgress);
   $('importBtn').addEventListener('click', function () { $('importFile').click(); });
   $('importFile').addEventListener('change', function () { if (this.files[0]) importProgress(this.files[0]); this.value = ''; });
@@ -9597,8 +9657,8 @@ html body #planBox .pcard .answer.ko,html body #cAnswer.ko{
 <style id="nhi-lesson-list-and-settings-icons-v140">
 /* Lesson overview only, not the cover and not flashcards. */
 html body #planBox .pitems{
- --nhi-lesson-list-ko-size:clamp(17px,1.45vw,22px);
- --nhi-lesson-list-vi-size:clamp(18px,1.5vw,23px);
+ --nhi-lesson-list-ko-size:clamp(14px,calc(1.45vw - 3px),19px);
+ --nhi-lesson-list-vi-size:clamp(15px,calc(1.5vw - 3px),20px);
  gap:12px!important;
 }
 html body #planBox .pitems>li .ptexts>.pko[lang="ko"]{
