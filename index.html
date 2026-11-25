@@ -4093,6 +4093,35 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
       put('merged', fromId, null);
       applyMergedLessons(); onData(); SYNC.flush();
     }
+    // Display-only preferences, scoped to each lesson and stored on this device.
+    var LESSON_MEANING_KEY='nhi-lesson-meaning-v142';
+    var lessonMeaning=Object.create(null), lessonMeaningOverrides=Object.create(null);
+    try{
+      var savedMeaning=JSON.parse(lsGet(LESSON_MEANING_KEY)||'{}');
+      Object.keys(savedMeaning||{}).forEach(function(id){
+        if(['both','ko','vi'].indexOf(savedMeaning[id])>=0)lessonMeaning[id]=savedMeaning[id];
+      });
+    }catch(e){}
+    function meaningMode(id){return lessonMeaning[id]||'both';}
+    function setMeaningMode(id,mode){
+      if(['both','ko','vi'].indexOf(mode)<0)return;
+      lessonMeaning[id]=mode;delete lessonMeaningOverrides[id];
+      lsSet(LESSON_MEANING_KEY,JSON.stringify(lessonMeaning));
+    }
+    function meaningState(id,item){
+      var mode=meaningMode(id),lang=mode==='vi'?'vi':'ko';
+      var overrides=lessonMeaningOverrides[id];
+      return {lang:lang,hidden:overrides&&Object.prototype.hasOwnProperty.call(overrides,item)?overrides[item]:mode!=='both'};
+    }
+    function toggleMeaning(id,item){
+      var state=meaningState(id,item);
+      if(!lessonMeaningOverrides[id])lessonMeaningOverrides[id]=Object.create(null);
+      lessonMeaningOverrides[id][item]=!state.hidden;
+      return meaningState(id,item);
+    }
+    function meaningEye(hidden){
+      return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/>'+(hidden?'<path d="m3 3 18 18"/>':'')+'</svg>';
+    }
     function openLessonSettings(L) {
       var previous = document.getElementById('nhiLessonSettings'); if (previous) previous.remove();
       var dlg = el('dialog', 'nhi-lesson-settings'); dlg.id = 'nhiLessonSettings';
@@ -4104,6 +4133,17 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
       form.appendChild(head);
       form.appendChild(el('p', 'listinfo', vn(L.date, true) + ' · ' + titleMain(L)));
       form.appendChild(btn('ghost', '✏️ Sửa tên và ngày học', function () { dlg.close(); openDailyEditor(L); }));
+      var meaningHeading=el('h3',null,'👁 Hiển thị nghĩa trong danh sách bài học');
+      form.appendChild(meaningHeading);
+      var meaningSelect=el('select','field');meaningSelect.id='nhiLessonMeaningMode';
+      meaningSelect.setAttribute('aria-label','Hiển thị nghĩa trong bài học');
+      [['both','Hiện cả tiếng Việt và tiếng Hàn'],['ko','Ẩn tiếng Hàn'],['vi','Ẩn tiếng Việt']].forEach(function(option){
+        meaningSelect.appendChild(new Option(option[1],option[0]));
+      });
+      meaningSelect.value=meaningMode(L.id);
+      meaningSelect.addEventListener('change',function(){setMeaningMode(L.id,this.value);render();});
+      form.appendChild(meaningSelect);
+      form.appendChild(el('p','listinfo','Bấm con mắt ở mỗi dòng để ẩn hoặc hiện riêng từ/câu đó. Khi hiện cả hai ngôn ngữ, con mắt mặc định ẩn/hiện tiếng Hàn.'));
       form.appendChild(el('h3',null,'5 mốc học và ôn của bài này'));
       form.appendChild(el('p','listinfo',
         'Các mốc tính bằng số ngày. Mốc 1 từ ngày của bài; mốc 2–5 từ lượt học đầu tiên. Không làm mất lịch sử đã học.'));
@@ -5018,10 +5058,10 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
         v.appendChild(dp);
       }
     }
-    function itemRow(it, withSrc) {
+    function itemRow(it, withSrc, lessonId) {
       var li = el('li', val('known', it.id) ? 'known' : ''); li.dataset.item = it.id; if (withSrc) li.dataset.src = '1'; li.style.setProperty('--tc', topicColor(it.topic));
       var t = el('div', 'ptexts');
-      t.appendChild(hlText(el('p', 'pvi'), it, 'vi', true));
+      var vi=hlText(el('p', 'pvi'), it, 'vi', true);vi.lang='vi';t.appendChild(vi);
       var k = hlText(el('p', 'pko'), it, 'ko', true); k.lang = 'ko';
       // The lesson overview is not a flashcard: never inherit its large per-card font size.
       k.style.setProperty('font-size','var(--nhi-lesson-list-ko-size,23px)','important');
@@ -5030,6 +5070,18 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
       if (withSrc && BY_LESSON[it.lesson]) { var s = el('span', 'src'), a = el('a', null, vn(it.date) + ' · ' + it.topic); a.href = '#/bai/' + it.lesson; s.appendChild(a); t.appendChild(s); }
       li.appendChild(t);
       var right = el('span', 'prow');
+      var meaningLesson=lessonId||mergeDestination(it.lesson)||it.lesson;
+      if(meaningLesson){
+        li.dataset.meaningLesson=meaningLesson;
+        var eye=btn('picon nhi-meaning-eye-v142','',function(e){e.stopPropagation();toggleMeaning(meaningLesson,it.id);paintMeaning();});
+        function paintMeaning(){
+          var state=meaningState(meaningLesson,it.id),langName=state.lang==='ko'?'tiếng Hàn':'tiếng Việt';
+          vi.hidden=state.lang==='vi'&&state.hidden;k.hidden=state.lang==='ko'&&state.hidden;
+          eye.innerHTML=meaningEye(state.hidden);eye.title=(state.hidden?'Hiện ':'Ẩn ')+langName;
+          eye.setAttribute('aria-label',eye.title);eye.setAttribute('aria-pressed',String(state.hidden));
+        }
+        paintMeaning();right.appendChild(eye);
+      }
       if (it.type === 'w' && it.n > 1) right.appendChild(el('span', 'ptag cnt', '×' + it.n));
       var rt = val('rate', it.id); if (rt && RATE_NAME[rt]) right.appendChild(el('span', 'ptag r-' + rt, RATE_NAME[rt]));
       if (canSpeak) right.appendChild(ibtn('picon', 'vol', function () { speak(it.ko, 'ko-KR'); }, 'Nghe tiếng Hàn'));
@@ -5037,7 +5089,7 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
       li.appendChild(right);
       return li;
     }
-    function contentBlock(ids) {
+    function contentBlock(ids,lessonId) {
       var g = grouped(ids), box = el('div');
       [['w', 'Phần 1 · Từ vựng'], ['s', 'Phần 2 · Câu']].forEach(function (sec) {
         var topics = Object.keys(g[sec[0]]).sort(function (a, b) { return a.localeCompare(b, 'vi'); });
@@ -5045,7 +5097,7 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
         box.appendChild(el('p', 'psec', sec[1]));
         topics.forEach(function (t) {
           var h = el('p', 'ptopic'), tg = ttag(t); tg.appendChild(document.createTextNode(' · ' + g[sec[0]][t].length)); h.appendChild(tg); box.appendChild(h);
-          var ul = el('ul', 'pitems'); g[sec[0]][t].forEach(function (it) { ul.appendChild(itemRow(it)); }); box.appendChild(ul);
+          var ul = el('ul', 'pitems'); g[sec[0]][t].forEach(function (it) { ul.appendChild(itemRow(it,false,lessonId)); }); box.appendChild(ul);
         });
       });
       return box;
@@ -5110,7 +5162,7 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
       });
       modes.appendChild(actions);hd.appendChild(modes);
       wrap.appendChild(hd);
-      var body = el('div', 'quiz'); body.appendChild(contentBlock(L.ids)); wrap.appendChild(body);
+      var body = el('div', 'quiz'); body.appendChild(contentBlock(L.ids,L.id)); wrap.appendChild(body);
       v.appendChild(wrap);
     }
 
@@ -6412,7 +6464,7 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
       toggleHl(ph.dataset.item, +ph.dataset.hi); haptic(6);
       // repaint only the row / card that changed
       var it = ITEMS[ph.dataset.item], li = ph.closest('li[data-item]');
-      if (li) li.parentNode.replaceChild(itemRow(it, li.dataset.src === '1'), li); else render();
+      if (li) li.parentNode.replaceChild(itemRow(it, li.dataset.src === '1',li.dataset.meaningLesson), li); else render();
     }, true);
     document.addEventListener('keydown', function (e) {
       // Ctrl+Z / Cmd+Z undoes accidental deletion; never override Undo inside inputs.
@@ -9545,7 +9597,9 @@ html body #planBox .pcard .answer.ko,html body #cAnswer.ko{
 <style id="nhi-lesson-list-and-settings-icons-v140">
 /* Lesson overview only, not the cover and not flashcards. */
 html body #planBox .pitems{
- --nhi-lesson-list-ko-size:clamp(18px,1.5vw,23px);
+ --nhi-lesson-list-ko-size:clamp(17px,1.45vw,22px);
+ --nhi-lesson-list-vi-size:clamp(18px,1.5vw,23px);
+ gap:12px!important;
 }
 html body #planBox .pitems>li .ptexts>.pko[lang="ko"]{
  font-family:"Noto Sans KR","Malgun Gothic","Apple SD Gothic Neo",sans-serif!important;
@@ -9554,10 +9608,10 @@ html body #planBox .pitems>li .ptexts>.pko[lang="ko"]{
 }
 html body #planBox .pitems>li .ptexts>.pvi{
  font-family:"Times New Roman","Liberation Serif",Times,serif!important;
- font-size:var(--nhi-lesson-list-ko-size)!important;line-height:1.42!important;
+ font-size:var(--nhi-lesson-list-vi-size)!important;line-height:1.42!important;
 }
 @media(max-width:700px){
- html body #planBox .pitems{--nhi-lesson-list-ko-size:19px}
+ html body #planBox .pitems{--nhi-lesson-list-ko-size:19px;--nhi-lesson-list-vi-size:19px;gap:10px!important}
 }
 /* All top-level settings receive a separate, visible icon and disclosure arrow. */
 html body #setSheet>.sheetbox>details>summary[data-nhi-icon-v140]{
@@ -9577,4 +9631,16 @@ html body #setSheet>.sheetbox>details>summary[data-nhi-icon-v140]::marker{conten
 #setSheet>.sheetbox>details[open]>summary>.nhi-setting-chevron-v140{transform:rotate(90deg)}
 </style>
 
+<style id="nhi-lesson-meaning-v142">
+html body #planBox .pitems>li{padding-block:12px!important}
+html body #planBox .pitems>li .ptexts>.pvi[hidden],
+html body #planBox .pitems>li .ptexts>.pko[hidden]{display:none!important}
+html body #planBox .pitems>li .nhi-meaning-eye-v142{color:var(--muted)}
+html body #planBox .pitems>li .nhi-meaning-eye-v142[aria-pressed="true"]{color:var(--accent-t);border-color:var(--accent-t)}
+@media(max-width:700px){
+ html body #planBox .pitems>li{padding-block:10px!important}
+ html body #planBox .pitems>li>.prow{gap:5px!important;justify-content:flex-end}
+ html body #planBox .pitems>li>.prow>.picon{width:36px!important;height:36px!important}
+}
+</style>
 </body></html>
