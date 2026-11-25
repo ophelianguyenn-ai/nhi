@@ -1,6 +1,6 @@
 {
   "v": 2,
-  "generated": "2026-11-22",
+  "generated": "2026-11-25",
   "lessons": [
     {
       "id": "2026-10-23",
@@ -37908,6 +37908,70 @@
           "Thiết bị & sản xuất",
           "Anh Thọ hỏi hôm nay có thể mở thiết bị ra để kiểm tra không. Việc này chỉ mất vài tiếng và không ảnh hưởng đến sản xuất.",
           "Thọ 씨가 오늘 설비를 열어 점검해 봐도 되는지 물어봤습니다. 몇 시간밖에 걸리지 않고 생산에는 지장이 없다고 합니다.",
+          1
+        ]
+      ]
+    },
+    {
+      "id": "daily-2026-11-25-nhi-extracted",
+      "date": "2026-11-25",
+      "plan": "2026-11-25",
+      "title": "Bài ngày 25.11 · Theo dõi tiến độ, cải tiến sản xuất và vệ sinh",
+      "items": [
+        [
+          "nhi20261125_000",
+          "w",
+          "Họp, báo cáo & giao tiếp",
+          "tiến độ thực hiện",
+          "진행 상황",
+          1
+        ],
+        [
+          "nhi20261125_001",
+          "w",
+          "Họp, báo cáo & giao tiếp",
+          "theo sát, kiểm tra liên tục",
+          "지속적으로 확인하다",
+          1
+        ],
+        [
+          "nhi20261125_002",
+          "w",
+          "Sản xuất & cải tiến",
+          "cải thiện tỷ lệ hao hụt",
+          "손실률 개선",
+          1
+        ],
+        [
+          "nhi20261125_003",
+          "w",
+          "Sản xuất & cải tiến",
+          "tìm kiếm phương án",
+          "방안을 모색하다",
+          1
+        ],
+        [
+          "nhi20261125_004",
+          "w",
+          "Vệ sinh & nơi làm việc",
+          "sắp xếp gọn gàng",
+          "정리 정돈",
+          1
+        ],
+        [
+          "nhi20261125_005",
+          "w",
+          "Vệ sinh & nơi làm việc",
+          "triệt để, kỹ lưỡng",
+          "철저히",
+          1
+        ],
+        [
+          "nhi20261125_006",
+          "w",
+          "Vệ sinh & nơi làm việc",
+          "khu vực làm việc",
+          "작업 구역",
           1
         ]
       ]
