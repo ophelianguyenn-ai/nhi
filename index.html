@@ -2881,6 +2881,13 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
         window.scrollTo(0, 0);
       });
     }
+    // The current URL is authoritative. Remote cursor sync can update a card
+    // within the same lesson, but must not navigate this tab to another page.
+    function canFollow(nav) {
+      var hash=location.hash||'';
+      if(nav.mode==='plan')return hash==='#/bai/'+nav.lesson;
+      return nav.mode==='cards'&&!hash&&state.mode==='cards';
+    }
     function receive(raw, full) {
       checkScope();
       if (!raw || typeof raw !== 'object') {
@@ -2899,7 +2906,7 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
       receivedOnce = true;
       if (newer || initialReplay) {
         remember(raw);
-        if (raw.from !== device) {
+        if (raw.from !== device && canFollow(raw)) {
           if (raw.mode === 'plan') PLAN.follow(raw);
           else followCards(raw);
         }
@@ -4720,7 +4727,7 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
         if (before > 0) restored = { queue: q.slice(), pos: before };
       } else q = ordered(L.ids);
       delete resume[L.id]; delete resumeFull[L.id]; save();
-      if (location.hash !== '#/bai/' + L.id) { history.pushState(null, '', '#/bai/' + L.id); page = L.id; document.body.classList.add('plan-page'); }
+      if (location.hash !== '#/bai/' + L.id) { history.pushState(null, '', location.pathname + location.search + '#/bai/' + L.id); page = L.id; document.body.classList.add('plan-page'); }
       start(restored && restored.kind ? restored.kind : (!cur || cur.st === 'next' ? 'free' : 'lesson'),
         q, titleMain(L) + (cur ? ' · ' + STEP[cur.step] : ''), L, restored);
     }
@@ -5118,7 +5125,10 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
     }
     function tryFollowCursor() {
       var nav = pendingCursor;
-      if (!nav || !loaded) return;
+      if (!nav) return;
+      // Recheck after asynchronous lesson loading: the user may have navigated away.
+      if (location.hash !== '#/bai/' + nav.lesson) { pendingCursor=null; return; }
+      if (!loaded) return;
       var L = BY_LESSON[nav.lesson];
       // Daily lessons may arrive after the initial Firebase event.
       if (!L) return;
@@ -5140,7 +5150,7 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
       ACTIVE_CARD.silence(function () {
         if (sess) leave();
         page = L.id;
-        history.replaceState(null, '', location.pathname + location.search + '#/bai/' + L.id);
+        // Already on this exact lesson URL; leave its query string and hash intact.
         document.body.classList.add('plan-page');
         state.mode = 'plan';
         saveUi();
@@ -5152,20 +5162,20 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
     }
     function restoreSession() {
       try {
-        var o = JSON.parse(lsGet(SKEY) || 'null'); if (!o || !o.queue) return;
+        if(sess)return;
+        var o = JSON.parse(lsGet(SKEY) || 'null'); if (!o || !Array.isArray(o.queue)) return;
         // a session on one of the daily lessons can only come back once those lessons have arrived
         if (!extrasTried && ((o.lesson && !BY_LESSON[o.lesson]) || o.queue.some(function (id) { return !ITEMS[id]; }))) return;
         sess = { kind: o.kind, title: o.title, L: o.lesson ? BY_LESSON[o.lesson] || null : null, queue: o.queue.filter(function (id) { return ITEMS[id]; }), pos: o.pos || 0, flipped: false, again: o.again || {}, picked: o.picked || {}, spoken: -1, stats: o.stats || { known: 0, hard: 0, mid: 0 }, recorded: !!o.recorded, celebrated: !!o.celebrated,
           recordOnDone: !!o.recordOnDone || (o.kind === 'lesson' && !o.recorded) };
-        // Do not hijack another learning mode while old lesson data is loading.
-        // On a slow connection, the user may already have selected "Thẻ ghi nhớ".
-        // Recover the deep-link only while the active mode is actually "Lịch học".
-        // Explicit schedule links should not be replaced by an old session.
-        // Only resume the lesson deep-link when no schedule URL was requested.
-        if(sess.L&&state.mode==='plan'&&
-          (!location.hash||location.hash==='#/'||location.hash==='#/bia')){
-          history.replaceState(null,'',location.pathname+location.search+'#/bai/'+sess.L.id);
+        // Restore an active session only on its own lesson URL. On every other
+        // page preserve the unfinished lesson as a paused session, never redirect.
+        if(!sess.L||location.hash!=='#/bai/'+sess.L.id){
+          if(o.lesson&&!sess.L){sess=null;return;} // missing lesson: retain raw saved session
+          leave();
+          return;
         }
+        state.mode='plan';
       } catch (e) { sess = null; }
     }
     function start(kind, ids, title, L, restored) {
