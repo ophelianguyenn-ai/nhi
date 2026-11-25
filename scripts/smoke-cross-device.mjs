@@ -96,7 +96,7 @@ async function checkCounter(page, n) {
 let laptop, phone;
 try {
   laptop = await makeDevice('laptop', ROOT + '#/bai/' + lesson.id);
-  phone = await makeDevice('phone', ROOT);
+  phone = await makeDevice('phone', ROOT + '?v=20261125-v143&utm_source=chatgpt.com#/lich-hoc');
   await laptop.page.waitForSelector('#planBox .ppage', { timeout: 18000 });
   await enableSync(laptop.page);
   await enableSync(phone.page);
@@ -108,6 +108,24 @@ try {
     button.click();
   });
   await laptop.page.waitForSelector('#planBox .pcard', { timeout: 16000 });
+  // A remote cursor must NEVER pull an explicit calendar route into a lesson.
+  await new Promise(r=>setTimeout(r,1200));
+  async function assertCalendar(){
+    const route=await phone.page.evaluate(()=>({hash:location.hash,search:location.search,card:!!document.querySelector('#planBox .pcard'),view:!document.querySelector('#view-plan').hidden}));
+    if(route.hash!=='#/lich-hoc'||route.search!=='?v=20261125-v143&utm_source=chatgpt.com'||route.card||!route.view)throw Error('Calendar was hijacked: '+JSON.stringify(route));
+  }
+  await assertCalendar();
+  const paused=await laptop.page.evaluate(()=>localStorage.getItem('viko-plan-sess-v1'));
+  await phone.page.evaluate(saved=>localStorage.setItem('viko-plan-sess-v1',saved),paused);
+  await phone.page.reload({waitUntil:'domcontentloaded'});
+  await enableSync(phone.page);
+  await phone.page.waitForFunction(()=>!!document.querySelector('#planBox .plesson'));
+  await new Promise(r=>setTimeout(r,1200));
+  await assertCalendar();
+  console.log('PASS: calendar reload preserves exact URL with stale local session and live remote cursor');
+  // Same lesson selected deliberately: cursor following remains available.
+  await phone.page.goto(ROOT+'#/bai/'+lesson.id,{waitUntil:'domcontentloaded'});
+  await enableSync(phone.page);
   await checkCounter(phone.page, 1);
 
   for (let i = 0; i < 3; i++) {
@@ -133,7 +151,14 @@ try {
   });
   await laptop.page.waitForFunction(() => !document.querySelector('#view-cards').hidden);
   await laptop.page.click('#next');
-  await phone.page.waitForFunction(() => !document.querySelector('#view-cards').hidden, { timeout: 18000 });
+  // Different active pages are no longer forcibly synchronized.
+  await new Promise(r=>setTimeout(r,700));
+  const stillLesson=await phone.page.evaluate(()=>location.hash);
+  if(stillLesson!=='#/bai/'+lesson.id)throw Error('Remote classic cards replaced lesson URL');
+  await phone.page.evaluate(()=>document.querySelector('#menuList [data-mode="cards"]').click());
+  await phone.page.waitForFunction(()=>!document.querySelector('#view-cards').hidden);
+  await laptop.page.click('#next');
+  await new Promise(r=>setTimeout(r,700));
   const [fromLaptop, fromPhone] = await Promise.all([
     laptop.page.$eval('#cPrompt', el => el.textContent),
     phone.page.$eval('#cPrompt', el => el.textContent)
