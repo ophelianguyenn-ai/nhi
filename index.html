@@ -1809,7 +1809,7 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
     </div>
 
     <details class="adv setgroup" id="syncPanel">
-      <summary>Nâng cao · Đồng bộ thiết bị</summary>
+      <summary>Đồng bộ thiết bị</summary>
       <div class="voice-grid">
         <button type="button" class="sync" id="sync" data-s="local" aria-live="polite">Chỉ lưu trên máy này</button>
         <div id="syncOffBox">
@@ -5024,7 +5024,7 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
       t.appendChild(hlText(el('p', 'pvi'), it, 'vi', true));
       var k = hlText(el('p', 'pko'), it, 'ko', true); k.lang = 'ko';
       // The lesson overview is not a flashcard: never inherit its large per-card font size.
-      k.style.setProperty('font-size','var(--nhi-lesson-list-ko-size,24px)','important');
+      k.style.setProperty('font-size','var(--nhi-lesson-list-ko-size,23px)','important');
       t.appendChild(k);
       if (it.note) t.appendChild(el('p', 'listinfo', it.note));
       if (withSrc && BY_LESSON[it.lesson]) { var s = el('span', 'src'), a = el('a', null, vn(it.date) + ' · ' + it.topic); a.href = '#/bai/' + it.lesson; s.appendChild(a); t.appendChild(s); }
@@ -7488,7 +7488,7 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
 <script src="nhi-card-controls-v8.js?v=20261124-v136-shared-height"></script>
 <script src="nhi-kitten-meow-v1.js?v=20261120-user-meow"></script>
 <script src="nhi-card-no-overlap-v1.js?v=20261115-safe-v1"></script>
-<script src="nhi-corner-v2.js?v=20261122-calendar-nav-fixed-v1"></script>
+<script src="nhi-corner-v2.js?v=20261125-v141-unified-settings"></script>
 <!-- NHI PATCH 22-11: dán nguyên khối này NGAY TRƯỚC </body> trong index.html -->
 <style id="nhi-patch-compact-v2">
 /* 1. Ảnh gần nội dung hơn, không phá layout một cột ở màn hình hẹp */
@@ -9545,7 +9545,7 @@ html body #planBox .pcard .answer.ko,html body #cAnswer.ko{
 <style id="nhi-lesson-list-and-settings-icons-v140">
 /* Lesson overview only, not the cover and not flashcards. */
 html body #planBox .pitems{
- --nhi-lesson-list-ko-size:clamp(21px,1.65vw,26px);
+ --nhi-lesson-list-ko-size:clamp(18px,1.5vw,23px);
 }
 html body #planBox .pitems>li .ptexts>.pko[lang="ko"]{
  font-family:"Noto Sans KR","Malgun Gothic","Apple SD Gothic Neo",sans-serif!important;
@@ -9554,9 +9554,10 @@ html body #planBox .pitems>li .ptexts>.pko[lang="ko"]{
 }
 html body #planBox .pitems>li .ptexts>.pvi{
  font-family:"Times New Roman","Liberation Serif",Times,serif!important;
+ font-size:var(--nhi-lesson-list-ko-size)!important;line-height:1.42!important;
 }
 @media(max-width:700px){
- html body #planBox .pitems{--nhi-lesson-list-ko-size:20px}
+ html body #planBox .pitems{--nhi-lesson-list-ko-size:19px}
 }
 /* All top-level settings receive a separate, visible icon and disclosure arrow. */
 html body #setSheet>.sheetbox>details>summary[data-nhi-icon-v140]{
