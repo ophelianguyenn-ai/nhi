@@ -20,6 +20,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@400;500;700;900&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Gowun+Dodum&family=Nanum+Gothic:wght@400;700;800&family=Nanum+Myeongjo:wght@400;700;800&family=Noto+Sans+KR:wght@400;500;700;900&display=swap">
 <script>(function () { try { var p = JSON.parse(localStorage.getItem('nlc-prefs-v1') || '{}').theme || 'auto'; var d = p === 'dark' || (p === 'auto' && window.matchMedia('(prefers-color-scheme: dark)').matches); document.documentElement.setAttribute('data-theme', d ? 'dark' : 'light'); } catch (e) { } })();</script>
 <style>
 /* Nhi's Learning Corner — candy block design system.
@@ -1694,7 +1695,7 @@ function initSettings(){
  }
  if(root.dataset.ready==='1')return;
  root.replaceChildren();
- const help=document.createElement('p');help.className='voice-note';help.textContent='Mặc định khôi phục hình dáng và hiệu ứng ngày 23/11. Chỉnh từng nút riêng; chỉ thông số đã chỉnh sẽ ghi đè kiểu gốc. Màu thùng rác chỉ áp dụng cho viền và biểu tượng. Thay đổi được áp dụng ngay trên thẻ đang mở; kéo thanh Cài đặt để nhìn rõ thẻ.';root.append(help);
+
  const selector=document.createElement('select');selector.className='field';selector.setAttribute('aria-label','Thiết bị cần tùy chỉnh');
  [['desktop','Máy tính'],['phone','Điện thoại']].forEach(([v,t])=>selector.add(new Option(t,v)));
  selector.value=isPhone()?'phone':'desktop';root.append(selector);
@@ -7012,7 +7013,7 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
     };
     var SYSTEM = 'Bạn là trợ lý học tiếng Hàn cho một người Việt đi làm ở nhà máy, thường họp và báo cáo với sếp người Hàn. Trả lời bằng tiếng Việt, ngắn gọn, đi thẳng vào câu hỏi. Khi giải thích một từ hay câu tiếng Hàn: nêu nghĩa, tách từ vựng và ngữ pháp chính, mức độ kính ngữ, rồi cho 1–2 ví dụ ngắn kèm nghĩa. Nếu bản dịch trong thẻ chưa tự nhiên thì đề xuất cách nói tốt hơn. Không dùng bảng.';
     try { var j = JSON.parse(lsGet(KEY) || '{}'); if (j && typeof j === 'object') { if (PROV[j.p]) cfg.p = j.p; cfg.k = j.k || {}; cfg.m = j.m || {}; } } catch (e) { }
-    cfg.p='gemini'; // Default to Gemini; keys remain private on this device.
+    // Keep the saved provider; Gemini is only the initial default when nothing is saved.
     try {var thread=threads.find(function(t){return t.id===threadId;});var lj=thread?thread.messages:JSON.parse(sessionStorage.getItem(LOGKEY)||'[]');if(Array.isArray(lj))log=lj.filter(function(m){return m&&(m.r==='me'||m.r==='ai')&&typeof m.t==='string';});}catch(e){}
     function saveCfg() { lsSet(KEY, JSON.stringify(cfg)); }
     function saveLog() {
@@ -7086,7 +7087,8 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
       getGeminiModels(apiKey).then(function(available){
         var selected=chooseGeminiModel(available,$('aiModel').value);
         if(!selected)throw new Error('Google không trả về mô hình Gemini dùng được với key này.');
-        cfg.p='gemini';cfg.k.gemini=apiKey;cfg.m.gemini=selected;saveCfg();
+        cfg.k.gemini=apiKey;cfg.m.gemini=selected;saveCfg();
+        if(cfg.p!=='gemini')return;
         $('aiModel').value=selected;status.textContent='Đã chọn '+selected+'. Bạn có thể hỏi lại AI.';
       }).catch(function(err){status.textContent='Không kiểm tra được: '+String(err.message||err).slice(0,200);})
       .then(function(){btn.disabled=false;});
@@ -7121,7 +7123,7 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
         var d = mk('div', 'aimsg ' + (m.r === 'me' ? 'me' : m.n ? 'ai note' : m.e ? 'err' : 'ai'));
         if (m.r === 'me') { d.textContent = m.t; lastSent = d; }
         else d.innerHTML = fmt(m.t);
-        if (m.link) { var a = mk('a', 'ghost', 'Tạo khóa Gemini tại Google AI Studio'); a.href = m.link; a.target = '_blank'; a.rel = 'noopener'; a.style.marginTop = '8px'; d.appendChild(document.createElement('br')); d.appendChild(a); }
+        if (m.link) { var a = mk('a', 'ghost', 'Mở trang lấy mã API'); a.href = m.link; a.target = '_blank'; a.rel = 'noopener'; a.style.marginTop = '8px'; d.appendChild(document.createElement('br')); d.appendChild(a); }
         box.appendChild(d);
       });
       if (busy) box.appendChild(mk('div', 'aimsg ai wait'));
@@ -7144,6 +7146,7 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
       var sel = $('aiProv');
       if (!sel.options.length) Object.keys(PROV).forEach(function (p) { var o = document.createElement('option'); o.value = p; o.textContent = PROV[p].name; sel.appendChild(o); });
       sel.value = cfg.p; $('aiKey').value = key(); $('aiModel').value = model();
+      $('aiCheck').hidden=cfg.p!=='gemini';
       var n = $('aiProvNote'); n.textContent = PROV[cfg.p].note + ' ';
       var a = mk('a', null, 'Mở trang lấy mã'); a.href = PROV[cfg.p].link; a.target = '_blank'; a.rel = 'noopener'; n.appendChild(a);
     }
@@ -7219,7 +7222,7 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
       var ctx = withCtx ? ctxLine() : '';
       log.push({ r: 'me', t: text, c: ctx }); $('aiInput').value = ''; grow();
       if (!key()) {
-        log.push({ r: 'ai', e: 1, n: 1, t: 'Chưa có mã Gemini. Mở Cài đặt AI, tạo khóa tại Google AI Studio rồi dán khóa vào đây một lần. Có gói miễn phí theo giới hạn tài khoản.', link: 'https://aistudio.google.com/apikey' });
+        log.push({ r: 'ai', e: 1, n: 1, t: 'Chưa có mã API cho '+PROV[cfg.p].name+'. Mở Cài đặt AI và nhập mã của nhà cung cấp đang chọn. '+PROV[cfg.p].note, link: PROV[cfg.p].link });
         saveLog(); paintLog('sent'); paintSetup(true); return;
       }
       busy = true; paintLog('sent');
@@ -9333,4 +9336,156 @@ html body #planBox .pcard[data-nhi-shared-height="v136"]:not(:has(>.pfront.nhi-w
  overflow:visible!important;
 }
 </style>
+
+<style id="nhi-type-settings-v137">
+html body #setSheet .sheetbox>.nhi-setting-accordion-v137{
+ display:block!important;flex:none!important;min-width:0;border:1px solid var(--line);border-radius:12px;padding:10px 12px;background:var(--surface);
+}
+html body #setSheet .nhi-setting-accordion-v137>summary{
+ display:list-item!important;list-style-position:inside;cursor:pointer;font-size:15px;font-weight:800;color:var(--ink);padding:6px 0;
+}
+html body #setSheet .nhi-setting-accordion-v137:not([open])>:not(summary){display:none!important}
+html body #setSheet .nhi-setting-accordion-v137[open]>.setgroup{
+ border:0;padding:8px 0 0;margin:0;min-width:0;
+}
+#setSheet .nhi-setting-accordion-v137 .setrow{min-width:0}
+#nhiKoreanFontSettingsV137 select{min-width:0;max-width:100%;font-size:16px}
+html body #planBox .pcard .prompt.ko,html body #cPrompt.ko{
+ font-family:var(--nhi-ko-front-v137,var(--ko))!important;
+}
+html body #planBox .pcard .pfront .nhi-ko-line>.answer.ko,
+html body #planBox .pcard .answer.ko,html body #cAnswer.ko{
+ font-family:var(--nhi-ko-back-v137,var(--ko))!important;
+}
+html body #cover.nhi-upper-v8 .lead>span[lang="ko"]{
+ font-family:"Gowun Dodum","Noto Sans KR",sans-serif!important;
+ font-size:clamp(13px,3.4vw,17px)!important;font-weight:400!important;
+}
+html body #cover.nhi-upper-v8 #coverGo.primary.white{
+ font-size:clamp(19px,5vw,23px)!important;font-weight:800!important;
+}
+@media(max-width:700px){
+ html body #planBox .pcard .prompt:not(.small),
+ html body #planBox .pcard .answer.ko,html body #cPrompt:not(.small),html body #cAnswer.ko{
+  overflow-wrap:anywhere!important;word-break:normal!important;max-width:100%!important;
+ }
+}
+</style>
+<script id="nhi-type-settings-script-v137">
+(function(){
+ 'use strict';
+ const key='nhi-device-typography-v137';
+ const families={
+  original:['Mặc định','var(--ko)'],
+  sans:['Noto Sans KR','"Noto Sans KR",sans-serif'],
+  serif:['Noto Serif KR','"Noto Serif KR",serif'],
+  dodum:['Gowun Dodum','"Gowun Dodum","Noto Sans KR",sans-serif'],
+  gothic:['Nanum Gothic','"Nanum Gothic","Noto Sans KR",sans-serif'],
+  myeongjo:['Nanum Myeongjo','"Nanum Myeongjo","Noto Serif KR",serif']
+ };
+ const pref={front:'original',back:'original',auto:true};
+ try{const x=JSON.parse(localStorage.getItem(key)||'{}');for(const k of ['front','back'])if(Object.hasOwn(families,x[k]))pref[k]=x[k];if(typeof x.auto==='boolean')pref.auto=x.auto;}catch(_){}
+ const root=document.documentElement;
+ function apply(){for(const face of ['front','back'])root.style.setProperty('--nhi-ko-'+face+'-v137',families[pref[face]][1]);}
+ function save(){try{localStorage.setItem(key,JSON.stringify(pref));}catch(_){}apply();schedule();if(document.fonts)document.fonts.ready.then(schedule);}
+ const mobile=matchMedia('(max-width:700px)');
+ const old=new WeakMap();const active=new Set();
+ function restore(el){
+  const o=old.get(el);if(!o)return;
+  if(el.style.getPropertyValue('font-size')===o.applied){
+   if(o.value)el.style.setProperty('font-size',o.value,o.priority);
+   else el.style.removeProperty('font-size');
+  }
+  old.delete(el);active.delete(el);
+ }
+ function visible(el){return el&&!el.closest('[hidden]')&&el.getClientRects().length&&el.clientWidth>0;}
+ const selector='#planBox .pcard .prompt:not(.small),#planBox .pcard .answer.ko,#cPrompt:not(.small),#cAnswer.ko';
+ function fit(el){
+  restore(el);
+  if(!visible(el)||!el.textContent.trim())return;
+  const card=el.closest('.pcard,#cardWrap,.fcard,.card');if(!card)return;
+  const stage=el.closest('.pfront,.stage')||el.parentElement;
+  const cs=getComputedStyle(el),cardStyle=getComputedStyle(card);
+  const base=parseFloat(cs.fontSize)||26;
+  const min=Math.max(12,Math.min(base,Math.round(base*.55)));
+  const max=Math.min(72,Math.max(min,Math.round(base*1.65)));
+  const pad=(parseFloat(cardStyle.paddingTop)||0)+(parseFloat(cardStyle.paddingBottom)||0);
+  const stableHeight=parseFloat(cardStyle.minHeight)||Math.min(card.clientHeight,Math.max(220,innerHeight*.65));
+  // Use the requested card height, not a previous auto-enlarged card, to avoid runaway sizing.
+  const outside=Math.max(0,card.clientHeight-stage.clientHeight-pad);
+  const other=Math.max(0,stage.scrollHeight-el.offsetHeight);
+  const budget=Math.max(48,stableHeight-pad-outside-other-12);
+  const original={value:el.style.getPropertyValue('font-size'),priority:el.style.getPropertyPriority('font-size'),applied:''};
+  function test(n){
+   el.style.setProperty('font-size',n+'px','important');
+   return el.offsetHeight<=budget+1&&el.scrollWidth<=el.clientWidth+2;
+  }
+  let lo=min,hi=max,best=min;
+  while(lo<=hi){const mid=Math.floor((lo+hi)/2);if(test(mid)){best=mid;lo=mid+1;}else hi=mid-1;}
+  // Even when the minimum will not fit, the existing natural growth/scrolling keeps the full text accessible.
+  original.applied=best+'px';el.style.setProperty('font-size',original.applied,'important');
+  old.set(el,original);active.add(el);
+ }
+ let frame=0;
+ function refresh(){
+  frame=0;
+  const targets=pref.auto&&mobile.matches?Array.from(document.querySelectorAll(selector)).filter(visible):[];
+  for(const el of Array.from(active))if(!targets.includes(el))restore(el);
+  for(const el of targets)fit(el);
+ }
+ function schedule(){if(!frame)frame=requestAnimationFrame(refresh);}
+ function init(){
+  const sheet=document.querySelector('#setSheet>.sheetbox');if(!sheet)return;
+  const font=document.createElement('div');font.className='setgroup';font.id='nhiKoreanFontSettingsV137';
+  const h=document.createElement('h3');h.textContent='Font tiếng Hàn & cỡ chữ tự động';font.append(h);
+  for(const face of ['front','back']){
+   const row=document.createElement('div');row.className='setrow';
+   const label=document.createElement('label');label.textContent='Font tiếng Hàn — mặt '+(face==='front'?'trước':'sau');
+   const select=document.createElement('select');select.className='field small';select.id='nhiKoFont-'+face;label.htmlFor=select.id;
+   for(const [id,[name]] of Object.entries(families))select.add(new Option(name,id));
+   select.value=pref[face];select.addEventListener('change',()=>{pref[face]=select.value;save();});row.append(label,select);font.append(row);
+  }
+  const row=document.createElement('div');row.className='setrow';
+  const label=document.createElement('label');label.htmlFor='nhiAutoFontV137';label.textContent='Tự co giãn cỡ chữ trên điện thoại';
+  const check=document.createElement('input');check.type='checkbox';check.id=label.htmlFor;check.checked=pref.auto;check.addEventListener('change',()=>{pref.auto=check.checked;save();});
+  row.append(label,check);font.append(row);
+  const size=document.getElementById('nhiCardFontSettings');if(size)size.before(font);else sheet.append(font);
+  const names={'nhiKoreanFontSettingsV137':'🔤 Font chữ & tự động co giãn','nhiCardFontSettings':'📏 Cỡ chữ trên thẻ','nhiTransitionSettings':'✨ Hiệu ứng chuyển cảnh','nhiReviewMilestoneSettings':'📅 Lịch học và ôn bài','nhiAiQuickEditor':'💬 Chatbox AI'};
+  function organize(){
+   for(const group of Array.from(sheet.children)){
+    if(!group.classList.contains('setgroup')||group.tagName==='DETAILS')continue;
+    const heading=group.querySelector(':scope > h3');
+    const title=names[group.id]||(heading&&heading.textContent.trim());
+    if(!title)continue;
+    const details=document.createElement('details');details.className='nhi-setting-accordion-v137';
+    const summary=document.createElement('summary');summary.textContent=title;details.append(summary);
+    group.before(details);details.append(group);
+    if(heading)heading.hidden=true;
+   }
+   // An existing expanded section is closed whenever another category opens.
+   for(const d of Array.from(sheet.children).filter(x=>x.tagName==='DETAILS')){
+    if(d.dataset.nhiAccordionV137)continue;d.dataset.nhiAccordionV137='1';
+    d.addEventListener('toggle',()=>{if(d.open)for(const x of sheet.children)if(x!==d&&x.tagName==='DETAILS')x.open=false;});
+   }
+  }
+  organize();
+  new MutationObserver(organize).observe(sheet,{childList:true});
+  const plan=document.getElementById('planBox'),classic=document.getElementById('cardWrap');
+  const observer=new MutationObserver(schedule);
+  for(const node of [plan,classic])if(node)observer.observe(node,{childList:true,subtree:true,attributes:true,attributeFilter:['class','hidden'],characterData:true});
+  new MutationObserver(schedule).observe(document.body,{attributes:true,attributeFilter:['class']});
+  if(typeof ResizeObserver!=='undefined'){
+   const widths=new WeakMap(),ro=new ResizeObserver(entries=>{for(const e of entries){const w=e.contentRect.width;if(widths.get(e.target)!==w){widths.set(e.target,w);schedule();}}});
+   for(const n of [plan,classic])if(n)ro.observe(n);
+  }
+  sheet.addEventListener('change',schedule);sheet.addEventListener('input',schedule);
+  for(const ev of ['nhi:card-font-selected','nhi:global-ko-font-change','nhi-study-ready'])document.addEventListener(ev,schedule);
+  window.addEventListener('resize',schedule,{passive:true});window.addEventListener('orientationchange',schedule);window.addEventListener('hashchange',schedule);
+  if(document.fonts){document.fonts.ready.then(schedule);document.fonts.addEventListener?.('loadingdone',schedule);}
+  schedule();
+ }
+ apply();if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init,{once:true});else init();
+})();
+</script>
+
 </body></html>
