@@ -5022,7 +5022,10 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
       var li = el('li', val('known', it.id) ? 'known' : ''); li.dataset.item = it.id; if (withSrc) li.dataset.src = '1'; li.style.setProperty('--tc', topicColor(it.topic));
       var t = el('div', 'ptexts');
       t.appendChild(hlText(el('p', 'pvi'), it, 'vi', true));
-      var k = hlText(el('p', 'pko'), it, 'ko', true); k.lang = 'ko'; t.appendChild(k);
+      var k = hlText(el('p', 'pko'), it, 'ko', true); k.lang = 'ko';
+      // The lesson overview is not a flashcard: never inherit its large per-card font size.
+      k.style.setProperty('font-size','var(--nhi-lesson-list-ko-size,24px)','important');
+      t.appendChild(k);
       if (it.note) t.appendChild(el('p', 'listinfo', it.note));
       if (withSrc && BY_LESSON[it.lesson]) { var s = el('span', 'src'), a = el('a', null, vn(it.date) + ' · ' + it.topic); a.href = '#/bai/' + it.lesson; s.appendChild(a); t.appendChild(s); }
       li.appendChild(t);
@@ -9445,7 +9448,8 @@ html body #planBox .pcard .answer.ko,html body #cAnswer.ko{
   let lo=min,hi=max,best=min;
   while(lo<=hi){const mid=Math.floor((lo+hi)/2);if(test(mid)){best=mid;lo=mid+1;}else hi=mid-1;}
   // Even when the minimum will not fit, the existing natural growth/scrolling keeps the full text accessible.
-  original.applied=best+'px';el.style.setProperty('font-size',original.applied,'important');
+  // Preserve the existing responsive fit, then reduce its result by 8px.
+  original.applied=Math.max(12,best-8)+'px';el.style.setProperty('font-size',original.applied,'important');
   old.set(el,original);active.add(el);
  }
  let frame=0;
@@ -9472,20 +9476,47 @@ html body #planBox .pcard .answer.ko,html body #cAnswer.ko{
   const check=document.createElement('input');check.type='checkbox';check.id=label.htmlFor;check.checked=pref.auto;check.addEventListener('change',()=>{pref.auto=check.checked;save();});
   row.append(label,check);font.append(row);
   const size=document.getElementById('nhiCardFontSettings');if(size)size.before(font);else sheet.append(font);
-  const names={'nhiKoreanFontSettingsV137':'🔤 Font chữ & tự động co giãn','nhiCardFontSettings':'📏 Cỡ chữ trên thẻ','nhiTransitionSettings':'✨ Hiệu ứng chuyển cảnh','nhiReviewMilestoneSettings':'📅 Lịch học và ôn bài','nhiAiQuickEditor':'💬 Chatbox AI'};
+  const categories={
+   nhiActionSettingsV122:['🎛','Nút điều hướng thẻ'],
+   nhiKoreanFontSettingsV137:['🔤','Font chữ & tự động co giãn'],
+   nhiCardFontSettings:['📏','Cỡ chữ trên thẻ'],
+   nhiTransitionSettings:['✨','Hiệu ứng chuyển cảnh'],
+   nhiReviewMilestoneSettings:['📅','Lịch học và ôn bài'],
+   nhiAiQuickEditor:['💬','Chatbox AI'],
+   syncPanel:['🔄','Đồng bộ thiết bị']
+  };
+  const titles={
+   'Giọng đọc':['🎧','Giọng đọc'],
+   'Giao diện':['🎨','Giao diện'],
+   'Kích thước thẻ':['📐','Kích thước thẻ'],
+   'Dữ liệu':['📁','Dữ liệu']
+  };
+  function category(group,title){
+   return categories[group.id]||titles[title]||['⚙️',title];
+  }
+  function decorate(summary,info){
+   if(!summary||summary.dataset.nhiIconV140)return;
+   summary.dataset.nhiIconV140='1';
+   const ico=document.createElement('span');ico.className='nhi-setting-icon-v140';ico.setAttribute('aria-hidden','true');ico.textContent=info[0];
+   const label=document.createElement('span');label.className='nhi-setting-label-v140';label.textContent=info[1];
+   const arrow=document.createElement('span');arrow.className='nhi-setting-chevron-v140';arrow.setAttribute('aria-hidden','true');arrow.textContent='›';
+   summary.replaceChildren(ico,label,arrow);
+  }
   function organize(){
    for(const group of Array.from(sheet.children)){
     if(!group.classList.contains('setgroup')||group.tagName==='DETAILS')continue;
     const heading=group.querySelector(':scope > h3');
-    const title=names[group.id]||(heading&&heading.textContent.trim());
+    const title=categories[group.id]?.[1]||(heading&&heading.textContent.trim());
     if(!title)continue;
     const details=document.createElement('details');details.className='nhi-setting-accordion-v137';
-    const summary=document.createElement('summary');summary.textContent=title;details.append(summary);
+    const summary=document.createElement('summary');decorate(summary,category(group,title));details.append(summary);
     group.before(details);details.append(group);
     if(heading)heading.hidden=true;
    }
    // An existing expanded section is closed whenever another category opens.
    for(const d of Array.from(sheet.children).filter(x=>x.tagName==='DETAILS')){
+    const summary=d.querySelector(':scope > summary');
+    if(summary&&!summary.dataset.nhiIconV140)decorate(summary,category(d,summary.textContent.trim()));
     if(d.dataset.nhiAccordionV137)continue;d.dataset.nhiAccordionV137='1';
     d.addEventListener('toggle',()=>{if(d.open)for(const x of sheet.children)if(x!==d&&x.tagName==='DETAILS')x.open=false;});
    }
@@ -9509,5 +9540,40 @@ html body #planBox .pcard .answer.ko,html body #cAnswer.ko{
  apply();if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init,{once:true});else init();
 })();
 </script>
+
+
+<style id="nhi-lesson-list-and-settings-icons-v140">
+/* Lesson overview only, not the cover and not flashcards. */
+html body #planBox .pitems{
+ --nhi-lesson-list-ko-size:clamp(21px,1.65vw,26px);
+}
+html body #planBox .pitems>li .ptexts>.pko[lang="ko"]{
+ font-family:"Noto Sans KR","Malgun Gothic","Apple SD Gothic Neo",sans-serif!important;
+ font-size:var(--nhi-lesson-list-ko-size)!important;
+ font-weight:600!important;line-height:1.42!important;
+}
+html body #planBox .pitems>li .ptexts>.pvi{
+ font-family:"Times New Roman","Liberation Serif",Times,serif!important;
+}
+@media(max-width:700px){
+ html body #planBox .pitems{--nhi-lesson-list-ko-size:20px}
+}
+/* All top-level settings receive a separate, visible icon and disclosure arrow. */
+html body #setSheet>.sheetbox>details>summary[data-nhi-icon-v140]{
+ display:flex!important;align-items:center!important;gap:9px!important;
+ list-style:none!important;min-height:38px;cursor:pointer!important;
+ font-size:15px!important;font-weight:800!important;color:var(--ink)!important;
+}
+html body #setSheet>.sheetbox>details>summary[data-nhi-icon-v140]::-webkit-details-marker{display:none!important}
+html body #setSheet>.sheetbox>details>summary[data-nhi-icon-v140]::marker{content:""}
+#setSheet .nhi-setting-icon-v140{
+ display:inline-flex!important;align-items:center;justify-content:center;flex:0 0 29px;
+ width:29px;height:29px;font-family:"Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif!important;
+ font-size:19px!important;line-height:1!important;text-transform:none!important;
+}
+#setSheet .nhi-setting-label-v140{flex:1;min-width:0;text-align:left}
+#setSheet .nhi-setting-chevron-v140{display:inline-block;flex:none;font-size:24px;line-height:1;color:var(--muted);transition:transform .15s}
+#setSheet>.sheetbox>details[open]>summary>.nhi-setting-chevron-v140{transform:rotate(90deg)}
+</style>
 
 </body></html>
