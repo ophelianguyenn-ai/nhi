@@ -1,6 +1,6 @@
 // Offline support: network-first for GitHub Pages and static assets.
 // Fall back to cache only when offline. Different cache key forces eviction of earlier stale CSS/JS.
-const CACHE = 'nhi-corner-v136-shared-card-height';
+const CACHE = 'nhi-corner-v137-typography-ai-settings';
 const CORE = [
   'nhi-cover-icon-32.png','nhi-cover-icon-180.png','nhi-cover-icon-192.png','nhi-cover-icon-512.png',
   'nhi-flower-v135-32.png','nhi-flower-v135-180.png','nhi-flower-v135-192.png','nhi-flower-v135-512.png','manifest.webmanifest?v=135',
@@ -36,7 +36,7 @@ const CORE = [
   'garden-winter-day.webp','garden-winter-night.webp'
 ];
 self.addEventListener('install', function(e) {
-  e.waitUntil(caches.open(CACHE).then(function(c){return c.addAll(CORE);}).then(function(){return self.skipWaiting();}));
+  e.waitUntil(caches.open(CACHE).then(function(c){return c.addAll(['./','index.html','lessons.json']).then(function(){return Promise.allSettled(CORE.filter(function(path){return !['./','index.html','lessons.json'].includes(path);}).map(function(path){return c.add(path);}));});}).then(function(){return self.skipWaiting();}));
 });
 self.addEventListener('activate', function(e){
   e.waitUntil(caches.keys().then(function(keys){
