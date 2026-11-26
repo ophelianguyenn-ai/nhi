@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="vi" data-nhi-build="145.1">
+<html lang="vi" data-nhi-build="146">
 <head>
 <script id="nhi-explicit-calendar-route-v143">
 (function(){
@@ -1525,7 +1525,7 @@ html body #planBox .sdone .pstatus{
 <div class="sheet" id="setSheet" hidden>
   <div class="scrim" data-close></div>
   <div class="sheetbox" role="dialog" aria-modal="true" aria-labelledby="setTitle">
-    <div class="sheethead" id="nhiSettingsDragHeader"><div id="nhiSettingsDragHandle" tabindex="0" role="button" aria-label="Di chuyển cửa sổ Cài đặt bằng cách kéo hoặc dùng phím mũi tên"><span aria-hidden="true">✥</span> Kéo để di chuyển</div><h2 id="setTitle">Cài đặt <small style="font-size:11px;font-weight:600;color:var(--muted)" id="nhiBuildVersion">V145.1</small></h2><button type="button" class="iconbtn sm" data-close aria-label="Đóng" data-ic="x"></button></div>
+    <div class="sheethead" id="nhiSettingsDragHeader"><div id="nhiSettingsDragHandle" tabindex="0" role="button" aria-label="Di chuyển cửa sổ Cài đặt bằng cách kéo hoặc dùng phím mũi tên"><span aria-hidden="true">✥</span> Kéo để di chuyển</div><h2 id="setTitle">Cài đặt <small style="font-size:11px;font-weight:600;color:var(--muted)" id="nhiBuildVersion">V146</small></h2><button type="button" class="iconbtn sm" data-close aria-label="Đóng" data-ic="x"></button></div>
 
 <script id="nhi-settings-drag-v126">
 (function(){
@@ -7308,15 +7308,25 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
       if(panel.getAnimations)panel.getAnimations().forEach(function(a){a.cancel();});
       ['opacity','transform','filter','clip-path','perspective','visibility'].forEach(function(p){panel.style.removeProperty(p);});
     }
+    function phoneAIGeometry(width,height,left,top){
+      // A bottom sheet: half the visible screen, not half its width.
+      var h=Math.max(1,Math.round(height*.5));
+      return {width:Math.max(1,Math.floor(width)),height:h,left:Math.round(left),top:Math.round(top+height-h)};
+    }
     function fitPhoneAI(){
       if(!aiPhone.matches)return;
       var vv=window.visualViewport;
-      if(vv){
-        $('aiPanel').style.setProperty('--nhi-phone-ai-height',Math.round(vv.height)+'px');
-        $('aiPanel').style.setProperty('--nhi-phone-ai-top',Math.round(vv.offsetTop)+'px');
-      }
+      var g=phoneAIGeometry(vv?vv.width:document.documentElement.clientWidth,
+        vv?vv.height:window.innerHeight,vv?vv.offsetLeft:0,vv?vv.offsetTop:0);
+      var panel=$('aiPanel');
+      panel.style.setProperty('--nhi-phone-ai-width',g.width+'px');
+      panel.style.setProperty('--nhi-phone-ai-height',g.height+'px');
+      panel.style.setProperty('--nhi-phone-ai-left',g.left+'px');
+      panel.style.setProperty('--nhi-phone-ai-top',g.top+'px');
+      document.documentElement.style.setProperty('--nhi-phone-ai-reserve',g.height+'px');
     }
     if(window.visualViewport){window.visualViewport.addEventListener('resize',fitPhoneAI);window.visualViewport.addEventListener('scroll',fitPhoneAI);}
+    window.addEventListener('resize',fitPhoneAI,{passive:true});
     function open(focusCard) {
       var generation=++aiOpenGeneration;
       if(aiPhone.matches){resetPhoneAI();fitPhoneAI();}
@@ -9755,27 +9765,33 @@ html body #planBox .pitems>li .nhi-meaning-eye-v142[aria-pressed="true"]{color:v
 html body #planBox .pcard>.pdel.nhi-card-corner-trash{pointer-events:auto!important;touch-action:manipulation!important;cursor:pointer!important}
 html body #planBox .pcard>.pdel.nhi-card-corner-trash svg{pointer-events:none!important}
 </style>
-<style id="nhi-mobile-ai-v145">
+<style id="nhi-mobile-ai-v146">
 @media(max-width:700px), (max-width:900px) and (pointer:coarse){
  html body #aiPanel.aipanel{
-  position:fixed!important;inset:auto!important;left:0!important;right:0!important;
-  top:var(--nhi-phone-ai-top,0px)!important;bottom:auto!important;
-  width:100%!important;max-width:100%!important;height:100vh!important;height:var(--nhi-phone-ai-height,100dvh)!important;
+  position:fixed!important;inset:auto!important;left:var(--nhi-phone-ai-left,0px)!important;right:auto!important;
+  top:var(--nhi-phone-ai-top,50dvh)!important;bottom:auto!important;
+  width:var(--nhi-phone-ai-width,100vw)!important;min-width:var(--nhi-phone-ai-width,100vw)!important;max-width:none!important;
+  height:50vh!important;height:var(--nhi-phone-ai-height,50dvh)!important;min-height:0!important;max-height:none!important;
   box-sizing:border-box!important;z-index:2147483000!important;
   background:var(--surface,#fff)!important;opacity:1!important;
   filter:none!important;backdrop-filter:none!important;clip-path:none!important;
   transform:none!important;transform-style:flat!important;perspective:none!important;
   isolation:isolate!important;animation:none!important;transition:none!important;
-  overflow:hidden!important;border:0!important;box-shadow:none!important;
+  overflow:hidden!important;border:0!important;border-top:2px solid var(--line)!important;
+  border-radius:18px 18px 0 0!important;box-shadow:0 -5px 24px rgb(0 0 0 / .16)!important;
+  padding-top:0!important;
  }
  html body:not(.ai-open) #aiPanel.aipanel{visibility:hidden!important;pointer-events:none!important}
  html body.ai-open #aiPanel.aipanel{visibility:visible!important;pointer-events:auto!important}
- html body.ai-open #planBox,html body.ai-open #topbar,
- html body.ai-open #nhiV2TopNav,html body.ai-open #nhiV2Workspace{visibility:hidden!important}
- html body.ai-open{overflow:hidden!important}
+ /* Do not hide the lesson or header: they remain usable above the chat. */
+ html body.ai-open .app{padding-bottom:calc(var(--nhi-phone-ai-reserve,50dvh) + 20px)!important}
+ html body #aiPanel #aiResizeHandle{display:none!important}
  html body #aiPanel #aiLog{flex:1 1 0!important;min-height:0!important;overflow-y:auto!important;overscroll-behavior:contain}
  html body #aiPanel #aiSetup:not([hidden]){flex:0 1 auto;min-height:0;max-height:45%;overflow-y:auto;overscroll-behavior:contain}
  html body #aiPanel .aihead,html body #aiPanel .aiform,html body #aiPanel .aiquick{flex-shrink:0}
+ html body #aiPanel .aihead{min-width:0!important;gap:4px!important}
+ html body #aiPanel .aihead h2{flex:1 1 auto!important;min-width:0!important;white-space:nowrap!important}
+ html body #aiPanel .aiform textarea{min-width:0!important;flex:1 1 0!important}
 }
 </style>
 </body></html>
