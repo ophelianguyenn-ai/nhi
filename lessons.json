@@ -38367,14 +38367,6 @@
           1
         ],
         [
-          "nhi20261125_011",
-          "w",
-          "Nhà máy & thiết bị",
-          "khu vực sản xuất",
-          "생산 구역",
-          1
-        ],
-        [
           "nhi20261125_012",
           "w",
           "Nhà máy & thiết bị",
@@ -38415,51 +38407,11 @@
           1
         ],
         [
-          "nhi20261125_017",
-          "w",
-          "Chụp ảnh & mô tả",
-          "chụp ảnh, ghi hình",
-          "촬영하다",
-          1
-        ],
-        [
-          "nhi20261125_018",
-          "w",
-          "Chụp ảnh & mô tả",
-          "một cách chi tiết, kỹ lưỡng",
-          "자세히",
-          1
-        ],
-        [
           "nhi20261125_019",
           "w",
           "Nhà máy & thiết bị",
           "cơ sở vật chất, công trình và tiện ích",
           "시설",
-          1
-        ],
-        [
-          "nhi20261125_020",
-          "w",
-          "Nhà máy & thiết bị",
-          "bên trong nhà máy",
-          "공장 내부",
-          1
-        ],
-        [
-          "nhi20261125_021",
-          "w",
-          "Nhà máy & thiết bị",
-          "toàn cảnh nhà máy",
-          "공장 전체 모습",
-          1
-        ],
-        [
-          "nhi20261125_022",
-          "w",
-          "Nhà máy & thiết bị",
-          "được kết nối với nhau",
-          "서로 연결되어 있다",
           1
         ],
         [
@@ -38487,14 +38439,6 @@
           1
         ],
         [
-          "nhi20261125_detail_000",
-          "w",
-          "Họp, báo cáo & giao tiếp",
-          "người phụ trách dự án",
-          "프로젝트 담당자",
-          1
-        ],
-        [
           "nhi20261125_detail_001",
           "w",
           "Họp, báo cáo & giao tiếp",
@@ -38508,14 +38452,6 @@
           "Họp, báo cáo & giao tiếp",
           "liên tục, thường xuyên",
           "지속적으로",
-          1
-        ],
-        [
-          "nhi20261125_detail_003",
-          "w",
-          "Họp, báo cáo & giao tiếp",
-          "kiểm tra, xác nhận",
-          "확인하다",
           1
         ],
         [
@@ -38535,22 +38471,6 @@
           1
         ],
         [
-          "nhi20261125_detail_006",
-          "w",
-          "Sản xuất & cải tiến",
-          "ý tưởng bổ sung",
-          "추가 아이디어",
-          1
-        ],
-        [
-          "nhi20261125_detail_007",
-          "w",
-          "Sản xuất & cải tiến",
-          "và, cùng với (trong văn viết)",
-          "및",
-          1
-        ],
-        [
           "nhi20261125_detail_008",
           "w",
           "Sản xuất & cải tiến",
@@ -38567,67 +38487,11 @@
           1
         ],
         [
-          "nhi20261125_detail_010",
-          "w",
-          "Vệ sinh & nơi làm việc",
-          "dọn dẹp, vệ sinh (động từ)",
-          "청소하다",
-          1
-        ],
-        [
           "nhi20261125_detail_011",
           "w",
           "Vệ sinh & nơi làm việc",
           "sắp xếp ngăn nắp",
           "정돈",
-          1
-        ],
-        [
-          "nhi20261125_detail_012",
-          "w",
-          "Vệ sinh & nơi làm việc",
-          "vệ sinh và sắp xếp văn phòng",
-          "사무실 청소 및 정리 정돈",
-          1
-        ],
-        [
-          "nhi20261125_detail_013",
-          "w",
-          "Vệ sinh & nơi làm việc",
-          "bên trong nhà máy",
-          "공장 내",
-          1
-        ],
-        [
-          "nhi20261125_detail_014",
-          "w",
-          "Vệ sinh & nơi làm việc",
-          "mỗi, từng",
-          "각",
-          1
-        ],
-        [
-          "nhi20261125_detail_015",
-          "w",
-          "Vệ sinh & nơi làm việc",
-          "từng khu vực làm việc",
-          "각 작업 구역",
-          1
-        ],
-        [
-          "nhi20261125_detail_016",
-          "w",
-          "Vệ sinh & nơi làm việc",
-          "một cách sạch sẽ",
-          "깨끗이",
-          1
-        ],
-        [
-          "nhi20261125_detail_017",
-          "w",
-          "Vệ sinh & nơi làm việc",
-          "vệ sinh sạch sẽ",
-          "깨끗이 청소하다",
           1
         ],
         [
@@ -38671,67 +38535,11 @@
           1
         ],
         [
-          "nhi20261125_s049",
-          "w",
-          "Vệ sinh & nơi làm việc",
-          "vệ sinh văn phòng",
-          "사무실 청소",
-          1
-        ],
-        [
-          "nhi20261125_s050",
-          "w",
-          "Vệ sinh & nơi làm việc",
-          "lau dọn sạch sẽ",
-          "깨끗하게 청소하다",
-          1
-        ],
-        [
-          "nhi20261125_s051",
-          "w",
-          "Nhà máy & thiết bị",
-          "từng khu vực làm việc bên trong nhà máy",
-          "공장 내 각 작업 구역",
-          1
-        ],
-        [
-          "nhi20261125_s052",
-          "w",
-          "Nhà máy & thiết bị",
-          "tất cả máy móc và thiết bị",
-          "모든 기계와 설비",
-          1
-        ],
-        [
           "nhi20261125_s053",
           "w",
           "Nhà máy & thiết bị",
           "vị trí/bộ phận được kết nối với nhau",
           "서로 연결되어 있는 부분",
-          1
-        ],
-        [
-          "nhi20261125_s054",
-          "w",
-          "Nhà máy & thiết bị",
-          "chụp ảnh toàn bộ thiết bị và cơ sở vật chất",
-          "전체 설비와 시설의 사진을 촬영하다",
-          1
-        ],
-        [
-          "nhi20261125_s055",
-          "w",
-          "Nhà máy & thiết bị",
-          "xác nhận trực tiếp với nhân viên hiện trường",
-          "현장 직원들에게 확인하다",
-          1
-        ],
-        [
-          "nhi20261125_s056",
-          "w",
-          "Chụp ảnh & mô tả",
-          "các hạng mục sau đây",
-          "다음 사항",
           1
         ],
         [
@@ -38743,51 +38551,11 @@
           1
         ],
         [
-          "nhi20261125_meeting_000",
-          "w",
-          "Vệ sinh & bảo trì",
-          "trong tuần này, trước khi hết tuần",
-          "이번 주 내에",
-          1
-        ],
-        [
           "nhi20261125_meeting_001",
           "w",
           "Vệ sinh & bảo trì",
           "trong tuần này",
           "이번 주 중으로",
-          1
-        ],
-        [
-          "nhi20261125_meeting_002",
-          "w",
-          "Vệ sinh & bảo trì",
-          "toàn bộ bồn chứa",
-          "전체 저장탱크",
-          1
-        ],
-        [
-          "nhi20261125_meeting_003",
-          "w",
-          "Vệ sinh & bảo trì",
-          "tất cả bồn chứa và lò hơi",
-          "모든 저장탱크와 보일러",
-          1
-        ],
-        [
-          "nhi20261125_meeting_004",
-          "w",
-          "Vệ sinh & bảo trì",
-          "vệ sinh khu vực sản xuất và văn phòng",
-          "생산 구역 및 사무실 청소",
-          1
-        ],
-        [
-          "nhi20261125_meeting_005",
-          "w",
-          "Vệ sinh & bảo trì",
-          "tuần này",
-          "이번 주",
           1
         ],
         [
@@ -38823,14 +38591,6 @@
           1
         ],
         [
-          "nhi20261125_meeting_010",
-          "w",
-          "Ngữ pháp",
-          "khoảng, xấp xỉ",
-          "약",
-          1
-        ],
-        [
           "nhi20261125_meeting_011",
           "w",
           "Kiểm kê & báo cáo",
@@ -38844,22 +38604,6 @@
           "Kiểm kê & báo cáo",
           "kiểm tra thực tế, kiểm kê",
           "실사",
-          1
-        ],
-        [
-          "nhi20261125_meeting_013",
-          "w",
-          "Lịch họp",
-          "sáng thứ Bảy",
-          "토요일 오전",
-          1
-        ],
-        [
-          "nhi20261125_meeting_014",
-          "w",
-          "Lịch họp",
-          "thứ Bảy",
-          "토요일",
           1
         ],
         [
@@ -38884,14 +38628,6 @@
           "Vệ sinh & bảo trì",
           "vệ sinh và bảo trì thiết bị",
           "설비 청소 및 유지보수",
-          1
-        ],
-        [
-          "nhi20261125_meeting2_001",
-          "w",
-          "Vệ sinh & bảo trì",
-          "vệ sinh thiết bị",
-          "설비 청소",
           1
         ],
         [
@@ -38975,14 +38711,6 @@
           1
         ],
         [
-          "nhi20261125_meeting2_012",
-          "w",
-          "Mặt bằng & xây dựng",
-          "nhổ, dọn cỏ dại",
-          "잡초를 제거하다",
-          1
-        ],
-        [
           "nhi20261125_meeting2_013",
           "w",
           "Mặt bằng & xây dựng",
@@ -39004,14 +38732,6 @@
           "Sản xuất & cải tiến",
           "quy trình sản xuất",
           "생산 공정",
-          1
-        ],
-        [
-          "nhi20261125_meeting2_016",
-          "w",
-          "Sản xuất & cải tiến",
-          "thực hiện quản lý",
-          "관리하다",
           1
         ],
         [
@@ -39055,22 +38775,6 @@
           1
         ],
         [
-          "nhi20261125_meeting2_022",
-          "w",
-          "Lịch họp",
-          "kế hoạch họp ngày 28/11",
-          "11월 28일 회의 계획",
-          1
-        ],
-        [
-          "nhi20261125_meeting2_023",
-          "w",
-          "Lịch họp",
-          "kế hoạch họp",
-          "회의 계획",
-          1
-        ],
-        [
           "nhi20261125_meeting2_024",
           "s",
           "Lịch họp",
@@ -39079,59 +38783,11 @@
           1
         ],
         [
-          "nhi20261125_meeting2_025",
-          "w",
-          "Lịch họp",
-          "cuộc họp sáng thứ Bảy",
-          "토요일 오전 회의",
-          1
-        ],
-        [
-          "nhi20261125_meeting2_026",
-          "w",
-          "Lịch họp",
-          "chuẩn bị cuộc họp",
-          "회의 준비",
-          1
-        ],
-        [
-          "nhi20261125_meeting2_027",
-          "w",
-          "Lịch họp",
-          "để chuẩn bị cho cuộc họp",
-          "회의 준비를 위해",
-          1
-        ],
-        [
-          "nhi20261125_meeting2_028",
-          "w",
-          "Ngữ pháp",
-          "để, nhằm mục đích (위해)",
-          "위해",
-          1
-        ],
-        [
-          "nhi20261125_meeting2_029",
-          "w",
-          "Lịch họp",
-          "trước, vừa qua (bổ nghĩa danh từ)",
-          "지난",
-          1
-        ],
-        [
           "nhi20261125_meeting2_030",
           "w",
           "Lịch họp",
           "cuộc họp báo cáo tỷ lệ hao hụt",
           "손실률 보고 회의",
-          1
-        ],
-        [
-          "nhi20261125_meeting2_031",
-          "w",
-          "Lịch họp",
-          "ngày họp",
-          "회의일",
           1
         ],
         [
@@ -39148,22 +38804,6 @@
           "Kiểm kê & báo cáo",
           "tổng hợp lượng hàng nhập và xuất",
           "입출고량을 정리하다",
-          1
-        ],
-        [
-          "nhi20261125_meeting2_034",
-          "w",
-          "Kiểm kê & báo cáo",
-          "sắp xếp, tổng hợp",
-          "정리하다",
-          1
-        ],
-        [
-          "nhi20261125_meeting2_035",
-          "w",
-          "Ngữ pháp",
-          "vui lòng tổng hợp, sắp xếp giúp",
-          "정리해 주세요",
           1
         ],
         [
@@ -39391,22 +39031,6 @@
           1
         ],
         [
-          "nhi20261125_fullmeeting_022",
-          "w",
-          "Vệ sinh & bảo trì",
-          "hoàn thành việc vệ sinh",
-          "청소를 완료하다",
-          1
-        ],
-        [
-          "nhi20261125_fullmeeting_023",
-          "w",
-          "Vệ sinh & bảo trì",
-          "tình trạng máy móc và thiết bị",
-          "기계와 설비의 상태",
-          1
-        ],
-        [
           "nhi20261125_fullmeeting_024",
           "w",
           "Vệ sinh & bảo trì",
@@ -39444,14 +39068,6 @@
           "Vệ sinh & bảo trì",
           "thiết bị cần bảo dưỡng",
           "정비가 필요한 설비",
-          1
-        ],
-        [
-          "nhi20261125_fullmeeting_029",
-          "w",
-          "Vệ sinh & bảo trì",
-          "cần thiết",
-          "필요하다",
           1
         ],
         [
@@ -39495,14 +39111,6 @@
           1
         ],
         [
-          "nhi20261125_fullmeeting_035",
-          "w",
-          "Vệ sinh & bảo trì",
-          "trong đợt này",
-          "이번 기간에",
-          1
-        ],
-        [
           "nhi20261125_fullmeeting_036",
           "w",
           "Vệ sinh & bảo trì",
@@ -39519,35 +39127,11 @@
           1
         ],
         [
-          "nhi20261125_fullmeeting_038",
-          "w",
-          "Vệ sinh & bảo trì",
-          "hoàn tất công việc",
-          "작업을 마무리하다",
-          1
-        ],
-        [
           "nhi20261125_fullmeeting_039",
           "w",
           "Mặt bằng & xây dựng",
           "dọn cỏ và chỉnh trang mặt bằng phía sau nhà máy",
           "공장 뒤편 제초 및 부지 정리",
-          1
-        ],
-        [
-          "nhi20261125_fullmeeting_040",
-          "w",
-          "Mặt bằng & xây dựng",
-          "phía sau nhà máy",
-          "공장 뒤편",
-          1
-        ],
-        [
-          "nhi20261125_fullmeeting_041",
-          "w",
-          "Mặt bằng & xây dựng",
-          "phía sau",
-          "뒤편",
           1
         ],
         [
@@ -39572,30 +39156,6 @@
           "Mặt bằng & xây dựng",
           "máy ủi",
           "불도저",
-          1
-        ],
-        [
-          "nhi20261125_fullmeeting_045",
-          "w",
-          "Mặt bằng & xây dựng",
-          "sử dụng máy ủi",
-          "불도저를 이용하다",
-          1
-        ],
-        [
-          "nhi20261125_fullmeeting_046",
-          "w",
-          "Mặt bằng & xây dựng",
-          "sử dụng, tận dụng",
-          "이용하다",
-          1
-        ],
-        [
-          "nhi20261125_fullmeeting_047",
-          "w",
-          "Mặt bằng & xây dựng",
-          "chỉnh trang khu đất",
-          "부지를 정리하다",
           1
         ],
         [
@@ -39644,14 +39204,6 @@
           "Mặt bằng & xây dựng",
           "phương pháp thi công cụ thể",
           "구체적인 작업 방법",
-          1
-        ],
-        [
-          "nhi20261125_fullmeeting_054",
-          "w",
-          "Mặt bằng & xây dựng",
-          "phương pháp làm việc",
-          "작업 방법",
           1
         ],
         [
@@ -39716,14 +39268,6 @@
           "Sản xuất & cải tiến",
           "lượng nguyên liệu đưa vào mỗi ngày",
           "하루 원료 투입량",
-          1
-        ],
-        [
-          "nhi20261125_fullmeeting_063",
-          "w",
-          "Sản xuất & cải tiến",
-          "mức cao",
-          "높은 수준",
           1
         ],
         [
@@ -39799,14 +39343,6 @@
           1
         ],
         [
-          "nhi20261125_fullmeeting_073",
-          "w",
-          "Xả bùn & bồn chứa",
-          "một cách đầy đủ",
-          "충분히",
-          1
-        ],
-        [
           "nhi20261125_fullmeeting_074",
           "w",
           "Xả bùn & bồn chứa",
@@ -39852,14 +39388,6 @@
           "Xả bùn & bồn chứa",
           "dầu được tách ra khỏi bùn",
           "슬러지에서 오일이 분리되다",
-          1
-        ],
-        [
-          "nhi20261125_fullmeeting_080",
-          "w",
-          "Xả bùn & bồn chứa",
-          "phát sinh mới",
-          "새로 발생하다",
           1
         ],
         [
@@ -39911,22 +39439,6 @@
           1
         ],
         [
-          "nhi20261125_fullmeeting_087",
-          "w",
-          "Xả bùn & bồn chứa",
-          "trong quá trình này",
-          "이 과정에서",
-          1
-        ],
-        [
-          "nhi20261125_fullmeeting_088",
-          "w",
-          "Xả bùn & bồn chứa",
-          "còn lại",
-          "남아 있다",
-          1
-        ],
-        [
           "nhi20261125_fullmeeting_089",
           "w",
           "Xả bùn & bồn chứa",
@@ -39975,27 +39487,11 @@
           1
         ],
         [
-          "nhi20261125_fullmeeting_095",
-          "w",
-          "Xả bùn & bồn chứa",
-          "tăng lên",
-          "증가하다",
-          1
-        ],
-        [
           "nhi20261125_fullmeeting_096",
           "w",
           "Xả bùn & bồn chứa",
           "dung tích lớn",
           "대용량",
-          1
-        ],
-        [
-          "nhi20261125_fullmeeting_097",
-          "w",
-          "Xả bùn & bồn chứa",
-          "lắp đặt bổ sung",
-          "추가로 설치하다",
           1
         ],
         [
@@ -40087,27 +39583,11 @@
           1
         ],
         [
-          "nhi20261125_fullmeeting_109",
-          "w",
-          "Gia nhiệt & phân ly",
-          "có ích, giúp ích",
-          "도움이 되다",
-          1
-        ],
-        [
           "nhi20261125_fullmeeting_110",
           "w",
           "Gia nhiệt & phân ly",
           "tuy nhiên",
           "다만",
-          1
-        ],
-        [
-          "nhi20261125_fullmeeting_111",
-          "w",
-          "Gia nhiệt & phân ly",
-          "vấn đề lớn nhất",
-          "가장 큰 문제",
           1
         ],
         [
@@ -40191,43 +39671,11 @@
           1
         ],
         [
-          "nhi20261125_fullmeeting_122",
-          "w",
-          "Kiểm kê & lịch họp",
-          "cuối năm",
-          "연말",
-          1
-        ],
-        [
           "nhi20261125_fullmeeting_123",
           "w",
           "Kiểm kê & lịch họp",
           "trước thời điểm cuối năm",
           "연말을 앞두고",
-          1
-        ],
-        [
-          "nhi20261125_fullmeeting_124",
-          "w",
-          "Kiểm kê & lịch họp",
-          "người đại diện, giám đốc (kính ngữ)",
-          "대표님",
-          1
-        ],
-        [
-          "nhi20261125_fullmeeting_125",
-          "w",
-          "Kiểm kê & lịch họp",
-          "nhân viên văn phòng",
-          "사무실 직원",
-          1
-        ],
-        [
-          "nhi20261125_fullmeeting_126",
-          "w",
-          "Kiểm kê & lịch họp",
-          "đến thăm nhà máy",
-          "공장을 방문하다",
           1
         ],
         [
@@ -40271,14 +39719,6 @@
           1
         ],
         [
-          "nhi20261125_fullmeeting_132",
-          "w",
-          "Kiểm kê & lịch họp",
-          "từng bộ phận",
-          "각 부서",
-          1
-        ],
-        [
           "nhi20261125_fullmeeting_133",
           "w",
           "Kiểm kê & lịch họp",
@@ -40292,22 +39732,6 @@
           "Kiểm kê & lịch họp",
           "nội dung đề xuất",
           "제안 사항",
-          1
-        ],
-        [
-          "nhi20261125_fullmeeting_135",
-          "w",
-          "Kiểm kê & lịch họp",
-          "chuẩn bị trước",
-          "미리 준비하다",
-          1
-        ],
-        [
-          "nhi20261125_fullmeeting_136",
-          "w",
-          "Kiểm kê & lịch họp",
-          "một cách tự do",
-          "자유롭게",
           1
         ],
         [
