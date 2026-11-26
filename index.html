@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="vi" data-nhi-build="152">
+<html lang="vi" data-nhi-build="153">
 <head>
 <script id="nhi-explicit-calendar-route-v143">
 (function(){
@@ -634,7 +634,7 @@ section:not([hidden]) > .quiz, section:not([hidden]) > #cardWrap, .list > .row:n
 }
 </style>
 
-<script src="nhi-chat-voice-v1.js?v=20261117"></script><script src="hanja-v9.js?v=12"></script><script src="hanja-extra-v12.js"></script><script src="card-images-v11.js?v=20261122-image-layout-notify-v8"></script><script src="nhi-google-images-v1.js?v=20261114-study-v7"></script><script src="nhi-hard-minimal-v1.js?v=20261120-in-card-v2"></script><script src="nhi-verified-pairs-20261117.js?v=1"></script><script src="nhi-daily-pairs.js?v=20261119-micro-v1"></script><script src="nhi-all-lesson-pairs-v6.js?v=20261121-refined-51"></script><script src="nhi-lesson-20261121-segments-v1.js?v=20261122-reviewed-24"></script><script src="nhi-phrases-v5.js?v=20261121-refined"></script><script src="nhi-english-data-v6.js?v=20261113-reviewed-173"></script><script src="nhi-english-v5.js?v=20261124-pale-border-v119"></script><script src="recorded-voices-v11.js?v=20261119-banmai-injoon-daily"></script>
+<script src="nhi-chat-voice-v1.js?v=20261117"></script><script src="hanja-v9.js?v=12"></script><script src="hanja-extra-v12.js"></script><script src="card-images-v11.js?v=20261126-v153"></script><script src="nhi-google-images-v1.js?v=20261114-study-v7"></script><script src="nhi-hard-minimal-v1.js?v=20261120-in-card-v2"></script><script src="nhi-verified-pairs-20261117.js?v=1"></script><script src="nhi-daily-pairs.js?v=20261119-micro-v1"></script><script src="nhi-all-lesson-pairs-v6.js?v=20261121-refined-51"></script><script src="nhi-lesson-20261121-segments-v1.js?v=20261122-reviewed-24"></script><script src="nhi-phrases-v5.js?v=20261121-refined"></script><script src="nhi-english-data-v6.js?v=20261113-reviewed-173"></script><script src="nhi-english-v5.js?v=20261124-pale-border-v119"></script><script src="recorded-voices-v11.js?v=20261119-banmai-injoon-daily"></script>
 <script src="qrcode.js" defer></script>
 <link rel="stylesheet" href="nhi-seven-fixes-20261117.css?v=1"><link rel="stylesheet" href="refresh-v9.css?v=13"><link rel="stylesheet" href="study-enhancements-v13.css?v=14"><link rel="stylesheet" href="nhi-updates-v1.css?v=1"><link rel="stylesheet" href="nhi-ai-resize-v2.css?v=1"><link rel="stylesheet" href="nhi-study-motion-v3.css?v=3"><link rel="stylesheet" href="nhi-interface-v4.css?v=4"><link rel="stylesheet" href="nhi-interface-v5.css?v=20261113-rollback-stable-v1"><link rel="stylesheet" href="nhi-seasons-v1.css?v=20261113-cartoon-soft-1">
 <link rel="stylesheet" href="nhi-living-garden-v1.css?v=20261113-cartoon-butterflies-v1">
@@ -1525,7 +1525,7 @@ html body #planBox .sdone .pstatus{
 <div class="sheet" id="setSheet" hidden>
   <div class="scrim" data-close></div>
   <div class="sheetbox" role="dialog" aria-modal="true" aria-labelledby="setTitle">
-    <div class="sheethead" id="nhiSettingsDragHeader"><div id="nhiSettingsDragHandle" tabindex="0" role="button" aria-label="Di chuyển cửa sổ Cài đặt bằng cách kéo hoặc dùng phím mũi tên"><span aria-hidden="true">✥</span> Kéo để di chuyển</div><h2 id="setTitle">Cài đặt <small style="font-size:11px;font-weight:600;color:var(--muted)" id="nhiBuildVersion">V152</small></h2><button type="button" class="iconbtn sm" data-close aria-label="Đóng" data-ic="x"></button></div>
+    <div class="sheethead" id="nhiSettingsDragHeader"><div id="nhiSettingsDragHandle" tabindex="0" role="button" aria-label="Di chuyển cửa sổ Cài đặt bằng cách kéo hoặc dùng phím mũi tên"><span aria-hidden="true">✥</span> Kéo để di chuyển</div><h2 id="setTitle">Cài đặt <small style="font-size:11px;font-weight:600;color:var(--muted)" id="nhiBuildVersion">V153</small></h2><button type="button" class="iconbtn sm" data-close aria-label="Đóng" data-ic="x"></button></div>
 
 <script id="nhi-settings-drag-v126">
 (function(){
@@ -4611,6 +4611,10 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
             'calc(var(--nhi-effective-ko,36px) * '+fitRatio+' * var(--nhi-card-font-multiplier,1))','important');
         }
       }
+      if(lang==='ko'){
+        var originalKoSize=elm.style.getPropertyValue('font-size')||'var(--nhi-effective-ko,36px)';
+        elm.style.setProperty('font-size','min('+originalKoSize+',var(--nhi-phone-ko-limit,100px))','important');
+      }
       return elm;
     }
     function toggleHl(id,i){
@@ -7403,7 +7407,7 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
     function clearPhoneStudyCompact(){
       var root=document.documentElement,body=document.body;
       body.classList.remove('nhi-ai-study-compact-v150','nhi-ai-study-chrome-hidden-v150','nhi-ai-study-english-hidden-v150');
-      ['--nhi-phone-action-scale','--nhi-phone-vi-scale','--nhi-phone-vi-limit','--nhi-phone-study-height','--nhi-phone-ai-card-height'].forEach(function(p){root.style.removeProperty(p);});
+      ['--nhi-phone-action-scale','--nhi-phone-vi-scale','--nhi-phone-vi-limit','--nhi-phone-ko-limit','--nhi-phone-study-height','--nhi-phone-ai-card-height'].forEach(function(p){root.style.removeProperty(p);});
       if(window.NHI_ACTION_LAYOUT_V122)window.NHI_ACTION_LAYOUT_V122.refresh();
     }
     function fitPhoneStudy(){
@@ -7429,8 +7433,9 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
       body.classList.toggle('nhi-ai-study-english-hidden-v150',hideEnglish);
       var scale=compact?Math.max(.62,1-.38*intensity):1;
       setPhoneVar(root,'--nhi-phone-action-scale',scale.toFixed(3));
-      setPhoneVar(root,'--nhi-phone-vi-scale',compact?Math.max(.58,1-.42*intensity).toFixed(3):'1');
-      setPhoneVar(root,'--nhi-phone-vi-limit',compact?Math.round(18-4*intensity)+'px':'100px');
+      setPhoneVar(root,'--nhi-phone-vi-scale',compact?Math.max(.76,1-.24*intensity).toFixed(3):'1');
+      setPhoneVar(root,'--nhi-phone-vi-limit',compact?Math.round(20-3*intensity)+'px':'100px');
+      setPhoneVar(root,'--nhi-phone-ko-limit',compact?Math.round(24-6*intensity)+'px':'100px');
       if(prevCompact!==compact||prevChrome!==hideChrome)app.scrollTop=0;
       // Layout must be measured AFTER changing header visibility.
       var appTop=Math.max(top,app.getBoundingClientRect().top);
@@ -8300,7 +8305,21 @@ html body #planBox .pcard:has(.pfront.nhi-with-image)>.prate.nhi-rating-v3{
     root.querySelectorAll('.pcard').forEach(function (card) {
       var front = card.querySelector('.pfront');
       if (!front) return;
-      if (front.classList.contains('nhi-with-image')) {
+      if (front.classList.contains('nhi-with-image')&&window.matchMedia('(max-width:700px), (max-width:900px) and (pointer:coarse)').matches) {
+        // The image sits below the primary text on phones; a desktop left-lane
+        // calculation would move the text and the toolbar off the viewport.
+        front.style.removeProperty('grid-template-columns');
+        front.querySelectorAll(':scope>.nhi-ko-line,:scope>.vi-under,:scope>.hanja,:scope>.nhi-card-details,.nhi-english-v5').forEach(function(item){item.style.removeProperty('translate');});
+        card.querySelector(':scope>.card-top')?.style.removeProperty('translate');
+        card.style.removeProperty('--nhi-rate-left');card.style.removeProperty('--nhi-rate-width');
+        var phoneRate=card.querySelector(':scope>.prate');
+        if(phoneRate){
+          phoneRate.style.setProperty('width','calc(100% - 24px)','important');
+          phoneRate.style.setProperty('max-width','100%','important');
+          phoneRate.style.setProperty('margin-left','auto','important');
+          phoneRate.style.setProperty('margin-right','auto','important');
+        }
+      } else if (front.classList.contains('nhi-with-image')) {
         // Align ALL bilingual content to the actual visible space from the
         // card's LEFT edge to the actual picture LEFT edge, not to a stale grid
         // track. This matters when the picture is resized or dragged.
@@ -8400,7 +8419,7 @@ html body #planBox .pcard:has(.pfront.nhi-with-image)>.prate.nhi-rating-v3{
       var expanded=front.querySelector('.nhi-english-v5.nhi-compare-expanded');
       var compareReady=!!expanded&&!!expanded.querySelector('.nhi-en-choice');
       front.classList.toggle('nhi-comparison-open',compareReady);
-      if(compareReady&&front.classList.contains('nhi-with-image')){
+      if(compareReady&&front.classList.contains('nhi-with-image')&&!window.matchMedia('(max-width:700px), (max-width:900px) and (pointer:coarse)').matches){
         var rateForClearance=card.querySelector(':scope>.prate');
         if(observedComparison!==expanded){
           if(comparisonResizeObserver)comparisonResizeObserver.disconnect();
@@ -9782,7 +9801,7 @@ html body #planBox .pcard .answer.ko,html body #cAnswer.ko{
  function fit(el){
   restore(el);
   if(!visible(el)||!el.textContent.trim())return;
-  if(el.matches('#planBox .pcard .prompt')&&document.body.classList.contains('ai-open')&&document.body.classList.contains('nhi-ai-study-compact-v150')&&!document.body.classList.contains('dictionary-open'))return;
+  if(el.matches('#planBox .pcard :is(.prompt,.answer.ko)')&&document.body.classList.contains('ai-open')&&document.body.classList.contains('nhi-ai-study-compact-v150')&&!document.body.classList.contains('dictionary-open'))return;
   const card=el.closest('.pcard,#cardWrap,.fcard,.card');if(!card)return;
   const stage=el.closest('.pfront,.stage')||el.parentElement;
   const cs=getComputedStyle(el),cardStyle=getComputedStyle(card);
@@ -10130,6 +10149,78 @@ html body #planBox .pcard>.pdel.nhi-card-corner-trash svg{pointer-events:none!im
  html body.ai-open.nhi-in-study:not(.dictionary-open) #planBox .pcard>.prate{flex-shrink:0!important}
  html body #aiPanel .aihead{flex-wrap:nowrap!important;gap:5px!important}
  html body #aiPanel .aihead h2{white-space:normal!important;overflow-wrap:anywhere!important}
+}
+</style>
+<style id="nhi-korean-and-phone-photo-v153">
+/* Hangul wraps between words (including attached particles), not syllables. */
+html body #planBox .pcard .pfront .nhi-ko-line>.answer.ko,
+html body #planBox .pcard .pfront .answer.ko,
+html body #planBox .pcard .pfront .answer.ko .ph,
+html body #cAnswer.ko{
+ word-break:keep-all!important;overflow-wrap:break-word!important;white-space:normal!important;text-wrap:wrap!important;
+}
+html body #planBox .pcard .pfront .answer.ko .ph{display:inline!important;white-space:normal!important}
+@media(max-width:700px),(max-width:900px) and (pointer:coarse){
+ /* One normal-flow column is the mobile photo layout. Saved desktop offsets
+    remain stored but do not push content out of the visible mobile card. */
+ html body #planBox .pcard[data-nhi-shared-height="v136"]>.pfront.nhi-with-image{
+  display:flex!important;flex-direction:column!important;flex-wrap:nowrap!important;
+  align-items:center!important;justify-content:flex-start!important;align-content:start!important;
+  width:100%!important;min-width:0!important;max-width:100%!important;
+  padding:12px 8px 8px!important;gap:8px!important;
+  grid-template-columns:none!important;grid-template-rows:none!important;
+  overflow-y:auto!important;overflow-x:hidden!important;box-sizing:border-box!important;
+ }
+ html body #planBox .pcard[data-nhi-shared-height="v136"]>.pfront.nhi-with-image>:is(.nhi-ko-line,.vi-under,.hanja,.nhi-card-details,.nhi-card-note,.nhi-english-v5,.card-illustration){
+  position:relative!important;inset:auto!important;transform:none!important;translate:none!important;scale:none!important;
+  flex:0 0 auto!important;align-self:center!important;max-width:100%!important;min-width:0!important;
+  margin:0!important;box-sizing:border-box!important;
+ }
+ html body #planBox .pcard[data-nhi-shared-height="v136"]>.pfront.nhi-with-image :is([data-nhi-movable],.nhi-english-v5,.nhi-card-details){
+  --nhi-move-x:0px!important;--nhi-move-y:0px!important;--nhi-en-offset-y:0px!important;--nhi-safe-margin:0px!important;
+  transform:none!important;translate:none!important;scale:none!important;inset:auto!important;margin-block:0!important;
+ }
+ html body #planBox .pcard[data-nhi-shared-height="v136"]>.pfront.nhi-with-image>.nhi-ko-line{
+  display:flex!important;flex-wrap:wrap!important;justify-content:center!important;align-items:center!important;
+  width:100%!important;padding:0!important;min-height:0!important;gap:4px!important;order:0!important;
+ }
+ html body #planBox .pcard[data-nhi-shared-height="v136"]>.pfront.nhi-with-image>.nhi-ko-line>.answer.ko{
+  position:static!important;width:100%!important;max-width:100%!important;min-width:0!important;
+  text-align:center!important;word-break:keep-all!important;overflow-wrap:break-word!important;height:auto!important;
+ }
+ html body #planBox .pcard[data-nhi-shared-height="v136"]>.pfront.nhi-with-image>.nhi-ko-line>.nhi-card-dictionaries{
+  position:static!important;transform:none!important;translate:none!important;flex:0 0 auto!important;
+ }
+ html body #planBox .pcard[data-nhi-shared-height="v136"]>.pfront.nhi-with-image>.hanja{order:1!important}
+ html body #planBox .pcard[data-nhi-shared-height="v136"]>.pfront.nhi-with-image>.vi-under{order:2!important;width:100%!important;text-align:center!important;height:auto!important;line-height:1.35!important}
+ html body #planBox .pcard[data-nhi-shared-height="v136"]>.pfront.nhi-with-image>.card-illustration{
+  order:3!important;width:min(68%,var(--nhi-image-width,180px),180px)!important;height:auto!important;max-height:none!important;
+  --nhi-image-height:auto!important;--nhi-frame-x:0px!important;--nhi-frame-y:0px!important;
+ }
+ html body #planBox .pcard[data-nhi-shared-height="v136"]>.pfront.nhi-with-image .card-illustration>.nhi-image-stage{
+  height:auto!important;min-height:0!important;max-height:clamp(80px,21dvh,160px)!important;overflow:visible!important;
+ }
+ html body #planBox .pcard[data-nhi-shared-height="v136"]>.pfront.nhi-with-image .card-illustration img{
+  display:block!important;width:100%!important;height:auto!important;max-height:clamp(80px,21dvh,160px)!important;
+  object-fit:contain!important;transform:none!important;translate:none!important;position:static!important;
+ }
+ html body #planBox .pcard[data-nhi-shared-height="v136"]>.pfront.nhi-with-image>:is(.nhi-card-details,.nhi-card-note,.nhi-english-v5){order:4!important}
+ html body #planBox .pcard[data-nhi-shared-height="v136"]:has(>.pfront.nhi-with-image)>.card-top{translate:none!important;transform:none!important}
+ html body #planBox .pcard[data-nhi-shared-height="v136"]:has(>.pfront.nhi-with-image)>.prate{align-self:center!important;max-width:100%!important}
+ html body.ai-open.nhi-in-study.nhi-ai-study-compact-v150:not(.dictionary-open) #planBox .pcard[data-nhi-shared-height="v136"]>.pfront{
+  padding-top:12px!important;padding-bottom:5px!important;gap:5px!important;
+ }
+ html body.ai-open.nhi-in-study.nhi-ai-study-compact-v150:not(.dictionary-open) #planBox .pcard .pfront .nhi-ko-line{
+  min-height:0!important;padding-block:0!important;margin-top:0!important;gap:2px!important;
+ }
+ html body.ai-open.nhi-in-study.nhi-ai-study-compact-v150:not(.dictionary-open) #planBox .pcard .pfront .nhi-ko-line>.answer.ko{
+  line-height:1.3!important;word-break:keep-all!important;overflow-wrap:break-word!important;
+ }
+ html body.ai-open.nhi-in-study.nhi-ai-study-compact-v150:not(.dictionary-open) #planBox .pcard .pfront .vi-under{line-height:1.35!important}
+ html body.ai-open.nhi-in-study.nhi-ai-study-compact-v150:not(.dictionary-open) #planBox .pcard[data-nhi-shared-height="v136"]>.pfront.nhi-with-image>.card-illustration{width:min(52%,var(--nhi-image-width,130px),130px)!important}
+ html body.ai-open.nhi-in-study.nhi-ai-study-compact-v150:not(.dictionary-open) #planBox .pcard[data-nhi-shared-height="v136"]>.pfront.nhi-with-image .card-illustration :is(.nhi-image-stage,img){max-height:clamp(42px,calc(var(--nhi-phone-ai-card-height,200px)*.28),100px)!important}
+ /* High-specificity final hide rule: photo layout must not resurrect English. */
+ html body.ai-open.nhi-in-study.nhi-ai-study-english-hidden-v150:not(.dictionary-open) #planBox .pcard[data-nhi-shared-height="v136"]>.pfront .nhi-english-v5{display:none!important}
 }
 </style>
 </body></html>

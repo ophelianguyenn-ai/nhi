@@ -99,6 +99,16 @@ jobs:
                 await page.evaluate(()=>window.NLC_AI.open('hotkey'));
                 await page.waitForFunction(()=>document.body.classList.contains('ai-open')&&Math.abs(document.querySelector('#aiPanel').getBoundingClientRect().height-(window.visualViewport?.height||innerHeight)*.5)<4);
                 console.log('PASS drag-to-dismiss and reopen at half height');
+                await page.evaluate(()=>window.NLC_AI.close());
+                await page.keyboard.press('Enter');
+                await page.waitForSelector('#planBox .pcard .answer.ko',{visible:true});
+                await page.waitForFunction(()=>getComputedStyle(document.querySelector('#planBox .answer.ko')).wordBreak==='keep-all');
+                await page.evaluate(()=>window.NLC_AI.open('hotkey'));
+                await page.focus('#nhiPhoneAIGrip');await page.keyboard.press('End');
+                await page.waitForFunction(()=>document.body.classList.contains('nhi-ai-study-compact-v150'));
+                const typography=await page.evaluate(()=>{const ko=document.querySelector('#planBox .answer.ko'),vi=document.querySelector('#planBox .vi-under'),stage=document.querySelector('#planBox .pfront');return {ko:parseFloat(getComputedStyle(ko).fontSize),vi:parseFloat(getComputedStyle(vi).fontSize),padding:parseFloat(getComputedStyle(stage).paddingTop),wrap:getComputedStyle(ko).wordBreak};});
+                if(typography.ko>24||typography.vi<12||typography.padding<10||typography.wrap!=='keep-all')throw Error('Compact Korean layout: '+JSON.stringify(typography));
+                console.log('PASS Korean word wrapping and compact type',JSON.stringify(typography));
 
 
                 await page.screenshot({path:'/tmp/nhi-ai-drag-'+width+'.png'});

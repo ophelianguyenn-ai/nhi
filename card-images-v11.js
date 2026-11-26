@@ -35,7 +35,7 @@ function figure(it,value,onResize){
     // image within a fixed, clipped stage.
     f.style.setProperty('--nhi-frame-y',Math.round(offsetY)+'px');
     f.style.setProperty('--nhi-image-y','0px');
-    var onDesktop=window.matchMedia&&window.matchMedia('(min-width:621px)').matches;
+    var onDesktop=window.matchMedia&&!window.matchMedia('(max-width:700px), (max-width:900px) and (pointer:coarse)').matches;
     if(parent){
       parent.style.setProperty('--nhi-photo-shift-x',onDesktop?Math.round(offsetX)+'px':'0px');
       parent.style.setProperty('--nhi-image-width',Math.round(width)+'px');
@@ -65,9 +65,9 @@ function figure(it,value,onResize){
     }
     // Inline-important wins over old Y-only CSS. Positive X moves the
     // figure directly, negative X moves its grid column, avoiding double X.
-    var visualX=onDesktop?Math.max(0,offsetX):offsetX;
+    var visualX=onDesktop?Math.max(0,offsetX):0;
     f.style.setProperty('transform',
-      'translate3d('+Math.round(visualX)+'px,'+Math.round(offsetY)+'px,0)','important');
+      'translate3d('+Math.round(visualX)+'px,'+Math.round(onDesktop?offsetY:0)+'px,0)','important');
   }
   function commit(){
     onResize(Object.assign({},v,{width:Math.round(width),height:Math.round(height),
