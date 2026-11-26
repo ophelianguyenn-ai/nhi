@@ -39983,6 +39983,510 @@
           1
         ]
       ]
+    },
+    {
+      "id": "daily-2026-11-26-nhi-extracted",
+      "date": "2026-11-26",
+      "plan": "2026-11-26",
+      "title": "Bài ngày 26.11 · Thi công và khảo sát mua nguyên liệu",
+      "items": [
+        [
+          "nhi20261126_auto_000",
+          "s",
+          "Thi công",
+          "Đội thi công tiếp tục mài và vệ sinh mối hàn, đồng thời tiến hành sơn kết cấu kim loại và bồn.",
+          "시공팀은 용접부 연마 및 청소를 이어가면서 금속 구조물과 탱크의 도장 작업을 진행하였습니다.",
+          1
+        ],
+        [
+          "nhi20261126_auto_001",
+          "s",
+          "Thi công",
+          "Công tác hoàn thiện cửa người và lắp đặt đường ống công nghệ cũng được thực hiện song song.",
+          "맨홀 마무리 작업과 공정 배관 설치도 병행하였습니다.",
+          1
+        ],
+        [
+          "nhi20261126_auto_002",
+          "s",
+          "Thi công",
+          "Đối với sàn thao tác trong nhà, tiếp tục lắp khung đỡ và tấm thép mặt sàn, căn chỉnh vị trí và hàn các mối liên kết.",
+          "실내 작업용 발판은 지지 프레임과 바닥용 강판을 설치하고 위치를 조정하며 연결 부위의 용접 작업을 지속하였습니다.",
+          1
+        ],
+        [
+          "nhi20261126_auto_003",
+          "s",
+          "Thi công",
+          "Tại xưởng chế tạo, tiếp tục chế tạo và gia công các bồn khác.",
+          "제작 작업장에서는 기타 탱크의 제작 및 가공 작업을 이어갔습니다.",
+          1
+        ],
+        [
+          "nhi20261126_auto_004",
+          "s",
+          "Mua hàng",
+          "Để xem xét mua nguyên liệu cho nhà máy, đã khảo sát giá bán công khai trực tuyến, quy đổi giá theo từng quy cách đóng gói thành đơn giá mỗi kg để so sánh.",
+          "공장 원자재 구매 검토를 위해 온라인 공개 판매가를 조사하고, 포장 단위별 가격을 kg당 단가로 환산하여 비교하였다.",
+          1
+        ],
+        [
+          "nhi20261126_auto_005",
+          "s",
+          "Mua hàng",
+          "Giá hiển thị trực tuyến là cơ sở tham khảo; tồn kho, thuế VAT, phí vận chuyển và điều kiện giao dịch thực tế cần được xác nhận riêng.",
+          "온라인 표시 가격 기준이며, 재고·부가세(VAT)·운송비 및 실제 거래 조건은 별도 확인이 필요하다.",
+          1
+        ],
+        [
+          "nhi20261126_auto_006",
+          "s",
+          "Mua hàng",
+          "Đây là số tiền dự kiến tính bằng cách áp dụng đơn giá công khai, chưa phản ánh chiết khấu mua số lượng lớn và chi phí bổ sung.",
+          "공개 단가를 단순 적용한 예상 금액으로, 대량 할인 및 추가 비용은 반영하지 않음.",
+          1
+        ],
+        [
+          "nhi20261126_auto_007",
+          "s",
+          "Mua hàng",
+          "Khoảng giá này là mục tiêu đàm phán nội bộ, không phải giá bán buôn đã được xác nhận trên thị trường.",
+          "해당 범위는 시장에서 확인된 도매가가 아닌 내부 협상 목표이다.",
+          1
+        ],
+        [
+          "nhi20261126_auto_008",
+          "s",
+          "Mua hàng",
+          "Thu thập báo giá giao đến nhà máy từ các nhà cung cấp và so sánh đơn giá mua thực tế bao gồm VAT và phí vận chuyển.",
+          "공장 도착 기준 견적을 여러 업체에서 확보하고, VAT 및 운송비를 포함한 실질 구매 단가를 비교한다.",
+          1
+        ],
+        [
+          "nhi20261126_auto_009",
+          "s",
+          "Mua hàng",
+          "Kiểm tra dạng khan/dạng monohydrat, độ tinh khiết, cấp chất lượng theo mục đích sử dụng, xuất xứ, COA, SDS, thời hạn giao hàng và tồn kho.",
+          "무수물/일수화물, 순도, 용도별 등급, 원산지, COA(시험성적서), SDS(안전보건자료), 납기 및 재고를 확인한다.",
+          1
+        ],
+        [
+          "nhi20261126_auto_010",
+          "s",
+          "Mua hàng",
+          "Đề xuất yêu cầu báo giá chính thức theo cùng quy cách, sau đó so sánh tổng hợp chất lượng và điều kiện giao hàng rồi chọn nhà cung cấp.",
+          "동일 규격으로 정식 견적을 요청하고, 품질 및 납품 조건을 종합적으로 비교한 후 구매업체를 선정할 것을 제안한다.",
+          1
+        ],
+        [
+          "nhi20261126_auto_011",
+          "s",
+          "Mua hàng",
+          "Báo cáo được lập dựa trên thông tin trang công khai; tồn kho thực tế, độ tin cậy giao dịch, chất lượng sản phẩm và báo giá xác định chưa được kiểm chứng độc lập.",
+          "공개 페이지 정보 기반으로 작성하였으며, 업체의 실제 재고, 거래 신뢰도, 제품 품질 및 확정 견적은 독립적으로 검증하지 않았다.",
+          1
+        ],
+        [
+          "nhi20261126_auto_012",
+          "s",
+          "Mua hàng",
+          "Có thể kiểm tra thông tin bán hàng tại liên kết nguồn trong bảng.",
+          "표의 출처 링크에서 판매 정보를 확인할 수 있다.",
+          1
+        ],
+        [
+          "nhi20261126_auto_013",
+          "s",
+          "Mua hàng",
+          "Trước đây, ngay cả khi giá axit sulfuric cao thì cũng chưa từng tăng đến mức như vậy.",
+          "예전에는 황산(H₂SO₄) 가격이 비싸도 그 정도까지 오른 적은 한 번도 없었습니다.",
+          1
+        ],
+        [
+          "nhi20261126_auto_014",
+          "w",
+          "Thi công",
+          "mài mối hàn",
+          "용접부 연마",
+          1
+        ],
+        [
+          "nhi20261126_auto_015",
+          "w",
+          "Thi công",
+          "kết cấu kim loại",
+          "금속 구조물",
+          1
+        ],
+        [
+          "nhi20261126_auto_016",
+          "w",
+          "Thi công",
+          "công tác sơn",
+          "도장 작업",
+          1
+        ],
+        [
+          "nhi20261126_auto_017",
+          "w",
+          "Thi công",
+          "công tác hoàn thiện",
+          "마무리 작업",
+          1
+        ],
+        [
+          "nhi20261126_auto_018",
+          "w",
+          "Thi công",
+          "đường ống công nghệ",
+          "공정 배관",
+          1
+        ],
+        [
+          "nhi20261126_auto_019",
+          "w",
+          "Thi công",
+          "tiến hành song song",
+          "병행하다",
+          1
+        ],
+        [
+          "nhi20261126_auto_020",
+          "w",
+          "Thi công",
+          "sàn thao tác trong nhà",
+          "실내 작업용 발판",
+          1
+        ],
+        [
+          "nhi20261126_auto_021",
+          "w",
+          "Thi công",
+          "khung đỡ",
+          "지지 프레임",
+          1
+        ],
+        [
+          "nhi20261126_auto_022",
+          "w",
+          "Thi công",
+          "tấm thép mặt sàn",
+          "바닥용 강판",
+          1
+        ],
+        [
+          "nhi20261126_auto_023",
+          "w",
+          "Thi công",
+          "căn chỉnh vị trí",
+          "위치를 조정하다",
+          1
+        ],
+        [
+          "nhi20261126_auto_024",
+          "w",
+          "Thi công",
+          "mối liên kết",
+          "연결 부위",
+          1
+        ],
+        [
+          "nhi20261126_auto_025",
+          "w",
+          "Thi công",
+          "xưởng chế tạo",
+          "제작 작업장",
+          1
+        ],
+        [
+          "nhi20261126_auto_026",
+          "w",
+          "Thi công",
+          "chế tạo và gia công",
+          "제작 및 가공",
+          1
+        ],
+        [
+          "nhi20261126_auto_027",
+          "w",
+          "Mua hàng",
+          "khảo sát thị trường nguyên liệu",
+          "원자재 시장조사",
+          1
+        ],
+        [
+          "nhi20261126_auto_028",
+          "w",
+          "Mua hàng",
+          "giá bán công khai",
+          "공개 판매가",
+          1
+        ],
+        [
+          "nhi20261126_auto_029",
+          "w",
+          "Mua hàng",
+          "quy cách đóng gói",
+          "포장 단위",
+          1
+        ],
+        [
+          "nhi20261126_auto_030",
+          "w",
+          "Mua hàng",
+          "quy đổi đơn giá",
+          "단가로 환산하다",
+          1
+        ],
+        [
+          "nhi20261126_auto_031",
+          "w",
+          "Mua hàng",
+          "quy đổi",
+          "환산하다",
+          1
+        ],
+        [
+          "nhi20261126_auto_032",
+          "w",
+          "Mua hàng",
+          "đóng gói nhỏ",
+          "소포장",
+          1
+        ],
+        [
+          "nhi20261126_auto_033",
+          "w",
+          "Mua hàng",
+          "độ tinh khiết cao",
+          "고순도",
+          1
+        ],
+        [
+          "nhi20261126_auto_034",
+          "w",
+          "Mua hàng",
+          "quy cách sản phẩm",
+          "제품 규격",
+          1
+        ],
+        [
+          "nhi20261126_auto_035",
+          "w",
+          "Mua hàng",
+          "chi phí vận chuyển",
+          "운송비",
+          1
+        ],
+        [
+          "nhi20261126_auto_036",
+          "w",
+          "Mua hàng",
+          "điều kiện giao dịch thực tế",
+          "실제 거래 조건",
+          1
+        ],
+        [
+          "nhi20261126_auto_037",
+          "w",
+          "Mua hàng",
+          "dạng monohydrat",
+          "일수화물",
+          1
+        ],
+        [
+          "nhi20261126_auto_038",
+          "w",
+          "Mua hàng",
+          "dạng khan",
+          "무수물",
+          1
+        ],
+        [
+          "nhi20261126_auto_039",
+          "w",
+          "Mua hàng",
+          "ghi rõ trong tài liệu",
+          "기재되다",
+          1
+        ],
+        [
+          "nhi20261126_auto_040",
+          "w",
+          "Mua hàng",
+          "báo giá mua số lượng lớn",
+          "대량 구매 견적",
+          1
+        ],
+        [
+          "nhi20261126_auto_041",
+          "w",
+          "Mua hàng",
+          "chiết khấu số lượng lớn",
+          "대량 할인",
+          1
+        ],
+        [
+          "nhi20261126_auto_042",
+          "w",
+          "Mua hàng",
+          "phản ánh chi phí bổ sung",
+          "추가 비용을 반영하다",
+          1
+        ],
+        [
+          "nhi20261126_auto_043",
+          "w",
+          "Mua hàng",
+          "giá bán buôn",
+          "도매가",
+          1
+        ],
+        [
+          "nhi20261126_auto_044",
+          "w",
+          "Mua hàng",
+          "mục tiêu đàm phán",
+          "협상 목표",
+          1
+        ],
+        [
+          "nhi20261126_auto_045",
+          "w",
+          "Mua hàng",
+          "đơn giá mua thực tế",
+          "실질 구매 단가",
+          1
+        ],
+        [
+          "nhi20261126_auto_046",
+          "w",
+          "Mua hàng",
+          "thu thập báo giá",
+          "견적을 확보하다",
+          1
+        ],
+        [
+          "nhi20261126_auto_047",
+          "w",
+          "Mua hàng",
+          "độ tinh khiết",
+          "순도",
+          1
+        ],
+        [
+          "nhi20261126_auto_048",
+          "w",
+          "Mua hàng",
+          "cấp chất lượng theo mục đích sử dụng",
+          "용도별 등급",
+          1
+        ],
+        [
+          "nhi20261126_auto_049",
+          "w",
+          "Mua hàng",
+          "phiếu an toàn hóa chất",
+          "안전보건자료",
+          1
+        ],
+        [
+          "nhi20261126_auto_050",
+          "w",
+          "Mua hàng",
+          "cùng quy cách",
+          "동일 규격",
+          1
+        ],
+        [
+          "nhi20261126_auto_051",
+          "w",
+          "Mua hàng",
+          "báo giá chính thức",
+          "정식 견적",
+          1
+        ],
+        [
+          "nhi20261126_auto_052",
+          "w",
+          "Mua hàng",
+          "điều kiện giao hàng",
+          "납품 조건",
+          1
+        ],
+        [
+          "nhi20261126_auto_053",
+          "w",
+          "Mua hàng",
+          "so sánh tổng hợp",
+          "종합적으로 비교하다",
+          1
+        ],
+        [
+          "nhi20261126_auto_054",
+          "w",
+          "Mua hàng",
+          "lựa chọn nhà cung cấp",
+          "구매업체를 선정하다",
+          1
+        ],
+        [
+          "nhi20261126_auto_055",
+          "w",
+          "Mua hàng",
+          "độ tin cậy giao dịch",
+          "거래 신뢰도",
+          1
+        ],
+        [
+          "nhi20261126_auto_056",
+          "w",
+          "Mua hàng",
+          "báo giá xác định",
+          "확정 견적",
+          1
+        ],
+        [
+          "nhi20261126_auto_057",
+          "w",
+          "Mua hàng",
+          "kiểm chứng độc lập",
+          "독립적으로 검증하다",
+          1
+        ],
+        [
+          "nhi20261126_auto_058",
+          "w",
+          "Ngữ pháp",
+          "vừa tiếp tục ... vừa ...",
+          "-을/를 이어가면서",
+          1
+        ],
+        [
+          "nhi20261126_auto_059",
+          "w",
+          "Ngữ pháp",
+          "theo từng đơn vị",
+          "-별",
+          1
+        ],
+        [
+          "nhi20261126_auto_060",
+          "w",
+          "Ngữ pháp",
+          "dựa trên thông tin ...",
+          "-정보 기반으로",
+          1
+        ],
+        [
+          "nhi20261126_auto_061",
+          "w",
+          "Ngữ pháp",
+          "đề xuất thực hiện ...",
+          "-ㄹ 것을 제안하다",
+          1
+        ]
+      ]
     }
   ]
 }
