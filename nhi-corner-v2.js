@@ -296,10 +296,13 @@ function nav(){
   });
   $('#tab-plan').textContent='🏠 Trang Hôm nay / Lịch học';
  }
- const history=document.createElement('button');history.type='button';history.className='iconbtn sm nhi-v2-chat-history';
- history.textContent='☷';history.title='Lịch sử hội thoại có tên';history.setAttribute('aria-label','Lịch sử hội thoại');
- history.addEventListener('click',()=>{$('#aiClose')?.click();route('threads')});
- $('#aiPanel .aihead')?.insertBefore(history,$('#aiCfgBtn'));
+ // Keep saved conversations accessible from the main menu, not the chat header.
+ if(menu){
+  const history=document.createElement('button');history.type='button';history.id='nhiChatHistoryMenuV152';
+  history.textContent='Lịch sử hội thoại AI';
+  history.addEventListener('click',()=>{if(!menu.hidden)$('#menuBtn')?.click();$('#aiClose')?.click();route('threads');});
+  menu.insertBefore(history,menu.querySelector('hr'));
+ }
  setActiveNav(null);
 }
 

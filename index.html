@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="vi" data-nhi-build="151">
+<html lang="vi" data-nhi-build="152">
 <head>
 <script id="nhi-explicit-calendar-route-v143">
 (function(){
@@ -1525,7 +1525,7 @@ html body #planBox .sdone .pstatus{
 <div class="sheet" id="setSheet" hidden>
   <div class="scrim" data-close></div>
   <div class="sheetbox" role="dialog" aria-modal="true" aria-labelledby="setTitle">
-    <div class="sheethead" id="nhiSettingsDragHeader"><div id="nhiSettingsDragHandle" tabindex="0" role="button" aria-label="Di chuyển cửa sổ Cài đặt bằng cách kéo hoặc dùng phím mũi tên"><span aria-hidden="true">✥</span> Kéo để di chuyển</div><h2 id="setTitle">Cài đặt <small style="font-size:11px;font-weight:600;color:var(--muted)" id="nhiBuildVersion">V151</small></h2><button type="button" class="iconbtn sm" data-close aria-label="Đóng" data-ic="x"></button></div>
+    <div class="sheethead" id="nhiSettingsDragHeader"><div id="nhiSettingsDragHandle" tabindex="0" role="button" aria-label="Di chuyển cửa sổ Cài đặt bằng cách kéo hoặc dùng phím mũi tên"><span aria-hidden="true">✥</span> Kéo để di chuyển</div><h2 id="setTitle">Cài đặt <small style="font-size:11px;font-weight:600;color:var(--muted)" id="nhiBuildVersion">V152</small></h2><button type="button" class="iconbtn sm" data-close aria-label="Đóng" data-ic="x"></button></div>
 
 <script id="nhi-settings-drag-v126">
 (function(){
@@ -1936,7 +1936,7 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
 
 <!-- AI side window -->
 <aside class="aipanel" id="aiPanel" aria-label="Hỏi AI" aria-hidden="true">
-  <div id="nhiPhoneAIGrip" role="separator" aria-orientation="horizontal" aria-label="Kéo lên xuống để đổi chiều cao chat AI" aria-valuemin="30" aria-valuemax="75" aria-valuenow="50" tabindex="0" title="Kéo lên xuống để đổi chiều cao chat AI"><span aria-hidden="true"></span></div>
+  <div id="nhiPhoneAIGrip" role="separator" aria-orientation="horizontal" aria-label="Kéo lên xuống để đổi chiều cao chat AI; kéo xuống đáy để đóng" aria-valuemin="8" aria-valuemax="75" aria-valuenow="50" tabindex="0" title="Kéo xuống đáy để đóng Chatbox AI"><span aria-hidden="true"></span></div>
   <div class="ai-resize-handle" id="aiResizeHandle" role="separator" aria-label="Kéo thay đổi độ rộng khung chat; dùng phím trái và phải để điều chỉnh" aria-orientation="vertical" tabindex="0" title="Giữ và kéo sang trái hoặc phải để thay đổi độ rộng"><span aria-hidden="true">⋮⋮</span></div>
   <div class="aihead">
     <button type="button" class="iconbtn sm nhi-ai-close-v5" id="aiClose" aria-label="Đóng chat AI" title="Đóng chat AI" data-ic="x"></button>
@@ -7392,7 +7392,7 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
     }
     var phoneAIRatio=.5,phoneAIDrag=null,phoneStudyFrame=0;
     function phoneAIGeometry(width,height,left,top,ratio){
-      var r=Math.min(.75,Math.max(.30,Number.isFinite(ratio)?ratio:.5));
+      var r=Math.min(.75,Math.max(.08,Number.isFinite(ratio)?ratio:.5));
       var h=Math.max(1,Math.round(height*r));
       return {width:Math.max(1,Math.floor(width)),height:h,left:Math.round(left),top:Math.round(top+height-h),ratio:r};
     }
@@ -7475,7 +7475,7 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
     if(window.visualViewport){window.visualViewport.addEventListener('resize',fitPhoneAI);window.visualViewport.addEventListener('scroll',fitPhoneAI);}
     window.addEventListener('resize',fitPhoneAI,{passive:true});
     function changePhoneAIHeight(ratio){
-      phoneAIRatio=Math.min(.75,Math.max(.30,ratio));
+      phoneAIRatio=Math.min(.75,Math.max(.08,ratio));
       fitPhoneAI();
     }
     (function(){
@@ -7492,7 +7492,15 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
         if(!phoneAIDrag||e.pointerId!==phoneAIDrag.id)return;
         e.preventDefault();
         var height=window.visualViewport?.height||window.innerHeight;
-        changePhoneAIHeight(phoneAIDrag.ratio+(phoneAIDrag.y-e.clientY)/Math.max(1,height));
+        var next=phoneAIDrag.ratio+(phoneAIDrag.y-e.clientY)/Math.max(1,height);
+        // A downward pull to the last 8% (or 64px) dismisses the sheet.
+        // Release pointer capture before hiding the grip to avoid a stuck drag.
+        if(e.clientY>phoneAIDrag.y&&next<=Math.max(.08,64/Math.max(1,height))){
+          phoneAIDrag=null;
+          if(grip.hasPointerCapture(e.pointerId))grip.releasePointerCapture(e.pointerId);
+          close();return;
+        }
+        changePhoneAIHeight(next);
       });
       function end(e){
         if(!phoneAIDrag||e.pointerId!==phoneAIDrag.id)return;
@@ -7503,7 +7511,9 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
       grip.addEventListener('keydown',function(e){
         if(!['ArrowUp','ArrowDown','Home','End'].includes(e.key))return;
         e.preventDefault();e.stopImmediatePropagation();
-        changePhoneAIHeight(e.key==='Home'?.3:e.key==='End'?.75:phoneAIRatio+(e.key==='ArrowUp'?.05:-.05));
+        var next=e.key==='Home'?.3:e.key==='End'?.75:phoneAIRatio+(e.key==='ArrowUp'?.05:-.05);
+        if(e.key==='ArrowDown'&&next<=.08){close();return;}
+        changePhoneAIHeight(next);
       });
       grip.addEventListener('dblclick',function(e){e.preventDefault();changePhoneAIHeight(.5);});
       var plan=$('planBox');
@@ -7541,6 +7551,7 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
         phoneAIDrag=null;document.body.classList.remove('nhi-phone-ai-dragging');
         resetPhoneAI();commit();
         clearPhoneStudyCompact();
+        document.documentElement.style.removeProperty('--nhi-phone-ai-reserve');
         var app=document.querySelector('.app');if(app)app.scrollTop=0;
       }else if(window.NHI_WINDOW_FX&&document.body.classList.contains('ai-open'))window.NHI_WINDOW_FX.close($('aiPanel'),'ai',commit);
       else commit();
@@ -7850,7 +7861,7 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
 <script src="nhi-card-controls-v8.js?v=20261124-v136-shared-height"></script>
 <script src="nhi-kitten-meow-v1.js?v=20261120-user-meow"></script>
 <script src="nhi-card-no-overlap-v1.js?v=20261115-safe-v1"></script>
-<script src="nhi-corner-v2.js?v=20261125-v141-unified-settings"></script>
+<script src="nhi-corner-v2.js?v=20261126-v152"></script>
 <!-- NHI PATCH 22-11: dán nguyên khối này NGAY TRƯỚC </body> trong index.html -->
 <style id="nhi-patch-compact-v2">
 /* 1. Ảnh gần nội dung hơn, không phá layout một cột ở màn hình hẹp */

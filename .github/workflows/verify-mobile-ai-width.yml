@@ -89,6 +89,17 @@ jobs:
                 await page.select('#aiFontSize','20');
                 if(await page.evaluate(()=>document.documentElement.style.getPropertyValue('--nhi-ai-font-size'))!=='20px')throw Error('Chat font setting not applied');
                 console.log('PASS adaptive study controls, header, font and English visibility state');
+                if(await page.$('#aiPanel .nhi-v2-chat-history'))throw Error('Chat history icon still visible');
+                await page.$eval('#aiCfgBtn',b=>{if(!document.getElementById('aiSetup').hidden)b.click();});
+                const dismissGrip=await page.$('#nhiPhoneAIGrip'),dismissBox=await dismissGrip.boundingBox();
+                await page.mouse.move(dismissBox.x+dismissBox.width/2,dismissBox.y+dismissBox.height/2);
+                await page.mouse.down();await page.mouse.move(dismissBox.x+dismissBox.width/2,815,{steps:15});await page.mouse.up();
+                await page.waitForFunction(()=>!document.body.classList.contains('ai-open'));
+                if(await page.evaluate(()=>document.body.classList.contains('nhi-phone-ai-dragging')||document.body.classList.contains('nhi-ai-study-compact-v150')))throw Error('Dismiss left stale study state');
+                await page.evaluate(()=>window.NLC_AI.open('hotkey'));
+                await page.waitForFunction(()=>document.body.classList.contains('ai-open')&&Math.abs(document.querySelector('#aiPanel').getBoundingClientRect().height-(window.visualViewport?.height||innerHeight)*.5)<4);
+                console.log('PASS drag-to-dismiss and reopen at half height');
+
 
                 await page.screenshot({path:'/tmp/nhi-ai-drag-'+width+'.png'});
                 await page.$eval('#nhiPhoneAIGrip',el=>el.dispatchEvent(new MouseEvent('dblclick',{bubbles:true})));
