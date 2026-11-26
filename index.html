@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="vi" data-nhi-build="146.1">
+<html lang="vi" data-nhi-build="147">
 <head>
 <script id="nhi-explicit-calendar-route-v143">
 (function(){
@@ -1525,7 +1525,7 @@ html body #planBox .sdone .pstatus{
 <div class="sheet" id="setSheet" hidden>
   <div class="scrim" data-close></div>
   <div class="sheetbox" role="dialog" aria-modal="true" aria-labelledby="setTitle">
-    <div class="sheethead" id="nhiSettingsDragHeader"><div id="nhiSettingsDragHandle" tabindex="0" role="button" aria-label="Di chuyển cửa sổ Cài đặt bằng cách kéo hoặc dùng phím mũi tên"><span aria-hidden="true">✥</span> Kéo để di chuyển</div><h2 id="setTitle">Cài đặt <small style="font-size:11px;font-weight:600;color:var(--muted)" id="nhiBuildVersion">V146.1</small></h2><button type="button" class="iconbtn sm" data-close aria-label="Đóng" data-ic="x"></button></div>
+    <div class="sheethead" id="nhiSettingsDragHeader"><div id="nhiSettingsDragHandle" tabindex="0" role="button" aria-label="Di chuyển cửa sổ Cài đặt bằng cách kéo hoặc dùng phím mũi tên"><span aria-hidden="true">✥</span> Kéo để di chuyển</div><h2 id="setTitle">Cài đặt <small style="font-size:11px;font-weight:600;color:var(--muted)" id="nhiBuildVersion">V147</small></h2><button type="button" class="iconbtn sm" data-close aria-label="Đóng" data-ic="x"></button></div>
 
 <script id="nhi-settings-drag-v126">
 (function(){
@@ -1907,6 +1907,7 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
 
 <!-- AI side window -->
 <aside class="aipanel" id="aiPanel" aria-label="Hỏi AI" aria-hidden="true">
+  <div id="nhiPhoneAIGrip" role="separator" aria-orientation="horizontal" aria-label="Kéo lên xuống để đổi chiều cao chat AI" aria-valuemin="30" aria-valuemax="75" aria-valuenow="50" tabindex="0" title="Kéo lên xuống để đổi chiều cao chat AI"><span aria-hidden="true"></span></div>
   <div class="ai-resize-handle" id="aiResizeHandle" role="separator" aria-label="Kéo thay đổi độ rộng khung chat; dùng phím trái và phải để điều chỉnh" aria-orientation="vertical" tabindex="0" title="Giữ và kéo sang trái hoặc phải để thay đổi độ rộng"><span aria-hidden="true">⋮⋮</span></div>
   <div class="aihead">
     <button type="button" class="iconbtn sm nhi-ai-close-v5" id="aiClose" aria-label="Đóng chat AI" title="Đóng chat AI" data-ic="x"></button>
@@ -5949,15 +5950,15 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
       // CSS variables stay live when the settings select changes without a rerender.
       c.dataset.nhiSharedHeight='v136';
       c.dataset.nhiCardFace=s.flipped?'back':'front';
-      c.style.setProperty('min-height','var(--nhi-card-effective-height)','important');
-      c.style.setProperty('height',f.classList.contains('nhi-with-image')&&!s.editing&&!s.imagePicker?'var(--nhi-card-effective-height)':'auto','important');
-      c.style.setProperty('max-height','none','important');
+      c.style.setProperty('min-height','var(--nhi-split-card-height,var(--nhi-card-effective-height))','important');
+      c.style.setProperty('height',f.classList.contains('nhi-with-image')&&!s.editing&&!s.imagePicker?'var(--nhi-split-card-height,var(--nhi-card-effective-height))':'var(--nhi-split-card-height,auto)','important');
+      c.style.setProperty('max-height','var(--nhi-split-card-height,none)','important');
       // Content without pictures grows naturally; pictured cards keep the existing
       // scrolling content area so notes/comparison never collide with the buttons.
       f.style.setProperty('min-height','0','important');
       f.style.setProperty('height','auto','important');
       f.style.setProperty('max-height','none','important');
-      f.style.setProperty('flex',f.classList.contains('nhi-with-image')&&!s.editing&&!s.imagePicker?'1 1 0':'1 0 auto','important');
+      f.style.setProperty('flex',f.classList.contains('nhi-with-image')&&!s.editing&&!s.imagePicker?'1 1 0':'var(--nhi-split-front-flex,1 0 auto)','important');
       // The unused background around the entire card should also flip it.
       c.addEventListener('click', function(e) {
         if(e.target.closest('.pfront,.pdel,.pundo,.legendpop,.nhi-card-dictionaries,.nhi-english-v5,figure,button,input,textarea,select,a,[contenteditable]'))return;
@@ -6053,7 +6054,7 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
           var available=Math.max(300,Math.floor(viewHeight-Math.max(0,top)-10));
           c.style.setProperty('--nhi-focus-available-height',available+'px');
           // Keep the same live height setting in focus mode; the viewport is a lower bound.
-          c.style.setProperty('min-height','var(--nhi-card-effective-height)','important');
+          c.style.setProperty('min-height','var(--nhi-split-card-height,var(--nhi-card-effective-height))','important');
         };
         requestAnimationFrame(updateFocusHeight);
         var focusViewport=window.visualViewport||window;
@@ -7308,30 +7309,95 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
       if(panel.getAnimations)panel.getAnimations().forEach(function(a){a.cancel();});
       ['opacity','transform','filter','clip-path','perspective','visibility'].forEach(function(p){panel.style.removeProperty(p);});
     }
-    function phoneAIGeometry(width,height,left,top){
-      // A bottom sheet: half the visible screen, not half its width.
-      var h=Math.max(1,Math.round(height*.5));
-      return {width:Math.max(1,Math.floor(width)),height:h,left:Math.round(left),top:Math.round(top+height-h)};
+    var phoneAIRatio=.5,phoneAIDrag=null,phoneStudyFrame=0;
+    function phoneAIGeometry(width,height,left,top,ratio){
+      var r=Math.min(.75,Math.max(.30,Number.isFinite(ratio)?ratio:.5));
+      var h=Math.max(1,Math.round(height*r));
+      return {width:Math.max(1,Math.floor(width)),height:h,left:Math.round(left),top:Math.round(top+height-h),ratio:r};
+    }
+    function setPhoneVar(node,name,value){
+      if(node.style.getPropertyValue(name)!==value)node.style.setProperty(name,value);
+    }
+    function fitPhoneStudy(){
+      phoneStudyFrame=0;
+      if(!aiPhone.matches||!isOpen())return;
+      var root=document.documentElement,app=document.querySelector('.app'),card=document.querySelector('#planBox .pcard');
+      if(!app)return;
+      var panel=$('aiPanel'),split=parseFloat(panel.style.getPropertyValue('--nhi-phone-ai-top'));
+      if(!Number.isFinite(split))return;
+      var vp=window.visualViewport,top=vp?vp.offsetTop:0;
+      var appTop=Math.max(top,app.getBoundingClientRect().top);
+      var upper=Math.max(0,Math.floor(split-appTop));
+      setPhoneVar(root,'--nhi-phone-study-height',upper+'px');
+      if(card){
+        var appRect=app.getBoundingClientRect(),cardRect=card.getBoundingClientRect();
+        var offset=Math.max(0,cardRect.top-appRect.top+app.scrollTop);
+        // Very small study panes remain independently scrollable rather than
+        // dropping buttons or clipping content.
+        var cardHeight=Math.max(150,Math.floor(upper-offset-6));
+        setPhoneVar(root,'--nhi-phone-ai-card-height',cardHeight+'px');
+      }
+    }
+    function schedulePhoneStudy(){
+      if(!phoneStudyFrame)phoneStudyFrame=requestAnimationFrame(fitPhoneStudy);
     }
     function fitPhoneAI(){
       if(!aiPhone.matches)return;
       var vv=window.visualViewport;
       var g=phoneAIGeometry(vv?vv.width:document.documentElement.clientWidth,
-        vv?vv.height:window.innerHeight,vv?vv.offsetLeft:0,vv?vv.offsetTop:0);
+        vv?vv.height:window.innerHeight,vv?vv.offsetLeft:0,vv?vv.offsetTop:0,phoneAIRatio);
       var panel=$('aiPanel');
       panel.style.setProperty('--nhi-phone-ai-width',g.width+'px');
       panel.style.setProperty('--nhi-phone-ai-height',g.height+'px');
       panel.style.setProperty('--nhi-phone-ai-left',g.left+'px');
       panel.style.setProperty('--nhi-phone-ai-top',g.top+'px');
-      document.documentElement.style.setProperty('--nhi-phone-ai-reserve',g.height+'px');
+      setPhoneVar(document.documentElement,'--nhi-phone-ai-reserve',g.height+'px');
+      $('nhiPhoneAIGrip').setAttribute('aria-valuenow',String(Math.round(g.ratio*100)));
+      schedulePhoneStudy();
     }
     if(window.visualViewport){window.visualViewport.addEventListener('resize',fitPhoneAI);window.visualViewport.addEventListener('scroll',fitPhoneAI);}
     window.addEventListener('resize',fitPhoneAI,{passive:true});
+    function changePhoneAIHeight(ratio){
+      phoneAIRatio=Math.min(.75,Math.max(.30,ratio));
+      fitPhoneAI();
+    }
+    (function(){
+      var grip=$('nhiPhoneAIGrip');
+      function begin(e){
+        if(!aiPhone.matches||!isOpen()||phoneAIDrag||e.button!==0)return;
+        e.preventDefault();e.stopPropagation();
+        phoneAIDrag={id:e.pointerId,y:e.clientY,ratio:phoneAIRatio};
+        grip.setPointerCapture(e.pointerId);
+        document.body.classList.add('nhi-phone-ai-dragging');
+      }
+      grip.addEventListener('pointerdown',begin);
+      grip.addEventListener('pointermove',function(e){
+        if(!phoneAIDrag||e.pointerId!==phoneAIDrag.id)return;
+        e.preventDefault();
+        var height=window.visualViewport?.height||window.innerHeight;
+        changePhoneAIHeight(phoneAIDrag.ratio+(phoneAIDrag.y-e.clientY)/Math.max(1,height));
+      });
+      function end(e){
+        if(!phoneAIDrag||e.pointerId!==phoneAIDrag.id)return;
+        phoneAIDrag=null;document.body.classList.remove('nhi-phone-ai-dragging');
+        if(grip.hasPointerCapture(e.pointerId))grip.releasePointerCapture(e.pointerId);
+      }
+      ['pointerup','pointercancel','lostpointercapture'].forEach(function(ev){grip.addEventListener(ev,end);});
+      grip.addEventListener('keydown',function(e){
+        if(!['ArrowUp','ArrowDown','Home','End'].includes(e.key))return;
+        e.preventDefault();e.stopImmediatePropagation();
+        changePhoneAIHeight(e.key==='Home'?.3:e.key==='End'?.75:phoneAIRatio+(e.key==='ArrowUp'?.05:-.05));
+      });
+      grip.addEventListener('dblclick',function(e){e.preventDefault();changePhoneAIHeight(.5);});
+      var plan=$('planBox');
+      if(plan)new MutationObserver(function(){if(aiPhone.matches&&isOpen())schedulePhoneStudy();}).observe(plan,{childList:true,subtree:false});
+    })();
     function open(focusCard) {
       var generation=++aiOpenGeneration;
-      if(aiPhone.matches){resetPhoneAI();fitPhoneAI();}
+      if(aiPhone.matches){resetPhoneAI();phoneAIRatio=.5;fitPhoneAI();window.scrollTo(0,0);}
       document.body.classList.add('ai-open'); $('aiPanel').setAttribute('aria-hidden', 'false'); $('aiBtn').setAttribute('aria-pressed', 'true');
       paintCtx(); paintQuick(); paintLog(); paintSetup(!key());
+      if(aiPhone.matches){var app=document.querySelector('.app');if(app)app.scrollTop=0;schedulePhoneStudy();}
       if(!aiPhone.matches&&window.NHI_WINDOW_FX)window.NHI_WINDOW_FX.open($('aiPanel'),'ai');
       if(focusCard==='hotkey'){
         // Retain keyboard focus outside the sidebar so a second A closes it.
@@ -7350,7 +7416,10 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
       function commit(){if(generation!==aiOpenGeneration)return;document.body.classList.remove('ai-open');$('aiPanel').setAttribute('aria-hidden','true');$('aiBtn').setAttribute('aria-pressed','false');}
       if(aiPhone.matches){
         if($('aiPanel').contains(document.activeElement))document.activeElement.blur();
+        phoneAIDrag=null;document.body.classList.remove('nhi-phone-ai-dragging');
         resetPhoneAI();commit();
+        ['--nhi-phone-study-height','--nhi-phone-ai-card-height'].forEach(function(v){document.documentElement.style.removeProperty(v);});
+        var app=document.querySelector('.app');if(app)app.scrollTop=0;
       }else if(window.NHI_WINDOW_FX&&document.body.classList.contains('ai-open'))window.NHI_WINDOW_FX.close($('aiPanel'),'ai',commit);
       else commit();
     }
@@ -9816,6 +9885,46 @@ html body #planBox .pcard>.pdel.nhi-card-corner-trash svg{pointer-events:none!im
  html body #aiPanel .aihead{min-width:0!important;gap:4px!important}
  html body #aiPanel .aihead h2{flex:1 1 auto!important;min-width:0!important;white-space:nowrap!important}
  html body #aiPanel .aiform textarea{min-width:0!important;flex:1 1 0!important}
+}
+</style>
+<style id="nhi-mobile-ai-split-v147">
+#nhiPhoneAIGrip{display:none}
+@media(max-width:700px), (max-width:900px) and (pointer:coarse){
+ html body #aiPanel #nhiPhoneAIGrip{
+  display:flex!important;align-items:center;justify-content:center;
+  height:24px;min-height:24px;flex:0 0 24px;
+  touch-action:none;cursor:ns-resize;user-select:none;-webkit-user-select:none;
+  background:var(--surface);border:0;position:relative;z-index:2;
+ }
+ #nhiPhoneAIGrip>span{display:block;width:52px;height:5px;border-radius:99px;background:var(--muted);opacity:.55}
+ #nhiPhoneAIGrip:focus-visible{outline:2px solid var(--accent-t);outline-offset:-3px}
+ html body.ai-open.nhi-in-study:not(.dictionary-open){overflow:hidden!important}
+ html body.ai-open.nhi-in-study:not(.dictionary-open) .app{
+  height:var(--nhi-phone-study-height,50dvh)!important;max-height:var(--nhi-phone-study-height,50dvh)!important;
+  min-height:0!important;overflow-y:auto!important;overflow-x:hidden!important;
+  overscroll-behavior:contain;justify-content:flex-start!important;
+  padding-top:4px!important;padding-bottom:4px!important;gap:4px!important;
+ }
+ html body.ai-open.nhi-in-study:not(.dictionary-open) #view-plan{flex:0 0 auto!important;min-height:0!important}
+ html body.ai-open.nhi-in-study:not(.dictionary-open) #planBox .ppage{gap:4px!important}
+ html body.ai-open.nhi-in-study:not(.dictionary-open) #planBox .pcard[data-nhi-shared-height="v136"]{
+  --nhi-split-card-height:var(--nhi-phone-ai-card-height,220px);
+  --nhi-split-front-flex:1 1 0;
+  --nhi-card-effective-height:var(--nhi-split-card-height);
+  gap:4px!important;padding-block:6px!important;
+  overflow:hidden!important;justify-content:flex-start!important;
+ }
+ html body.ai-open.nhi-in-study:not(.dictionary-open) #planBox .pcard[data-nhi-shared-height="v136"]>.pfront{
+  flex:1 1 0!important;min-height:0!important;overflow-y:auto!important;overflow-x:hidden!important;
+  padding-block:4px!important;gap:4px!important;justify-content:safe center!important;overscroll-behavior:contain;
+ }
+ html body.ai-open.nhi-in-study:not(.dictionary-open) #planBox .pcard>.card-top,
+ html body.ai-open.nhi-in-study:not(.dictionary-open) #planBox .pcard>.prate{flex-shrink:0!important}
+ html body.ai-open.nhi-in-study:not(.dictionary-open) #planBox .pcard>.card-top{gap:3px!important;margin-block:0!important}
+ html body.ai-open.nhi-in-study:not(.dictionary-open) #planBox .pcard>.card-top .iconbtn{min-height:30px!important;height:30px!important}
+ html body.ai-open.nhi-in-study:not(.dictionary-open) #planBox .pcard>.prate{margin-block:0!important}
+ html body.nhi-phone-ai-dragging{user-select:none!important;-webkit-user-select:none!important}
+ html body.nhi-phone-ai-dragging #planBox .pcard{transition:none!important}
 }
 </style>
 </body></html>
