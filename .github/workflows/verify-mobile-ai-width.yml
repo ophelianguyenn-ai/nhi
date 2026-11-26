@@ -61,6 +61,21 @@ jobs:
               if(width<700){
                 if(d.docked||d.dockWidth!=='0px'||d.card.width<d.viewport*.85||Math.abs(d.panel.width-d.viewport)>4||Math.abs(d.panel.height-d.viewportHeight*.5)>4)throw Error('Mobile layout regression: '+JSON.stringify(d));
               }else if(!d.docked||parseFloat(d.dockWidth)<100)throw Error('Desktop AI dock regressed');
+              if(width<700){
+                if(d.card.y+d.card.height>d.panel.y+10)throw Error('Card extends behind AI sheet: '+JSON.stringify(d));
+                const grip=await page.$('#nhiPhoneAIGrip'),g=await grip.boundingBox();
+                await page.mouse.move(g.x+g.width/2,g.y+g.height/2);
+                await page.mouse.down();
+                await page.mouse.move(g.x+g.width/2,g.y+g.height/2-100,{steps:10});
+                await page.mouse.up();
+                await new Promise(r=>setTimeout(r,400));
+                const resized=await page.evaluate(()=>({panel:document.querySelector('#aiPanel').getBoundingClientRect().height,card:document.querySelector('#planBox .pcard').getBoundingClientRect().height}));
+                if(resized.panel<d.panel.height+70||resized.card>=d.card.height-30)throw Error('Drag did not resize both panes: '+JSON.stringify({before:d,after:resized}));
+                console.log('PASS drag',JSON.stringify(resized));
+                await page.screenshot({path:'/tmp/nhi-ai-drag-'+width+'.png'});
+                await page.$eval('#nhiPhoneAIGrip',el=>el.dispatchEvent(new MouseEvent('dblclick',{bubbles:true})));
+                await new Promise(r=>setTimeout(r,300));
+              }
               await page.screenshot({path:'/tmp/nhi-ai-'+width+'.png'});
               await page.evaluate(()=>window.NLC_AI.close());
               await page.waitForFunction(()=>!document.body.classList.contains('ai-open'));
