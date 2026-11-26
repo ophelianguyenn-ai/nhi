@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="vi" data-nhi-build="147">
+<html lang="vi" data-nhi-build="148">
 <head>
 <script id="nhi-explicit-calendar-route-v143">
 (function(){
@@ -5771,7 +5771,7 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
     function legendPop() {
       var p = el('div', 'legendpop'); p.setAttribute('role', 'note');
       var hh = el('div', 'lrow'); hh.appendChild(el('h3', null, 'Chú giải')); hh.appendChild(ibtn('iconbtn sm lclose', 'x', function () { legendOpen = false; render(); }, 'Đóng chú giải')); p.appendChild(hh);
-      [['Chuyển thẻ', ['←', '→']], ['Lật thẻ', ['Enter']], ['Khó', ['S']], ['Bình thường', ['2']], ['Xoá từ', ['Delete']], ['Chế độ tập trung', ['F']], ['Chỉnh sửa thẻ (mở / đóng)', ['C']], ['Hỏi AI (mở / đóng)', ['A']]].forEach(function (x) {
+      [['Chuyển thẻ', ['←', '→']], ['Lật thẻ', ['Enter', 'Space']], ['Khó', ['S']], ['Bình thường', ['2']], ['Xoá từ', ['Delete']], ['Hoàn tác xoá', ['Ctrl+Z / Cmd+Z']], ['Chế độ tập trung', ['F']], ['Chỉnh sửa thẻ / thoát khi đang nhập', ['C', 'Esc']], ['Hỏi AI (mở / đóng)', ['A']]].forEach(function (x) {
         var r = el('div', 'lrow'); r.appendChild(el('span', null, x[0])); var k = el('span'); x[1].forEach(function (key) { k.appendChild(el('kbd', null, key)); }); r.appendChild(k); p.appendChild(r);
       });
       p.appendChild(el('p', 'hint', 'Vuốt để chuyển thẻ · chạm thẻ để lật · chạm chữ Việt để tô sáng'));
@@ -6545,27 +6545,69 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
       var it = ITEMS[ph.dataset.item], li = ph.closest('li[data-item]');
       if (li) li.parentNode.replaceChild(itemRow(it, li.dataset.src === '1',li.dataset.meaningLesson), li); else render();
     }, true);
-    document.addEventListener('keydown', function (e) {
-      // Ctrl+Z / Cmd+Z undoes accidental deletion; never override Undo inside inputs.
-      if (state.mode === 'plan' && undoHistory.length && (e.ctrlKey || e.metaKey) && !e.shiftKey && e.key.toLowerCase() === 'z'
-          && !(e.target && (e.target.isContentEditable || /INPUT|TEXTAREA|SELECT/.test(e.target.tagName)))) {
-        e.preventDefault(); undoDelete(); return;
+    // V148: keyboard routing follows the active study surface, not stale focus.
+    function shortcutVisible(node) {
+      return !!(node && !node.hidden && node.getClientRects().length &&
+        getComputedStyle(node).visibility !== 'hidden');
+    }
+    function shortcutEditing(t) {
+      return !!(t && (t.isContentEditable || t.closest('input,textarea,select,[contenteditable]:not([contenteditable="false"]),[role="textbox"]')));
+    }
+    function focusStudyCard() {
+      if (state.mode !== 'plan' || !sess || sess.editing || sess.imagePicker) return;
+      var card = document.querySelector('#planBox .pcard');
+      if (!shortcutVisible(card)) return;
+      card.tabIndex = -1;
+      try { card.focus({preventScroll:true}); } catch(e) { card.focus(); }
+    }
+    window.NHI_RESTORE_STUDY_FOCUS = focusStudyCard;
+    // Clicking a word may leave a tabindex=0 span focused, swallowing the next
+    // flashcard shortcut. Keep keyboard-tab accessibility, but restore focus
+    // after a pointer click (including copying or looking up a word).
+    document.addEventListener('click', function(e) {
+      var t = e.target instanceof Element ? e.target : null;
+      if (!e.detail || !t || !t.closest('#planBox .nhi-en-word') || shortcutEditing(t)) return;
+      queueMicrotask(function() {
+        if (document.activeElement && document.activeElement.closest('#planBox .nhi-en-word')) focusStudyCard();
+      });
+    }, true);
+    document.addEventListener('keydown', function(e) {
+      if (state.mode !== 'plan' || !sess || e.isComposing || e.repeat || e.defaultPrevented) return;
+      var t = e.target instanceof Element ? e.target : null;
+      var key = String(e.key || '').toLowerCase();
+      var editing = shortcutEditing(t);
+      var modal = Array.from(document.querySelectorAll('dialog[open],#cover,#setSheet')).some(shortcutVisible);
+      var inAI = t && t.closest('#aiPanel');
+      var inDict = t && t.closest('.nhi-dictionary-dock');
+      var inResize = t && t.closest('[role="separator"],#aiResizeHandle,#nhiPhoneAIGrip');
+      var inWord = t && t.closest('.nhi-en-word');
+      var activeAI = inAI && document.body.classList.contains('ai-open');
+      var activeDict = inDict && document.body.classList.contains('dictionary-open');
+      function consume(){e.preventDefault();e.stopImmediatePropagation();}
+      if (modal) return;
+      // Keep browser/editor Undo and all native text editing untouched.
+      if ((e.ctrlKey || e.metaKey) && !e.shiftKey && !e.altKey && key === 'z' &&
+          undoHistory.length && !editing && !activeAI && !activeDict && !sess.editing && !sess.imagePicker) {
+        consume(); undoDelete(); return;
       }
-      if (state.mode !== 'plan' || !sess || e.metaKey || e.ctrlKey || e.altKey || e.isComposing || e.repeat || e.defaultPrevented || (e.target&&e.target.closest('#aiPanel,.nhi-dictionary-dock,.nhi-en-word'))) return;
-      // Route Delete on a selected picture before the generic delete-card shortcut.
-      var selectedImage=e.target&&e.target.closest('#planBox .card-illustration.nhi-image-selected');
-      if(selectedImage&&(e.key==='Delete'||e.key==='Backspace')){
-        e.preventDefault();e.stopImmediatePropagation();
-        var imageCard=selectedImage.closest('.pcard');
-        if(imageCard&&imageCard.dataset.nhiCardId)deleteImage(imageCard.dataset.nhiCardId);
+      if (e.ctrlKey || e.metaKey || e.altKey) return;
+      if (sess.imagePicker) {
+        if (key === 'escape') { consume(); sess.imagePicker = false; render(); focusStudyCard(); }
         return;
       }
-      if (sess.imagePicker) { if (e.key === 'Escape') { e.preventDefault(); sess.imagePicker = false; render(); } return; }
       if (page && (!sess.L || sess.L.id !== page)) return;
-      if (e.target && (e.target.isContentEditable || /INPUT|TEXTAREA|SELECT/.test(e.target.tagName))) { if (e.key === 'Escape' && sess.editing) { var ed=document.querySelector('#planBox form.editbox');if(ed&&ed.nhiClose)ed.nhiClose(); } return; }
-      if(e.key==='Escape'&&sess.editing){e.preventDefault();var ed=document.querySelector('#planBox form.editbox');if(ed&&ed.nhiClose)ed.nhiClose();return;}
-      if((e.key==='c'||e.key==='C')&&!e.repeat&&!document.querySelector('dialog[open]')&&$('cover').hidden&&$('setSheet').hidden){
-        e.preventDefault();e.stopImmediatePropagation();
+      if (sess.editing && key === 'escape') {
+        consume(); var ed=document.querySelector('#planBox form.editbox');if(ed&&ed.nhiClose)ed.nhiClose();return;
+      }
+      if (editing || activeAI || activeDict || inResize) return;
+      // Preserve Enter/Space on a word reached with Tab; other study keys still work.
+      if (inWord && (key === 'enter' || key === ' ')) return;
+      if (sess.pos >= sess.queue.length) {
+        if (key === 'arrowleft') { consume(); go(-1); focusStudyCard(); }
+        return;
+      }
+      if (key === 'c') {
+        consume();
         if(sess.editing){
           var currentEditor=document.querySelector('#planBox form.editbox');
           if(currentEditor&&currentEditor.nhiClose){currentEditor.nhiClose();return;}
@@ -6575,18 +6617,26 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
         }
         render();return;
       }
-      if (document.querySelector('dialog[open]') || !$('cover').hidden || !$('setSheet').hidden || sess.editing) return;
-      if (e.key === 'Escape') { if (legendOpen) { legendOpen = false; render(); } else if (document.body.classList.contains('focus')) { setFocus(false); render(); } return; }
-      if (sess.pos >= sess.queue.length) { if (e.key === 'ArrowLeft') { e.preventDefault(); go(-1); } return; }
-      if (['ArrowRight','ArrowLeft','Enter',' ','s','S','2','f','F','a','A','c','C','Delete','Backspace'].indexOf(e.key)>=0)e.stopImmediatePropagation();
-      if (e.key === 'ArrowRight') { e.preventDefault(); go(1); }
-      else if (e.key === 'ArrowLeft') { e.preventDefault(); go(-1); }
-      else if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); flip(); }
-      else if (e.key === 's' || e.key === 'S') {e.preventDefault();rate('hard');}
-      else if (e.key === '2') {e.preventDefault();rate('mid');}
-      else if (e.key === 'f' || e.key === 'F') { e.preventDefault(); setFocus(!document.body.classList.contains('focus')); render(); }
-      else if (e.key === 'a' || e.key === 'A') { e.preventDefault(); if(window.NLC_AI) window.NLC_AI.toggle('hotkey'); }
-      else if (e.key === 'Delete' || e.key === 'Backspace') { e.preventDefault(); del(sess.queue[sess.pos]); }
+      if (sess.editing) return;
+      if (key === 'escape') {
+        if (legendOpen) { consume(); legendOpen=false; render(); }
+        else if (document.body.classList.contains('focus')) { consume(); setFocus(false); render(); }
+        return;
+      }
+      var selectedImage=t&&t.closest('#planBox .card-illustration.nhi-image-selected');
+      if (selectedImage && (key==='delete'||key==='backspace')) {
+        consume();var imageCard=selectedImage.closest('.pcard');
+        if(imageCard&&imageCard.dataset.nhiCardId)deleteImage(imageCard.dataset.nhiCardId);
+        return;
+      }
+      if (key === 'arrowright') { consume(); go(1); }
+      else if (key === 'arrowleft') { consume(); go(-1); }
+      else if (key === 'enter' || key === ' ') { consume(); flip(); }
+      else if (key === 's') { consume(); rate('hard'); }
+      else if (key === '2') { consume(); rate('mid'); }
+      else if (key === 'f') { consume(); setFocus(!document.body.classList.contains('focus')); render(); }
+      else if (key === 'a') { consume(); if(window.NLC_AI) window.NLC_AI.toggle('hotkey'); }
+      else if (key === 'delete' || key === 'backspace') { consume(); del(sess.queue[sess.pos]); }
     }, true);
     var tx = null;
     document.addEventListener('touchstart', function (e) { if (state.mode === 'plan' && sess && !sess.editing && e.target.closest('.pfront')) tx = { x: e.touches[0].clientX, y: e.touches[0].clientY }; else tx = null; }, { passive: true });
@@ -7046,7 +7096,7 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
     }
     function sheet(open) {
       var shell=$('setSheet'),panel=shell.querySelector('.sheetbox');
-      function commit(){shell.hidden=!open;document.body.classList.toggle('modal-open',!!open);}
+      function commit(){var restore=!open&&shell.contains(document.activeElement);shell.hidden=!open;document.body.classList.toggle('modal-open',!!open);if(restore){document.activeElement.blur();window.NHI_RESTORE_STUDY_FOCUS?.();}}
       if(open){
         commit();
         if(window.NHI_ACTION_LAYOUT_V122)window.NHI_ACTION_LAYOUT_V122.initSettings();
@@ -7413,9 +7463,8 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
     }
     function close() {
       var generation=++aiOpenGeneration;
-      function commit(){if(generation!==aiOpenGeneration)return;document.body.classList.remove('ai-open');$('aiPanel').setAttribute('aria-hidden','true');$('aiBtn').setAttribute('aria-pressed','false');}
+      function commit(){if(generation!==aiOpenGeneration)return;var restore=$('aiPanel').contains(document.activeElement);document.body.classList.remove('ai-open');$('aiPanel').setAttribute('aria-hidden','true');$('aiBtn').setAttribute('aria-pressed','false');if(restore){document.activeElement.blur();window.NHI_RESTORE_STUDY_FOCUS?.();}}
       if(aiPhone.matches){
-        if($('aiPanel').contains(document.activeElement))document.activeElement.blur();
         phoneAIDrag=null;document.body.classList.remove('nhi-phone-ai-dragging');
         resetPhoneAI();commit();
         ['--nhi-phone-study-height','--nhi-phone-ai-card-height'].forEach(function(v){document.documentElement.style.removeProperty(v);});
@@ -7547,8 +7596,10 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
       $('aiClose').addEventListener('click', close);
        // A toggles chat outside editable fields; never swallow the letter while typing.
        document.addEventListener('keydown',function(e){
-         if(e.key.toLowerCase()!=='a'||e.ctrlKey||e.metaKey||e.altKey||e.isComposing||e.repeat||e.defaultPrevented)return;
-         if(e.target&&(e.target.isContentEditable||e.target.closest('input,textarea,select,[contenteditable="true"]')))return;
+         if(String(e.key||'').toLowerCase()!=='a'||e.ctrlKey||e.metaKey||e.altKey||e.isComposing||e.repeat||e.defaultPrevented)return;
+         var target=e.target instanceof Element?e.target:null;
+         if(target&&(target.isContentEditable||target.closest('input,textarea,select,[contenteditable]:not([contenteditable="false"]),[role="textbox"],.nhi-dictionary-dock,[role="separator"]')))return;
+         if(document.body.classList.contains('cover-on')||document.querySelector('dialog[open]')||!$('setSheet').hidden||document.querySelector('#planBox .editbox,#planBox .nhi-picture-picker'))return;
          e.preventDefault();toggle('hotkey');
        },true);
       $('aiCfgBtn').addEventListener('click', function () { paintSetup($('aiSetup').hidden); });
