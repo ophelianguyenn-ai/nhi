@@ -1,0 +1,80 @@
+name: Verify mobile AI bottom sheet and card width
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'index.html'
+      - 'study-update-v6.js'
+      - '.github/workflows/verify-mobile-ai-width.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  mobile-ai:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install browser test driver
+        run: npm install --no-save --no-package-lock puppeteer-core@24
+      - name: Verify rendered mobile and desktop layouts
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m http.server 8765 --bind 127.0.0.1 >/tmp/nhi-mobile-ai-server.log 2>&1 &
+          for i in $(seq 1 20); do
+            if curl -sf http://127.0.0.1:8765/index.html >/dev/null; then break; fi
+            sleep 1
+          done
+          node --input-type=module <<'JS'
+          import puppeteer from 'puppeteer-core';
+          const browser=await puppeteer.launch({headless:true,executablePath:process.env.CHROME_BIN||'/usr/bin/google-chrome',args:['--no-sandbox','--disable-dev-shm-usage']});
+          const errors=[];
+          try{
+            for(const width of [390,430,1280]){
+              const ctx=await browser.createBrowserContext();
+              const page=await ctx.newPage();
+              page.on('pageerror',e=>errors.push(String(e)));
+              await page.setViewport({width,height:820,isMobile:width<700,hasTouch:width<700,deviceScaleFactor:1});
+              await page.evaluateOnNewDocument(()=>sessionStorage.setItem('nlc-cover-seen','1'));
+              await page.goto('http://127.0.0.1:8765/#/lich-hoc',{waitUntil:'domcontentloaded'});
+              await page.waitForFunction(()=>window.NHI_PLAN_V2?.snapshot().lessons.some(l=>l.total>5),{timeout:30000});
+              await page.evaluate(()=>{
+                const plan=window.NHI_PLAN_V2;
+                const lesson=plan.snapshot().lessons.find(l=>l.total>5&&l.date<'2026-11-26');
+                if(!lesson)throw Error('No eligible lesson');
+                plan.startLessonById(lesson.id);
+                window.NHI_COVER?.close();
+              });
+              await page.waitForSelector('#planBox .pcard',{visible:true,timeout:20000});
+              await page.evaluate(()=>{const b=document.querySelector('#planBox .pcard button[aria-label^="Hỏi AI về thẻ"]');if(!b)throw Error('Missing AI card button');b.click();});
+              await page.waitForFunction(()=>document.body.classList.contains('ai-open')&&document.querySelector('#aiPanel').getBoundingClientRect().width>50);
+              await new Promise(r=>setTimeout(r,1100));
+              const d=await page.evaluate(()=>{
+                const rect=s=>{const r=document.querySelector(s).getBoundingClientRect();return {x:r.x,y:r.y,width:r.width,height:r.height};};
+                return {build:document.documentElement.dataset.nhiBuild,docked:document.body.classList.contains('nhi-docked'),dockWidth:document.documentElement.style.getPropertyValue('--nhi-dock-width'),viewport:window.visualViewport?.width||innerWidth,viewportHeight:window.visualViewport?.height||innerHeight,card:rect('#planBox .pcard'),panel:rect('#aiPanel')};
+              });
+              console.log(width,JSON.stringify(d));
+              if(width<700){
+                if(d.docked||d.dockWidth!=='0px'||d.card.width<d.viewport*.85||Math.abs(d.panel.width-d.viewport)>4||Math.abs(d.panel.height-d.viewportHeight*.5)>4)throw Error('Mobile layout regression: '+JSON.stringify(d));
+              }else if(!d.docked||parseFloat(d.dockWidth)<100)throw Error('Desktop AI dock regressed');
+              await page.screenshot({path:'/tmp/nhi-ai-'+width+'.png'});
+              await page.evaluate(()=>window.NLC_AI.close());
+              await page.waitForFunction(()=>!document.body.classList.contains('ai-open'));
+              await ctx.close();
+            }
+            console.log('PASS: mobile card full-width, AI half-height, desktop dock retained');
+            if(errors.length)console.log('Other page errors:',JSON.stringify(errors));
+          }finally{await browser.close();}
+          JS
+      - name: Save rendered screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: mobile-ai-layout-${{ github.run_attempt }}
+          path: /tmp/nhi-ai-*.png
+          if-no-files-found: ignore
+          retention-days: 7
