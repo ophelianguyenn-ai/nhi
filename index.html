@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="vi" data-nhi-build="148">
+<html lang="vi" data-nhi-build="149">
 <head>
 <script id="nhi-explicit-calendar-route-v143">
 (function(){
@@ -1525,7 +1525,7 @@ html body #planBox .sdone .pstatus{
 <div class="sheet" id="setSheet" hidden>
   <div class="scrim" data-close></div>
   <div class="sheetbox" role="dialog" aria-modal="true" aria-labelledby="setTitle">
-    <div class="sheethead" id="nhiSettingsDragHeader"><div id="nhiSettingsDragHandle" tabindex="0" role="button" aria-label="Di chuyển cửa sổ Cài đặt bằng cách kéo hoặc dùng phím mũi tên"><span aria-hidden="true">✥</span> Kéo để di chuyển</div><h2 id="setTitle">Cài đặt <small style="font-size:11px;font-weight:600;color:var(--muted)" id="nhiBuildVersion">V147</small></h2><button type="button" class="iconbtn sm" data-close aria-label="Đóng" data-ic="x"></button></div>
+    <div class="sheethead" id="nhiSettingsDragHeader"><div id="nhiSettingsDragHandle" tabindex="0" role="button" aria-label="Di chuyển cửa sổ Cài đặt bằng cách kéo hoặc dùng phím mũi tên"><span aria-hidden="true">✥</span> Kéo để di chuyển</div><h2 id="setTitle">Cài đặt <small style="font-size:11px;font-weight:600;color:var(--muted)" id="nhiBuildVersion">V149</small></h2><button type="button" class="iconbtn sm" data-close aria-label="Đóng" data-ic="x"></button></div>
 
 <script id="nhi-settings-drag-v126">
 (function(){
@@ -1797,6 +1797,24 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
 })();
       </script>
     </details>
+    <section class="setgroup nhi-shortcut-settings-v149" id="nhiShortcutSettingsV149">
+      <h3>Phím tắt</h3>
+      <p class="voice-note">Sử dụng bàn phím khi học thẻ ghi nhớ. Các phím tắt không can thiệp khi đang nhập văn bản.</p>
+      <dl class="nhi-shortcut-list-v149">
+        <div><dt>Lùi thẻ</dt><dd><kbd>←</kbd></dd></div>
+        <div><dt>Tiến thẻ</dt><dd><kbd>→</kbd></dd></div>
+        <div><dt>Lật thẻ</dt><dd><kbd>Enter</kbd><span aria-hidden="true">/</span><kbd>Space</kbd></dd></div>
+        <div><dt>Đánh dấu / bỏ Khó</dt><dd><kbd>S</kbd></dd></div>
+        <div><dt>Bình thường</dt><dd><kbd>2</kbd></dd></div>
+        <div><dt>Chỉnh sửa thẻ</dt><dd><kbd>C</kbd></dd></div>
+        <div><dt>Mở / đóng Chatbox AI</dt><dd><kbd>A</kbd></dd></div>
+        <div><dt>Chế độ tập trung</dt><dd><kbd>F</kbd></dd></div>
+        <div><dt>Thoát chỉnh sửa / tập trung</dt><dd><kbd>Esc</kbd></dd></div>
+        <div><dt>Xóa thẻ</dt><dd><kbd>Delete</kbd><span aria-hidden="true">/</span><kbd>Backspace</kbd></dd></div>
+        <div><dt>Hoàn tác xóa</dt><dd><kbd>Ctrl + Z</kbd><span aria-hidden="true">/</span><kbd>⌘ + Z</kbd></dd></div>
+      </dl>
+      <p class="voice-note">Mac: dùng ⌘ + Z để hoàn tác. Khi đang nhập trong cửa sổ sửa thẻ, dùng Esc để đóng.</p>
+    </section>
     <section class="setgroup nhi-transitions-settings" id="nhiTransitionSettings" aria-labelledby="nhiTransitionTitle">
       <h3 id="nhiTransitionTitle">✨ Hiệu ứng chuyển cảnh</h3>
       <p class="voice-note">Chọn kiểu mở/đóng cửa sổ và chuyển thẻ. Cửa sổ sửa thẻ sử dụng đúng hiệu ứng của Cài đặt tổng.</p>
@@ -9768,6 +9786,7 @@ html body #planBox .pcard .answer.ko,html body #cAnswer.ko{
   const size=document.getElementById('nhiCardFontSettings');if(size)size.before(font);else sheet.append(font);
   const categories={
    nhiActionSettingsV122:['🎛','Nút điều hướng thẻ'],
+   nhiShortcutSettingsV149:['⌨️','Phím tắt'],
    nhiKoreanFontSettingsV137:['🔤','Font chữ & tự động co giãn'],
    nhiCardFontSettings:['📏','Cỡ chữ trên thẻ'],
    nhiTransitionSettings:['✨','Hiệu ứng chuyển cảnh'],
@@ -9977,5 +9996,15 @@ html body #planBox .pcard>.pdel.nhi-card-corner-trash svg{pointer-events:none!im
  html body.nhi-phone-ai-dragging{user-select:none!important;-webkit-user-select:none!important}
  html body.nhi-phone-ai-dragging #planBox .pcard{transition:none!important}
 }
+</style>
+<style id="nhi-shortcut-settings-style-v149">
+#setSheet #nhiShortcutSettingsV149 .nhi-shortcut-list-v149{display:grid;gap:0;margin:0;padding:0;min-width:0}
+#setSheet #nhiShortcutSettingsV149 .nhi-shortcut-list-v149>div{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:8px;padding:9px 0;border-bottom:1px solid var(--line);min-width:0}
+#setSheet #nhiShortcutSettingsV149 .nhi-shortcut-list-v149>div:last-child{border-bottom:0}
+#setSheet #nhiShortcutSettingsV149 dt{font-size:13px;font-weight:600;overflow-wrap:anywhere}
+#setSheet #nhiShortcutSettingsV149 dd{display:flex;align-items:center;justify-content:flex-end;flex-wrap:wrap;gap:4px;margin:0;max-width:100%}
+#setSheet #nhiShortcutSettingsV149 kbd{display:inline-flex;align-items:center;justify-content:center;min-width:28px;min-height:25px;padding:3px 7px;border-radius:7px;background:var(--surface);color:var(--ink);white-space:nowrap;font-size:12px}
+#setSheet #nhiShortcutSettingsV149 dd>span{font-size:11px;color:var(--muted)}
+@media(max-width:420px){#setSheet #nhiShortcutSettingsV149 .nhi-shortcut-list-v149>div{grid-template-columns:minmax(0,1fr) minmax(0,auto);gap:5px}#setSheet #nhiShortcutSettingsV149 dd{max-width:118px}#setSheet #nhiShortcutSettingsV149 kbd{font-size:11px;padding:2px 5px}}
 </style>
 </body></html>
