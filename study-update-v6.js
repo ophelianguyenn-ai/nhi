@@ -14,14 +14,16 @@ try{dictWidth=Number(localStorage.getItem('nhi-dictionary-width-v1'))||480;}catc
 function setVar(name,value){if(document.documentElement.style.getPropertyValue(name)!==value)document.documentElement.style.setProperty(name,value);}
 function layout(){
  const ai=document.body.classList.contains('ai-open'),di=document.body.classList.contains('dictionary-open');
+ const mobile=window.matchMedia('(max-width:700px), (max-width:900px) and (pointer:coarse)').matches;
  const desiredAI=parseFloat(document.documentElement.style.getPropertyValue('--nhi-ai-width'))||520;
- let a=ai?desiredAI:0,d=di?dictWidth:0;
+ let a=ai&&!mobile?desiredAI:0,d=di?dictWidth:0;
  const available=Math.max(180,innerWidth-(innerWidth>=700?300:Math.round(innerWidth*.44)));
  if(a+d>available){const scale=available/(a+d);a*=scale;d*=scale;}
  setVar('--nhi-ai-effective',a+'px');
  setVar('--nhi-dict-effective',d+'px');
  setVar('--nhi-dock-width',(a+d)+'px');
- if(document.body.classList.contains('nhi-docked')!==(ai||di))document.body.classList.toggle('nhi-docked',ai||di);
+ const docked=(ai&&!mobile)||di;
+ if(document.body.classList.contains('nhi-docked')!==docked)document.body.classList.toggle('nhi-docked',docked);
 }
 function dictionary(word,kind){
  word=String(word||'').trim();if(!word)return;
