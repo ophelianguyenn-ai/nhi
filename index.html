@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="vi" data-nhi-build="150">
+<html lang="vi" data-nhi-build="151">
 <head>
 <script id="nhi-explicit-calendar-route-v143">
 (function(){
@@ -1525,7 +1525,7 @@ html body #planBox .sdone .pstatus{
 <div class="sheet" id="setSheet" hidden>
   <div class="scrim" data-close></div>
   <div class="sheetbox" role="dialog" aria-modal="true" aria-labelledby="setTitle">
-    <div class="sheethead" id="nhiSettingsDragHeader"><div id="nhiSettingsDragHandle" tabindex="0" role="button" aria-label="Di chuyển cửa sổ Cài đặt bằng cách kéo hoặc dùng phím mũi tên"><span aria-hidden="true">✥</span> Kéo để di chuyển</div><h2 id="setTitle">Cài đặt <small style="font-size:11px;font-weight:600;color:var(--muted)" id="nhiBuildVersion">V150</small></h2><button type="button" class="iconbtn sm" data-close aria-label="Đóng" data-ic="x"></button></div>
+    <div class="sheethead" id="nhiSettingsDragHeader"><div id="nhiSettingsDragHandle" tabindex="0" role="button" aria-label="Di chuyển cửa sổ Cài đặt bằng cách kéo hoặc dùng phím mũi tên"><span aria-hidden="true">✥</span> Kéo để di chuyển</div><h2 id="setTitle">Cài đặt <small style="font-size:11px;font-weight:600;color:var(--muted)" id="nhiBuildVersion">V151</small></h2><button type="button" class="iconbtn sm" data-close aria-label="Đóng" data-ic="x"></button></div>
 
 <script id="nhi-settings-drag-v126">
 (function(){
@@ -1941,14 +1941,15 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
   <div class="aihead">
     <button type="button" class="iconbtn sm nhi-ai-close-v5" id="aiClose" aria-label="Đóng chat AI" title="Đóng chat AI" data-ic="x"></button>
     <h2><span class="mi" id="aiFace"></span>Hỏi AI</h2>
-    <label class="ai-font-control" for="aiFontSize"><span aria-hidden="true">Aa</span><select id="aiFontSize" aria-label="Cỡ chữ khung chat AI">
+    <button type="button" class="iconbtn sm" id="aiCfgBtn" aria-label="Thiết lập AI" title="Thiết lập AI" data-ic="gear"></button>
+  </div>
+  <form class="aisetup" id="aiSetup" hidden>
+    <p><b>Cài đặt Chatbox AI</b></p>
+    <label class="flabel nhi-ai-font-settings-v151" for="aiFontSize"><span>Cỡ chữ Chatbox AI (px)</span><select class="field small" id="aiFontSize" aria-label="Cỡ chữ khung chat AI">
       <option value="13">13</option><option value="14">14</option><option value="15">15</option>
       <option value="16">16</option><option value="18">18</option><option value="20">20</option><option value="22">22</option>
     </select></label>
-    <button type="button" class="iconbtn sm" id="aiCfgBtn" aria-label="Thiết lập AI" title="Thiết lập AI" data-ic="gear"></button>
-    <button type="button" class="iconbtn sm" id="aiNewBtn" aria-label="Xoá hội thoại" title="Xoá hội thoại" data-ic="trash"></button>
-  </div>
-  <form class="aisetup" id="aiSetup" hidden>
+    <div id="nhiAiPromptSettingsV151"></div>
     <p><b>Kết nối AI (làm một lần trên mỗi máy)</b></p>
     <p class="voice-note">Trang này chạy thẳng trên trình duyệt nên cần một mã API của riêng bạn để gọi AI. Mã chỉ lưu trong trình duyệt này, không đồng bộ, không gửi đi đâu ngoài nhà cung cấp AI bạn chọn.</p>
     <label class="flabel"><span>Nhà cung cấp</span><select class="field small" id="aiProv"></select></label>
@@ -7343,6 +7344,7 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
       var items=window.NHI_PROMPTS?window.NHI_PROMPTS.list(!!(c&&c.ko),defaults):defaults;
       items.forEach(function (t) { var b = mkBtn('', t); b.addEventListener('click', function () { send(t); }); q.appendChild(b); });
     }
+    window.addEventListener('nhi:ai-prompts-changed',function(){if(isOpen())paintQuick();});
     function paintLog(scrollMode) {
       var box = $('aiLog'); box.textContent = '';
       // Keep the user's latest sent question in view instead of jumping to the
@@ -7413,8 +7415,8 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
       if(!Number.isFinite(split))return;
       var vp=window.visualViewport,top=vp?vp.offsetTop:0;
       var visibleUpper=Math.max(0,split-top),ratio=phoneAIRatio;
-      var compact=ratio>.53||visibleUpper<300;
-      var hideChrome=ratio>=.64||visibleUpper<245;
+      var compact=ratio>.505||visibleUpper<300;
+      var hideChrome=ratio>.505||visibleUpper<245;
       var hideEnglish=ratio>=.70||visibleUpper<205;
       var intensity=Math.max(0,Math.min(1,(ratio-.50)/.25));
       if(visibleUpper<300)intensity=Math.max(intensity,Math.min(1,(300-visibleUpper)/150));
@@ -7423,12 +7425,13 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
       var prevEnglish=body.classList.contains('nhi-ai-study-english-hidden-v150');
       body.classList.toggle('nhi-ai-study-compact-v150',compact);
       body.classList.toggle('nhi-ai-study-chrome-hidden-v150',hideChrome);
+      // Reset only for synchronous measurement, before the next paint.
       body.classList.toggle('nhi-ai-study-english-hidden-v150',hideEnglish);
       var scale=compact?Math.max(.62,1-.38*intensity):1;
       setPhoneVar(root,'--nhi-phone-action-scale',scale.toFixed(3));
       setPhoneVar(root,'--nhi-phone-vi-scale',compact?Math.max(.58,1-.42*intensity).toFixed(3):'1');
       setPhoneVar(root,'--nhi-phone-vi-limit',compact?Math.round(18-4*intensity)+'px':'100px');
-      if(prevCompact!==compact||prevChrome!==hideChrome||prevEnglish!==hideEnglish)app.scrollTop=0;
+      if(prevCompact!==compact||prevChrome!==hideChrome)app.scrollTop=0;
       // Layout must be measured AFTER changing header visibility.
       var appTop=Math.max(top,app.getBoundingClientRect().top);
       var upper=Math.max(0,Math.floor(split-appTop));
@@ -7439,6 +7442,18 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
       var cardHeight=Math.max(100,Math.floor(upper-offset-6));
       setPhoneVar(root,'--nhi-phone-ai-card-height',cardHeight+'px');
       if(window.NHI_ACTION_LAYOUT_V122)window.NHI_ACTION_LAYOUT_V122.refresh();
+      // English is optional when a genuinely measured layout cannot fit.
+      // Normal-flow text/frames never overlap; long primary content scrolls.
+      var stage=card.querySelector('.pfront'),vi=stage&&stage.querySelector('.vi-under'),en=stage&&stage.querySelector('.nhi-english-v5');
+      if(!hideEnglish&&stage&&en&&en.getClientRects().length){
+        var er=en.getBoundingClientRect(),sr=stage.getBoundingClientRect(),vr=vi&&vi.getBoundingClientRect();
+        var overlaps=vr&&vr.width&&vr.height&&er.left<vr.right&&er.right>vr.left&&er.top<vr.bottom+3&&er.bottom>vr.top;
+        var outside=er.bottom+stage.scrollTop>sr.bottom-2||stage.scrollHeight>stage.clientHeight+3;
+        var internalOverflow=en.scrollHeight>en.clientHeight+3;
+        hideEnglish=!!(overlaps||outside||internalOverflow);
+      }
+      body.classList.toggle('nhi-ai-study-english-hidden-v150',hideEnglish);
+      if(prevEnglish!==hideEnglish&&stage)stage.scrollTop=0;
     }
     function schedulePhoneStudy(){
       if(!phoneStudyFrame)phoneStudyFrame=requestAnimationFrame(fitPhoneStudy);
@@ -7492,7 +7507,7 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
       });
       grip.addEventListener('dblclick',function(e){e.preventDefault();changePhoneAIHeight(.5);});
       var plan=$('planBox');
-      if(plan)new MutationObserver(function(){if(aiPhone.matches&&isOpen())schedulePhoneStudy();}).observe(plan,{childList:true,subtree:false});
+      if(plan)new MutationObserver(function(){if(aiPhone.matches&&isOpen())schedulePhoneStudy();}).observe(plan,{childList:true,subtree:true,characterData:true});
       // Recalculate on dictionary/focus transitions without a class observer loop.
       var lastDock='';
       new MutationObserver(function(){
@@ -7662,8 +7677,6 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
          e.preventDefault();toggle('hotkey');
        },true);
       $('aiCfgBtn').addEventListener('click', function () { paintSetup($('aiSetup').hidden); });
-      $('aiNewBtn').title='Bắt đầu hội thoại mới (giữ lại hội thoại cũ)';$('aiNewBtn').setAttribute('aria-label','Hội thoại mới');
-      $('aiNewBtn').addEventListener('click', function () { newThread(); });
       $('aiProv').addEventListener('change', function () { cfg.p = this.value; saveCfg(); paintSetup(); });
       $('aiSetup').addEventListener('submit', function (e) { e.preventDefault(); cfg.p = $('aiProv').value; cfg.k[cfg.p] = $('aiKey').value.trim(); var m = $('aiModel').value.trim(); if(cfg.p==='gemini'){var normalized=normalizeGeminiModel(m);if(m&&!normalized){$('aiCheckStatus').textContent='Tên mô hình không hợp lệ. Hãy bấm Kiểm tra Gemini và chọn mô hình.';return;}m=normalized||PROV.gemini.model;} if (m && m !== PROV[cfg.p].model) cfg.m[cfg.p] = m; else delete cfg.m[cfg.p]; saveCfg(); paintSetup(!key()); });
       $('aiCheck').addEventListener('click',checkGemini);
@@ -7829,7 +7842,7 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
 <script src="study-update-v6.js?v=20261126-v146-1"></script>
 <script src="nhi-longpress-dictionary-v1.js?v=20261117"></script>
 <script src="nhi-interface-v5.js?v=20261114"></script>
-<script src="nhi-november-v15.js?v=20261114-ux-v17"></script>
+<script src="nhi-november-v15.js?v=20261126-v151"></script>
 <script src="nhi-seasons-v1.js?v=20261113-original-garden-v2"></script>
 <script src="nhi-living-garden-v1.js?v=20261113-cartoon-butterflies-v1"></script>
 <script src="nhi-late-2026.js?v=20261115-v9-compact-pairs"></script>
@@ -10066,6 +10079,46 @@ html body #planBox .pcard>.pdel.nhi-card-corner-trash svg{pointer-events:none!im
  html body.ai-open.nhi-in-study.nhi-ai-study-compact-v150:not(.dictionary-open) #planBox .pcard>.prate>:is(.nhi-prev-v3,.nhi-next-v3) svg{width:15px!important;height:15px!important}
  html body.ai-open.nhi-in-study.nhi-ai-study-compact-v150:not(.dictionary-open) #planBox .pcard .pfront :is(.prompt,.vi-under){line-height:1.24!important;margin-block:0!important}
  html body.ai-open.nhi-in-study.nhi-ai-study-english-hidden-v150:not(.dictionary-open) #planBox .pcard .pfront .nhi-english-v5{display:none!important}
+}
+</style>
+<style id="nhi-mobile-ai-no-overlap-v151">
+#aiPanel .nhi-ai-font-settings-v151{display:flex;flex-direction:column;gap:5px;min-width:0}
+#aiPanel .nhi-ai-font-settings-v151 select{width:100%;min-width:0;position:static;opacity:1;min-height:38px}
+#aiPanel #nhiAiPromptSettingsV151{min-width:0}
+#aiPanel #nhiAiQuickEditor .nhi-prompt-row{min-width:0}
+#aiPanel #nhiAiQuickEditor .nhi-prompt-row input{min-width:0;max-width:100%}
+#aiPanel #aiQuick{max-width:100%;min-width:0;overflow-x:auto}
+#aiPanel #aiLog .aimsg{overflow-wrap:anywhere;word-break:normal;min-width:0}
+@media(max-width:700px),(max-width:900px) and (pointer:coarse){
+ html body.ai-open.nhi-in-study.nhi-ai-study-chrome-hidden-v150:not(.dictionary-open) #planBox .pcard>.card-top{display:none!important}
+ html body.ai-open.nhi-in-study:not(.dictionary-open) #planBox .pcard[data-nhi-shared-height="v136"]>.pfront{
+  display:flex!important;flex-direction:column!important;flex-wrap:nowrap!important;align-items:center!important;justify-content:flex-start!important;
+  gap:5px!important;min-height:0!important;min-width:0!important;overflow-y:auto!important;overflow-x:hidden!important;box-sizing:border-box!important;
+  grid-template-columns:none!important;grid-template-rows:none!important;
+ }
+ html body.ai-open.nhi-in-study:not(.dictionary-open) #planBox .pcard>.pfront>:is(.prompt,.vi-under,.nhi-ko-line,.hanja,.nhi-card-details,.nhi-card-note,.nhi-english-v5,.card-illustration){
+  position:relative!important;inset:auto!important;transform:none!important;translate:none!important;scale:none!important;
+  flex:0 0 auto!important;align-self:center!important;max-width:100%!important;min-width:0!important;
+  margin:0!important;max-height:none!important;box-sizing:border-box!important;overflow-wrap:anywhere!important;
+ }
+ html body.ai-open.nhi-in-study:not(.dictionary-open) #planBox .pcard>.pfront :is([data-nhi-movable],.nhi-english-v5,.nhi-card-details,.card-illustration){
+  --nhi-move-x:0px!important;--nhi-move-y:0px!important;--nhi-en-offset-y:0px!important;--nhi-safe-margin:0px!important;
+  transform:none!important;translate:none!important;scale:none!important;inset:auto!important;margin-block:0!important;
+ }
+ html body.ai-open.nhi-in-study:not(.dictionary-open) #planBox .pcard>.pfront .nhi-ko-line{display:flex!important;flex-wrap:wrap!important;gap:3px!important;min-height:0!important;padding:0!important}
+ html body.ai-open.nhi-in-study:not(.dictionary-open) #planBox .pcard>.pfront .nhi-ko-line>.answer.ko{position:static!important;width:100%!important;max-width:100%!important;min-width:0!important;height:auto!important;white-space:normal!important;overflow-wrap:anywhere!important}
+ html body.ai-open.nhi-in-study:not(.dictionary-open) #planBox .pcard>.pfront .nhi-ko-line>.nhi-card-dictionaries{position:static!important;transform:none!important;translate:none!important;flex:0 0 auto!important}
+ html body.ai-open.nhi-in-study:not(.dictionary-open) #planBox .pcard>.pfront :is(.prompt,.vi-under,.hanja,.nhi-card-note){height:auto!important;min-height:0!important;white-space:normal!important;overflow-wrap:anywhere!important;line-height:1.3!important}
+ html body.ai-open.nhi-in-study:not(.dictionary-open) #planBox .pcard>.pfront .nhi-card-details{display:flex!important;flex-direction:column!important;flex:0 0 auto!important;gap:5px!important;align-items:center!important;height:auto!important;min-height:0!important;max-height:none!important}
+ html body.ai-open.nhi-in-study:not(.dictionary-open) #planBox .pcard>.pfront .nhi-english-v5{position:relative!important;height:auto!important;min-height:0!important;max-height:none!important;width:fit-content!important;max-width:100%!important;min-width:0!important;overflow-wrap:anywhere!important;flex:0 0 auto!important}
+ html body.ai-open.nhi-in-study:not(.dictionary-open) #planBox .pcard>.pfront .nhi-english-v5 .nhi-en-main{min-width:0!important;max-width:100%!important;white-space:normal!important;overflow-wrap:anywhere!important}
+ html body.ai-open.nhi-in-study:not(.dictionary-open) #planBox .pcard>.pfront .nhi-english-v5 :is(.nhi-en-translation,.nhi-en-ipa,.nhi-en-word){white-space:normal!important;overflow-wrap:anywhere!important;max-width:100%!important}
+ html body.ai-open.nhi-in-study.nhi-ai-study-english-hidden-v150:not(.dictionary-open) #planBox .pcard>.pfront .nhi-english-v5{display:none!important}
+ html body.ai-open.nhi-in-study:not(.dictionary-open) #planBox .pcard>.pfront .card-illustration{width:min(100%,180px)!important;height:auto!important}
+ html body.ai-open.nhi-in-study:not(.dictionary-open) #planBox .pcard>.pfront .card-illustration img{max-width:100%!important;height:auto!important;object-fit:contain!important}
+ html body.ai-open.nhi-in-study:not(.dictionary-open) #planBox .pcard>.prate{flex-shrink:0!important}
+ html body #aiPanel .aihead{flex-wrap:nowrap!important;gap:5px!important}
+ html body #aiPanel .aihead h2{white-space:normal!important;overflow-wrap:anywhere!important}
 }
 </style>
 </body></html>

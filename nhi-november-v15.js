@@ -13,12 +13,12 @@ function list(isCard,fallback){
  const k=isCard?'card':'general',v=sanitize(data[k]);return v===null?(fallback||DEFAULTS[k]).slice():v;
 }
 function save(){try{localStorage.setItem(KEY,JSON.stringify(data));}catch(e){return false;}refreshQuick();return true;}
-function refreshQuick(){if(document.body.classList.contains('ai-open')&&window.NLC_AI)window.NLC_AI.open();}
+function refreshQuick(){window.dispatchEvent(new Event('nhi:ai-prompts-changed'));}
 window.NHI_PROMPTS={list};
 function node(tag,className,text){const e=document.createElement(tag);if(className)e.className=className;if(text!==undefined)e.textContent=text;return e;}
 function makeBtn(text,action){const b=node('button','ghost',text);b.type='button';b.addEventListener('click',action);return b;}
 function setupPrompts(){
- const target=document.getElementById('aiSetup');if(!target)return;
+ const target=document.getElementById('nhiAiPromptSettingsV151')||document.getElementById('aiSetup');if(!target||document.getElementById('nhiAiQuickEditor'))return;
  const root=node('section','setgroup');root.id='nhiAiQuickEditor';
  root.append(node('h3',null,'Câu hỏi mẫu trong chatbox AI'));
  root.append(node('p','voice-note','Thêm, sửa hoặc xóa câu hỏi nhanh. Nội dung được lưu trên trình duyệt này.'));

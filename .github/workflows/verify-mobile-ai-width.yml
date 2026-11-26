@@ -70,8 +70,10 @@ jobs:
                 await page.mouse.up();
                 await new Promise(r=>setTimeout(r,400));
                 const resized=await page.evaluate(()=>({panel:document.querySelector('#aiPanel').getBoundingClientRect().height,card:document.querySelector('#planBox .pcard').getBoundingClientRect().height}));
-                if(resized.panel<d.panel.height+70||resized.card>=d.card.height-30)throw Error('Drag did not resize both panes: '+JSON.stringify({before:d,after:resized}));
+                if(resized.panel<d.panel.height+70||resized.card>d.viewportHeight-resized.panel+5)throw Error('Drag did not resize both panes: '+JSON.stringify({before:d,after:resized}));
                 console.log('PASS drag',JSON.stringify(resized));
+                const early=await page.evaluate(()=>({brand:getComputedStyle(document.querySelector('#topbar')).display,progress:[...document.querySelectorAll('.nhi-study-topbar')].every(x=>!x.getClientRects().length),toolbar:getComputedStyle(document.querySelector('#planBox .pcard>.card-top')).display}));
+                if(early.brand!=='none'||!early.progress||early.toolbar!=='none')throw Error('Study toolbar not hidden on drag: '+JSON.stringify(early));
                 const mid=await page.evaluate(()=>({compact:document.body.classList.contains('nhi-ai-study-compact-v150'),button:document.querySelector('#planBox .pcard .hard').getBoundingClientRect().height,scale:parseFloat(document.documentElement.style.getPropertyValue('--nhi-phone-vi-scale'))}));
                 if(!mid.compact||mid.button>37||!(mid.scale<1))throw Error('Compact controls/font not active: '+JSON.stringify(mid));
                 await page.focus('#nhiPhoneAIGrip');await page.keyboard.press('End');
@@ -81,6 +83,11 @@ jobs:
                 await page.$eval('#nhiPhoneAIGrip',el=>el.dispatchEvent(new MouseEvent('dblclick',{bubbles:true})));
                 await page.waitForFunction(()=>!document.body.classList.contains('nhi-ai-study-compact-v150')&&!document.body.classList.contains('nhi-ai-study-chrome-hidden-v150')&&!document.body.classList.contains('nhi-ai-study-english-hidden-v150'));
                 if(await page.$eval('#topbar',el=>getComputedStyle(el).display)==='none')throw Error('Header did not return on lowering AI');
+                await page.$eval('#aiCfgBtn',b=>{if(document.getElementById('aiSetup').hidden)b.click();});
+                const cfg=await page.evaluate(()=>({trash:!!document.querySelector('#aiPanel #aiNewBtn'),font:!!document.querySelector('#aiSetup #aiFontSize'),prompts:!!document.querySelector('#aiSetup #nhiAiQuickEditor'),fontVisible:!!document.querySelector('#aiSetup #aiFontSize')?.getClientRects().length}));
+                if(cfg.trash||!cfg.font||!cfg.prompts||!cfg.fontVisible)throw Error('Chat settings migration failed: '+JSON.stringify(cfg));
+                await page.select('#aiFontSize','20');
+                if(await page.evaluate(()=>document.documentElement.style.getPropertyValue('--nhi-ai-font-size'))!=='20px')throw Error('Chat font setting not applied');
                 console.log('PASS adaptive study controls, header, font and English visibility state');
 
                 await page.screenshot({path:'/tmp/nhi-ai-drag-'+width+'.png'});
