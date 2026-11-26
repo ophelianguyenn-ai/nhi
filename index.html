@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="vi" data-nhi-build="149">
+<html lang="vi" data-nhi-build="150">
 <head>
 <script id="nhi-explicit-calendar-route-v143">
 (function(){
@@ -1525,7 +1525,7 @@ html body #planBox .sdone .pstatus{
 <div class="sheet" id="setSheet" hidden>
   <div class="scrim" data-close></div>
   <div class="sheetbox" role="dialog" aria-modal="true" aria-labelledby="setTitle">
-    <div class="sheethead" id="nhiSettingsDragHeader"><div id="nhiSettingsDragHandle" tabindex="0" role="button" aria-label="Di chuyển cửa sổ Cài đặt bằng cách kéo hoặc dùng phím mũi tên"><span aria-hidden="true">✥</span> Kéo để di chuyển</div><h2 id="setTitle">Cài đặt <small style="font-size:11px;font-weight:600;color:var(--muted)" id="nhiBuildVersion">V149</small></h2><button type="button" class="iconbtn sm" data-close aria-label="Đóng" data-ic="x"></button></div>
+    <div class="sheethead" id="nhiSettingsDragHeader"><div id="nhiSettingsDragHandle" tabindex="0" role="button" aria-label="Di chuyển cửa sổ Cài đặt bằng cách kéo hoặc dùng phím mũi tên"><span aria-hidden="true">✥</span> Kéo để di chuyển</div><h2 id="setTitle">Cài đặt <small style="font-size:11px;font-weight:600;color:var(--muted)" id="nhiBuildVersion">V150</small></h2><button type="button" class="iconbtn sm" data-close aria-label="Đóng" data-ic="x"></button></div>
 
 <script id="nhi-settings-drag-v126">
 (function(){
@@ -1688,19 +1688,30 @@ function mount(card,row,buttons,trash,undo){
   if(!card.isConnected)return;
   restore();
   const mode=isPhone()?'phone':'desktop',p=prefs[mode],flags=overrides[mode];
+  const compact=document.body.classList.contains('ai-open')&&document.body.classList.contains('nhi-ai-study-compact-v150')&&!document.body.classList.contains('dictionary-open');
+  const scale=compact?Math.max(.62,Math.min(1,Number(document.documentElement.style.getPropertyValue('--nhi-phone-action-scale'))||1)):1;
   const cs=getComputedStyle(card),available=Math.max(80,card.clientWidth-(parseFloat(cs.paddingLeft)||0)-(parseFloat(cs.paddingRight)||0));
   // Single flex layout owner: no expanding grid tracks or distributed spaces.
   apply(row,{'display':'flex','flex-direction':'row','flex-wrap':'nowrap','justify-content':'center','align-items':'center','gap':px(p.gap),'column-gap':px(p.gap),'row-gap':px(p.gap),'grid-template-columns':'none','grid-template-rows':'none','box-sizing':'border-box'});
   if(flags.margin)apply(row,{'padding-left':px(p.margin),'padding-right':px(p.margin)});
   ids.slice(0,3).forEach((k,i)=>{
    const b=buttons[k],q=p[k],m=flags[k+'.margin']?q.margin:0;
-   const v={'width':px(q.width),'min-width':'0','max-width':px(q.width),'flex':'0 1 '+px(q.width),'flex-basis':px(q.width),'order':String(i),'margin-left':px(m),'margin-right':px(m),'position':'static','inset':'auto','box-sizing':'border-box','align-self':'center','justify-self':'auto'};
-   if(flags[k+'.height'])Object.assign(v,{'height':px(q.height),'min-height':px(q.height),'max-height':px(q.height)});
+   const width=Math.max(28,Math.round(q.width*scale));
+   const v={'width':px(width),'min-width':'0','max-width':px(width),'flex':'0 1 '+px(width),'flex-basis':px(width),'order':String(i),'margin-left':px(m),'margin-right':px(m),'position':'static','inset':'auto','box-sizing':'border-box','align-self':'center','justify-self':'auto'};
+   if(compact||flags[k+'.height']){
+    const height=compact?Math.max(28,Math.min(36,Math.round(q.height*scale))):q.height;
+    Object.assign(v,{'height':px(height),'min-height':px(height),'max-height':px(height)});
+   }
    if(flags[k+'.margin'])Object.assign(v,{'margin-left':px(q.margin),'margin-right':px(q.margin)});
    if(flags[k+'.color'])Object.assign(v,{'background':q.color,'background-image':'none','--nhi-classic-edge':'color-mix(in srgb,'+q.color+' 55%,#a963a1 45%)','--nhi-classic-shadow':'color-mix(in srgb,'+q.color+' 65%,#a963a1 35%)'});
    apply(b,v);
   });
-  if(undo)apply(undo,{'order':'3','position':'static','inset':'auto','width':'94px','min-width':'52px','max-width':'94px','flex':'0 1 94px','margin':'0','align-self':'center'});
+  if(undo){
+   const u=compact?Math.max(55,Math.round(94*scale)):94;
+   const props={'order':'3','position':'static','inset':'auto','width':px(u),'min-width':'52px','max-width':px(u),'flex':'0 1 '+px(u),'margin':'0','align-self':'center'};
+   if(compact)Object.assign(props,{'height':'32px','min-height':'32px','max-height':'32px'});
+   apply(undo,props);
+  }
   paintButton(trash,'trash',p.trash,p.trash.width);
   const maxRight=Math.max(0,card.clientWidth-p.trash.width);
    const maxBottom=Math.max(0,card.clientHeight-p.trash.height);
@@ -4581,10 +4592,10 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
       var perCardSizes=((val('fmt',it.id)||{})._sizes)||{};
       var localSize=Number(lang==='vi'&&elm.classList.contains('prompt')?
         (perCardSizes.viFront||perCardSizes.vi):perCardSizes[lang]);
-      if(lang==='vi'&&elm.classList.contains('prompt'))elm.style.setProperty('font-size',
-        localSize>=12&&localSize<=72?localSize+'px':'var(--nhi-effective-vi-front,26px)','important');
-      if(lang==='vi'&&elm.classList.contains('vi-under'))elm.style.setProperty('font-size',
-        localSize>=12&&localSize<=72?localSize+'px':'var(--nhi-effective-vi-back,22px)','important');
+      if(lang==='vi'&&(elm.classList.contains('prompt')||elm.classList.contains('vi-under'))){
+        var viBase=localSize>=12&&localSize<=72?localSize+'px':(elm.classList.contains('prompt')?'var(--nhi-effective-vi-front,26px)':'var(--nhi-effective-vi-back,22px)');
+        elm.style.setProperty('font-size','min('+viBase+',max(12px,calc('+viBase+' * var(--nhi-phone-vi-scale,1))),var(--nhi-phone-vi-limit,100px))','important');
+      }
       if(lang==='ko'){
         // Global Korean changes affect every card, including cards customized in the past.
         // A new individual edit after that global change may still override this card.
@@ -5822,7 +5833,7 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
       setFocus(focus);
       if (topbar && !focus) topbar.insertBefore(head, topbar.querySelector('.topbtns'));
       else {
-        head.style.setProperty('display','grid','important');
+        head.style.setProperty('display','var(--nhi-phone-progress-display,grid)','important');
         head.style.setProperty('grid-template-columns','max-content minmax(0,1fr) max-content 30px','important');
         head.style.setProperty('gap','6px','important');
         head.style.setProperty('width','100%','important');
@@ -7386,31 +7397,54 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
     function setPhoneVar(node,name,value){
       if(node.style.getPropertyValue(name)!==value)node.style.setProperty(name,value);
     }
+    // V150: transient compact study view, derived from the actual split ratio.
+    function clearPhoneStudyCompact(){
+      var root=document.documentElement,body=document.body;
+      body.classList.remove('nhi-ai-study-compact-v150','nhi-ai-study-chrome-hidden-v150','nhi-ai-study-english-hidden-v150');
+      ['--nhi-phone-action-scale','--nhi-phone-vi-scale','--nhi-phone-vi-limit','--nhi-phone-study-height','--nhi-phone-ai-card-height'].forEach(function(p){root.style.removeProperty(p);});
+      if(window.NHI_ACTION_LAYOUT_V122)window.NHI_ACTION_LAYOUT_V122.refresh();
+    }
     function fitPhoneStudy(){
       phoneStudyFrame=0;
-      if(!aiPhone.matches||!isOpen())return;
-      var root=document.documentElement,app=document.querySelector('.app'),card=document.querySelector('#planBox .pcard');
-      if(!app)return;
+      if(!aiPhone.matches||!isOpen()||document.body.classList.contains('dictionary-open')){clearPhoneStudyCompact();return;}
+      var root=document.documentElement,body=document.body,app=document.querySelector('.app'),card=document.querySelector('#planBox .pcard');
+      if(!app||!card||!body.classList.contains('nhi-in-study')){clearPhoneStudyCompact();return;}
       var panel=$('aiPanel'),split=parseFloat(panel.style.getPropertyValue('--nhi-phone-ai-top'));
       if(!Number.isFinite(split))return;
       var vp=window.visualViewport,top=vp?vp.offsetTop:0;
+      var visibleUpper=Math.max(0,split-top),ratio=phoneAIRatio;
+      var compact=ratio>.53||visibleUpper<300;
+      var hideChrome=ratio>=.64||visibleUpper<245;
+      var hideEnglish=ratio>=.70||visibleUpper<205;
+      var intensity=Math.max(0,Math.min(1,(ratio-.50)/.25));
+      if(visibleUpper<300)intensity=Math.max(intensity,Math.min(1,(300-visibleUpper)/150));
+      var prevCompact=body.classList.contains('nhi-ai-study-compact-v150');
+      var prevChrome=body.classList.contains('nhi-ai-study-chrome-hidden-v150');
+      var prevEnglish=body.classList.contains('nhi-ai-study-english-hidden-v150');
+      body.classList.toggle('nhi-ai-study-compact-v150',compact);
+      body.classList.toggle('nhi-ai-study-chrome-hidden-v150',hideChrome);
+      body.classList.toggle('nhi-ai-study-english-hidden-v150',hideEnglish);
+      var scale=compact?Math.max(.62,1-.38*intensity):1;
+      setPhoneVar(root,'--nhi-phone-action-scale',scale.toFixed(3));
+      setPhoneVar(root,'--nhi-phone-vi-scale',compact?Math.max(.58,1-.42*intensity).toFixed(3):'1');
+      setPhoneVar(root,'--nhi-phone-vi-limit',compact?Math.round(18-4*intensity)+'px':'100px');
+      if(prevCompact!==compact||prevChrome!==hideChrome||prevEnglish!==hideEnglish)app.scrollTop=0;
+      // Layout must be measured AFTER changing header visibility.
       var appTop=Math.max(top,app.getBoundingClientRect().top);
       var upper=Math.max(0,Math.floor(split-appTop));
       setPhoneVar(root,'--nhi-phone-study-height',upper+'px');
-      if(card){
-        var appRect=app.getBoundingClientRect(),cardRect=card.getBoundingClientRect();
-        var offset=Math.max(0,cardRect.top-appRect.top+app.scrollTop);
-        // Very small study panes remain independently scrollable rather than
-        // dropping buttons or clipping content.
-        var cardHeight=Math.max(150,Math.floor(upper-offset-6));
-        setPhoneVar(root,'--nhi-phone-ai-card-height',cardHeight+'px');
-      }
+      var appRect=app.getBoundingClientRect(),cardRect=card.getBoundingClientRect();
+      var offset=Math.max(0,cardRect.top-appRect.top+app.scrollTop);
+      // Keep controls usable; extremely small keyboard-reduced panes can scroll.
+      var cardHeight=Math.max(100,Math.floor(upper-offset-6));
+      setPhoneVar(root,'--nhi-phone-ai-card-height',cardHeight+'px');
+      if(window.NHI_ACTION_LAYOUT_V122)window.NHI_ACTION_LAYOUT_V122.refresh();
     }
     function schedulePhoneStudy(){
       if(!phoneStudyFrame)phoneStudyFrame=requestAnimationFrame(fitPhoneStudy);
     }
     function fitPhoneAI(){
-      if(!aiPhone.matches)return;
+      if(!aiPhone.matches){clearPhoneStudyCompact();return;}
       var vv=window.visualViewport;
       var g=phoneAIGeometry(vv?vv.width:document.documentElement.clientWidth,
         vv?vv.height:window.innerHeight,vv?vv.offsetLeft:0,vv?vv.offsetTop:0,phoneAIRatio);
@@ -7459,6 +7493,12 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
       grip.addEventListener('dblclick',function(e){e.preventDefault();changePhoneAIHeight(.5);});
       var plan=$('planBox');
       if(plan)new MutationObserver(function(){if(aiPhone.matches&&isOpen())schedulePhoneStudy();}).observe(plan,{childList:true,subtree:false});
+      // Recalculate on dictionary/focus transitions without a class observer loop.
+      var lastDock='';
+      new MutationObserver(function(){
+        var b=document.body,signature=[b.classList.contains('dictionary-open'),b.classList.contains('focus'),b.classList.contains('nhi-in-study')].join('/');
+        if(signature!==lastDock){lastDock=signature;if(aiPhone.matches&&isOpen())schedulePhoneStudy();}
+      }).observe(document.body,{attributes:true,attributeFilter:['class']});
     })();
     function open(focusCard) {
       var generation=++aiOpenGeneration;
@@ -7485,10 +7525,11 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
       if(aiPhone.matches){
         phoneAIDrag=null;document.body.classList.remove('nhi-phone-ai-dragging');
         resetPhoneAI();commit();
-        ['--nhi-phone-study-height','--nhi-phone-ai-card-height'].forEach(function(v){document.documentElement.style.removeProperty(v);});
+        clearPhoneStudyCompact();
         var app=document.querySelector('.app');if(app)app.scrollTop=0;
       }else if(window.NHI_WINDOW_FX&&document.body.classList.contains('ai-open'))window.NHI_WINDOW_FX.close($('aiPanel'),'ai',commit);
       else commit();
+      if(!aiPhone.matches)clearPhoneStudyCompact();
     }
      function toggle(mode) { if (isOpen()) close(); else open(mode || 'hotkey'); }
     function call(msgs) {
@@ -9717,6 +9758,7 @@ html body #planBox .pcard .answer.ko,html body #cAnswer.ko{
  function fit(el){
   restore(el);
   if(!visible(el)||!el.textContent.trim())return;
+  if(el.matches('#planBox .pcard .prompt')&&document.body.classList.contains('ai-open')&&document.body.classList.contains('nhi-ai-study-compact-v150')&&!document.body.classList.contains('dictionary-open'))return;
   const card=el.closest('.pcard,#cardWrap,.fcard,.card');if(!card)return;
   const stage=el.closest('.pfront,.stage')||el.parentElement;
   const cs=getComputedStyle(el),cardStyle=getComputedStyle(card);
@@ -10006,5 +10048,24 @@ html body #planBox .pcard>.pdel.nhi-card-corner-trash svg{pointer-events:none!im
 #setSheet #nhiShortcutSettingsV149 kbd{display:inline-flex;align-items:center;justify-content:center;min-width:28px;min-height:25px;padding:3px 7px;border-radius:7px;background:var(--surface);color:var(--ink);white-space:nowrap;font-size:12px}
 #setSheet #nhiShortcutSettingsV149 dd>span{font-size:11px;color:var(--muted)}
 @media(max-width:420px){#setSheet #nhiShortcutSettingsV149 .nhi-shortcut-list-v149>div{grid-template-columns:minmax(0,1fr) minmax(0,auto);gap:5px}#setSheet #nhiShortcutSettingsV149 dd{max-width:118px}#setSheet #nhiShortcutSettingsV149 kbd{font-size:11px;padding:2px 5px}}
+</style>
+<style id="nhi-mobile-ai-adaptive-v150">
+@media(max-width:700px), (max-width:900px) and (pointer:coarse){
+ html body.ai-open.nhi-in-study.nhi-ai-study-chrome-hidden-v150:not(.dictionary-open) #topbar{display:none!important}
+ html body.ai-open.nhi-in-study.nhi-ai-study-chrome-hidden-v150:not(.dictionary-open){--nhi-phone-progress-display:none}
+ html body.ai-open.nhi-in-study.nhi-ai-study-chrome-hidden-v150:not(.dictionary-open) #planBox .nhi-study-topbar{display:none!important}
+ html body.ai-open.nhi-in-study.nhi-ai-study-compact-v150:not(.dictionary-open) #planBox .pcard[data-nhi-shared-height="v136"]{
+  padding-block:3px!important;gap:2px!important;
+ }
+ html body.ai-open.nhi-in-study.nhi-ai-study-compact-v150:not(.dictionary-open) #planBox .pcard>.pfront{
+  padding-block:2px!important;gap:2px!important;min-height:0!important;
+ }
+ html body.ai-open.nhi-in-study.nhi-ai-study-compact-v150:not(.dictionary-open) #planBox .pcard>.card-top .iconbtn{height:25px!important;min-height:25px!important;padding:2px!important}
+ html body.ai-open.nhi-in-study.nhi-ai-study-compact-v150:not(.dictionary-open) #planBox .pcard>.prate{padding-block:0!important;margin-block:0!important;min-height:0!important}
+ html body.ai-open.nhi-in-study.nhi-ai-study-compact-v150:not(.dictionary-open) #planBox .pcard>.prate>:is(.hard,.nhi-prev-v3,.nhi-next-v3){font-size:12px!important;box-shadow:0 2px 0 var(--nhi-classic-shadow)!important;border-radius:10px!important}
+ html body.ai-open.nhi-in-study.nhi-ai-study-compact-v150:not(.dictionary-open) #planBox .pcard>.prate>:is(.nhi-prev-v3,.nhi-next-v3) svg{width:15px!important;height:15px!important}
+ html body.ai-open.nhi-in-study.nhi-ai-study-compact-v150:not(.dictionary-open) #planBox .pcard .pfront :is(.prompt,.vi-under){line-height:1.24!important;margin-block:0!important}
+ html body.ai-open.nhi-in-study.nhi-ai-study-english-hidden-v150:not(.dictionary-open) #planBox .pcard .pfront .nhi-english-v5{display:none!important}
+}
 </style>
 </body></html>

@@ -72,6 +72,17 @@ jobs:
                 const resized=await page.evaluate(()=>({panel:document.querySelector('#aiPanel').getBoundingClientRect().height,card:document.querySelector('#planBox .pcard').getBoundingClientRect().height}));
                 if(resized.panel<d.panel.height+70||resized.card>=d.card.height-30)throw Error('Drag did not resize both panes: '+JSON.stringify({before:d,after:resized}));
                 console.log('PASS drag',JSON.stringify(resized));
+                const mid=await page.evaluate(()=>({compact:document.body.classList.contains('nhi-ai-study-compact-v150'),button:document.querySelector('#planBox .pcard .hard').getBoundingClientRect().height,scale:parseFloat(document.documentElement.style.getPropertyValue('--nhi-phone-vi-scale'))}));
+                if(!mid.compact||mid.button>37||!(mid.scale<1))throw Error('Compact controls/font not active: '+JSON.stringify(mid));
+                await page.focus('#nhiPhoneAIGrip');await page.keyboard.press('End');
+                await page.waitForFunction(()=>document.body.classList.contains('nhi-ai-study-english-hidden-v150'));
+                const high=await page.evaluate(()=>({brand:getComputedStyle(document.querySelector('#topbar')).display,progress:[...document.querySelectorAll('.nhi-study-topbar')].every(x=>x.getClientRects().length===0),englishHidden:document.body.classList.contains('nhi-ai-study-english-hidden-v150'),scale:parseFloat(document.documentElement.style.getPropertyValue('--nhi-phone-vi-scale'))}));
+                if(high.brand!=='none'||!high.progress||!high.englishHidden||high.scale>=mid.scale)throw Error('High AI pane did not hide chrome / shrink text: '+JSON.stringify(high));
+                await page.$eval('#nhiPhoneAIGrip',el=>el.dispatchEvent(new MouseEvent('dblclick',{bubbles:true})));
+                await page.waitForFunction(()=>!document.body.classList.contains('nhi-ai-study-compact-v150')&&!document.body.classList.contains('nhi-ai-study-chrome-hidden-v150')&&!document.body.classList.contains('nhi-ai-study-english-hidden-v150'));
+                if(await page.$eval('#topbar',el=>getComputedStyle(el).display)==='none')throw Error('Header did not return on lowering AI');
+                console.log('PASS adaptive study controls, header, font and English visibility state');
+
                 await page.screenshot({path:'/tmp/nhi-ai-drag-'+width+'.png'});
                 await page.$eval('#nhiPhoneAIGrip',el=>el.dispatchEvent(new MouseEvent('dblclick',{bubbles:true})));
                 await new Promise(r=>setTimeout(r,300));
