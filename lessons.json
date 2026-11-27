@@ -40487,6 +40487,214 @@
           1
         ]
       ]
+    },
+    {
+      "id": "daily-2026-11-27-nhi-extracted",
+      "date": "2026-11-27",
+      "plan": "2026-11-27",
+      "title": "Bài ngày 27.11 · Điện, hơi nước và năng lực nhà máy",
+      "items": [
+        [
+          "nhi20261127_util_000",
+          "s",
+          "Điện & hơi nước",
+          "Bạn có thể ghi giúp thông tin về nguồn cung cấp điện và sản lượng hơi nước của chúng ta không?",
+          "우리 전력공급이랑 스팀 생산량 적어줄래요?",
+          1
+        ],
+        [
+          "nhi20261127_util_001",
+          "w",
+          "Điện & hơi nước",
+          "Công suất máy biến áp và mức sử dụng điện tối đa",
+          "변압기 용량 및 최대 전력 사용량",
+          1
+        ],
+        [
+          "nhi20261127_util_002",
+          "w",
+          "Điện & hơi nước",
+          "Công suất sản xuất hơi mỗi giờ của lò hơi và lượng sử dụng thực tế",
+          "보일러 시간당 스팀 생산능력 및 실제 사용량",
+          1
+        ],
+        [
+          "nhi20261127_util_003",
+          "w",
+          "Định mức tiêu hao",
+          "Lượng điện, hơi nước và nước sử dụng trên mỗi tấn sản phẩm",
+          "제품 1톤당 전력·스팀·용수 사용량",
+          1
+        ],
+        [
+          "nhi20261127_util_004",
+          "w",
+          "Logistics",
+          "Khối lượng nguyên liệu có thể nhập và thành phẩm có thể xuất mỗi ngày",
+          "일일 원료 입고 및 완제품 출고 가능량",
+          1
+        ],
+        [
+          "nhi20261127_util_005",
+          "w",
+          "Cơ sở hạ tầng",
+          "Tổng diện tích đất nhà máy và diện tích xây dựng",
+          "전체 공장 부지 및 건축 면적",
+          1
+        ],
+        [
+          "nhi20261127_util_006",
+          "w",
+          "Điện & hơi nước",
+          "cung cấp điện",
+          "전력공급",
+          1
+        ],
+        [
+          "nhi20261127_util_007",
+          "w",
+          "Điện & hơi nước",
+          "sản lượng hơi nước",
+          "스팀 생산량",
+          1
+        ],
+        [
+          "nhi20261127_util_008",
+          "w",
+          "Điện & hơi nước",
+          "máy biến áp",
+          "변압기",
+          1
+        ],
+        [
+          "nhi20261127_util_009",
+          "w",
+          "Điện & hơi nước",
+          "công suất máy biến áp",
+          "변압기 용량",
+          1
+        ],
+        [
+          "nhi20261127_util_010",
+          "w",
+          "Điện & hơi nước",
+          "mức sử dụng điện tối đa",
+          "최대 전력 사용량",
+          1
+        ],
+        [
+          "nhi20261127_util_011",
+          "w",
+          "Điện & hơi nước",
+          "lượng điện sử dụng",
+          "전력 사용량",
+          1
+        ],
+        [
+          "nhi20261127_util_012",
+          "w",
+          "Điện & hơi nước",
+          "tính theo giờ",
+          "시간당",
+          1
+        ],
+        [
+          "nhi20261127_util_013",
+          "w",
+          "Điện & hơi nước",
+          "năng lực sản xuất hơi",
+          "스팀 생산능력",
+          1
+        ],
+        [
+          "nhi20261127_util_014",
+          "w",
+          "Điện & hơi nước",
+          "lượng sử dụng thực tế",
+          "실제 사용량",
+          1
+        ],
+        [
+          "nhi20261127_util_015",
+          "w",
+          "Định mức tiêu hao",
+          "trên mỗi tấn sản phẩm",
+          "제품 1톤당",
+          1
+        ],
+        [
+          "nhi20261127_util_016",
+          "w",
+          "Định mức tiêu hao",
+          "lượng nước sử dụng",
+          "용수 사용량",
+          1
+        ],
+        [
+          "nhi20261127_util_017",
+          "w",
+          "Logistics",
+          "xuất thành phẩm",
+          "완제품 출고",
+          1
+        ],
+        [
+          "nhi20261127_util_018",
+          "w",
+          "Logistics",
+          "khối lượng có thể xuất",
+          "출고 가능량",
+          1
+        ],
+        [
+          "nhi20261127_util_019",
+          "w",
+          "Logistics",
+          "khối lượng có thể nhập nguyên liệu",
+          "원료 입고 가능량",
+          1
+        ],
+        [
+          "nhi20261127_util_020",
+          "w",
+          "Logistics",
+          "khối lượng có thể thực hiện",
+          "가능량",
+          1
+        ],
+        [
+          "nhi20261127_util_021",
+          "w",
+          "Cơ sở hạ tầng",
+          "khu đất nhà máy",
+          "공장 부지",
+          1
+        ],
+        [
+          "nhi20261127_util_022",
+          "w",
+          "Cơ sở hạ tầng",
+          "diện tích xây dựng",
+          "건축 면적",
+          1
+        ],
+        [
+          "nhi20261127_util_023",
+          "w",
+          "Ngữ pháp",
+          "trên mỗi đơn vị (danh từ + 당)",
+          "-당",
+          1
+        ],
+        [
+          "nhi20261127_util_024",
+          "w",
+          "Ngữ pháp",
+          "nhờ ai làm gì giúp (cách nói thân mật lịch sự)",
+          "-아/어 줄래요?",
+          1
+        ]
+      ]
     }
   ]
 }
