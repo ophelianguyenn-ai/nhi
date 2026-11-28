@@ -1,6 +1,6 @@
 {
   "v": 2,
-  "generated": "2026-11-27",
+  "generated": "2026-11-28",
   "lessons": [
     {
       "id": "2026-10-23",
@@ -40937,6 +40937,86 @@
           "Vâng, tôi sẽ hỏi người phụ trách.",
           "네, 담당자한테 물어볼게요.",
           1
+        ]
+      ]
+    },
+    {
+      "id": "daily-2026-11-28-nhi-extracted",
+      "date": "2026-11-28",
+      "plan": "2026-11-28",
+      "title": "Bài ngày 28.11 · Tồn kho, nhập xuất và hiệu suất F1/F2",
+      "items": [
+        [
+          "nhi20261128_auto_001",
+          "w",
+          "Kiểm soát tồn kho",
+          "tồn kho F1",
+          "F1 재고",
+          1,
+          [
+            [
+              "tồn kho",
+              "재고"
+            ],
+            [
+              "mã F1",
+              "F1"
+            ]
+          ]
+        ],
+        [
+          "nhi20261128_auto_002",
+          "w",
+          "Kiểm soát tồn kho",
+          "tồn kho F2",
+          "F2 재고",
+          1,
+          [
+            [
+              "tồn kho",
+              "재고"
+            ],
+            [
+              "mã F2",
+              "F2"
+            ]
+          ]
+        ],
+        [
+          "nhi20261128_auto_003",
+          "w",
+          "Nhập kho & xuất kho",
+          "nhập kho F1",
+          "F1 입고",
+          1,
+          [
+            [
+              "nhập kho",
+              "입고"
+            ],
+            [
+              "mã F1",
+              "F1"
+            ]
+          ]
+        ],
+        [
+          "nhi20261128_auto_004",
+          "w",
+          "Nhập kho & xuất kho",
+          "xuất kho F2",
+          "F2 출고",
+          1,
+          [
+            [
+              "xuất kho",
+              "출고"
+            ],
+            [
+              "mã F2",
+              "F2"
+            ]
+          ]
         ]
       ]
     }
