@@ -40485,6 +40485,30 @@
           "đề xuất thực hiện ...",
           "-ㄹ 것을 제안하다",
           1
+        ],
+        [
+          "nhi20261126_catchup28_0",
+          "s",
+          "Trao đổi công việc",
+          "Trước khi tan làm, vui lòng sắp xếp gọn gàng khu vực làm việc.",
+          "퇴근하기 전에 작업장을 정리 정돈해 주세요.",
+          1
+        ],
+        [
+          "nhi20261126_catchup28_1",
+          "w",
+          "Trao đổi công việc",
+          "khu vực làm việc",
+          "작업장",
+          1
+        ],
+        [
+          "nhi20261126_catchup28_2",
+          "w",
+          "Trao đổi công việc",
+          "sắp xếp gọn gàng",
+          "정리 정돈하다",
+          1
         ]
       ]
     },
@@ -40905,6 +40929,14 @@
               "한 통에 담다"
             ]
           ]
+        ],
+        [
+          "nhi20261127_catchup28_3",
+          "s",
+          "Trao đổi công việc",
+          "Vâng, tôi sẽ hỏi người phụ trách.",
+          "네, 담당자한테 물어볼게요.",
+          1
         ]
       ]
     }
